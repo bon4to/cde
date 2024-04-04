@@ -1,0 +1,29 @@
+            <!-- main-sidebar.html -->
+            {% if 'privilegio' in session %}
+                <div class="sidebar" style="position: static; max-width: 70px; width: 70px">
+                    <div id="sidebar" class="sidebar">
+                        <a href="{{ url_for('index') }}" class="nav-link{% if current_page == url_for('index') %} active{% endif %}">
+                            <img class="svg-white" src="{{ url_for('static', filename='icons/house.svg') }}" alt=""><br>INÍCIO
+                        </a>
+                        <a href="{{ url_for('mov') }}" class="nav-link{% if current_page == url_for('mov') %} active{% endif %}">
+                            <img class="svg-white" src="{{ url_for('static', filename='icons/boxes-packing.svg') }}" alt=""><br>MOVIMENTAR
+                        </a>
+                        {% if session['privilegio'] <= 2 %}
+                            <!-- admins -->
+                            <a href="{{ url_for('envase') }}" class="nav-link{% if current_page == url_for('envase') %} active{% endif %}">
+                                <img class="svg-white" src="{{ url_for('static', filename='icons/recep-drop.svg') }}" alt=""><br>ENVASE
+                            </a>
+                            <a href="{{ url_for('producao') }}" class="nav-link{% if current_page == url_for('producao') %} active{% endif %}">
+                                <img class="svg-white" src="{{ url_for('static', filename='icons/producao.svg') }}" alt=""><br>PROCESSAMENTO
+                            </a>
+                            <a href="{{ url_for('users') }}" class="nav-link{% if current_page == url_for('users') %} active{% endif %}">
+                                <img class="svg-white" src="{{ url_for('static', filename='icons/user-gear.svg') }}" alt=""><br>USUÁRIOS
+                            </a>
+                        {% endif %}
+                        {% if session['privilegio'] <= 1 %}
+
+                        {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        <!-- header.html -->

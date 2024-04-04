@@ -1,0 +1,51 @@
+<!-- footer.html -->
+
+        </div>
+        <div class="vers-info">v0.3.2 (beta)</div>
+        <div id="footer" style="position: static">
+            <div class="three-split" style="width: 100%; align-items: start;">
+                <div>
+                    <p style="font-weight: bold;color: white;margin-bottom: 10px">Desenvolvido por</p>
+                    <img style="width: 140px;margin-top: -25px; margin-right: 0" class="logo" src="{{ url_for('static', filename='png/logo-lb.png') }}" alt="Lucas Bonato">
+                    <p style="margin-top: -24px;font-weight: normal; color: white">Lucas G. Bonato</p>
+                    <p style="margin-top: -2px;font-weight: bold; color: white">2023-2024</p>
+                </div>
+                <div>
+                    <p style="font-weight: bold; color: white;margin-bottom: 10px">Comunicação</p>
+                    <p style="font-weight: normal; color: white">Entre em contato<br> comigo:</p>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="https://www.linkedin.com/in/lucas-bonato/" target="_blank">
+                                <img style="height: 18px;width: 18px" class="svg-white opaque" src="{{ url_for('static', filename='icons/linkedin.svg') }}" alt="">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mailto:lucas.bon4to@gmail.com" target="_blank">
+                                <img style="height: 18px;width: 18px" class="svg-white opaque" src="{{ url_for('static', filename='icons/email.svg') }}" alt="">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <p style="font-weight: bold;color: white;margin-bottom: 10px"> Direitos</p>
+                    <p style="font-weight: normal; color: white"> Todos os direitos<br> reservados</p>
+                    <p style="color: white;margin-top: 6px"> &copy; 2024</p>
+                </div>
+            </div>
+        </div>
+        <dialog class="modal" id="modal">
+            <div class="alert-container">
+                <div class="alert-content">
+                    <h1 class="alert-type">{{ alerta_tipo | safe }}</h1>
+                    <p class="alert-message">{{ alerta_mensagem | safe }}</p>
+                    <p class="alert-more">{{ alerta_mais | safe }}</p>
+                </div>
+            </div>
+        </dialog>
+        {% if request.path == '/mov', '/envase', '/producao' %}
+            <script src="{{ url_for('static', filename='js/lb-float-cont.js') }}"></script>
+        {% endif %}
+        <script src="{{ url_for('static', filename='js/lb-filter.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    </body>
+</html>

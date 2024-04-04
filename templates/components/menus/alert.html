@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Alerta | TRANS LÉGUA</title>
+
+        {% include 'shared/header.html' %}
+
+<style>
+    .alert-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: transparent;
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+    }
+
+    .alert-more, .alert-message {
+        text-align: left;
+        white-space: pre-line;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .alert-more {
+        font-size: 16px;
+        color: #3f3f3f;
+    }
+
+    .alert-message {
+        font-size: 22px;
+        font-weight: bolder;
+        color: #000;
+    }
+
+    .alert-content{
+        margin-left: 10px;
+    }
+
+    h1 {
+        color: var(--cor-destaque);
+    }
+
+</style>
+
+    <div class="alert-container">
+        <div class="alert-content">
+            <h1 class="alert-type">{{ alerta_tipo | safe }}</h1>
+            <p style="display: block" class="alert-message">{{ alerta_mensagem | safe }}</p>
+            <p style="display: block" class="alert-more">{{ alerta_mais | safe }}</p>
+            <br>
+            <a class="subm" href="{{ url_return | safe }}">Voltar</a>
+        </div>
+    </div>
+
+{% include 'shared/footer.html' %}

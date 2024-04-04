@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Produtos | TRANS LÉGUA</title>
+
+        {% include 'shared/header.html' %}
+            {% if 'privilegio' in session %}
+                {% if session['privilegio'] == 1 %}
+                    <div class="form-container" style="height: max-content">
+                        <h1>Novo produto...</h1>
+                        <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
+
+                            <div>
+                                <label for="produto">Item (Descrição)</label>
+                                <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
+                            </div>
+                            <div class="split-horizontal">
+                                <div>
+                                    <label for="cod_item">Código (SKU)</label>
+                                    <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" type="text" name="cod_item" placeholder="SKU..." required>
+                                </div>
+                                <div>
+                                    <label for="cod_item">Código de Barras (DUN-14)</label>
+                                    <input class="address" type="number" inputmode="numeric" pattern="\d{14}" minlength="14" maxlength="14" name="cod_dun14" placeholder="DUN-14..." required>
+                                </div>
+                            </div>
+                            <br>
+                            <input class="subm" type="submit" value="Cadastrar" style="width: 100%">
+                        </form>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div class="tables-mobile" >
+                <div class="split-horizontal">
+                    <h1>Produtos Cadastrados</h1>
+
+                    <div>
+                        <img class="svg-gray" src="{{ url_for('static', filename='icons/filter.svg') }}" alt="" onclick="toggleFilter()">
+                    </div>
+                </div>
+
+                <div style="justify-content: flex-end" >
+                    <label for="searchInput1"></label>
+                    <label for="filterSelect"></label>
+                    <div id="table-filter" style="display: none" >
+                        <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
+                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                            <option value="1">Produto (Descrição)</option>
+                            <option value="0">SKU (Código)</option>
+                            <option value="2">DUN-14 (Código)</option>
+
+                        </select>
+                    </div>
+                </div>
+                    <div style="max-height: 600px; overflow-y: auto;">
+                        <table class="saldoTable">
+                            <tr>
+                                <th>Código</th>
+                                <th>Produto</th>
+                                <th>DUN-14</th>
+                            </tr>
+                            {% for item in itens %}
+                                <tr>
+                                    <td>{{ item['cod_item'] }}</td>
+                                    <td>{{ item['desc_item'] }}</td>
+                                    <td>{{ item['dun14'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                <a href="{{ url_for('export_csv_tipo', tipo='produtos') }}">
+                    Baixar tabela...
+                </a>
+            </div>
+
+        {% include 'shared/footer.html' %}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Processamento | TRANS LÉGUA</title>
+
+
+        {% include "shared/header.html" %}
+        <div class="form-login">
+            <div class="split-horizontal">
+                <h1>Calendário de Processamento</h1>
+                <div style="display: flex">
+                    <img class="svg-gray" src="{{ url_for('static', filename='icons/xmark.svg') }}" alt="" onclick="window.location.href='{{ url_for('producao') }}';">
+                </div>
+            </div>
+            <div id="calendar-container"></div>
+
+        </div>
+
+<script>
+
+    function generateCalendar(year, month) {
+        const calendarContainer = document.getElementById('calendar-container');
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDay = new Date(year, month, 1).getDay();
+
+        let html = '<table class="calendar"><thead><tr><th>DOM</th><th>SEG</th><th>TER</th><th>QUA</th><th>QUI</th><th>SEX</th><th>SAB</th></tr></thead><tbody>';
+
+        let day = 1;
+        for (let i = 0; i < 6; i++) {
+            html += '<tr>';
+            for (let j = 0; j < 7; j++) {
+                if ((i === 0 && j < firstDay) || day > daysInMonth) {
+                    html += '<td class="calendar"></td>';
+                } else {
+                    const date = new Date(year, month, day);
+                    const weekendClass = date.getDay() === 0 || date.getDay() === 6 ? 'weekend' : '';
+                    html += `<td class="calendar ${weekendClass}" data-date="${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}">${day}</td>`;
+                    day++;
+                }
+            }
+            html += '</tr>';
+            if (day > daysInMonth) break;
+        }
+
+        html += '</tbody></table>';
+        calendarContainer.innerHTML = html;
+    }
+
+    const today = new Date();
+    generateCalendar(today.getFullYear(), today.getMonth());
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var dataEnvL1 = [
+            {% for item in producao %}
+                {% if item['linha'] == 1 %}
+                    '{{ item.data_producao }}',
+                {% endif %}
+            {% endfor %}
+        ];
+        var dataEnvL2 = [
+            {% for item in producao %}
+                {% if item['linha'] == 2 %}
+                    '{{ item.data_producao }}',
+                {% endif %}
+            {% endfor %}
+        ];
+        var dataEnvL3 = [
+            {% for item in producao %}
+                {% if item['linha'] == 3 %}
+                    '{{ item.data_producao }}',
+                {% endif %}
+            {% endfor %}
+        ];
+        var dataEnvL4 = [
+            {% for item in producao %}
+                {% if item['linha'] == 4 %}
+                    '{{ item.data_producao }}',
+                {% endif %}
+            {% endfor %}
+        ];
+
+        function destacarDatasDeProducao() {
+            const calendario = document.getElementById('calendar-container');
+            const cells = calendario.querySelectorAll('td');
+            cells.forEach(cell => {
+                const data = cell.dataset.date;
+                if (dataEnvL1.includes(data)) {
+                    cell.classList.add('programmed-l1');
+                }
+                if (dataEnvL2.includes(data)) {
+                    cell.classList.add('programmed-l2');
+                }
+                if (dataEnvL3.includes(data)) {
+                    cell.classList.add('programmed-l3');
+                }
+                if (dataEnvL4.includes(data)) {
+                    cell.classList.add('programmed-l4');
+                }
+            });
+        }
+
+        destacarDatasDeProducao();
+    });
+</script>
+
+        
+    {% include 'shared/footer.html' %}

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Usuários | TRANS LÉGUA</title>
+
+        {% include 'shared/header.html' %}
+
+    <!-- TABELA -->
+        <div draggable="false" class="form-container">
+            <div class="split-horizontal">
+                <div>
+                    <h1>Cadastrar Usuário</h1>
+                    <div>
+                        <form action="/users/inserting" method="post">
+                            <label for="login_user">Login *</label>
+                            <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
+                            <div class="split-horizontal">
+
+                                <label for="password_user">Senha *</label><label class="cor-web" style="text-align: right;" id="password_strength"></label>
+                            </div>
+                            <input type="password" id="password_user" name="password_user" placeholder="Senha de usuário..." required>
+
+                            <script>
+                                const passwordInput = document.getElementById('password_user');
+                                const passwordStrength = document.getElementById('password_strength');
+
+                                function checkPasswordStrength(password) {
+                                    let strength = 0;
+
+                                    if (password.length >= 12){
+                                        strength = 2;
+                                    }
+                                    else if (password.length >= 8){
+                                        strength = 1;
+                                    }
+                                    else if (password.length < 8){
+                                        strength = 0;
+                                    }
+
+                                    if (strength === 0) {
+                                        passwordStrength.textContent = 'Fraca *';
+                                        passwordStrength.style.color = 'red';
+                                    } else if (strength === 1) {
+                                        passwordStrength.textContent = 'Média **';
+                                        passwordStrength.style.color = 'orange';
+                                    } else {
+                                        passwordStrength.textContent = 'Forte ***';
+                                        passwordStrength.style.color = 'green';
+                                    }
+                                }
+
+                                passwordInput.addEventListener('input', function () {
+                                    const password = this.value;
+                                    checkPasswordStrength(password);
+                                });
+                            </script>
+                            <div class="split-horizontal">
+                                <div>
+                                    <label for="nome_user">Nome *</label><br>
+                                    <input class="address" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
+                                </div>
+
+                                <div>
+                                    <label for="sobrenome_user">Sobrenome *</label><br>
+                                    <input class="address" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
+                                </div>
+                            </div>
+
+                            <label for="privilege_user">Tipo de Usuário *</label>
+                            <select id="privilege_user" name="privilege_user" required>
+                                <option value="3">Padrão</option>
+                                <option value="2">Administrador</option>
+                                <option value="4">Espectador</option>
+                                {% if 'privilegio' in session %}
+                                    {% if session['privilegio'] <= 1 %}
+                                        <option value="1">Desenvolvedor</option>
+                                    {% endif %}
+                                {% endif %}
+                            </select>
+                            <p class="alert">Campos com * são obrigatórios.</p>
+
+                            <input class="subm" type="submit" value="Cadastrar">
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div draggable="false" class="tables-container" style="width: 600px">
+
+            <div class="split-horizontal">
+                <div style="width: 100%; max-height: 535px;">
+
+                    <h1>Usuários do Sistema</h1>
+
+                    <table class="saldoTable">
+                        <tr>
+                            <th>Usuário (Cód.)</th>
+                            <th>Usuário (Desc.)</th>
+                            <th>Usuário (Tipo)</th>
+                            <th>Último Acesso (Data)</th>
+                        </tr>
+                        {% for item in users %}
+                            <tr>
+                                <td>{{ item['cod_user'] }}</td>
+                                <td>{{ item['user_name'] }}</td>
+                                <td>{{ item['privilegio'] }}</td>
+                                <td>{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <br>
+                </div>
+
+                <div class="box-case">
+                    <img class="svg-none" src="{{ url_for('static', filename='icons/user.svg') }}" alt="">
+                    <div class="centralizado" style="width: 450px; height: 450px;">
+                        <div>
+                            <img class="side-banner" style="height: 450px; width: 450px; border-radius: 20px; " src="{{ url_for('static', filename='png/side-user.jpg') }}" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+
+
+
+    {% include 'shared/footer.html' %}
