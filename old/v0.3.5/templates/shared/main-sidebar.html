@@ -1,0 +1,25 @@
+            <!-- main-sidebar.html -->
+
+                <div class="sidebar" style="position: static; max-width: 70px; width: 70px">
+                    <div id="sidebar" class="sidebar">
+                        <a href="{{ url_for('index') }}" class="nav-link">
+                            <img class="svg-none" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt=""><br>INÍCIO (CDE)
+                        </a>
+                        {% if 'privilegio' in session %}
+                            <a href="{{ url_for('home_hp') }}" class="nav-link">
+                                <img class="svg-none" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt=""><br>HUGO PIETRO
+                            </a>
+                            <a href="{{ url_for('home_tl') }}" class="nav-link">
+                                <img class="svg-none" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt=""><br>TRANSLÉGUA
+                            </a>
+                            {% if session['privilegio'] <= 2 %}
+
+                            {% endif %}
+
+                            {% if session['privilegio'] <= 1 %}
+
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+        <!-- header.html -->
