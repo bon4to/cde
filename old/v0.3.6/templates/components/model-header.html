@@ -1,0 +1,30 @@
+    <!-- header.html -->
+        {% include 'components/head.html' %}
+    </head>
+    <body>
+        <div class="user-name">
+            <img class="svg-mobile" onclick="window.location.href='{{ url_for('index') }}';" src="{{ url_for('static', filename='svg/house-mobile.svg') }}" alt="">
+            <p class="user-name" onclick="window.location.href='{{ url_for('login') }}';">
+                {{ session.get('user_name', '') }}
+            </p>
+            <div style="pointer-events: none" class="user-logger">
+                <a style="color: var(--cor-destaque); pointer-events: auto; font-size: 16px;text-shadow: 20px #fff" href="{{ url_for('logout') }}">
+                    {{ 'SAIR' if session.get('logged_in', False) else '' }}
+                </a>
+            </div>
+            {% if 'privilegio' in session %}
+                <div class="user-button" onclick="window.location.href='{{ url_for('login') }}';">
+                    {{ session.get('user_initials', '') }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="split-horizontal">
+            <!-- main-sidebar.html -->
+            {% include 'shared/main-sidebar.html' %}
+            <!-- header.html -->
+            <div id="loading-content">
+                <div class="back-modal"></div>
+                <div class="loader"></div>
+            </div>
+            <div style="width: 100%">

@@ -1,0 +1,174 @@
+/* ESTILIZAÇÃO P/ TELAS MENORES*/
+
+
+@media screen and (max-width: 1300px) {
+    .form-container {
+        max-width: none;
+    }
+    .banner img.blurable {
+        top: -260px;
+        left: 0;
+    }
+    .side-banner {
+        min-width: 30%;
+
+    }
+}
+
+
+@media screen and (max-width: 1000px) {
+    .container {
+        max-height: none;
+    }
+}
+
+
+@media screen and (max-width: 850px) {
+    .banner img.blurable {
+        top: -100px;
+        left: 0;
+    }
+}
+
+
+@media screen and (max-width: 570px) {
+    html {
+        touch-action: manipulation;
+        zoom: initial;
+    }
+    body {
+        background-color: #ffffff;
+        width: 100%;
+    }
+    .sidebar, .header-bar, header, .main-header, div#footer, img, .tables-container, section.banner.text-overlay, div.user-button {
+        display: none;
+    }
+    .svg {
+        display: block;
+    }
+    .tables-mobile {
+        position: fixed;
+        font-size: 8px;
+        left: 0;
+        right: 0;
+    }
+
+    input.login {
+        width: unset;
+    }
+
+    .container-grid {
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+    }
+
+    .header-bar, header, header.main-header, .form-login, .svg-mobile {
+        display: block;
+        position: fixed;
+        opacity: 1;
+    }
+    div.log {
+        height: 140%;
+    }
+    .form-container, .form-login {
+        display: flex;
+        align-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+
+        scale: 0.9;
+        position: absolute;
+        box-shadow: none;
+
+    }
+    .alert-container {
+        width: 75%;
+        left: 50%;
+    }
+    h1 {
+        margin-bottom: 2px;
+    }
+    .scrolled {
+        all: unset;
+    }
+    div.form-login, .container {
+        margin: 40px;
+    }
+    .vers-info {
+        font-size: 14px;
+    }
+    .container {
+        display: flex;
+        align-items: stretch;
+        align-content: center;
+        justify-content: center;
+        height: unset;
+        min-height: max-content;
+    }
+    .floating-container {
+        display: flex;
+        align-items: center;
+        align-content: center;
+    }
+    .form-login {
+        height: 100vh;
+        width: 100vw;
+        all: unset;
+        display: flex;
+        padding-left: 15px;
+        scale: 0.9;
+        position: absolute;
+    }
+    input, select {
+        margin-left: 0;
+    }
+    input.subm {
+        width: 250px;
+    }
+
+    .button-mini {
+        opacity: 0;
+    }
+
+    .saudacao {
+        display: none;
+    }
+
+    .container-grid {
+        position: absolute;
+        left: -20px;
+        top: 10px;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    html {
+        line-height: 1.0;
+    }
+    .form-container {
+        scale: 0.75;
+        top: 20px;
+        position: unset;
+    }
+    header.main-header {
+        height: 10px;
+    }
+    p.user-name, div.user-button, div.user-logger, img.svg-mobile {
+        scale: 0.8;
+        top: 4px;
+    }
+    .scrolled {
+        all: unset;
+    }
+    .container {
+        max-height: 450px;
+    }
+
+    .container-grid {
+        position: absolute;
+        left: -85px;
+        top: 10px;
+    }
+}
+
