@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Faturado {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANS LÉGUA</title>
+        <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+
+        {% include "shared/header/tl-header.html" %}
+            
+                <div class="tables-container" id="tables-cont">
+                    <div class="split-horizontal">
+                        <h1>Separação de Faturados <span class="id-page">{{session['id_page']}}</span></h1>
+                        <div class="aux-buttons">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                            <hr class="vert">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" onclick="toggleFilter()">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                        </div>
+                    </div>
+                    <div style="justify-content: flex-end" >
+                        <label for="searchInput1"></label>
+                        <label for="filterSelect"></label>
+                        <div id="table-filter" style="display: none" >
+                            <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
+                            <select class="address" name="filterIndex" id="filterSelect" onchange="updateFilterIndex()">
+                                <option value=0>Carga (Código)</option>
+                                <option value=2>Produto (Código)</option>
+                                <option value=3>Produto (Descrição)</option>
+                                <option value=1>Endereço (Letra)</option>
+                                <option value=4>Lote (Código)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-overflow">
+                        <table class="saldoTable">
+                            <tr>
+                                <th>Carga</th>
+                                <th>Endereço</th>
+                                <th>Produto (Código)</th>
+                                <th>Produto (Descrição)</th>
+                                <th>Lote</th>
+                                <th>Saldo (CX)</th>
+                            </tr>
+                            {% for item in saldo_atual %}
+                            <tr>
+                                <td>{{ item['id_carga'] }}</td>
+                                <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
+                                <td>{{ item['cod_item'] }}</td>
+                                <td>{{ item['produto'] }}</td>
+                                <td>{{ item['lote'] }}</td>
+                                <td>{{ item['saldo'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <a href="{{ url_for('export_csv_tipo', tipo='faturado') }}">
+                        Baixar tabela...
+                    </a>
+                </div>
+        <script>
+
+            $("#formBuscarItens").submit(function(event) {
+                event.preventDefault();
+                buscarItens();
+            });
+
+            function buscarItens() {
+                var codigo = $("#cod_str_qr").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/searching",
+                    data: { cod_str_qr: codigo },
+                    success: function(response) {
+
+                        $("#produto").val(response.descITEM);
+                        $("#cod_str_qr").val("");
+                        $("#codsku").empty();
+
+                        if (response.codITEM.length > 1) {
+                            lockIcoHide("label-sku");
+                        }
+
+                        if (response.codITEM) {
+                            response.codITEM.forEach(function(item) {
+
+                                $("#codsku").append("<option value='" + item + "'>" + item + "</option>");
+                            });
+                        } else {
+                            $("#codsku").append("<option value=''></option>");
+                        }
+
+                        $("#lote_item").val(response.codLOTE);
+
+                        if (response.codLOTE === "") {
+                            lockIcoHide("label-lote")
+
+                            $("#lote_item").prop("readonly", false);
+                        } else {
+
+                            $("#lote_item").prop("readonly", true);
+                        }
+                    },
+
+                    error: function(error) {
+                        console.error("Erro ao buscar itens:", error);
+                    }
+                });
+            }
+
+            document.getElementById("field").addEventListener("submit", function() {
+                    document.getElementById("submitform").disabled = true;
+
+                });
+
+
+
+
+        </script>
+
+    <!-- SUPLEMENTO P/ FILTRO [LB-FILTER] -->
+        <script src="{{ url_for('static', filename='js/lb-filter.js') }}"></script>
+
+    {% include 'shared/footer.html' %}

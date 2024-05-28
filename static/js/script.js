@@ -4,11 +4,72 @@
 // CAMPOS DE TRANSFERENCIA
 function toggleFields() {
     var operacao = document.getElementById('operacao').value;
-    var destinoFields = document.getElementById('destinoFields');
-    var destinoNumeroInput = document.getElementById('destino_numero');
+    const svgImage = document.getElementById('svg-image');
+    const svgCfg = document.getElementById('svg-cfg');
+    
+    var is_end_completo = document.getElementById('is_end_completo');
 
-    destinoFields.style.display = operacao === 'transferencia' ? 'block' : 'none';
-    destinoNumeroInput.required = operacao === 'transferencia';
+    var destinoFields = document.getElementById('destinoFields');
+    var destinoNumeroInput = document.getElementById('destino_end_number');
+    
+    var cargaFields = document.getElementById('cargaFields');
+    var cargaNumeroInput = document.getElementById('id_carga');
+
+    destinoNumeroInput.removeAttribute('required');
+    cargaNumeroInput.removeAttribute('required');
+
+    destinoFields.style.display = operacao === 'T' ? 'contents' : 'none';
+    cargaFields.style.display = operacao === 'F' ? 'contents' : 'none';
+
+    const svgPaths = {
+        'E' : "/static/svg/arrow-down-to-dot.svg",
+        'S' : "/static/svg/arrow-up-from-dot.svg",
+        'T' : "/static/svg/arrow-down-up.svg",
+        'F' : "/static/svg/package-check.svg"
+    };
+
+    svgImage.src = svgPaths[operacao];
+    
+    if (operacao === 'T') {
+        destinoNumeroInput.required = true;
+        svgCfg.style.display = 'flex';
+    } else if (operacao === 'F') {
+        cargaNumeroInput.required = true;
+        svgCfg.style.display = 'flex';
+    } else {
+        cargaNumeroInput.required = false;
+        destinoNumeroInput.required = false;
+        svgCfg.style.display = 'none';
+
+        is_end_completo.checked = false;
+        handleCheckChange();
+    }
+}
+
+function handleCheckChange() {
+    const checkbox = document.getElementById('is_end_completo');
+    const quantField = document.getElementById('quantField');
+    const produtoField = document.getElementById('produtoField');
+    const busca = document.getElementById('formBuscarItens');
+    const quantidade = document.getElementById('quantidade');
+    const lote = document.getElementById('lote_item');
+    const codsku = document.getElementById('codsku');
+    
+    if (checkbox.checked) {
+        produtoField.style.display = 'none';
+        busca.style.display = 'none';
+        quantField.style.display = 'none';
+        quantidade.required = false;
+        lote.required = false;
+        codsku.required = false;
+    } else {
+        produtoField.style.display = 'block';
+        busca.style.display = 'block';
+        quantField.style.display = 'block';
+        quantidade.required = true;
+        lote.required = true;
+        codsku.required = true;
+    }
 }
 
 // VISUAL DE CADEADOS
@@ -68,16 +129,38 @@ $(document).ready(function () {
 });
 
 function alterarCor() {
-  var elemento = document.getElementById("elemento");
-  var estilo = getComputedStyle(elemento);
-
-  var corAtual = estilo.getPropertyValue("--cor-destaque");
-
-  var novaCor = "#2688ea";
-  document.documentElement.style.setProperty("--cor-destaque", novaCor);
+    var elemento = document.getElementById("elemento");
+    var estilo = getComputedStyle(elemento);
+  
+    var corAtual = estilo.getPropertyValue("--cor-destaque");
+  
+    var novaCor = "#2688ea";
+    document.documentElement.style.setProperty("--cor-destaque", novaCor);
 }
 
 
+function maximizeText(text) {
+    if (text.value != '') {
+        var popupOverlay = document.createElement('div');
+        popupOverlay.className = 'popup-overlay';
+
+        var popupContent = document.createElement('div');
+        popupContent.className = 'popup-content';
+        popupContent.innerHTML = '<p>' + text.value + '</p>';
+
+        var closeButton = document.createElement('button');
+        closeButton.innerText = '×';
+        closeButton.className = 'subm button-mini';
+        closeButton.addEventListener('click', function() {
+            document.body.removeChild(popupOverlay);
+        });
+
+        popupContent.appendChild(closeButton);
+        popupOverlay.appendChild(popupContent);
+        document.body.appendChild(popupOverlay);
+    }
+    
+}
 
 // HEADER POP-UP
 window.addEventListener('scroll', function () {
@@ -105,9 +188,9 @@ window.addEventListener('scroll', function () {
 
 
 // CHECKBOX DOWNLOAD
-function toggleCheckbox() {
-    let checkbox = document.getElementById("img_download");
-    let imgCheckbox = document.getElementById("img_checkbox");
+function toggleCheckbox(placebo, checkbox) {
+    var checkbox = document.getElementById(checkbox);
+    var imgCheckbox = document.getElementById(placebo);
 
     checkbox.checked = !checkbox.checked;
 
@@ -119,12 +202,12 @@ function toggleCheckbox() {
 }
 
 function toggleEdit() {
-    var elements = document.querySelectorAll('.svg-link');
+    var elements = document.querySelectorAll('.hidden-button');
     elements.forEach(function(element) {
-        if (element.style.display === 'unset') {
+        if (element.style.display === 'table-cell') {
             element.style.display = 'none';
         } else {
-            element.style.display = 'unset';
+            element.style.display = 'table-cell';
         }
     });
 }
@@ -142,7 +225,6 @@ function capitalizeTexto() {
     });
 }
 
-
 function toggleTable(linha) {
     let checkBox = document.getElementById("toggle_" + linha);
     let table = document.getElementById(linha + "_table");
@@ -153,13 +235,62 @@ function toggleTable(linha) {
     }
 }
 
+function scrollFunction() {
+    var button = document.getElementById("scroll-to-top-button");
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        button.classList.remove("hidden");
+    } else {
+        button.classList.add("hidden");
+    }
+}
+
+function scrollToTop() {
+    var scrollToTopElement = document.documentElement;
+    if (scrollToTopElement.scrollTop !== 0) {
+        scrollToTopElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        document.body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function blockImg() {
+    try {
+        const images = document.querySelectorAll('img');
+        if (images.length > 0) {
+            images.forEach(img => {
+                if (img) {
+                    img.setAttribute('draggable', 'false');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao bloquear a arrastabilidade das imagens:', error);
+    }
+}
+
+function togglePopUp() {
+    let popUp = document.getElementById('popup-field');
+
+    if (popUp.style.display === 'flex') {
+        popUp.style.display = 'none';
+    } else {
+        popUp.style.display = 'flex';
+    }
+}
+
 window.addEventListener("load", function() {
-  hideLoading();
+    hideLoading();
 });
 
 window.onload = function () {
     capitalizeTexto();
-    toggleContainer();
+    blockImg();
     updateFilterIndex();
+    toggleContainer();
     hideLoading();
+
+};
+
+window.onscroll = function() {
+    scrollFunction();
 };

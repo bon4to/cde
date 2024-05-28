@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sticky-note" xmlns="http://www.w3.org/2000/svg">
+  <defs/>
+  <path d="M 15.727 2.842 L 4.727 2.842 C 3.623 2.842 2.727 3.738 2.727 4.842 L 2.727 18.842 C 2.727 19.947 3.623 20.842 4.727 20.842 L 18.727 20.842 C 19.832 20.842 20.727 19.947 20.727 18.842 L 20.727 7.842 L 15.727 2.842 Z" style=""/>
+  <path d="M 15.329 2.842 L 15.329 6.441 C 15.329 7.435 16.135 8.24 17.128 8.24 L 20.727 8.24" style=""/>
+  <rect width="2.452" height="2.452" x="6.925" y="8.041" rx="1" style="stroke-width: 1px;"/>
+  <rect width="2.452" height="2.452" x="13.303" y="8.041" rx="1" style="stroke-width: 1px;"/>
+  <rect width="2.452" height="2.452" x="6.925" y="14.419" rx="1" style="stroke-width: 1px;"/>
+  <path d="M 15.755 14.419 L 14.282 14.419 C 13.741 14.419 13.303 14.857 13.303 15.401 L 13.303 16.871" style="stroke-width: 1px;"/>
+  <path d="M 15.755 16.871 L 15.755 16.877" style="stroke-width: 1px;"/>
+  <path d="M 11.34 10.004 L 11.34 11.475 C 11.34 12.016 10.9 12.456 10.359 12.456 L 8.888 12.456" style="stroke-width: 1px;"/>
+  <path d="M 6.925 12.456 L 6.93 12.456" style="stroke-width: 1px;"/>
+  <path d="M 11.34 8.041 L 11.345 8.041" style="stroke-width: 1px;"/>
+  <path d="M 11.34 14.419 L 11.34 14.424" style="stroke-width: 1px;"/>
+  <path d="M 13.303 12.456 L 13.793 12.456" style="stroke-width: 1px;"/>
+  <path d="M 15.755 12.456 L 15.755 12.462" style="stroke-width: 1px;"/>
+  <path d="M 11.34 16.871 L 11.34 16.38" style="stroke-width: 1px;"/>
+</svg>

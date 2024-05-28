@@ -4,9 +4,13 @@
 
 const suplementstat_flt = ("Suplemento: [lb-filter v1.0]: ")
 
-console.log(suplementstat_flt + "Iniciando...")
-let filterIndex = document.getElementById('filterSelect').value;
-console.log(suplementstat_flt + "Iniciado com sucesso. Pronto para ser utilizado")
+// console.log(suplementstat_flt + "Iniciando...")
+try {
+    let filterIndex = document.getElementById('filterSelect').value;
+} catch (error) {
+    console.info('Página não contém filtros:', error);
+}
+// console.log(suplementstat_flt + "Iniciado com sucesso. Pronto para ser utilizado")
 
 
 //FILTRO DE TABELA
@@ -31,16 +35,20 @@ function filterTable() {
             }
         }
     }
-    console.log(suplementstat_flt + "Elementos filtrados.");
+    // console.log(suplementstat_flt + "Elementos filtrados.");
 }
 
 
 // ATUALIZAR HEADER DE FILTRO
 function updateFilterIndex() {
-    console.log(suplementstat_flt + "Atualizando...")
-    let filterIndex = document.getElementById('filterSelect').value;
-    console.log(suplementstat_flt + "Filtrado por novo Parâmetro.")
-    filterTable(filterIndex);
+    try {
+        // console.log(suplementstat_flt + "Atualizando...")
+        let filterIndex = document.getElementById('filterSelect').value;
+        // console.log(suplementstat_flt + "Filtrado por novo Parâmetro.")
+        filterTable(filterIndex);
+    } catch (error) {
+        console.info('Página não contém filtros:', error);
+    }
 }
 
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Histórico {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANS LÉGUA</title>
+        <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+
+        {% include 'shared/header/tl-header.html' %}
+
+            <div class="tables-mobile">
+
+                <div class="split-horizontal">
+                    <h1>Histórico <span class="id-page">{{session['id_page']}}</h1>
+                    <div class="aux-buttons">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                        <hr class="vert">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" onclick="toggleFilter()">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                    </div>
+                </div>
+                    <div style="justify-content: flex-end" >
+                        <label for="searchInput1"></label>
+                        <label for="filterSelect"></label>
+                        <div id="table-filter" style="display: none" >
+                            <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
+                            <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                                <option value="1">Produto (Código)</option>
+                                <option value="2">Produto (Descrição)</option>
+                                <option value="0">Endereço</option>
+                                <option value="3">Operação (Descrição)</option>
+                                <option value="4">Quantidade</option>
+                                <option value="5">Lote (Código)</option>
+                                <option value="6">Usuário (Nome)</option>
+                                <option value="7">Horário (Data/Hora)</option>
+                            </select>
+                        </div>
+                    </div>
+                <div style="max-height: 600px; overflow-y: auto;">
+                    <table class="saldoTable">
+                        <tr>
+                            <th>Endereço</th>
+                            <th>Produto (Código)</th>
+                            <th>Produto (Descrição)</th>
+                            <th>Operação</th>
+                            <th>Quantidade</th>
+                            <th>Lote</th>
+                            <th>Usuário</th>
+                            <th>Horário</th>
+                        </tr>
+                        {% for item in estoque %}
+                        <tr>
+                            <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
+                            <td>{{ item['cod_item'] }}</td>
+                            <td>{{ item['desc_item'] }}</td>
+                            <td>{{ item['operacao'] }}</td>
+                            <td>{{ item['quantidade'] }}</td>
+                            <td>{{ item['lote'] }}</td>
+                            <td>{{ item['user_name'] }}</td>
+                            <td>{{ item['timestamp'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                
+                <a href="{{ url_for('export_csv_tipo', tipo='historico') }}">
+                    Baixar tabela...
+                </a>
+                <div class="pagination">
+                    {% if page > 1 %}
+                    <a href="{{ url_for('historico', page=page-1) }}">&laquo; Anterior</a>
+                    {% endif %}
+                
+                    {% if page > 3 %}
+                    <a href="{{ url_for('historico', page=1) }}">1</a>
+                    <span>...</span>
+                    {% endif %}
+                
+                    {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+                        <a href="{{ url_for('historico', page=p) }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
+                    {% endfor %}
+                
+                    {% if page < total_pages - 2 %}
+                    <span>...</span>
+                    <a href="{{ url_for('historico', page=total_pages) }}">{{ total_pages }}</a>
+                    {% endif %}
+                
+                    {% if page < total_pages %}
+                    <a href="{{ url_for('historico', page=page+1) }}">Próximo &raquo;</a>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        {% include 'shared/footer.html' %}

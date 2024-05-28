@@ -1,2 +1,7 @@
 .env
 translegua.db
+dbg_translegua.db
+cde_database.db
+.history
+.idea
+__pycache__

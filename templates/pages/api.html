@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>API | CDE</title>
+        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+
+        {% include 'shared/header/cde-header.html' %}
+    <style>
+        .wrap {
+            white-space: pre-wrap;
+        }
+    </style>
+    <!-- TABELA -->
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
+    
+        <div draggable="false" class="form-login" style="padding: 20px; position: static; margin-bottom: 40px">
+            <div class="two-split" style="grid-gap: 30px">
+                <div id="tables-cont">
+                    <img class="side-banner" style="width: 450px;height: auto;border-radius: 20px;margin-left: unset" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
+                </div>
+                <div class="log" style="width: 100%">
+                    <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Console SQL</h1>
+                    <form action="/api" method="post" onsubmit="showLoading()" id="field">
+                        <div>
+                            <label for="sel_schema"></label>
+                            <select id="sel_schema" name="sel_schema" class="address" required>
+                                {% if dsn %}
+                                    <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
+                                {% endif %}
+                                <option>HUGOPIET</option>
+                                <option>SQLITE</option>
+                            </select>
+                            <div>
+                                <label for="sql_query"></label>
+                                <textarea class="address-observ" style="height: 180px" id="sql_query" name="sql_query" placeholder="SQL Query..." required>{% if query %}{{ query }}{% else %}SELECT * FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM;{% endif %}</textarea>
+                            </div>
+                            <p class="alert" id="custom-alert">{% if alerta_mensagem %}{{ alerta_mensagem }}{% else %}{% endif %}</p>
+                            <input class="subm" type="submit" value="Consultar" id="submitform">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tables-container" style="min-width: 800px; max-width: 90%; width: -webkit-fill-available">
+            <h1>API Results</h1>
+            <div style="max-height: 600px; overflow: auto;">
+            {% if result %}
+                <table>
+                    <thead>
+                        <tr>
+                            {% for column in columns %}
+                                <th>{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in result %}
+                            <tr>
+                                {% for value in row %}
+                                    <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="msg-error">Nenhum resultado foi encontrado.</div>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+        <script>
+            document.getElementById("field").addEventListener("submit", function() {
+                document.getElementById("submitform").disabled = true;
+
+            });
+
+        </script>
+
+        {% include 'shared/footer.html' %}

@@ -4,7 +4,7 @@
 
 var suplementstat_fc = ("Suplemento: [lb-float-cont v1.8]: ");
 
-console.log(suplementstat_fc + "Iniciando...");
+// console.log(suplementstat_fc + "Iniciando...");
 // LISTENERS
 var offsetX, offsetY, isDragging = true, isFixed = true;
 var container = document.getElementById('floating-container');
@@ -20,24 +20,28 @@ if (container) {
     document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
 }
-console.log(suplementstat_fc + "Iniciado com sucesso. Pronto para ser utilizado.");
+// console.log(suplementstat_fc + "Iniciado com sucesso. Pronto para ser utilizado.");
 
 // CONTAINER FLUTUANTE
 function toggleContainer() {
     var container = document.getElementById('floating-container');
     if (container) {
         container.classList.toggle('show');
-        document.getElementById("cod_str_qr").focus();
-        console.log(suplementstat_fc + "O container foi inicializado para uso.");
+        try {
+            document.getElementById("cod_str_qr").focus();
+        } catch (error) {
+            console.info('O campo flutuante não existe:', error)
+        }
+        // console.log(suplementstat_fc + "O container foi inicializado para uso.");
     } else {
-        console.log(suplementstat_fc + "O elemento 'floating-container' não foi encontrado.");
+        // console.log(suplementstat_fc + "O elemento 'floating-container' não foi encontrado.");
     }
 }
 
 
 function closeContainer() {
     var container = document.getElementById('floating-container');
-    console.log(suplementstat_fc + "O container foi ocultado.");
+    // console.log(suplementstat_fc + "O container foi ocultado.");
     container.classList.remove('show');
 }
 
@@ -67,7 +71,7 @@ function toggleFixMove() {
         container.style.zIndex = '998';
 
         fixMoveBtn.style.transform = 'scaleX(-1)';
-        console.log(suplementstat_fc + "O container foi bloqueado para movimento.");
+        //// console.log(suplementstat_fc + "O container foi bloqueado para movimento.");
 
     } else {
         container.style.left = '';
@@ -82,7 +86,7 @@ function toggleFixMove() {
         container.style.zIndex = '1099';
 
         fixMoveBtn.style.transform = 'scaleX(1)';
-        console.log(suplementstat_fc + "O container foi liberado para movimento.");
+        //// console.log(suplementstat_fc + "O container foi liberado para movimento.");
 
     }
 
@@ -153,11 +157,3 @@ function drag(e) {
         container.style.top = newTop + 'px';
     }
 }
-
-
-
-// ANIMAÇÃO DE ENTRADA
-document.addEventListener("DOMContentLoaded", function() {
-    var elementToAnimate = document.getElementById("destinoFields");
-    elementToAnimate.classList.add("fade-in-from-top");
-});

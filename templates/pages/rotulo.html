@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>Rótulos | TRANS LÉGUA</title>
+        <title>Rótulos {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | CDE</title>
+        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
-        {% include 'shared/header.html' %}
+        {% include 'shared/header/hp-header.html' %}
 
     <!-- TABELA -->
         <div draggable="false" class="form-login">
             <div class="split-horizontal">
-                <div>
-                    <div class="split-horizontal"><h1>Rótulos</h1></div>
-                    <div>
+                <div class="log">
+                    <div class="split-horizontal"><h1 class="title">Calculadora de Rótulos <span class="id-page">{{session['id_page']}}</h1></div>
+                    <div style="max-width: 400px; justify-content: flex-start; margin: auto;">
                         <form style="display: flex;" id="field" method="post" action="{{ url_for('rotulo') }}">
                             <div class="two-split">
 
@@ -23,7 +24,7 @@
                                     <input class="address" maxlength="6" id="diametro_minimo" type="number" name="diametro_minimo" oninput="verificarComprimento()" required placeholder="Diâmetro...">
                                 </div>
                             </div>
-
+                            <hr>
                             <div class="two-split">
                                 <div>
                                     <label for="espessura_fita">Rótulo (Espessura)</label><br>
@@ -32,7 +33,7 @@
 
                                 <div>
                                     <label for="espessura_papelao">Tubete (Espessura)</label><br>
-                                    <input class="address" maxlength="6" type="number" maxlength="6" id="espessura_papelao" name="espessura_papelao" oninput="verificarComprimento()"  required placeholder="Espessura...">
+                                    <input class="address" maxlength="6" type="number" id="espessura_papelao" name="espessura_papelao" oninput="verificarComprimento()"  required placeholder="Espessura...">
                                 </div>
                             </div>
                                 <div>
@@ -40,19 +41,19 @@
                                     <input  type="number" maxlength="6" id="compr_rotulo" name="compr_rotulo" oninput="verificarComprimento()"  required placeholder="Distância do início de um rótulo ao início de outro...">
                                 </div>
                             <hr>
-                            <div class="split-horizontal">
-                                <input style="display: none" class="subm" type="submit" value="Calcular...">
+                            <h3 id="resposta1" class="alert">Calculadora</h3>
+                            <p id="resposta3">Digite os parâmetros...</p>
+                            <div style="display: none" class="split-horizontal">
+                                <input class="subm" type="submit" value="Calcular...">
                             </div>
                         </form>
-                        <h3 id="resposta1" class="alert"></h3>
-                        <p id="resposta3">Digite os parâmetros...</p>
                     </div>
                 </div>
                 <div class="form-container" id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
-                    <img class="svg-none" src="{{ url_for('static', filename='icons/tags.svg') }}" alt="">
+                    <img class="svg-none" src="{{ url_for('static', filename='svg/tags.svg') }}" alt="">
                     <div class="centralizado">
                         <div>
-                            <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='png/rotulo/rotulo.jpg') }}" alt="">
+                            <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="">
                         </div>
                     </div>
                 </div>
@@ -71,19 +72,19 @@
                 var dynamicImage = document.getElementById("dynamicImage");
 
                 input1.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "png/rotulo/rotulo_esp_rot.jpg";
+                    dynamicImage.src = static_path + "img/rotulo/rotulo_esp_rot.jpg";
                 });
                 input2.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "png/rotulo/rotulo_diam_total.jpg";
+                    dynamicImage.src = static_path + "img/rotulo/rotulo_diam_total.jpg";
                 });
                 input3.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "png/rotulo/rotulo_diam_int.jpg";
+                    dynamicImage.src = static_path + "img/rotulo/rotulo_diam_int.jpg";
                 });
                 input4.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "png/rotulo/rotulo_esp_tub.jpg";
+                    dynamicImage.src = static_path + "img/rotulo/rotulo_esp_tub.jpg";
                 });
                 input5.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "png/rotulo/rotulo_dist_rot.jpg";
+                    dynamicImage.src = static_path + "img/rotulo/rotulo_dist_rot.jpg";
                 });
 
                 $("#field").submit(function(event) {
