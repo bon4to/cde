@@ -11,10 +11,10 @@
                 <div class="split-horizontal">
                     <h1>Histórico <span class="id-page">{{session['id_page']}}</h1>
                     <div class="aux-buttons">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
                         <hr class="vert">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" onclick="toggleFilter()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" alt="" onclick="toggleFilter()">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
                     </div>
                 </div>
                     <div style="justify-content: flex-end" >

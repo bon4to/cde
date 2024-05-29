@@ -183,13 +183,13 @@
                     <div class="split-horizontal">
                         <h1>Saldo Atual do Estoque <span class="id-page">{{session['id_page']}}</span></h1>
                         <div class="aux-buttons">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
                             <hr class="vert">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" alt="" onclick="toggleContainer()">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="CAMPO LATERAL" alt="" onclick="toggleContainer()">
                             <hr class="vert">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" onclick="toggleFilter()">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="window.location.href='{{ url_for('home_tl') }}';">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="window.location.href='{{ url_for('home_tl') }}';">
                         </div>
                     </div>
                     <div style="justify-content: flex-end">

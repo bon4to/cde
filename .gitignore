@@ -5,3 +5,4 @@ cde_database.db
 .history
 .idea
 __pycache__
+venv
