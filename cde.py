@@ -293,13 +293,34 @@ def get_historico(page=1, per_page=10):                                         
             ORDER BY h.time_mov DESC
             LIMIT ? OFFSET ?;
         ''', (per_page, offset))
-        
+
         estoque = [{
-            'numero'    : row[0], 'letra'     : row[1], 'cod_item'   : row[2], 
-            'desc_item' : row[3], 'lote'      : row[4], 'quantidade' : row[5], 
-            'operacao'  : row[6], 'user_name' : row[7], 'timestamp'  : row[8]
+            'endereco'  : str(row[1]) + '.' + str(row[0]), 'cod_item'   : row[2], 
+            'desc_item' : row[3], 'lote'      : row[4],    'quantidade' : row[5], 
+            'operacao'  : row[6], 'user_name' : row[7],    'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque, row_count
+
+
+def get_all_historico():                                                                                                  
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        
+        cursor.execute('''
+            SELECT  h.rua_numero, h.rua_letra, h.desc_item,
+                    i.desc_item, h.lote_item, h.quantidade,
+                    h.operacao, h.user_name, h.time_mov
+            FROM historico h
+            JOIN itens i ON h.desc_item = i.cod_item
+            ORDER BY h.time_mov DESC;
+        ''')
+        
+        estoque = [{
+            'endereco'  : str(row[1]) + '.' + str(row[0]), 'cod_item'   : row[2], 
+            'desc_item' : row[3], 'lote'      : row[4],    'quantidade' : row[5], 
+            'operacao'  : row[6], 'user_name' : row[7],    'timestamp'  : row[8]
+        } for row in cursor.fetchall()]
+    return estoque
 
 
 def get_users():                                                                                                                        #* RETORNA DADOS DOS USUÁRIOS
@@ -996,7 +1017,35 @@ def historico():
     per_page = 20
     estoque, row_count = get_historico(page, per_page)
     total_pages = ceil(row_count / per_page)
-    return render_template('pages/mov/mov-historico.html', estoque=estoque, page=page, total_pages=total_pages, max=max, min=min)
+    return render_template('pages/mov/mov-historico.html', estoque=estoque, page=page, total_pages=total_pages, max=max, min=min, row_count=row_count)
+
+
+@app.route('/mov/historico/search', methods=['GET', 'POST'])
+@verify_auth('MOV003')
+def historico_search():
+    create_tables()
+    if request.method == 'POST':
+        search_term = request.form['search_term']
+        search_index = request.form['search_index']
+        
+        option_texts = {
+            'cod_item': 'Produto (Código)',
+            'desc_item': 'Produto (Descrição)',
+            'endereco': 'Endereço',
+            'operacao': 'Operação (Descrição)',
+            'quantidade': 'Quantidade',
+            'lote': 'Lote (Código)',
+            'user_name': 'Usuário (Nome)',
+            'timestamp': 'Horário (Data/Hora)'
+        }
+
+        search_row_text = option_texts.get(search_index, '')
+
+        estoque = get_all_historico()
+        filtered_estoque = [item for item in estoque if search_term.lower() in item[search_index].lower()]
+        return render_template('pages/mov/mov-historico.html', estoque=filtered_estoque, search_term=search_term, page = 0, max=max, min=min, total_pages=0, search_row_text=search_row_text)
+    return render_template('pages/mov/mov-historico.html', estoque=[], search_term="", page = 0, max=max, min=min, total_pages=0, search_row_text=search_row_text)
+
 
 
 @app.route('/mov/faturado')
@@ -1727,7 +1776,7 @@ def saldo():
 @verify_auth('CDE018')
 def export_csv_tipo(tipo):                                                                                                              #* EXPORT .csv
     if tipo == 'historico':
-        data = get_historico()
+        data = get_all_historico()
         filename = 'exp_historico'
     elif tipo == 'produtos':
         data = get_itens()

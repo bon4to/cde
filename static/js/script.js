@@ -268,6 +268,11 @@ function blockImg() {
     }
 }
 
+function goBack() {
+    window.history.back();
+}
+
+
 function togglePopUp() {
     let popUp = document.getElementById('popup-field');
 
