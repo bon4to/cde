@@ -14,26 +14,38 @@
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
                         <hr class="vert">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" alt="" onclick="toggleFilter()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
                     </div>
                 </div>
                     <div style="justify-content: flex-end" >
                         <label for="searchInput1"></label>
                         <label for="filterSelect"></label>
                         <div id="table-filter" style="display: none" >
-                            <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
-                            <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                                <option value="1">Produto (Código)</option>
-                                <option value="2">Produto (Descrição)</option>
-                                <option value="0">Endereço</option>
-                                <option value="3">Operação (Descrição)</option>
-                                <option value="4">Quantidade</option>
-                                <option value="5">Lote (Código)</option>
-                                <option value="6">Usuário (Nome)</option>
-                                <option value="7">Horário (Data/Hora)</option>
+                        <form style="display: flex; flex-direction: row" id="search-all" method="post" action="/mov/historico/search">
+                            <input type="text" class="searchInput" id="searchInput1" name="search_term" oninput="filterTable()" placeholder="Filtrar por...">
+                            <select class="address" id="filterSelect" name="search_index" onchange="updateFilterIndex()">
+                                <option value="cod_item">Produto (Código)</option>
+                                <option value="desc_item">Produto (Descrição)</option>
+                                <option value="endereco">Endereço</option>
+                                <option value="operacao">Operação (Descrição)</option>
+                                <option value="quantidade">Quantidade</option>
+                                <option value="lote">Lote (Código)</option>
+                                <option value="user_name">Usuário (Nome)</option>
+                                <option value="timestamp">Horário (Data/Hora)</option>
                             </select>
-                        </div>
+                            <input class="subm" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/text-search.svg') }}" alt="">
+                        </form>
                     </div>
+                    {% if search_term %}
+                    <div class="split-horizontal">
+                        <h1 style="font-size: 22px">Critério de pesquisa: <span class="cor-web">"{{ search_term }}"</span> em <span class="cor-web">{{ search_row_text }}</span>.</h1>
+                        <a class="button-mini subm" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                    
                 <div style="max-height: 600px; overflow-y: auto;">
                     <table class="saldoTable">
                         <tr>
@@ -48,7 +60,7 @@
                         </tr>
                         {% for item in estoque %}
                         <tr>
-                            <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
+                            <td>{{ item['endereco'] }}</td>
                             <td>{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['operacao'] }}</td>
@@ -64,6 +76,7 @@
                 <a href="{{ url_for('export_csv_tipo', tipo='historico') }}">
                     Baixar tabela...
                 </a>
+                    
                 <div class="pagination">
                     {% if page > 1 %}
                     <a href="{{ url_for('historico', page=page-1) }}">&laquo; Anterior</a>
@@ -87,7 +100,9 @@
                     <a href="{{ url_for('historico', page=page+1) }}">Próximo &raquo;</a>
                     {% endif %}
                 </div>
-
+                {% if row_count %}
+                    <p>{{ row_count }} registros</p>
+                {% endif %}
             </div>
 
         {% include 'shared/footer.html' %}
