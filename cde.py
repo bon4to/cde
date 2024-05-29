@@ -683,14 +683,14 @@ def generate_etiqueta(qr_text, desc_item, cod_item, lote):                      
     img.paste(qr_image, ((width - qr_width) // 2, (height - qr_height) // 2))
 
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype('arial.ttf', 30)
+    font = ImageFont.truetype('arialbd.ttf', 30)
 
     lote_bbox = draw.textbbox((0, 0), lote, font=font)
     lote_width = lote_bbox[2] - lote_bbox[0]
     draw.text(((width - lote_width) // 2, height // 1.5), lote, fill='black', font=font)
 
     text = desc_item
-    font = ImageFont.truetype('arial.ttf', 20)
+    font = ImageFont.truetype('arialbd.ttf', 22)
     lines = textwrap.wrap(text, width=30)
     y_text = height - height // 4.6
     for line in lines:
