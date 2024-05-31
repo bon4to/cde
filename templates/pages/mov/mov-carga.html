@@ -8,30 +8,29 @@
 
             {% if 'privilegio' in session %}
                 {% if session['privilegio'] <= 2 %}
-                    {% if alert %}
-                        {% if class_alert == 'error' %}
+                    {% if id_carga %}
+                        
                             <div class="form-container" style="height: max-content;" class="disabled">
-                                <h1>Novo produto...</h1>
-                                <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
-                                    <div>
-                                        <label for="produto">Item (Descrição)</label>
-                                        <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
-                                    </div>
-                                    <div class="split-horizontal">
-                                        <div>
-                                            <label for="cod_item">Código (SKU)</label>
-                                            <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" type="text" name="cod_item" placeholder="SKU..." required>
-                                        </div>
-                                        <div>
-                                            <label for="cod_item">Código de Barras (DUN-14)</label>
-                                            <input class="address" type="number" inputmode="numeric" pattern="\d{14}" minlength="14" maxlength="14" name="cod_dun14" placeholder="DUN-14..." required>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <input class="subm" type="submit" value="Cadastrar" style="width: 100%">
-                                </form>
+                                <h1>Carga: <span class="cor-web">{{ id_carga }}</span></h1>
+                                {% if result %}
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Produto (Código)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in result %}
+                                                <tr>
+                                                    <td>{{ row[columns.index('ITEM')] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% endif %}
+                                <br>
                             </div>
-                        {% endif %}
+                        
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -65,8 +64,8 @@
                     {% endif %}
                 {% else %}
                     <div class="msg-info">
-                        <details><summary>A lista pode estar desatualizada.</summary>
-                            Considere fazer a atualização da lista, caso tenha dúvidas. A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7;height: 16px; width: 16px;padding: 0;padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                        <details><summary>Carregue a lista para obter as cargas.</summary>
+                            A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7;height: 16px; width: 16px;padding: 0;padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
                         </details>
                     </div>
                 {% endif %}
@@ -88,23 +87,23 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Carga</th>
-                                        <th>Cliente</th>
-                                        <th>Data</th>
+                                        <th>Carga (Código)</th>
+                                        <th>Pedido (Código)</th>
+                                        <th>Pedido (Sequencia)</th>
+                                        <th>Cliente (Código)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for row in result %}
                                         <tr>
-                                            {% for value in row %}
-                                                <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
-                                            {% endfor %}
+                                            <td>{{ row[columns.index('CODIGO_GRUPOPED')] }}</td>
+                                            <td>{{ row[columns.index('NRO_PEDIDO')] }}</td>
+                                            <td>{{ row[columns.index('SEQ')] }}</td>
+                                            <td>{{ row[columns.index('CODIGO_CLIENTE')] }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
-                        {% else %}
-                            <div class="msg-error">Nenhum resultado foi encontrado.</div>
                         {% endif %}
                     </div>
                 <a href="{{ url_for('export_csv_tipo', tipo='produtos') }}">

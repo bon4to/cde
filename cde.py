@@ -1591,27 +1591,70 @@ def cadastrar_usuario():
     return render_template('pages/users/users.html')
 
 
-@app.route('/mov/carga', methods=['GET', 'POST'])
-@verify_auth('MOV007')
-def cargas():                                                                          #TODO: BOTÃO PARA FAZER A ATUALIZAÇÃO DOS CADASTROS DE ITENS
-    if request.method == 'POST':
-        query = '''
-            SELECT ext.ITEM, ext.ITEM_DESCRICAO, ext.GTIN_14
-            FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM ext
-            WHERE (UNIDADE_DESCRICAO = 'CX' OR UNIDADE_DESCRICAO = 'UN' OR UNIDADE_DESCRICAO = 'FD')
-            AND (GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR GRUPO_DESCRICAO = 'REVENDA')
-            AND NOT GTIN_14 = '';
+@app.route('/mov/carga/<int:id_carga>', methods=['GET', 'POST'])
+@verify_auth('MOV006')
+def carga_id(id_carga):
+    if request.method == 'GET':
+        #? SEARCH DE ITENS POR CARGA
+        query = f'''
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, iped.ITEM
+            FROM DB2ADMIN.IGRUPOPE crg
+            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+            JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+            WHERE crg.QTDE_FATUR = 0            -- apenas pendencias
+            -- AND iped.NRO_PEDIDO = ?          -- filtro por pedido
+            AND crg.CODIGO_GRUPOPED = {id_carga}         -- filtro por carga
+            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
+            LIMIT 100;
         '''
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
         result, columns = db_query_connect(query, dsn)
-        print(result[0])
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
 
         else:
-            
+            alert = f'''{result[0][0]}'''
+            class_alert = 'error'
+        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga)
+    result = []
+    return render_template('pages/mov/mov-carga.html', result=result)
+        
+
+@app.route('/mov/carga', methods=['GET', 'POST'])
+@verify_auth('MOV006')
+def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
+    if request.method == 'POST':
+        query = '''
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ
+            FROM DB2ADMIN.IGRUPOPE crg
+            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+            JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+            WHERE crg.QTDE_FATUR = 0
+            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
+            LIMIT 100;
+        '''
+        """ SEARCH DE ITENS POR CARGA
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, iped.ITEM
+            FROM DB2ADMIN.IGRUPOPE crg
+            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+            JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+            WHERE crg.QTDE_FATUR = 0            -- apenas pendencias
+            -- AND iped.NRO_PEDIDO = ?          -- filtro por pedido
+            AND crg.CODIGO_GRUPOPED = ?         -- filtro por carga
+            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
+            LIMIT 100;
+        """
+        
+        dsn_name = 'HUGOPIET'
+        dsn = dsn_name
+        result, columns = db_query_connect(query, dsn)
+        if columns:
+            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+            class_alert = 'success'
+
+        else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
         return render_template('pages/mov/mov-carga.html', result=result, alert=alert, class_alert=class_alert)
