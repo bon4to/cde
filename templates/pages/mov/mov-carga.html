@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Carga {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+
+        {% include 'shared/header/tl-header.html' %}
+
+            {% if 'privilegio' in session %}
+                {% if session['privilegio'] <= 2 %}
+                    {% if alert %}
+                        {% if class_alert == 'error' %}
+                            <div class="form-container" style="height: max-content;" class="disabled">
+                                <h1>Novo produto...</h1>
+                                <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
+                                    <div>
+                                        <label for="produto">Item (Descrição)</label>
+                                        <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
+                                    </div>
+                                    <div class="split-horizontal">
+                                        <div>
+                                            <label for="cod_item">Código (SKU)</label>
+                                            <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" type="text" name="cod_item" placeholder="SKU..." required>
+                                        </div>
+                                        <div>
+                                            <label for="cod_item">Código de Barras (DUN-14)</label>
+                                            <input class="address" type="number" inputmode="numeric" pattern="\d{14}" minlength="14" maxlength="14" name="cod_dun14" placeholder="DUN-14..." required>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <input class="subm" type="submit" value="Cadastrar" style="width: 100%">
+                                </form>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            <div class="tables-mobile" >
+                <div class="split-horizontal">
+                    <h1>Cargas à Faturar <span class="id-page">{{session['id_page']}}</span></h1>
+                    <div class="aux-buttons">
+                        <form action="{{ url_for('cargas') }}" method="post">
+                            <button type="submit" style="all: unset">
+                                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE ITENS">
+                            </button>
+                        </form>
+                        <hr class="vert">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="window.location.href='{{ url_for('home_hp') }}';">
+                    </div>
+                </div>
+                {% if alert %}
+                    {% if class_alert == 'error' %}
+                        <div class="msg-error">
+                            <details><summary>A lista não pôde ser carregada!</summary>
+                                {{ alert | safe }}
+                            </details>
+                        </div>
+                    {% elif class_alert == 'success' %}
+                        <div class="msg-success">
+                            <details><summary>A lista foi carregada com sucesso!</summary>
+                                {{ alert | safe }}
+                            </details>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="msg-info">
+                        <details><summary>A lista pode estar desatualizada.</summary>
+                            Considere fazer a atualização da lista, caso tenha dúvidas. A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7;height: 16px; width: 16px;padding: 0;padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                        </details>
+                    </div>
+                {% endif %}
+                <div style="justify-content: flex-end" >
+                    <label for="searchInput1"></label>
+                    <label for="filterSelect"></label>
+                    <div id="table-filter" style="display: none" >
+                        <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
+                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                            <option value="0">Item (Código)</option>
+                            <option value="1">Item (Descrição)</option>
+                            <option value="2">Código de Barras (DUN-14)</option>
+
+                        </select>
+                    </div>
+                </div>
+                    <div style="max-height: 600px; overflow-y: auto;">
+                        {% if result %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Carga</th>
+                                        <th>Cliente</th>
+                                        <th>Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in result %}
+                                        <tr>
+                                            {% for value in row %}
+                                                <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="msg-error">Nenhum resultado foi encontrado.</div>
+                        {% endif %}
+                    </div>
+                <a href="{{ url_for('export_csv_tipo', tipo='produtos') }}">
+                    Baixar tabela...
+                </a>
+            </div>
+
+        {% include 'shared/footer.html' %}
