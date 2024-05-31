@@ -1328,7 +1328,12 @@ p.phrase {
     bottom: 20px;
     right: 20px;
     z-index: 1000;
+    opacity: 0.5;
     transition: opacity 0.3s ease;
+}
+
+#scroll-to-top-button:hover {
+    opacity: 1;
 }
 
 #scroll-to-top-button button {
