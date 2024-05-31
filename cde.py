@@ -1619,7 +1619,7 @@ def carga_id(id_carga):
             class_alert = 'error'
         return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga)
     result = []
-    return render_template('pages/mov/mov-carga.html', result=result)
+    return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
         
 
 @app.route('/mov/carga', methods=['GET', 'POST'])
@@ -1627,7 +1627,7 @@ def carga_id(id_carga):
 def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
     if request.method == 'POST':
         query = '''
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
             JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
@@ -1657,7 +1657,7 @@ def cargas():                                                                   
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga.html', result=result, alert=alert, class_alert=class_alert)
+        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert)
     result = []
     return render_template('pages/mov/mov-carga.html', result=result)
 
