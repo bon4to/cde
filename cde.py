@@ -295,9 +295,9 @@ def get_historico(page=1, per_page=10):                                         
         ''', (per_page, offset))
 
         estoque = [{
-            'endereco'  : str(row[1]) + '.' + str(row[0]), 'cod_item'   : row[2], 
-            'desc_item' : row[3], 'lote'      : row[4],    'quantidade' : row[5], 
-            'operacao'  : row[6], 'user_name' : row[7],    'timestamp'  : row[8]
+            'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
+            'desc_item' : row[3], 'lote'      : row[4],          'quantidade' : row[5], 
+            'operacao'  : row[6], 'user_name' : row[7],          'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque, row_count
 
@@ -316,9 +316,9 @@ def get_all_historico():
         ''')
         
         estoque = [{
-            'endereco'  : str(row[1]) + '.' + str(row[0]), 'cod_item'   : row[2], 
-            'desc_item' : row[3], 'lote'      : row[4],    'quantidade' : row[5], 
-            'operacao'  : row[6], 'user_name' : row[7],    'timestamp'  : row[8]
+            'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
+            'desc_item' : row[3], 'lote'      : row[4],          'quantidade' : row[5], 
+            'operacao'  : row[6], 'user_name' : row[7],          'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque
 
