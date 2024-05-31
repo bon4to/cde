@@ -1591,6 +1591,34 @@ def cadastrar_usuario():
     return render_template('pages/users/users.html')
 
 
+@app.route('/mov/carga', methods=['GET', 'POST'])
+@verify_auth('MOV007')
+def cargas():                                                                          #TODO: BOTÃO PARA FAZER A ATUALIZAÇÃO DOS CADASTROS DE ITENS
+    if request.method == 'POST':
+        query = '''
+            SELECT ext.ITEM, ext.ITEM_DESCRICAO, ext.GTIN_14
+            FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM ext
+            WHERE (UNIDADE_DESCRICAO = 'CX' OR UNIDADE_DESCRICAO = 'UN' OR UNIDADE_DESCRICAO = 'FD')
+            AND (GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR GRUPO_DESCRICAO = 'REVENDA')
+            AND NOT GTIN_14 = '';
+        '''
+        dsn_name = 'HUGOPIET'
+        dsn = dsn_name
+        result, columns = db_query_connect(query, dsn)
+        print(result[0])
+        if columns:
+            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+            class_alert = 'success'
+
+        else:
+            
+            alert = f'''{result[0][0]}'''
+            class_alert = 'error'
+        return render_template('pages/mov/mov-carga.html', result=result, alert=alert, class_alert=class_alert)
+    result = []
+    return render_template('pages/mov/mov-carga.html', result=result)
+
+
 @app.route('/produtos', methods=['GET', 'POST'])
 @verify_auth('ITE005')
 def produtos():
