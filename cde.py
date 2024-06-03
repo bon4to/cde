@@ -1597,13 +1597,15 @@ def carga_id(id_carga):
     if request.method == 'GET':
         #? SEARCH DE ITENS POR CARGA
         query = f'''
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, iped.ITEM
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM, ped.DT_EMISSAO
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
             JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
-            WHERE crg.QTDE_FATUR = 0            -- apenas pendencias
-            -- AND iped.NRO_PEDIDO = ?          -- filtro por pedido
-            AND crg.CODIGO_GRUPOPED = {id_carga}         -- filtro por carga
+            JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+            WHERE crg.QTDE_FATUR = 0                -- apenas pendencias
+            -- AND iped.NRO_PEDIDO = ?              -- filtro por pedido
+            AND crg.CODIGO_GRUPOPED = {id_carga}    -- filtro por carga
+            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
             ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
             LIMIT 100;
         '''
@@ -1627,11 +1629,13 @@ def carga_id(id_carga):
 def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
     if request.method == 'POST':
         query = '''
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM, ped.DT_EMISSAO
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+            JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
             JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
             WHERE crg.QTDE_FATUR = 0
+            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
             ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
             LIMIT 100;
         '''

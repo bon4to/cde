@@ -9,28 +9,26 @@
             {% if 'privilegio' in session %}
                 {% if session['privilegio'] <= 2 %}
                     {% if id_carga %}
-                        
-                            <div class="form-container" style="height: max-content;" class="disabled">
-                                <h1>Carga: <span class="cor-web">{{ id_carga }}</span></h1>
-                                {% if result %}
-                                    <table>
-                                        <thead>
+                        <div class="form-container" style="height: max-content;" class="disabled">
+                            <h1>Carga: <span class="cor-web">{{ id_carga }}</span></h1>
+                            {% if result %}
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Produto (Código)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in result %}
                                             <tr>
-                                                <th>Produto (Código)</th>
+                                                <td>{{ row[columns.index('ITEM')] }}</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for row in result %}
-                                                <tr>
-                                                    <td>{{ row[columns.index('ITEM')] }}</td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                {% endif %}
-                                <br>
-                            </div>
-                        
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endif %}
+                            <br>
+                        </div>
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -45,7 +43,7 @@
                         </form>
                         <hr class="vert">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="window.location.href='{{ url_for('home_hp') }}';">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="goBack()">
                     </div>
                 </div>
                 {% if alert %}
@@ -89,17 +87,17 @@
                                     <tr>
                                         <th>Carga (Código)</th>
                                         <th>Pedido (Código)</th>
-                                        <th>Pedido (Sequencia)</th>
                                         <th>Cliente (Código)</th>
+                                        <th>Cliente (Descrição)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for row in result %}
-                                        <tr>
+                                        <tr class="selectable-row" data-id="{{ row[columns.index('CODIGO_GRUPOPED')] }}">
                                             <td>{{ row[columns.index('CODIGO_GRUPOPED')] }}</td>
-                                            <td>{{ row[columns.index('NRO_PEDIDO')] }}</td>
-                                            <td>{{ row[columns.index('SEQ')] }}</td>
+                                            <td>{{ row[columns.index('NRO_PEDIDO')] }}.{{ row[columns.index('SEQ')] }}</td>
                                             <td>{{ row[columns.index('CODIGO_CLIENTE')] }}</td>
+                                            <td>{{ row[columns.index('FANTASIA')] }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -110,5 +108,17 @@
                     Baixar tabela...
                 </a>
             </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var rows = document.querySelectorAll('.selectable-row');
+                    rows.forEach(function(row) {
+                        row.addEventListener('click', function() {
+                            var idCarga = this.getAttribute('data-id');
+                            window.location.href = 'carga/' + idCarga;
+                        });
+                    });
+                });
+            </script>
 
         {% include 'shared/footer.html' %}
