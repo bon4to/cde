@@ -1604,7 +1604,7 @@ def carga_id(id_carga):
         query = f'''
             SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ,
                    ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM,
-                   i.ITEM_DESCRICAO, ped.DT_EMISSAO
+                   i.ITEM_DESCRICAO, ped.DT_EMISSAO, iped.QTDE_SOLICITADA
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
             JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
