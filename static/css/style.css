@@ -424,6 +424,7 @@ th, td {
     max-width: 300px;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 th {
@@ -1328,7 +1329,20 @@ p.phrase {
     bottom: 20px;
     right: 20px;
     z-index: 1000;
+    opacity: 0.5;
     transition: opacity 0.3s ease;
+}
+
+#scroll-to-top-button:hover {
+    opacity: 1;
+}
+
+.selectable-row {
+    cursor: pointer;
+}
+
+.selectable-row:hover {
+    background-color: #f0f0f0;
 }
 
 #scroll-to-top-button button {
