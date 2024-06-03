@@ -1840,9 +1840,9 @@ if __name__ == '__main__':                                                      
     app.config['APP_VERSION'] = ['0.4.1', 'Junho/2024', False]
 
     # GET nome do diretório
-    dir_os        = os.path.dirname(os.path.abspath(__file__))
-    debug_dir     = os.getenv('DEBUG_DIR').split(';')
-    main_exec_dir = os.getenv('MAIN_EXEC_DIR')
+    dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
+    debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
+    main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
 
     # MISC
     exec_head   = \

@@ -1429,7 +1429,7 @@ div.msg-info {
 .pagination span {
     padding: 8px 16px;
     cursor: default;
-    min-width: 40px; /* Definindo uma largura mínima */
+    min-width: 40px;
     box-sizing: border-box;
 }
 
