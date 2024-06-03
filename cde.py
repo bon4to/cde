@@ -1597,7 +1597,6 @@ def carga_id(id_carga):
     if request.method == 'GET':
 
         cod_item = request.args.get('cod_item', '')
-        print(cod_item)
         
         item_query = f'AND iped.ITEM = {cod_item}' if cod_item else ''
 
@@ -1629,7 +1628,7 @@ def carga_id(id_carga):
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga)
+        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga, cod_item=cod_item)
     result = []
     return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
         
