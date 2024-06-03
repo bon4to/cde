@@ -7,10 +7,19 @@
         {% include 'shared/header/tl-header.html' %}
 
             {% if 'privilegio' in session %}
-                {% if session['privilegio'] <= 2 %}
-                    {% if id_carga %}
-                        <div class="form-container" style="height: max-content;" class="disabled">
-                            <h1>Carga: <span class="cor-web">{{ id_carga }}</span></h1>
+                {% if id_carga %}
+                    {% if cod_item %}
+                        <div class="form-container" style="height: max-content;">
+                            <span style="display:space-between: width: 100%;">
+                                <h1>{{ cod_item }} em Estoque</h1>
+                                {% if 'privilegio' in session %}
+                                    {% if id_carga %}
+                                    <a class="button-mini subm" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
+                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                                    </a>
+                                    {% endif %}
+                                {% endif %}
+                            </span>
                             {% if result %}
                                 <table>
                                     <thead>
@@ -104,10 +113,37 @@
                             </table>
                         {% endif %}
                     </div>
-                <a href="{{ url_for('export_csv_tipo', tipo='produtos') }}">
-                    Baixar tabela...
-                </a>
+                    
+                {% if not id_carga %}
+                    <a href="{{ url_for('export_csv_tipo', tipo='produtos') }}">
+                        Baixar tabela...
+                    </a>
+                {% else %}
+                
+                <h1>Itens da carga <span class="cor-web">{{ id_carga }}</span></h1>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in result %}
+                                <tr onclick="sendCodItem('{{ row[columns.index('ITEM')] }}', '{{ row[columns.index('CODIGO_GRUPOPED')] }}')">
+                                    <td>{{ row[columns.index('ITEM')] }}</td>
+                                    <td>{{ row[columns.index('ITEM_DESCRICAO')] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table> 
+                {% endif %}
+                <form id="cod_item_form" method="GET" action="">
+                    <input type="hidden" id="cod_item_input" name="cod_item">
+                    <input type="hidden" id="lote_id_input" name="lote_id">
+                </form>
             </div>
+
 
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
@@ -115,10 +151,19 @@
                     rows.forEach(function(row) {
                         row.addEventListener('click', function() {
                             var idCarga = this.getAttribute('data-id');
-                            window.location.href = 'carga/' + idCarga;
+                            window.location.href = '/mov/carga/' + idCarga;
                         });
                     });
                 });
+
+                function sendCodItem(cod_item, lote_id) {
+                    document.getElementById('cod_item_input').value = cod_item;
+                    document.getElementById('lote_id_input').value = lote_id;
+                    var form = document.getElementById('cod_item_form');
+                    form.action = '/mov/carga/' + lote_id;
+                    form.submit();
+                }
+
             </script>
 
         {% include 'shared/footer.html' %}

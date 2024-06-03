@@ -1595,17 +1595,27 @@ def cadastrar_usuario():
 @verify_auth('MOV006')
 def carga_id(id_carga):
     if request.method == 'GET':
+
+        cod_item = request.args.get('cod_item', '')
+        print(cod_item)
+        
+        item_query = f'AND iped.ITEM = {cod_item}' if cod_item else ''
+
         #? SEARCH DE ITENS POR CARGA
         query = f'''
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM, ped.DT_EMISSAO
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ,
+                   ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM,
+                   i.ITEM_DESCRICAO, ped.DT_EMISSAO
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
             JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
             JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i ON i.ITEM = iped.ITEM
             WHERE crg.QTDE_FATUR = 0                -- apenas pendencias
             -- AND iped.NRO_PEDIDO = ?              -- filtro por pedido
             AND crg.CODIGO_GRUPOPED = {id_carga}    -- filtro por carga
-            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
+            {item_query}
+            -- AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
             ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
             LIMIT 100;
         '''
@@ -1629,13 +1639,15 @@ def carga_id(id_carga):
 def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
     if request.method == 'POST':
         query = '''
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM, ped.DT_EMISSAO
+            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ,
+                   ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM,
+                   ped.DT_EMISSAO
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
             JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
             JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
             WHERE crg.QTDE_FATUR = 0
-            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
+            -- AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
             ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
             LIMIT 100;
         '''

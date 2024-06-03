@@ -424,6 +424,7 @@ th, td {
     max-width: 300px;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 th {
