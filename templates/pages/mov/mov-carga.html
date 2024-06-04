@@ -12,27 +12,34 @@
                         <div class="tables-mobile">
                             <span style="display:space-between: width: 100%;">
                                 <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
-                                {% if 'privilegio' in session %}
-                                    {% if id_carga %}
-                                    <a class="button-mini subm" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
-                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                                    </a>
-                                    {% endif %}
-                                {% endif %}
                             </span>
                             {% if result %}
                                 <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Produto (Código)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row in result %}
+                                    {% if result_int %}
+                                        <thead>
                                             <tr>
-                                                <td>{{ row[columns.index('ITEM')] }}</td>
+                                                <th>Endereço</th>
+                                                <th>Produto (Código)</th>
+                                                <th>Lote (Código)</th>
+                                                <th>Saldo</th>
                                             </tr>
-                                        {% endfor %}
+                                        </thead>
+                                        <tbody>
+                                            {% for row in result_int %}
+                                                <tr class="selectable-row">
+                                                    <td>{{ row[columns_int.index('rua_letra')] }}.{{ row[columns_int.index('rua_numero')] }}</td>
+                                                    <td>{{ row[columns_int.index('cod_item')] }}</td>
+                                                    <td>{{ row[columns_int.index('lote_item')] }}</td>
+                                                    <td>{{ row[columns_int.index('saldo')] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="msg-error">
+                                                <details><summary>Não há saldo disponível para este item!</summary>
+                                                    Atualmente, não existe saldo suficiente para suprir esta carga.
+                                                </details>
+                                            </div>
+                                        {% endif %}
                                     </tbody>
                                 </table>
                             {% endif %}
@@ -45,35 +52,47 @@
             {% if id_carga %}
                 <div class="tables-container">
                     <h1>Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in result %}
-                                <tr onclick="sendCodItem('{{ row[columns.index('ITEM')] }}', '{{ row[columns.index('CODIGO_GRUPOPED')] }}')">
-                                    <td>{{ row[columns.index('ITEM')] }}</td>
-                                    <td>{{ row[columns.index('ITEM_DESCRICAO')] }}</td>
+                    <div style="max-height: 600px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item (Código)</th>
+                                    <th>Item (Descrição)</th>
+                                    <th>QTDE (Solicitada)</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for row in result %}
+                                    <tr class="selectable-row" onclick="sendCodItem('{{ row[columns.index('ITEM')] }}', '{{ row[columns.index('CODIGO_GRUPOPED')] }}')">
+                                        <td>{{ row[columns.index('ITEM')] }}</td>
+                                        <td style="text-wrap: balance;">{{ row[columns.index('ITEM_DESCRICAO')] }}</td>
+                                        <td>{{ row[columns.index('QTDE_SOLICITADA')] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {% endif %}
+
             <form id="cod_item_form" method="GET" action="">
                 <input type="hidden" id="cod_item_input" name="cod_item">
-                <input type="hidden" id="lote_id_input" name="lote_id">
+                <input type="hidden" id="carga_id_input" name="carga_id">
             </form>
+            {% if 'privilegio' in session %}
+                {% if id_carga %}
+                <a class="button-mini subm" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                </a>
+                {% else %}
+                
             <div class="tables-mobile" >
                 <div class="split-horizontal">
                     <h1>Cargas à Faturar <span class="id-page">{{session['id_page']}}</span></h1>
                     <div class="aux-buttons">
                         <form action="{{ url_for('cargas') }}" method="post">
                             <button type="submit" style="all: unset">
-                                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE ITENS">
+                                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
                             </button>
                         </form>
                         <hr class="vert">
@@ -97,24 +116,14 @@
                     {% endif %}
                 {% else %}
                     <div class="msg-info">
-                        <details><summary>Carregue a lista para obter as cargas.</summary>
-                            A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7;height: 16px; width: 16px;padding: 0;padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                        <details><summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
+                            A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7; height: 16px; width: 16px; padding: 0; padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
                         </details>
                     </div>
+                    <form action="{{ url_for('cargas') }}" method="post">
+                        <input class="subm" type="submit" value="Carregar Lista de Cargas..." id="submitform">
+                    </form>
                 {% endif %}
-                <div style="justify-content: flex-end" >
-                    <label for="searchInput1"></label>
-                    <label for="filterSelect"></label>
-                    <div id="table-filter" style="display: none" >
-                        <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
-                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                            <option value="0">Item (Código)</option>
-                            <option value="1">Item (Descrição)</option>
-                            <option value="2">Código de Barras (DUN-14)</option>
-
-                        </select>
-                    </div>
-                </div>
                     <div style="max-height: 600px; overflow-y: auto;">
                         {% if result %}
                             <table>
@@ -128,28 +137,25 @@
                                 </thead>
                                 <tbody>
                                     {% for row in result %}
-                                        <tr class="selectable-row" data-id="{{ row[columns.index('CODIGO_GRUPOPED')] }}">
+                                        <tr class="selectable-row js_boot" data-id="{{ row[columns.index('CODIGO_GRUPOPED')] }}">
                                             <td>{{ row[columns.index('CODIGO_GRUPOPED')] }}</td>
                                             <td>{{ row[columns.index('NRO_PEDIDO')] }}.{{ row[columns.index('SEQ')] }}</td>
                                             <td>{{ row[columns.index('CODIGO_CLIENTE')] }}</td>
-                                            <td>{{ row[columns.index('FANTASIA')] }}</td>
+                                            <td style="text-wrap: balance;">{{ row[columns.index('FANTASIA')] }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         {% endif %}
                     </div>
-                
-                    <a href="{{ url_for('export_csv_tipo', tipo='produtos') }}">
-                        Baixar tabela...
-                    </a>
                 </div>
+                {% endif %}
+            {% endif %}
             </div>
-
 
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    var rows = document.querySelectorAll('.selectable-row');
+                    var rows = document.querySelectorAll('.js_boot');
                     rows.forEach(function(row) {
                         row.addEventListener('click', function() {
                             var idCarga = this.getAttribute('data-id');
@@ -158,11 +164,11 @@
                     });
                 });
 
-                function sendCodItem(cod_item, lote_id) {
+                function sendCodItem(cod_item, carga_id) {
                     document.getElementById('cod_item_input').value = cod_item;
-                    document.getElementById('lote_id_input').value = lote_id;
+                    document.getElementById('carga_id_input').value = carga_id;
                     var form = document.getElementById('cod_item_form');
-                    form.action = '/mov/carga/' + lote_id;
+                    form.action = '/mov/carga/' + carga_id;
                     form.submit();
                 }
 
