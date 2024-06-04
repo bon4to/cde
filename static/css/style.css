@@ -733,7 +733,6 @@ button.pin {
 
 }
 
-
 .svg-gray:hover, .svg-gray:focus {
     filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg);
     background-color: var(--cor-destaque);
@@ -1339,14 +1338,6 @@ p.phrase {
     opacity: 1;
 }
 
-.selectable-row {
-    cursor: pointer;
-}
-
-.selectable-row:hover td {
-    background-color: #f0f0f0;
-}
-
 #scroll-to-top-button button {
     display: block;
     padding: 12px;
@@ -1445,7 +1436,23 @@ div.msg-info {
 .pagination span {
     padding: 8px 16px;
     cursor: default;
-    min-width: 40px; /* Definindo uma largura mínima */
+    min-width: 40px;
     box-sizing: border-box;
 }
+
+.selectable-row {
+    cursor: pointer;
+}
+
+.selectable-row:hover td {
+    background-color: #f0f0f0;
+}
+
+h1.subtitle {
+    font-size: 22px;
+    color: #353535;
+    padding-left: 18px;
+}
+
+
 
