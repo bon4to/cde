@@ -729,6 +729,8 @@ button.pin {
     border-radius: 20%;
     transition: 0.2s ease all;
     user-select: none;
+    cursor: pointer;
+
 }
 
 
@@ -1341,7 +1343,7 @@ p.phrase {
     cursor: pointer;
 }
 
-.selectable-row:hover {
+.selectable-row:hover td {
     background-color: #f0f0f0;
 }
 
