@@ -729,8 +729,9 @@ button.pin {
     border-radius: 20%;
     transition: 0.2s ease all;
     user-select: none;
-}
+    cursor: pointer;
 
+}
 
 .svg-gray:hover, .svg-gray:focus {
     filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg);
@@ -1337,14 +1338,6 @@ p.phrase {
     opacity: 1;
 }
 
-.selectable-row {
-    cursor: pointer;
-}
-
-.selectable-row:hover {
-    background-color: #f0f0f0;
-}
-
 #scroll-to-top-button button {
     display: block;
     padding: 12px;
@@ -1446,4 +1439,20 @@ div.msg-info {
     min-width: 40px;
     box-sizing: border-box;
 }
+
+.selectable-row {
+    cursor: pointer;
+}
+
+.selectable-row:hover td {
+    background-color: #f0f0f0;
+}
+
+h1.subtitle {
+    font-size: 22px;
+    color: #353535;
+    padding-left: 18px;
+}
+
+
 

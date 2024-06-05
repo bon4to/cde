@@ -1574,18 +1574,22 @@ def cadastrar_usuario():
                 alerta_mensagem = 'Não foi possível criar usuário... \n'
                 alerta_mais     = ('''MOTIVO:
                                - Já existe um usuário com este login.''')
-                return render_template('components/menus/alert.html', alerta_tipo=alerta_tipo,
+                return render_template('components/menus/alert.html', 
+                                       alerta_tipo=alerta_tipo,
                                        alerta_mensagem=alerta_mensagem,
-                                       alerta_mais=alerta_mais, url_return=url_for('users'))
+                                       alerta_mais=alerta_mais, 
+                                       url_return=url_for('users'))
             else:
                 print('Erro: ', e)
                 alerta_tipo     = 'CADASTRO (USUÁRIO) \n'
                 alerta_mensagem = 'Não foi possível criar usuário... \n'
                 alerta_mais     = (f'''DESCRIÇÃO DO ERRO:
                                - {e}. \n''')
-                return render_template('components/menus/alert.html', alerta_tipo=alerta_tipo,
+                return render_template('components/menus/alert.html', 
+                                       alerta_tipo=alerta_tipo,
                                        alerta_mensagem=alerta_mensagem,
-                                       alerta_mais=alerta_mais, url_return=url_for('users'))
+                                       alerta_mais=alerta_mais, 
+                                       url_return=url_for('users'))
         else:
             return redirect(url_for('users'))
     return render_template('pages/users/users.html')
@@ -1594,29 +1598,51 @@ def cadastrar_usuario():
 @app.route('/mov/carga/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_id(id_carga):
+    item_query = ''
+    result_int, columns_int = [], []
     if request.method == 'GET':
-
         cod_item = request.args.get('cod_item', '')
-        
-        item_query = f'AND iped.ITEM = {cod_item}' if cod_item else ''
+        print(cod_item)
+        if cod_item:
+            query = f'''
+                SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
+                        i.desc_item, h.lote_item,
+                        SUM( CASE 
+                            WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                            WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                            ELSE (quantidade * 0)
+                            END
+                        ) as saldo
+                FROM historico h
+                JOIN itens i ON h.desc_item = i.cod_item
+                WHERE i.cod_item = "{str(cod_item)}"
+                GROUP BY  h.rua_numero, h.rua_letra, h.desc_item, 
+                        h.lote_item
+                HAVING saldo != 0
+                ORDER BY h.lote_item DESC, h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
+            '''
+            dsn_name = 'SQLITE'
+            dsn = dsn_name
+            result_int, columns_int = db_query_connect(query, dsn)
+
+            item_query = f'AND iped.ITEM = "{cod_item}"'
+
 
         #? SEARCH DE ITENS POR CARGA
         query = f'''
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ,
-                   ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM,
-                   i.ITEM_DESCRICAO, ped.DT_EMISSAO
+            SELECT crg.CODIGO_GRUPOPED, iped.ITEM,
+                   i.ITEM_DESCRICAO,
+                   CAST(crg.QTDE AS INTEGER) AS QTDE_SOLICITADA
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-            JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
             JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
             JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i ON i.ITEM = iped.ITEM
-            WHERE crg.QTDE_FATUR = 0                -- apenas pendencias
+            WHERE crg.QTDE_FATUR != 0               -- apenas faturados
             -- AND iped.NRO_PEDIDO = ?              -- filtro por pedido
-            AND crg.CODIGO_GRUPOPED = {id_carga}    -- filtro por carga
-            {item_query}
-            -- AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
-            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
-            LIMIT 100;
+            AND crg.CODIGO_GRUPOPED = '{id_carga}'    -- filtro por carga
+            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 2 MONTHS) AND CURRENT DATE
+            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ;
         '''
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
@@ -1628,7 +1654,7 @@ def carga_id(id_carga):
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga, cod_item=cod_item)
+        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga, cod_item=cod_item, result_int=result_int, columns_int=columns_int)
     result = []
     return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
         
@@ -1644,22 +1670,21 @@ def cargas():                                                                   
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
             JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-            JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
-            WHERE crg.QTDE_FATUR = 0
-            -- AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS) AND CURRENT DATE
-            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
-            LIMIT 100;
+            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
+            WHERE crg.QTDE_FATUR != 0
+            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 2 MONTHS) AND CURRENT DATE
+            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ;
         '''
         """ SEARCH DE ITENS POR CARGA
             SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, iped.ITEM
             FROM DB2ADMIN.IGRUPOPE crg
             JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-            JOIN DB2ADMIN.ITEMPED iped ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
             WHERE crg.QTDE_FATUR = 0            -- apenas pendencias
             -- AND iped.NRO_PEDIDO = ?          -- filtro por pedido
             AND crg.CODIGO_GRUPOPED = ?         -- filtro por carga
             ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
-            LIMIT 100;
+            FETCH FIRST 100 ROWS ONLY;
         """
         
         dsn_name = 'HUGOPIET'
