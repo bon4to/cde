@@ -1630,20 +1630,28 @@ def carga_id(id_carga):
 
         #? SEARCH DE ITENS POR CARGA
         query = f'''
-            SELECT crg.CODIGO_GRUPOPED, iped.ITEM,
-                   i.ITEM_DESCRICAO,
-                   CAST(crg.QTDE AS INTEGER) AS QTDE_SOLICITADA
-            FROM DB2ADMIN.IGRUPOPE crg
-            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
-            JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i ON i.ITEM = iped.ITEM
-            WHERE crg.QTDE_FATUR != 0               -- apenas faturados
-            -- AND iped.NRO_PEDIDO = ?              -- filtro por pedido
-            AND crg.CODIGO_GRUPOPED = '{id_carga}'    -- filtro por carga
-            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 2 MONTHS) AND CURRENT DATE
-            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ;
+            SELECT  crg.CODIGO_GRUPOPED                   AS NRO_CARGA,
+                    crg.NRO_PEDIDO                        AS NRO_PEDIDO,
+                    (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
+                    CAST(iped.ITEM AS VARCHAR(255))       AS COD_ITEM,
+                    i.ITEM_DESCRICAO                      AS DESC_ITEM,
+                    CAST(iped.QTDE_SOLICITADA AS INTEGER) AS QTDE_SOLIC
+            FROM DB2ADMIN.ITEMPED iped
+
+            JOIN DB2ADMIN.IGRUPOPE crg
+            ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+            AND crg.SEQ = iped.SEQ
+
+            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+            ON i.ITEM = iped.ITEM
+
+            WHERE crg.CODIGO_GRUPOPED = '{id_carga}' 
+            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS)
+            AND CURRENT DATE
+
+            LIMIT 100;
         '''
+
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
         result, columns = db_query_connect(query, dsn)
@@ -1664,28 +1672,35 @@ def carga_id(id_carga):
 def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
     if request.method == 'POST':
         query = '''
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ,
-                   ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM,
-                   ped.DT_EMISSAO
-            FROM DB2ADMIN.IGRUPOPE crg
-            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-            JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
+            SELECT DISTINCT 
+                crg.CODIGO_GRUPOPED AS NRO_CARGA,
+                crg.NRO_PEDIDO      AS NRO_PEDIDO,
+                ped.CODIGO_CLIENTE  AS COD_CLIENTE,
+                cl.FANTASIA         AS FANT_CLIENTE,
+                iped.DT_EMISSAO     AS DT_EMISSAO,
+                iped.DT_ENTREGA     AS DT_ENTREGA
+
+            FROM DB2ADMIN.ITEMPED iped
+
+            JOIN DB2ADMIN.IGRUPOPE crg
+            ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+            AND crg.SEQ = iped.SEQ
+
+            JOIN DB2ADMIN.PEDIDO ped
+            ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+
+            JOIN DB2ADMIN.CLIENTE cl
+            ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+            ON i.ITEM = iped.ITEM
+
             WHERE crg.QTDE_FATUR != 0
-            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 2 MONTHS) AND CURRENT DATE
-            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ;
+            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS)
+            AND CURRENT DATE
+
+            ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
         '''
-        """ SEARCH DE ITENS POR CARGA
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ, ped.CODIGO_CLIENTE, iped.ITEM
-            FROM DB2ADMIN.IGRUPOPE crg
-            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
-            WHERE crg.QTDE_FATUR = 0            -- apenas pendencias
-            -- AND iped.NRO_PEDIDO = ?          -- filtro por pedido
-            AND crg.CODIGO_GRUPOPED = ?         -- filtro por carga
-            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ
-            FETCH FIRST 100 ROWS ONLY;
-        """
         
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
@@ -1705,7 +1720,7 @@ def cargas():                                                                   
 @app.route('/produtos', methods=['GET', 'POST'])
 @verify_auth('ITE005')
 def produtos():
-    itens = get_itens()                                                                             #TODO: BOTÃO PARA FAZER A ATUALIZAÇÃO DOS CADASTROS DE ITENS
+    itens = get_itens()
     if request.method == 'POST':
         query = '''
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
@@ -1721,6 +1736,7 @@ def produtos():
             )
             AND NOT GTIN_14 = '';
         '''
+
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
         result, columns = db_query_connect(query, dsn)
@@ -1950,8 +1966,8 @@ C:::::C                              D:::::D
     start_head  = \
         f'''
     * Started in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
-    * Versão CDE: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
-    * Versão Python: {sys.version}
+    * CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
+    * Python Version: {sys.version}
         '''
     error_foot  = \
         f'''
