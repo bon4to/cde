@@ -1665,21 +1665,7 @@ def carga_id(id_carga):
 
             LIMIT 100;
         '''
-        """ #! ANTIGA QUERY
-            SELECT crg.CODIGO_GRUPOPED, iped.ITEM,
-                   i.ITEM_DESCRICAO,
-                   CAST(crg.QTDE AS INTEGER) AS QTDE_SOLICITADA
-            FROM DB2ADMIN.IGRUPOPE crg
-            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
-            JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i ON i.ITEM = iped.ITEM
-            WHERE crg.QTDE_FATUR != 0               -- apenas faturados
-            -- AND iped.NRO_PEDIDO = ?              -- filtro por pedido
-            AND crg.CODIGO_GRUPOPED = '{id_carga}'  -- filtro por carga
-            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 2 MONTHS) AND CURRENT DATE
-            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ;
-        """
+
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
         result, columns = db_query_connect(query, dsn)
@@ -1732,18 +1718,6 @@ def cargas():                                                                   
 
             ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
         '''
-        """ #! ANTIGA QUERY
-            SELECT crg.CODIGO_GRUPOPED, crg.NRO_PEDIDO, crg.SEQ,
-                   ped.CODIGO_CLIENTE, cl.FANTASIA, iped.ITEM,
-                   ped.DT_EMISSAO
-            FROM DB2ADMIN.IGRUPOPE crg
-            JOIN DB2ADMIN.PEDIDO ped ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-            JOIN DB2ADMIN.CLIENTE cl ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-            JOIN DB2ADMIN.ITEMPED iped ON crg.RECNUM = iped.RECNUM
-            WHERE crg.QTDE_FATUR != 0
-            AND ped.DT_EMISSAO BETWEEN (CURRENT DATE - 2 MONTHS) AND CURRENT DATE
-            ORDER BY crg.CODIGO_GRUPOPED DESC, crg.NRO_PEDIDO, crg.SEQ;
-        """
         
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
@@ -2009,8 +1983,8 @@ C:::::C                              D:::::D
     start_head  = \
         f'''
     * Started in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
-    * Versão CDE: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
-    * Versão Python: {sys.version}
+    * CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
+    * Python Version: {sys.version}
         '''
     error_foot  = \
         f'''
