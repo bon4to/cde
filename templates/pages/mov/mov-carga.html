@@ -15,32 +15,32 @@
                             </span>
                             {% if result %}
                                 <table>
-                                    {% if result_local %}
+                                    {% if result_int %}
                                         <thead>
                                             <tr>
                                                 <th>Endereço</th>
                                                 <th>Produto (Código)</th>
                                                 <th>Lote (Código)</th>
-                                                <th>QTDE (Efetiva)</th>
+                                                <th>Saldo</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for row in result_local %}
+                                            {% for row in result_int %}
                                                 <tr class="selectable-row">
-                                                    <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
-                                                    <td>{{ row[columns_local.index('cod_item')] }}</td>
-                                                    <td>{{ row[columns_local.index('lote_item')] }}</td>
-                                                    <td>{{ row[columns_local.index('saldo')] }}</td>
+                                                    <td>{{ row[columns_int.index('rua_letra')] }}.{{ row[columns_int.index('rua_numero')] }}</td>
+                                                    <td>{{ row[columns_int.index('cod_item')] }}</td>
+                                                    <td>{{ row[columns_int.index('lote_item')] }}</td>
+                                                    <td>{{ row[columns_int.index('saldo')] }}</td>
                                                 </tr>
                                             {% endfor %}
-                                        </tbody>
-                                    {% else %}
-                                        <div class="msg-error">
-                                            <details><summary>Não há saldo disponível para este item!</summary>
-                                                Atualmente, não existe saldo suficiente para suprir esta carga.
-                                            </details>
-                                        </div>
-                                    {% endif %}
+                                        {% else %}
+                                            <div class="msg-error">
+                                                <details><summary>Não há saldo disponível para este item!</summary>
+                                                    Atualmente, não existe saldo suficiente para suprir esta carga.
+                                                </details>
+                                            </div>
+                                        {% endif %}
+                                    </tbody>
                                 </table>
                             {% endif %}
                             <br>
@@ -56,7 +56,6 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Pedido SEQ</th>
                                     <th>Item (Código)</th>
                                     <th>Item (Descrição)</th>
                                     <th>QTDE (Solicitada)</th>
@@ -64,11 +63,10 @@
                             </thead>
                             <tbody>
                                 {% for row in result %}
-                                    <tr class="selectable-row" onclick="sendCodItem('{{ row[columns.index('COD_ITEM')] }}', '{{ row[columns.index('NRO_CARGA')] }}')">
-                                        <td>{{ row[columns.index('NROPED_SEQ')] }}</td>
-                                        <td>{{ row[columns.index('COD_ITEM')] }}</td>
-                                        <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
-                                        <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
+                                    <tr class="selectable-row" onclick="sendCodItem('{{ row[columns.index('ITEM')] }}', '{{ row[columns.index('CODIGO_GRUPOPED')] }}')">
+                                        <td>{{ row[columns.index('ITEM')] }}</td>
+                                        <td style="text-wrap: balance;">{{ row[columns.index('ITEM_DESCRICAO')] }}</td>
+                                        <td>{{ row[columns.index('QTDE_SOLICITADA')] }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -76,6 +74,7 @@
                     </div>
                 </div>
             {% endif %}
+
             <form id="cod_item_form" method="GET" action="">
                 <input type="hidden" id="cod_item_input" name="cod_item">
                 <input type="hidden" id="carga_id_input" name="carga_id">
@@ -127,7 +126,7 @@
                         <input class="subm" type="submit" value="Carregar Lista de Cargas..." id="submitform">
                     </form>
                 {% endif %}
-                    <div style="max-height: 440px; overflow-y: auto; width: 100%;">
+                    <div style="max-height: 600px; overflow-y: auto;">
                         {% if result %}
                             <table>
                                 <thead>
@@ -136,19 +135,15 @@
                                         <th>Pedido (Código)</th>
                                         <th>Cliente (Código)</th>
                                         <th>Cliente (Descrição)</th>
-                                        <th>Emissão (Data)</th>
-                                        <th>Entrega (Data)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for row in result %}
-                                        <tr class="selectable-row js_boot" data-id="{{ row[columns.index('NRO_CARGA')] }}">
-                                            <td>{{ row[columns.index('NRO_CARGA')] }}</td>
-                                            <td>{{ row[columns.index('NRO_PEDIDO')] }}</td>
-                                            <td>{{ row[columns.index('COD_CLIENTE')] }}</td>
-                                            <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
-                                            <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
-                                            <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
+                                        <tr class="selectable-row js_boot" data-id="{{ row[columns.index('CODIGO_GRUPOPED')] }}">
+                                            <td>{{ row[columns.index('CODIGO_GRUPOPED')] }}</td>
+                                            <td>{{ row[columns.index('NRO_PEDIDO')] }}.{{ row[columns.index('SEQ')] }}</td>
+                                            <td>{{ row[columns.index('CODIGO_CLIENTE')] }}</td>
+                                            <td style="text-wrap: balance;">{{ row[columns.index('FANTASIA')] }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -159,7 +154,7 @@
                 {% endif %}
             {% endif %}
             </div>
-            
+
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     var rows = document.querySelectorAll('.js_boot');
