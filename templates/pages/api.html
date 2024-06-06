@@ -13,15 +13,12 @@
     <!-- TABELA -->
     <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
     
-        <div draggable="false" class="form-login" style="padding: 20px; position: static; margin-bottom: 40px">
-            <div class="two-split" style="grid-gap: 30px">
-                <div id="tables-cont">
-                    <img class="side-banner" style="width: 450px;height: auto;border-radius: 20px;margin-left: unset" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
-                </div>
-                <div class="log" style="width: 100%">
+        <div draggable="false" class="form-login" style="padding: 20px; position: static; margin-bottom: 40px;">
+            <div class="two-split" style="grid-gap: 30px; width: 900px;">
+                <div class="log" style="width: 900px">
                     <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Console SQL</h1>
                     <form action="/api" method="post" onsubmit="showLoading()" id="field">
-                        <div>
+                        <div style="width: 800px">
                             <label for="sel_schema"></label>
                             <select id="sel_schema" name="sel_schema" class="address" required>
                                 {% if dsn %}
@@ -32,7 +29,7 @@
                             </select>
                             <div>
                                 <label for="sql_query"></label>
-                                <textarea class="address-observ" style="height: 180px" id="sql_query" name="sql_query" placeholder="SQL Query..." required>{% if query %}{{ query }}{% else %}SELECT * FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM;{% endif %}</textarea>
+                                <textarea class="address-observ" style="height: 180px; overflow-wrap: nowrap; width: 800px;" id="sql_query" name="sql_query" placeholder="SQL Query..." required>{% if query %}{{ query }}{% else %}SELECT * FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM;{% endif %}</textarea>
                             </div>
                             <p class="alert" id="custom-alert">{% if alerta_mensagem %}{{ alerta_mensagem }}{% else %}{% endif %}</p>
                             <input class="subm" type="submit" value="Consultar" id="submitform">
@@ -46,27 +43,38 @@
             <h1>API Results</h1>
             <div style="max-height: 600px; overflow: auto;">
             {% if result %}
-                <table>
-                    <thead>
-                        <tr>
-                            {% for column in columns %}
-                                <th>{{ column }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in result %}
+                {% if columns %}
+                    <table>
+                        <thead>
                             <tr>
-                                {% for value in row %}
-                                    <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
+                                {% for column in columns %}
+                                    <th>{{ column }}</th>
                                 {% endfor %}
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for row in result %}
+                                <tr>
+                                    {% for value in row %}
+                                        <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    {% for row in result %}
+                        <tr>
+                            {% for value in row %}
+                                <div class="msg-error" {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</div>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                {% endif %}
             {% else %}
-                <div class="msg-error">Nenhum resultado foi encontrado.</div>
+                <div class="msg-info">Nenhum resultado foi encontrado.</div>
             {% endif %}
+            <br>
             </div>
         </div>
     </div>
