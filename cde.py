@@ -1708,20 +1708,19 @@ def produtos():
     itens = get_itens()                                                                             #TODO: BOTÃO PARA FAZER A ATUALIZAÇÃO DOS CADASTROS DE ITENS
     if request.method == 'POST':
         query = '''
-            SELECT ext.ITEM, ext.ITEM_DESCRICAO, ext.GTIN_14
-            FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM ext
-            WHERE (UNIDADE_DESCRICAO = 'CX' OR UNIDADE_DESCRICAO = 'UN' OR UNIDADE_DESCRICAO = 'FD')
-            AND (GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR GRUPO_DESCRICAO = 'REVENDA')
+            SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
+            FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
+            WHERE (
+                   UNIDADE_DESCRICAO = 'CX' 
+                OR UNIDADE_DESCRICAO = 'UN' 
+                OR UNIDADE_DESCRICAO = 'FD'
+            )
+            AND (
+                   GRUPO_DESCRICAO = 'PRODUTO ACABADO' 
+                OR GRUPO_DESCRICAO = 'REVENDA'
+            )
             AND NOT GTIN_14 = '';
         '''
-        """ #! ANTIGA QUERY
-            SELECT ext.ITEM, ext.ITEM_DESCRICAO, ext.GTIN_14
-            FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM ext
-            WHERE UNIDADE_DESCRICAO = 'CX'
-            AND GRUPO_DESCRICAO = 'PRODUTO ACABADO'
-            OR GRUPO_DESCRICAO = 'REVENDA'
-            AND NOT GTIN_14 = '';
-        """
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
         result, columns = db_query_connect(query, dsn)
