@@ -637,10 +637,9 @@ button.close {
     cursor: pointer;
     z-index: 999;
     transition: ease all 0.5s;
-
 }
 
-button.pin {
+button.bit-button {
     height: 26px;
     width: 26px;
     all: unset;
