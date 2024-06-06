@@ -1763,7 +1763,7 @@ def cargas():                                                                   
 @app.route('/produtos', methods=['GET', 'POST'])
 @verify_auth('ITE005')
 def produtos():
-    itens = get_itens()                                                                             #TODO: BOTÃO PARA FAZER A ATUALIZAÇÃO DOS CADASTROS DE ITENS
+    itens = get_itens()
     if request.method == 'POST':
         query = '''
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
@@ -1779,6 +1779,7 @@ def produtos():
             )
             AND NOT GTIN_14 = '';
         '''
+
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
         result, columns = db_query_connect(query, dsn)
