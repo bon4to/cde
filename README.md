@@ -5,6 +5,7 @@
 <body>
     <div class="container">
         <h1>CDE | Collaborative Developed Enviroment</h1>
+        <img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-banner">
 <h2>Documentação do Projeto</h2>
 <p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa de desenvolvimento implementada por HUGO PIETRO e TRANS LÉGUA. Descreve-se a finalidade, funcionalidades principais, requisitos de sistema e uso básico do sistema, lançado em janeiro de 2023 e em constante crescimento técnico.</p>
 
