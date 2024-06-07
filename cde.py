@@ -95,109 +95,108 @@ def create_tables():                                                            
         # TABELA DE PROGRAMAÇÃO DO ENVASE
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS envase (
-                id_envase           INTEGER PRIMARY KEY AUTOINCREMENT,
-                linha               INTEGER(3),
-                cod_cliente         INTEGER(10),
-                cod_item            VARCHAR(6),
-                quantidade          INTEGER(20),
-                data_entr_antec     DATETIME,
-                data_envase         DATETIME,
-                observacao          VARCHAR(100),
-                concluido           BOOLEAN
+                id_envase        INTEGER PRIMARY KEY AUTOINCREMENT,
+                linha            INTEGER(3),
+                cod_cliente      INTEGER(10),
+                cod_item         VARCHAR(6),
+                quantidade       INTEGER(20),
+                data_entr_antec  DATETIME,
+                data_envase      DATETIME,
+                observacao       VARCHAR(100),
+                concluido        BOOLEAN
             );
         ''')
 
         # TABELA DE PROGRAMAÇÃO DA PROCESSAMENTO
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS producao (
-                id_producao         INTEGER PRIMARY KEY AUTOINCREMENT,
-                linha               INTEGER(3),
-                liq_tipo            VARCHAR(10),
-                liq_linha           VARCHAR(30),
-                liq_cor             VARCHAR(30),
-                embalagem           VARCHAR(10),
-                litros              INTEGER(20),
-                data_entr_antec     DATETIME,
-                data_producao       DATETIME,
-                observacao          VARCHAR(100),
-                concluido           BOOLEAN
+                id_producao      INTEGER PRIMARY KEY AUTOINCREMENT,
+                linha            INTEGER(3),
+                liq_tipo         VARCHAR(10),
+                liq_linha        VARCHAR(30),
+                liq_cor          VARCHAR(30),
+                embalagem        VARCHAR(10),
+                litros           INTEGER(20),
+                data_entr_antec  DATETIME,
+                data_producao    DATETIME,
+                observacao       VARCHAR(100),
+                concluido        BOOLEAN
             );
         ''')
 
         # TABELA HISTÓRICO
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS historico (
-                id_mov              INTEGER PRIMARY KEY AUTOINCREMENT,
-                rua_numero          INTEGER(6),
-                rua_letra           VARCHAR(10),
-                desc_item           VARCHAR(6),
-                lote_item           VARCHAR(8),
-                quantidade          INTEGER,
-                operacao            VARCHAR(15),
-                user_name           VARCHAR(30),
-                id_carga            INTEGER(6),
-                time_mov            DATETIME
+                id_mov           INTEGER PRIMARY KEY AUTOINCREMENT,
+                rua_numero       INTEGER(6),
+                rua_letra        VARCHAR(10),
+                desc_item        VARCHAR(6),
+                lote_item        VARCHAR(8),
+                quantidade       INTEGER,
+                operacao         VARCHAR(15),
+                user_name        VARCHAR(30),
+                id_carga         INTEGER(6),
+                time_mov         DATETIME
             );
         ''')
         
         # TABELA DE CLIENTES
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS clientes (
-                cod_cliente         INTEGER(10) PRIMARY KEY,
-                razao_cliente       VARCHAR(100),
-                fantasia_cliente    VARCHAR(100),
-                cidade_cliente      VARCHAR(100),
-                estado_cliente      VARCHAR(2)
+                cod_cliente      INTEGER(10) PRIMARY KEY,
+                razao_cliente    VARCHAR(100),
+                fantasia_cliente VARCHAR(100),
+                cidade_cliente   VARCHAR(100),
+                estado_cliente   VARCHAR(2)
             );
         ''')
 
         # TABELA DE USUÁRIOS
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                id_user             INTEGER PRIMARY KEY AUTOINCREMENT,
-                login_user          VARCHAR(30) UNIQUE,
-                password_user       TEXT,
-                nome_user           VARCHAR(100),
-                sobrenome_user      VARCHAR(100),
-                privilege_user      INTEGER(2),
-                data_cadastro       DATETIME,
-                ult_acesso          DATETIME
+                id_user          INTEGER PRIMARY KEY AUTOINCREMENT,
+                login_user       VARCHAR(30) UNIQUE,
+                password_user    TEXT,
+                nome_user        VARCHAR(100),
+                sobrenome_user   VARCHAR(100),
+                privilege_user   INTEGER(2),
+                data_cadastro    DATETIME,
+                ult_acesso       DATETIME
             );
         ''')
 
         # TABELA DE PERMISSÕES DE USUÁRIO
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_permissions (
-                id_user             INTEGER,
-                id_perm             VARCHAR(6)
+                id_user          INTEGER,
+                id_perm          VARCHAR(6)
             );
         ''')                                                                                                                            #TODO! mudar id_perm: integer para varchar(6)
 
         # TABELA DE ITENS
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS itens (
-                cod_item            INTEGER(6) PRIMARY KEY,
-                desc_item           VARCHAR(100),
-                dun14               INTEGER(14)
+                cod_item         INTEGER(6) PRIMARY KEY,
+                desc_item        VARCHAR(100),
+                dun14            INTEGER(14)
             );
         ''')
 
         # TABELA AUXILIAR DE PRIVILÉGIOS
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS aux_privilege (
-                id_priv             INTEGER(2) PRIMARY KEY,
-                desc_priv           VARCHAR(30)
+                id_priv          INTEGER(2) PRIMARY KEY,
+                desc_priv        VARCHAR(30)
             );
         ''')
 
         # TABELA AUXILIAR DE PERMISSÕES
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS aux_permissions (
-                id_perm             VARCHAR(6) PRIMARY KEY,
-                desc_perm           VARCHAR(30)
+                id_perm          VARCHAR(6) PRIMARY KEY,
+                desc_perm        VARCHAR(30)
             );
         ''')                                                                                                                            #TODO! mudar id_perm: integer para varchar(6)
-
 
         connection.commit()
 
@@ -296,8 +295,8 @@ def get_historico(page=1, per_page=10):                                         
 
         estoque = [{
             'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3], 'lote'      : row[4],          'quantidade' : row[5], 
-            'operacao'  : row[6], 'user_name' : row[7],          'timestamp'  : row[8]
+            'desc_item' : row[3],          'lote'      : row[4], 'quantidade' : row[5], 
+            'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque, row_count
 
@@ -317,8 +316,8 @@ def get_all_historico():
         
         estoque = [{
             'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3], 'lote'      : row[4],          'quantidade' : row[5], 
-            'operacao'  : row[6], 'user_name' : row[7],          'timestamp'  : row[8]
+            'desc_item' : row[3],          'lote'      : row[4], 'quantidade' : row[5], 
+            'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque
 
@@ -330,7 +329,10 @@ def get_users():                                                                
             SELECT u.nome_user, u.sobrenome_user, ap.desc_priv,
                    u.ult_acesso, u.id_user
             FROM users u
-            JOIN aux_privilege ap ON u.privilege_user = ap.id_priv
+                       
+            JOIN aux_privilege ap 
+            ON u.privilege_user = ap.id_priv
+                       
             ORDER BY u.ult_acesso DESC;
         ''')
 
@@ -364,16 +366,17 @@ def get_end_lote():
         cursor.execute('''
             SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
                     i.desc_item, h.lote_item,
-                    SUM( CASE 
-                         WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                         WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                         ELSE (quantidade * 0)
-                         END
+                    SUM( 
+                       CASE 
+                       WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                       WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                       ELSE (quantidade * 0)
+                       END
                     ) as saldo
             FROM historico h
             JOIN itens i ON h.desc_item = i.cod_item
-            GROUP BY  h.rua_numero, h.rua_letra, h.desc_item, 
-                      h.lote_item
+            GROUP BY h.rua_numero, h.rua_letra, h.desc_item, 
+                     h.lote_item
             HAVING saldo != 0
             ORDER BY h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
         ''')
@@ -401,7 +404,7 @@ def get_end_lote_fat():
             JOIN itens i ON h.desc_item = i.cod_item
             GROUP BY  h.id_carga,  h.rua_numero, h.rua_letra,
                       h.desc_item, h.lote_item
-            HAVING saldo != 0
+            HAVING saldo   != 0
             AND h.id_carga != 0
             ORDER BY h.desc_item;
         ''')
@@ -426,10 +429,7 @@ def get_ult_acesso():
         ''', (id_user,))
         row = cursor.fetchone()
 
-        if row:
-            ult_acesso = row[1]
-        else:
-            ult_acesso = None
+        ult_acesso = row[1] if row else None
 
         return ult_acesso
 
@@ -459,8 +459,8 @@ def get_saldo_view():
         ''')
 
         saldo_visualization = [{
-            'desc_item': row[0], 'cod_item': row[1], 'saldo': row[2], 
-            'ult_mov'  : row[3]
+            'desc_item': row[0], 'cod_item': row[1], 
+            'saldo'    : row[2], 'ult_mov' : row[3]
         } for row in cursor.fetchall()]
 
     return saldo_visualization
@@ -526,9 +526,13 @@ def verify_auth(id_page):
                         alerta_mensagem = 'Você não tem permissão para acessar esta página.\n'
                         alerta_mais     = ('''SOLUÇÕES:
                                        - Solicite ao seu supervisor um novo nível de acesso.''')
-                        return render_template('components/menus/alert.html', alerta_tipo=alerta_tipo,
-                                               alerta_mensagem=alerta_mensagem, alerta_mais=alerta_mais,
-                                               url_return=url_for('index'))
+                        return render_template(
+                            'components/menus/alert.html', 
+                            alerta_tipo=alerta_tipo,
+                            alerta_mensagem=alerta_mensagem, 
+                            alerta_mais=alerta_mais,
+                            url_return=url_for('index')
+                        )
                 else:
                     print('[ACESSO] PERMITIDO')
                     return f(*args, **kwargs)
@@ -594,9 +598,13 @@ def export_csv(data, filename):                                                 
         alerta_mais     = ('''POSSÍVEIS SOLUÇÕES:
                        - Verifique se a tabela possui mais de uma linha.
                        - Contate o suporte. ''')
-        return render_template('components/menus/alert.html', alerta_tipo=alerta_tipo, 
-                               alerta_mensagem=alerta_mensagem, alerta_mais=alerta_mais, 
-                               url_return=url_for('index'))
+        return render_template(
+            'components/menus/alert.html', 
+            alerta_tipo=alerta_tipo, 
+            alerta_mensagem=alerta_mensagem, 
+            alerta_mais=alerta_mais, 
+            url_return=url_for('index')
+        )
 
 
 def db_query_connect(query, dsn):                                                                                                       #* CONEXÃO E QUERY NO BANCO DE DADOS
@@ -674,7 +682,7 @@ def get_saldo_item(numero, letra, cod_item, lote):                              
 
 def generate_etiqueta(qr_text, desc_item, cod_item, lote):                                                                              #* GERA ETIQUETA COM QRCODE
     width, height = 400, 400
-    img = Image.new('RGB', (width, height), color='white')
+    img  = Image.new('RGB', (width, height), color='white')
     lote = f'LOTE: {lote}'
     desc_item = f'{cod_item} - {desc_item}'
 
@@ -685,13 +693,13 @@ def generate_etiqueta(qr_text, desc_item, cod_item, lote):                      
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype('arialbd.ttf', 30)
 
-    lote_bbox = draw.textbbox((0, 0), lote, font=font)
+    lote_bbox  = draw.textbbox((0, 0), lote, font=font)
     lote_width = lote_bbox[2] - lote_bbox[0]
     draw.text(((width - lote_width) // 2, height // 1.5), lote, fill='black', font=font)
 
-    text = desc_item
-    font = ImageFont.truetype('arialbd.ttf', 22)
-    lines = textwrap.wrap(text, width=30)
+    text   = desc_item
+    font   = ImageFont.truetype('arialbd.ttf', 22)
+    lines  = textwrap.wrap(text, width=30)
     y_text = height - height // 4.6
     for line in lines:
         text_width, text_height = draw.textbbox((0, 0), line, font=font)[2:]
@@ -747,19 +755,28 @@ def debug():
 @app.route('/home')
 @verify_auth('CDE001')
 def home():
-    return render_template('pages/index/index.html', frase=get_frase())
+    return render_template(
+        'pages/index/index.html', 
+        frase=get_frase()
+    )
 
 
 @app.route('/home/tl')
 @verify_auth('CDE001')
 def home_tl():
-    return render_template('pages/index/tl-index.html', frase=get_frase())
+    return render_template(
+        'pages/index/tl-index.html', 
+        frase=get_frase()
+    )
 
 
 @app.route('/home/hp')
 @verify_auth('CDE001')
 def home_hp():
-    return render_template('pages/index/hp-index.html', frase=get_frase())
+    return render_template(
+        'pages/index/hp-index.html', 
+        frase=get_frase()
+    )
 
 
 @app.route('/in-dev')
@@ -771,19 +788,29 @@ def in_dev():
 @app.route('/users')
 @verify_auth('CDE016')
 def users():
-    return render_template('pages/users/users.html', users=get_users())
+    return render_template(
+        'pages/users/users.html', 
+        users=get_users()
+    )
 
 
 @app.route('/api', methods=['GET', 'POST'])                                                                                             #* ROTA DE DATABASE MANAGER
 @verify_auth('DEV000')
 def api():
     if request.method == 'POST':
-        query   = request.form['sql_query']
-        dsn     = request.form['sel_schema']
+        query = request.form['sql_query']
+        dsn   = request.form['sel_schema']
         
         result, columns = db_query_connect(query, dsn)
 
-        return render_template('pages/api.html', result=result, columns=columns, query=query, dsn=dsn)
+        return render_template(
+            'pages/api.html', 
+            result=result, 
+            columns=columns, 
+            query=query, 
+            dsn=dsn
+        )
+    
     return render_template('pages/api.html')
 
 
@@ -836,9 +863,13 @@ def login():                                                                    
                                 alerta_mais     = '/users/reset-key'
                                 url_return      = 'Digite sua nova senha...'
 
-                                return render_template('components/menus/alert-input.html', alerta_tipo=alerta_tipo,
-                                                       alerta_mensagem=alerta_mensagem,
-                                                       alerta_mais=alerta_mais, url_return=url_return)
+                                return render_template(
+                                    'components/menus/alert-input.html', 
+                                    alerta_tipo=alerta_tipo,
+                                    alerta_mensagem=alerta_mensagem,
+                                    alerta_mais=alerta_mais, 
+                                    url_return=url_return
+                                )
                             else:  # if ult_acesso:
                                 with connection:
                                     cursor = connection.cursor()
@@ -851,11 +882,17 @@ def login():                                                                    
                                 return redirect(url_for('index'))
                     else:   # if not check_key(password_user, password):
                         alerta_mensagem = 'A senha está incorreta. Tente novamente.'
-                        return render_template('pages/login.html', alerta_mensagem=alerta_mensagem)
+                        return render_template(
+                            'pages/login.html', 
+                            alerta_mensagem=alerta_mensagem
+                        )
 
                 else:  # if row is None:
                     alerta_mensagem = 'O usuário não foi encontrado. Tente novamente.'
-                    return render_template('pages/login.html', alerta_mensagem=alerta_mensagem)
+                    return render_template(
+                        'pages/login.html', 
+                        alerta_mensagem=alerta_mensagem
+                    )
         else:   # if 'logged_in' in session:
             return redirect(url_for('index'))
     else:  # if not request.method == 'POST':
@@ -872,9 +909,9 @@ def logout():
 @app.route('/users/reset-key', methods=['POST'])
 @verify_auth('CDE001')
 def reset_key():
-    password        = request.form['input']
-    password_user   = hash_key(password)
-    id_user         = session.get('id_user')
+    password      = request.form['input']
+    password_user = hash_key(password)
+    id_user       = session.get('id_user')
 
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -884,7 +921,6 @@ def reset_key():
             WHERE id_user     = ?;
         ''',
         (password_user, id_user))
-
         connection.commit()
 
     with sqlite3.connect(db_path) as connection:
@@ -896,7 +932,6 @@ def reset_key():
             WHERE id_user  = ?;
         ''',
         (acesso, id_user))
-
         connection.commit()
 
     return redirect(url_for('index'))
@@ -910,18 +945,25 @@ def searching():
     
     if len(codigo) == 4 or len(codigo) == 0:
         desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO', '', '', ''
-        return jsonify({'codITEM': cod_item, 'descITEM': desc_item, 'codLOTE': cod_lote, 'codLINHA': cod_linha})
+        return jsonify(
+            {
+            'codITEM' : cod_item, 
+            'descITEM': desc_item, 
+            'codLOTE' : cod_lote, 
+            'codLINHA': cod_linha
+            }
+        )
 
     else:                                                                       #? VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
         if len(codigo) == 6:
             codigo = codigo + ';'
 
-        partes = codigo.split(';')
-        cod_item = []
+        partes       = codigo.split(';')
+        cod_item     = []
         cod_item_qnt = None
 
         if len(partes) == 1:
-            cod_barra = partes[0]
+            cod_barra  = partes[0]
 
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
@@ -963,7 +1005,14 @@ def searching():
                 else:
                     desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
 
-                return jsonify({'codITEM': cod_item, 'descITEM': desc_item, 'codLOTE': cod_lote, 'codITEMqnt': cod_item_qnt})
+                return jsonify(
+                    {
+                    'codITEM': cod_item,
+                    'descITEM': desc_item, 
+                    'codLOTE': cod_lote, 
+                    'codITEMqnt': cod_item_qnt
+                    }
+                )
 
         elif len(partes) == 2:
             codigos_itens = partes[0]
@@ -991,11 +1040,23 @@ def searching():
                 else:
                     desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
 
-                return jsonify({'codITEM': cod_item, 'codLOTE': cod_lote, 'descITEM': desc_item})
+                return jsonify(
+                    {
+                    'codITEM' : cod_item, 
+                    'codLOTE' : cod_lote, 
+                    'descITEM': desc_item
+                    }
+                )
 
         else:
             desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
-            return jsonify({'codITEM': cod_item, 'codLOTE': cod_lote, 'descITEM': desc_item})
+            return jsonify(
+                {
+                'codITEM' : cod_item, 
+                'codLOTE' : cod_lote, 
+                'descITEM': desc_item
+                }
+            )
 
 
 @app.route('/mov')                                                                                                                      # ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
@@ -1004,7 +1065,10 @@ def mov():
     create_tables()
     end_lote = get_end_lote()
 
-    return render_template('pages/mov/mov.html', saldo_atual=end_lote)
+    return render_template(
+        'pages/mov/mov.html', 
+        saldo_atual=end_lote
+    )
 
 
 @app.route('/mov/historico')
@@ -1015,7 +1079,13 @@ def historico():
     per_page = 20
     estoque, row_count = get_historico(page, per_page)
     total_pages = ceil(row_count / per_page)
-    return render_template('pages/mov/mov-historico.html', estoque=estoque, page=page, total_pages=total_pages, max=max, min=min, row_count=row_count)
+
+    return render_template(
+        'pages/mov/mov-historico.html', 
+        estoque=estoque, page=page, 
+        total_pages=total_pages, max=max, min=min, 
+        row_count=row_count
+    )
 
 
 @app.route('/mov/historico/search', methods=['GET', 'POST'])
@@ -1023,7 +1093,7 @@ def historico():
 def historico_search():
     create_tables()
     if request.method == 'POST':
-        search_term = request.form['search_term']
+        search_term  = request.form['search_term']
         search_index = request.form['search_index']
         
         option_texts = {
@@ -1041,9 +1111,24 @@ def historico_search():
 
         estoque = get_all_historico()
         filtered_estoque = [item for item in estoque if search_term.lower() in item[search_index].lower()]
-        return render_template('pages/mov/mov-historico.html', estoque=filtered_estoque, search_term=search_term, page = 0, max=max, min=min, total_pages=0, search_row_text=search_row_text)
-    return render_template('pages/mov/mov-historico.html', estoque=[], search_term="", page = 0, max=max, min=min, total_pages=0, search_row_text=search_row_text)
 
+        return render_template(
+            'pages/mov/mov-historico.html', 
+            estoque=filtered_estoque, 
+            search_term=search_term, 
+            page = 0, max=max, min=min, 
+            total_pages=0, 
+            search_row_text=search_row_text
+        )
+    
+    return render_template(
+        'pages/mov/mov-historico.html', 
+        estoque=[], 
+        search_term="", 
+        page = 0, max=max, min=min, 
+        total_pages=0, 
+        search_row_text=search_row_text
+    )
 
 
 @app.route('/mov/faturado')
@@ -1052,7 +1137,10 @@ def faturado():
     create_tables()
     end_lote = get_end_lote_fat()
 
-    return render_template('pages/mov/mov-faturado.html', saldo_atual=end_lote)
+    return render_template(
+        'pages/mov/mov-faturado.html', 
+        saldo_atual=end_lote
+    )
 
 
 @app.route('/mov/moving', methods=['POST'])                                                                                             # ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
@@ -1072,6 +1160,7 @@ def moving():
 
     if is_end_completo:                                                                                                                 # MOVIMENTA ENDEREÇO COMPLETO
         items = select_rua(letra, numero)
+        
         print(f'ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
     else:
@@ -1079,6 +1168,7 @@ def moving():
         lote_item  = str(request.form['lote'])
         quantidade = int(request.form['quantidade'])
         items      = [(cod_item, lote_item, quantidade)]                                                                                # MOVIMENTA ITEM ÚNICO
+        
         print(f'ITEM ÚNICO ({letra}.{numero}): {items}')
 
         saldo_item  = int(get_saldo_item(numero, letra, cod_item, lote_item))
@@ -1090,20 +1180,34 @@ def moving():
                             - Verifique a quantidade de movimentação.
                             - Verifique a operação selecionada. ''')
             
-            return render_template('components/menus/alert.html', alerta_tipo=alerta_tipo,
-                                    alerta_mensagem=alerta_mensagem,
-                                    alerta_mais=alerta_mais, url_return=url_for('mov'))
+            return render_template(
+                'components/menus/alert.html', 
+                alerta_tipo=alerta_tipo,
+                alerta_mensagem=alerta_mensagem,
+                alerta_mais=alerta_mais, 
+                url_return=url_for('mov')
+            )
 
     if operacao == 'T':                                                                                                                 #* TRANSFERENCIA
-        destino_letter  = str(request.form['destino_end_letra'])
-        destino_number  = int(request.form['destino_end_number'])
+        destino_letter = str(request.form['destino_end_letra'])
+        destino_number = int(request.form['destino_end_number'])
 
         if items:
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-                    insert_historico(numero, letra, cod_item, lote_item, quantidade, 'TS', timestamp_out, id_carga)                     #? SAÍDA DO ENDEREÇO DE ORIGEM
-                    insert_historico(destino_number, destino_letter, cod_item, lote_item, quantidade, 'TE', timestamp_in, id_carga)     #? ENTRADA NO ENDEREÇO DE DESTINO
+                    #? SAÍDA DO ENDEREÇO DE ORIGEM
+                    insert_historico(
+                        numero, letra, cod_item, 
+                        lote_item, quantidade, 'TS', 
+                        timestamp_out, id_carga
+                    )
+                    #? ENTRADA NO ENDEREÇO DE DESTINO
+                    insert_historico(
+                        destino_number, destino_letter, cod_item, 
+                        lote_item, quantidade, 'TE', 
+                        timestamp_in, id_carga
+                    )
                     print(f'{letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
         
     elif operacao == 'F':                                                                                                               #* FATURAMENTO
@@ -1113,11 +1217,19 @@ def moving():
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-                    insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga)
+                    insert_historico(
+                        numero, letra, cod_item, 
+                        lote_item, quantidade, operacao, 
+                        timestamp_out, id_carga
+                    )
                     print(f'{letra}.{numero}: ', cod_item, lote_item, quantidade)
 
     elif operacao == 'E' or operacao == 'S':                                                                                            #* OPERAÇÃO PADRÃO (entrada 'E' ou saída 'S')
-        insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga)
+        insert_historico(
+            numero, letra, cod_item, 
+            lote_item, quantidade, operacao, 
+            timestamp_out, id_carga
+        )
         print(f'{letra}.{numero}: ', cod_item, lote_item, quantidade)
     
     else:                                                                                                                               #* OPERAÇÃO INVÁLIDA
@@ -1149,7 +1261,10 @@ def envase():
     create_tables()
     envase_list = get_envase()
 
-    return render_template('pages/envase/envase.html', envase=envase_list)
+    return render_template(
+        'pages/envase/envase.html', 
+        envase=envase_list
+    )
 
 
 @app.route('/envase/calendar')
@@ -1157,7 +1272,10 @@ def envase():
 def calendar_envase():
     create_tables()
     envase_list = get_envase()
-    return render_template('pages/envase/envase-calendar.html', envase=envase_list)
+    return render_template(
+        'pages/envase/envase-calendar.html', 
+        envase=envase_list
+    )
 
 
 @app.route('/envase/delete/<id_envase>')
@@ -1235,10 +1353,10 @@ def envase_edit():                                                              
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                SELECT p.linha, c.fantasia_cliente, i.cod_item,
-                            i.desc_item, p.quantidade, p.data_entr_antec,
-                            p.data_envase, p.observacao, p.id_envase,
-                            p.concluido
+                SELECT  p.linha, c.fantasia_cliente, i.cod_item,
+                        i.desc_item, p.quantidade, p.data_entr_antec,
+                        p.data_envase, p.observacao, p.id_envase,
+                        p.concluido
                 FROM envase p
                 JOIN itens i ON p.cod_item = i.cod_item
                 JOIN clientes c ON p.cod_cliente = c.cod_cliente
@@ -1253,7 +1371,10 @@ def envase_edit():                                                              
                 'concluido'  : row[9]
             } for row in cursor.fetchall()]
 
-        return render_template('pages/envase/envase-edit.html', env_edit=env_edit)
+        return render_template(
+            'pages/envase/envase-edit.html', 
+            env_edit=env_edit
+        )
 
 
 @app.route('/envase/insert', methods=['POST'])
@@ -1309,7 +1430,11 @@ def producao():
     user_permissions = [item['id_perm'] for item in user_permissions]
     producao_list = get_producao()
     
-    return render_template('pages/processamento/processamento.html', producao=producao_list, user_permissions=user_permissions)
+    return render_template(
+        'pages/processamento/processamento.html', 
+        producao=producao_list, 
+        user_permissions=user_permissions
+    )
 
 
 @app.route('/processamento/calendar')
@@ -1318,7 +1443,10 @@ def calendar_producao():
     create_tables()
     producao_list = get_producao()
 
-    return render_template('pages/processamento/processamento-calendar.html', producao=producao_list)
+    return render_template(
+        'pages/processamento/processamento-calendar.html', 
+        producao=producao_list
+    )
 
 
 @app.route('/processamento/delete/<id_producao>')
@@ -1341,10 +1469,13 @@ def delete_producao(id_producao):
 def conclude_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        cursor.execute('''UPDATE producao
-                          SET concluido = true
-                          WHERE id_producao = ?;
-                          ''', (id_producao,))
+        cursor.execute('''
+            UPDATE producao
+            SET concluido = true
+            WHERE id_producao = ?;
+        ''', 
+        (id_producao,))
+        
     return redirect(url_for('producao'))
 
 
@@ -1381,11 +1512,11 @@ def producao_edit():
             cursor = connection.cursor()
             cursor.execute('''
                 UPDATE producao
-                SET litros   = ?,
+                SET litros          = ?,
                     data_entr_antec = ?,
-                    data_producao = ?,
-                    observacao = ?
-                WHERE id_producao = ?;
+                    data_producao   = ?,
+                    observacao      = ?
+                WHERE id_producao   = ?;
             ''',
             (litros, data_entr_antec, data_producao, observacao, req_id_producao))
             
@@ -1470,9 +1601,13 @@ def users_edit():
     else:
         user_permissions = get_user_permissions(req_id_user)
         permissions = get_permissions()
-        return render_template('pages/users/users-edit.html', user_permissions=user_permissions,
-                               permissions=permissions, req_id_user=req_id_user,
-                               user_data=get_userdata(req_id_user))
+        return render_template(
+            'pages/users/users-edit.html', 
+            user_permissions=user_permissions,
+            permissions=permissions, 
+            req_id_user=req_id_user,
+            user_data=get_userdata(req_id_user)
+        )
 
 
 @app.route('/users/remove-perm/<int:id_user>/<string:id_perm>', methods=['GET', 'POST'])
@@ -1515,12 +1650,12 @@ def add_permission(id_user, id_perm):
 def cadastrar_usuario():
     if request.method == 'POST':
 
-        login_user      = str(request.form['login_user'])
-        nome_user       = str(request.form['nome_user'])
-        sobrenome_user  = str(request.form['sobrenome_user'])
-        privilege_user  = int(request.form['privilege_user'])
-        data_cadastro   = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        password_user   = hash_key(request.form['password_user'])
+        login_user     = str(request.form['login_user'])
+        nome_user      = str(request.form['nome_user'])
+        sobrenome_user = str(request.form['sobrenome_user'])
+        privilege_user = int(request.form['privilege_user'])
+        data_cadastro  = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        password_user  = hash_key(request.form['password_user'])
 
         try:
             with sqlite3.connect(db_path) as connection:
@@ -1554,7 +1689,6 @@ def cadastrar_usuario():
                     ''',
                     (id_user, 'CDE001'))
                     connection.commit()
-
                     user_name = session.get('user_name')
                     id_user   = session.get('id_user')
 
@@ -1572,22 +1706,26 @@ def cadastrar_usuario():
                 alerta_mensagem = 'Não foi possível criar usuário... \n'
                 alerta_mais     = ('''MOTIVO:
                                - Já existe um usuário com este login.''')
-                return render_template('components/menus/alert.html', 
-                                       alerta_tipo=alerta_tipo,
-                                       alerta_mensagem=alerta_mensagem,
-                                       alerta_mais=alerta_mais, 
-                                       url_return=url_for('users'))
+                return render_template(
+                    'components/menus/alert.html', 
+                    alerta_tipo=alerta_tipo,
+                    alerta_mensagem=alerta_mensagem,
+                    alerta_mais=alerta_mais, 
+                    url_return=url_for('users')
+                )
             else:
                 print('Erro: ', e)
                 alerta_tipo     = 'CADASTRO (USUÁRIO) \n'
                 alerta_mensagem = 'Não foi possível criar usuário... \n'
                 alerta_mais     = (f'''DESCRIÇÃO DO ERRO:
                                - {e}. \n''')
-                return render_template('components/menus/alert.html', 
-                                       alerta_tipo=alerta_tipo,
-                                       alerta_mensagem=alerta_mensagem,
-                                       alerta_mais=alerta_mais, 
-                                       url_return=url_for('users'))
+                return render_template(
+                    'components/menus/alert.html', 
+                    alerta_tipo=alerta_tipo,
+                    alerta_mensagem=alerta_mensagem, 
+                    alerta_mais=alerta_mais, 
+                    url_return=url_for('users')
+                )
         else:
             return redirect(url_for('users'))
     return render_template('pages/users/users.html')
@@ -1596,12 +1734,11 @@ def cadastrar_usuario():
 @app.route('/mov/carga/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_id(id_carga):
-    item_query = ''
-    result_int, columns_int = [], []
+    result, result_int, columns_int = [], [], []
+
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
-        print(cod_item)
-        if cod_item:
+        if cod_item:                                                #? ROTA: /mov/carga/<id_carga>?cod_item=xxx
             query = f'''
                 SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
                         i.desc_item, h.lote_item,
@@ -1622,9 +1759,6 @@ def carga_id(id_carga):
             dsn_name = 'SQLITE'
             dsn = dsn_name
             result_int, columns_int = db_query_connect(query, dsn)
-
-            item_query = f'AND iped.ITEM = "{cod_item}"'
-
 
         #? SEARCH DE ITENS POR CARGA
         query = f'''
@@ -1660,14 +1794,25 @@ def carga_id(id_carga):
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga, cod_item=cod_item, result_int=result_int, columns_int=columns_int)
-    result = []
-    return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
+        return render_template(
+            'pages/mov/mov-carga.html', 
+            result=result, columns=columns, 
+            alert=alert, class_alert=class_alert, 
+            id_carga=id_carga, cod_item=cod_item, 
+            result_int=result_int, columns_int=columns_int
+        )
+    
+    return render_template(
+        'pages/mov/mov-carga.html', 
+        result=result, 
+        columns=columns
+    )
         
 
 @app.route('/mov/carga', methods=['GET', 'POST'])
 @verify_auth('MOV006')
-def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
+def cargas():
+    result = []
     if request.method == 'POST':
         query = '''
             SELECT DISTINCT 
@@ -1706,13 +1851,18 @@ def cargas():                                                                   
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
-
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert)
-    result = []
-    return render_template('pages/mov/mov-carga.html', result=result)
+        return render_template(
+            'pages/mov/mov-carga.html', 
+            result=result, columns=columns, 
+            alert=alert, class_alert=class_alert
+        )
+    return render_template(
+        'pages/mov/mov-carga.html', 
+        result=result
+    )
 
 
 @app.route('/produtos', methods=['GET', 'POST'])
@@ -1724,19 +1874,19 @@ def produtos():
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
             FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
             WHERE (
-                   UNIDADE_DESCRICAO = 'CX' 
-                OR UNIDADE_DESCRICAO = 'UN' 
-                OR UNIDADE_DESCRICAO = 'FD'
+                UNIDADE_DESCRICAO = 'CX' OR 
+                UNIDADE_DESCRICAO = 'UN' OR 
+                UNIDADE_DESCRICAO = 'FD'
             )
             AND (
-                   GRUPO_DESCRICAO = 'PRODUTO ACABADO' 
-                OR GRUPO_DESCRICAO = 'REVENDA'
+                GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
+                GRUPO_DESCRICAO = 'REVENDA'
             )
             AND NOT GTIN_14 = '';
         '''
 
         dsn_name = 'HUGOPIET'
-        dsn = dsn_name
+        dsn      = dsn_name
         result, columns = db_query_connect(query, dsn)
 
         if columns:
@@ -1753,49 +1903,31 @@ def produtos():
                 
                 connection.commit()
         else:
-            """
-            if request.method == 'POST':
-                desc_item   = request.form['desc_item']
-                cod_item    = request.form['cod_item']
-                dun14       = request.form['cod_dun14']
-                
-                with sqlite3.connect(db_path) as connection:
-                    cursor = connection.cursor()
-                    cursor.execute('''
-                        INSERT INTO itens
-                        VALUES (?,?,?);
-                    ''',
-                    (cod_item, desc_item, dun14))
-
-                    connection.commit()
-                msg = f'''
-                [CADASTRO ITEM] [+]
-                {cod_item}
-                {desc_item}
-                ({dun14})
-                '''
-                tlg_msg(msg)
-            
-                return redirect(url_for('produtos'))
-            """
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
         itens = get_itens()
-        return render_template('pages/produtos.html', itens=itens, alert=alert, class_alert=class_alert)
-    return render_template('pages/produtos.html', itens=itens)
+        return render_template(
+            'pages/produtos.html', 
+            itens=itens, 
+            alert=alert, 
+            class_alert=class_alert
+        )
+    return render_template(
+        'pages/produtos.html', 
+        itens=itens
+    )
 
 
 @app.route('/etiqueta', methods=['GET', 'POST'])
 @verify_auth('OUT014')
 def etiqueta():
     if request.method == 'POST':
-        qr_text     = str(request.form['qr_text'])
-        desc_item   = str(request.form['produto'])
-        cod_item    = str(request.form['codsku'])
-        lote        = str(request.form['lote_item'])
+        qr_text   = str(request.form['qr_text'])
+        desc_item = str(request.form['produto'])
+        cod_item  = str(request.form['codsku'])
+        lote      = str(request.form['lote_item'])
 
         return generate_etiqueta(qr_text, desc_item, cod_item, lote)
-
     return render_template('pages/etiqueta.html', produtos=produtos)
 
 
@@ -1827,16 +1959,24 @@ def rotulo():
             else:
                 num_rotulos = 0
 
-            num_rotulos_str = f"{num_rotulos:_.0f}".replace('.', ',').replace('_', '.')
+            num_rotulos_str  = f"{num_rotulos:_.0f}".replace('.', ',').replace('_', '.')
             comprimento_mtrs = f"{(comprimento_total / 1000):_.2f}".replace('.', ',').replace('_', '.')
 
-            return jsonify({'num_rotulos_str': num_rotulos_str,
-                            'num_voltas': num_voltas,
-                            'comprimento_mtrs': comprimento_mtrs})
+            return jsonify(
+                {
+                'num_rotulos_str': num_rotulos_str,
+                'num_voltas': num_voltas,
+                'comprimento_mtrs': comprimento_mtrs
+                }
+            )
         else:
-            return jsonify({'num_rotulos_str': 0,
-                            'num_voltas': 0,
-                            'comprimento_mtrs': "0,00"})
+            return jsonify(
+                {
+                'num_rotulos_str': 0,
+                'num_voltas': 0,
+                'comprimento_mtrs': "0,00"
+                }
+            )
 
     return render_template('pages/rotulo.html')
 
@@ -1883,17 +2023,28 @@ def buscar_linhas():
 
                 cod_linha = cursor.fetchall()
 
-            return jsonify({'cod_linha': cod_linha})
+            return jsonify(
+                {
+                'cod_linha': cod_linha
+                }
+            )
         else:
             cod_linha = ''
-            return jsonify({'codLINHA': cod_linha})
+            return jsonify(
+                {
+                'codLINHA': cod_linha
+                }
+            )
 
 
 @app.route('/saldo')
 @verify_auth('MOV004')
 def saldo():
     saldo_visualization = get_saldo_view()
-    return render_template('pages/estoque.html', saldo_visualization=saldo_visualization)
+    return render_template(
+        'pages/estoque.html', 
+        saldo_visualization=saldo_visualization
+    )
 
 
 @app.route('/export_csv/<tipo>', methods=['GET'])
@@ -1926,8 +2077,13 @@ def export_csv_tipo(tipo):                                                      
         alerta_mais     = ('''POSSÍVEIS SOLUÇÕES:
                        - Verifique se a tabela possui mais de uma linha.
                        - Contate o suporte. ''')
-        return render_template('components/menus/alert.html', alerta_tipo=alerta_tipo, alerta_mensagem=alerta_mensagem,
-                               alerta_mais=alerta_mais, url_return=url_for('index'))
+        return render_template(
+            'components/menus/alert.html', 
+            alerta_tipo=alerta_tipo, 
+            alerta_mensagem=alerta_mensagem,
+            alerta_mais=alerta_mais, 
+            url_return=url_for('index')
+        )
     return export_csv(data, filename)
 
 
