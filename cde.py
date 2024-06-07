@@ -921,6 +921,7 @@ def searching():
 
         partes = codigo.split(';')
         cod_item = []
+        cod_item_qnt = None
 
         if len(partes) == 1:
             cod_barra = partes[0]

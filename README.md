@@ -4,8 +4,8 @@
 
 <body>
     <div class="container">
-        <h1>CDE | Collaborative Developed Enviroment</h1>
-        <img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-banner">
+        <h1>Collaborative Developed Enviroment</h1>
+        <img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
 <h2>Documentação do Projeto</h2>
 <p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa de desenvolvimento implementada por HUGO PIETRO e TRANS LÉGUA. Descreve-se a finalidade, funcionalidades principais, requisitos de sistema e uso básico do sistema, lançado em janeiro de 2023 e em constante crescimento técnico.</p>
 
@@ -62,7 +62,7 @@
         <h2>Autor</h2>
         <p>Lucas G. Bonato - <a href="mailto:bon4to@icloud.com">bon4to@icloud.com</a> | <a href="https://github.com/bon4to">github.com/bon4to</a></p>
         <h2>Licença</h2>
-        <p>Este projeto é licenciado sob a licença MIT. Veja o arquivo <a href="https://github.com/bon4to/cde/LICENSE">LICENSE</a> para mais detalhes.</p>
+        <p>Este projeto é licenciado sob a licença MIT. Veja o arquivo <a href="https://github.com/bon4to/cde/blob/main/LICENSE">LICENSE</a> para mais detalhes.</p>
     </div>
 </body>
 
