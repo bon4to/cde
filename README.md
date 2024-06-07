@@ -6,11 +6,10 @@
     <div class="container">
         <h1>Collaborative Developed Enviroment</h1>
         <img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
-<h2>Documentação do Projeto</h2>
-<p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa de desenvolvimento implementada por HUGO PIETRO e TRANS LÉGUA. Descreve-se a finalidade, funcionalidades principais, requisitos de sistema e uso básico do sistema, lançado em janeiro de 2023 e em constante crescimento técnico.</p>
-
-<h2>Objetivo</h2>
-<p>O projeto CDE visa fornecer uma plataforma para colaboração e desenvolvimento, oferecendo funcionalidades específicas aos usuários. Com uma abordagem centrada no usuário, busca-se melhorar a produtividade das empresas, promovendo inovação e evolução contínua da plataforma.</p><h2>Funcionalidades Principais</h2>
+        <h2>Documentação do Projeto</h2>
+        <p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa de desenvolvimento implementada por HUGO PIETRO e TRANS LÉGUA. Descreve-se a finalidade, funcionalidades principais, requisitos de sistema e uso básico do sistema, lançado em janeiro de 2023 e em constante crescimento técnico.</p>
+        <h2>Objetivo</h2>
+        <p>O projeto CDE visa fornecer uma plataforma para colaboração e desenvolvimento, oferecendo funcionalidades específicas aos usuários. Com uma abordagem centrada no usuário, busca-se melhorar a produtividade das empresas, promovendo inovação e evolução contínua da plataforma.</p><h2>Funcionalidades Principais</h2>
         <ul>
             <li>Movimentação de Estoque: [Descrição da funcionalidade].</li>
             <li>Programação de Envase/Processamento: [Descrição da funcionalidade].</li>
