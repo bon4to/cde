@@ -295,9 +295,9 @@ def get_historico(page=1, per_page=10):                                         
         ''', (per_page, offset))
 
         estoque = [{
-            'endereco'  : str(row[1]) + '.' + str(row[0]), 'cod_item'   : row[2], 
-            'desc_item' : row[3], 'lote'      : row[4],    'quantidade' : row[5], 
-            'operacao'  : row[6], 'user_name' : row[7],    'timestamp'  : row[8]
+            'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
+            'desc_item' : row[3], 'lote'      : row[4],          'quantidade' : row[5], 
+            'operacao'  : row[6], 'user_name' : row[7],          'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque, row_count
 
@@ -316,9 +316,9 @@ def get_all_historico():
         ''')
         
         estoque = [{
-            'endereco'  : str(row[1]) + '.' + str(row[0]), 'cod_item'   : row[2], 
-            'desc_item' : row[3], 'lote'      : row[4],    'quantidade' : row[5], 
-            'operacao'  : row[6], 'user_name' : row[7],    'timestamp'  : row[8]
+            'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
+            'desc_item' : row[3], 'lote'      : row[4],          'quantidade' : row[5], 
+            'operacao'  : row[6], 'user_name' : row[7],          'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque
 
@@ -1599,7 +1599,7 @@ def cadastrar_usuario():
 @verify_auth('MOV006')
 def carga_id(id_carga):
     item_query = ''
-    result_local, columns_local = [], []
+    result_int, columns_int = [], []
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
         print(cod_item)
@@ -1607,37 +1607,23 @@ def carga_id(id_carga):
             query = f'''
                 SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
                         i.desc_item, h.lote_item,
-                        SUM(
-                            CASE 
-                            WHEN operacao = 'E'
-                            OR operacao = 'TE'
-                            THEN quantidade 
-                            
-                            WHEN operacao = 'S' 
-                            OR operacao = 'TS' 
-                            OR operacao = 'F' 
-                            THEN (quantidade * -1)
-
+                        SUM( CASE 
+                            WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                            WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
                             ELSE (quantidade * 0)
                             END
                         ) as saldo
                 FROM historico h
-
-                JOIN itens i 
-                ON h.desc_item = i.cod_item
-
+                JOIN itens i ON h.desc_item = i.cod_item
                 WHERE i.cod_item = "{str(cod_item)}"
-                
-                GROUP BY  h.rua_numero, h.rua_letra, 
-                          h.desc_item, h.lote_item
+                GROUP BY  h.rua_numero, h.rua_letra, h.desc_item, 
+                        h.lote_item
                 HAVING saldo != 0
-
-                ORDER BY h.lote_item DESC, h.rua_letra ASC,
-                         h.rua_numero ASC, i.desc_item ASC;
+                ORDER BY h.lote_item DESC, h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
             '''
             dsn_name = 'SQLITE'
             dsn = dsn_name
-            result_local, columns_local = db_query_connect(query, dsn)
+            result_int, columns_int = db_query_connect(query, dsn)
 
             item_query = f'AND iped.ITEM = "{cod_item}"'
 
@@ -1676,10 +1662,7 @@ def carga_id(id_carga):
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga.html',
-                               result=result, columns=columns, alert=alert,
-                               class_alert=class_alert, id_carga=id_carga, cod_item=cod_item,
-                               result_local=result_local, columns_local=columns_local)
+        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert, id_carga=id_carga, cod_item=cod_item, result_int=result_int, columns_int=columns_int)
     result = []
     return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
         
@@ -1955,9 +1938,9 @@ if __name__ == '__main__':                                                      
     app.config['APP_VERSION'] = ['0.4.1', 'Junho/2024', False]
 
     # GET nome do diretório
-    dir_os        = os.path.dirname(os.path.abspath(__file__))
-    debug_dir     = os.getenv('DEBUG_DIR').split(';')
-    main_exec_dir = os.getenv('MAIN_EXEC_DIR')
+    dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
+    debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
+    main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
 
     # MISC
     exec_head   = \
