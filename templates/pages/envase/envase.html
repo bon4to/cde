@@ -65,7 +65,7 @@
                                     <input class="subm" style="max-width: none;" type="submit" value="Registrar...">
                                     {% if 'privilegio' in session %}
                                         {% if session['privilegio'] <= 2 %}
-                                            <img class="subm" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
+                                            <img class="subm" style="height: 30px; width: 30px; padding: 15px; margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
                                         {% endif %}
                                     {% endif %}
                                 </div>

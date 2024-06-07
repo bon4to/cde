@@ -652,8 +652,8 @@ def get_user_permissions(user_id):                                              
             return []
 
 
-def check_key(hashed_password, password):                                                                                               #* VERIFICA SENHA NO BANCO DE HASH
-    return pbkdf2_sha256.verify(password, hashed_password)
+def check_key(hashed_pwd, pwd):                                                                                                         #* VERIFICA SENHA NO BANCO DE HASH
+    return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
 def get_saldo_item(numero, letra, cod_item, lote):                                                                                      #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
@@ -771,9 +771,6 @@ def in_dev():
 @app.route('/users')
 @verify_auth('CDE016')
 def users():
-    create_tables()
-    get_users()
-
     return render_template('pages/users/users.html', users=get_users())
 
 
@@ -817,9 +814,9 @@ def login():                                                                    
                     password_user = row[3]
                     if check_key(password_user, password):
                         privilege_user = row[0]
-                        nome_user = row[1]
+                        nome_user      = row[1]
                         sobrenome_user = row[2]
-                        id_user = row[4]
+                        id_user        = row[4]
                         try:
                             session['user_initials'] = f'{nome_user[0]}{sobrenome_user[0]}'
                             session['user_name']     = f'{nome_user} {sobrenome_user}'
@@ -944,7 +941,7 @@ def searching():
                     cod_item_qnt = len(cod_item)
                 
                 if cod_item:
-                    with sqlite3.connect(db_path) as connection:                #// TODO: if cod_item (implementar após descobrir o caso de erro)
+                    with sqlite3.connect(db_path) as connection:
                         cursor = connection.cursor()
                         cursor.execute('''
                             SELECT desc_item    
