@@ -27,12 +27,12 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
 
 
 @app.before_request
-def renew_session():
+def renew_session():                                                                                            #* RENOVA A SESSÃO DE USUÁRIO
     session.modified = True
 
 
 @app.before_request
-def check_session_expiry():
+def check_session_expiry():                                                                                     #* VERIFICA SE A SESSÃO ESTÁ EXPIRADA
     if 'last_active' in session:
         last_active     = session.get('last_active')
         expiration_time = app.config['PERMANENT_SESSION_LIFETIME']
@@ -45,7 +45,7 @@ def check_session_expiry():
 
 
 @app.before_request
-def check_ip():                                                                                                                         #// CHECA LISTA DE IPS (MODO DEBUG)
+def check_ip():                                                                                                 #// CHECA LISTA DE IPS (MODO DEBUG)
     client_ip = request.remote_addr
     """
     if debug:
@@ -65,12 +65,12 @@ def check_ip():                                                                 
 
 
 @app.context_processor
-def inject_version():                                                                                                                   #? INJETA VARIAVEL DE VERSÃO AO AMBIENTE
+def inject_version():                                                                                           #? INJETA VARIAVEL DE VERSÃO AO AMBIENTE
     return dict(app_version=app.config['APP_VERSION'])
 
 
 @app.context_processor
-def inject_page():                                                                                                                      #? RETORNA URL ACESSADA PEÇO USER
+def inject_page():                                                                                              #? RETORNA URL ACESSADA PEÇO USER
     current_page    = request.path
     if 'logged_in' in session:
         user_name   = session.get('user_name')
@@ -79,7 +79,7 @@ def inject_page():                                                              
     return {'current_page': current_page}
 
 
-def get_frase():                                                                                                                        #* BUSCA FRASE MOTIVACIONAL PARA /INDEX
+def get_frase():                                                                                                #* BUSCA FRASE MOTIVACIONAL PARA /INDEX
     with open('static/frases.txt', 'r', encoding='utf-8') as file:
         frases = file.readlines()
         frase = random.choice(frases).strip()
@@ -88,11 +88,11 @@ def get_frase():                                                                
     return frase
 
 
-def create_tables():                                                                                                                    #* GERADOR DE TABELAS
+def create_tables():                                                                                            #* GERADOR DE TABELAS
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
 
-        # TABELA DE PROGRAMAÇÃO DO ENVASE
+# TABELA DE PROGRAMAÇÃO DO ENVASE
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS envase (
                 id_envase        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,7 +107,7 @@ def create_tables():                                                            
             );
         ''')
 
-        # TABELA DE PROGRAMAÇÃO DA PROCESSAMENTO
+# TABELA DE PROGRAMAÇÃO DA PROCESSAMENTO
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS producao (
                 id_producao      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -124,7 +124,7 @@ def create_tables():                                                            
             );
         ''')
 
-        # TABELA HISTÓRICO
+# TABELA HISTÓRICO
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS historico (
                 id_mov           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -140,7 +140,7 @@ def create_tables():                                                            
             );
         ''')
         
-        # TABELA DE CLIENTES
+# TABELA DE CLIENTES
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS clientes (
                 cod_cliente      INTEGER(10) PRIMARY KEY,
@@ -151,7 +151,7 @@ def create_tables():                                                            
             );
         ''')
 
-        # TABELA DE USUÁRIOS
+# TABELA DE USUÁRIOS
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id_user          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -165,15 +165,15 @@ def create_tables():                                                            
             );
         ''')
 
-        # TABELA DE PERMISSÕES DE USUÁRIO
+# TABELA DE PERMISSÕES DE USUÁRIO
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_permissions (
                 id_user          INTEGER,
                 id_perm          VARCHAR(6)
             );
-        ''')                                                                                                                            #TODO! mudar id_perm: integer para varchar(6)
+        ''')                                                                                                    #TODO! mudar id_perm: integer para varchar(6)
 
-        # TABELA DE ITENS
+# TABELA DE ITENS
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS itens (
                 cod_item         INTEGER(6) PRIMARY KEY,
@@ -182,7 +182,7 @@ def create_tables():                                                            
             );
         ''')
 
-        # TABELA AUXILIAR DE PRIVILÉGIOS
+# TABELA AUXILIAR DE PRIVILÉGIOS
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS aux_privilege (
                 id_priv          INTEGER(2) PRIMARY KEY,
@@ -190,18 +190,18 @@ def create_tables():                                                            
             );
         ''')
 
-        # TABELA AUXILIAR DE PERMISSÕES
+# TABELA AUXILIAR DE PERMISSÕES
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS aux_permissions (
                 id_perm          VARCHAR(6) PRIMARY KEY,
                 desc_perm        VARCHAR(30)
             );
-        ''')                                                                                                                            #TODO! mudar id_perm: integer para varchar(6)
+        ''')                                                                                                    #TODO! mudar id_perm: integer para varchar(6)
 
         connection.commit()
 
 
-def get_desc_itens():                                                                                                                   #// RETORNA APENAS DESCRIÇÃO DO ITEM
+def get_desc_itens():                                                                                           #// RETORNA APENAS DESCRIÇÃO DO ITEM
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -214,7 +214,7 @@ def get_desc_itens():                                                           
     return desc_item
 
 
-def get_itens():                                                                                                                        #* RETORNA TODOS OS PARÂMETROS DO ITEM
+def get_itens():                                                                                                #* RETORNA TODOS OS PARÂMETROS DO ITEM
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -229,7 +229,7 @@ def get_itens():                                                                
     return itens
 
 
-def get_producao():                                                                                                                     #* RETORNA TABELA DE PROGRAMAÇÃO (PROCESSAMENTO)
+def get_producao():                                                                                             #* RETORNA TABELA DE PROGRAMAÇÃO (PROCESSAMENTO)
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -250,7 +250,7 @@ def get_producao():                                                             
     return producao_list
 
 
-def get_envase():                                                                                                                       #* RETORNA TABELA DE PROGRAMAÇÃO (ENVASE)
+def get_envase():                                                                                               #* RETORNA TABELA DE PROGRAMAÇÃO (ENVASE)
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -274,7 +274,7 @@ def get_envase():                                                               
     return envase_list
 
 
-def get_historico(page=1, per_page=10):                                                                                                 #* RETORNA MOVIMENTAÇÕES
+def get_historico(page=1, per_page=10):                                                                         #* RETORNA MOVIMENTAÇÕES
     offset = (page - 1) * per_page
 
     with sqlite3.connect(db_path) as connection:
@@ -301,7 +301,7 @@ def get_historico(page=1, per_page=10):                                         
     return estoque, row_count
 
 
-def get_all_historico():                                                                                                  
+def get_all_historico():                                                                                        #* RETORNA TODAS AS MOVIMENTAÇÕES
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         
@@ -322,7 +322,7 @@ def get_all_historico():
     return estoque
 
 
-def get_users():                                                                                                                        #* RETORNA DADOS DOS USUÁRIOS
+def get_users():                                                                                                #* RETORNA DADOS DOS USUÁRIOS
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -344,7 +344,7 @@ def get_users():                                                                
     return users_list
 
 
-def get_permissions():
+def get_permissions():                                                                                          #* RETORNA DADOS DE PERMISSÃO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -360,7 +360,7 @@ def get_permissions():
     return permissions
 
 
-def get_end_lote():
+def get_end_lote():                                                                                             #* RETORNA ENDEREÇAMENTO POR LOTES
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -389,7 +389,7 @@ def get_end_lote():
     return end_lote
 
 
-def get_end_lote_fat():
+def get_end_lote_fat():                                                                                         #* RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -418,7 +418,7 @@ def get_end_lote_fat():
     return end_lote
 
 
-def get_ult_acesso():
+def get_ult_acesso():                                                                                           #* RETORNA ULTIMO ACESSO DO USUÁRIO
     id_user = session.get('id_user')
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -434,7 +434,7 @@ def get_ult_acesso():
         return ult_acesso
 
 
-def get_saldo_view():
+def get_saldo_view():                                                                                           #* RETORNA TABELA DE SALDO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -466,7 +466,7 @@ def get_saldo_view():
     return saldo_visualization
 
 
-def tlg_msg(msg):                                                                                                                       #* TLG-bot API
+def tlg_msg(msg):                                                                                               #* MENSAGEM DO TELEGRAM
     if not session.get('privilegio') == 1:
         if debug:
             print('[Telegram] não pôde ser enviada em modo debug')
@@ -482,7 +482,7 @@ def tlg_msg(msg):                                                               
         return None
 
 
-def qr_code(qr_text):
+def qr_code(qr_text):                                                                                           #* CRIA QRCODE
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -496,18 +496,18 @@ def qr_code(qr_text):
     return qr_image
 
 
-def hash_key(password):
+def hash_key(password):                                                                                         #* HASH DA SENHA
     return pbkdf2_sha256.hash(password)
 
 
-def parse_float(value):
+def parse_float(value):                                                                                         #* PARSE P/ FLOAT
     try:
         return float(value.replace(',', '.'))
     except ValueError:
         return 0
 
 
-def verify_auth(id_page):
+def verify_auth(id_page):                                                                                       #* VERIFICA PRIVILÉGIO DE ACESSO
     def decorator(f):
         @wraps(f)
         def decorador(*args, **kwargs):
@@ -542,7 +542,7 @@ def verify_auth(id_page):
     return decorator
 
 
-def get_userdata(id_user):
+def get_userdata(id_user):                                                                                      #* RETORNA DADOS DO USUÁRIO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -562,7 +562,7 @@ def get_userdata(id_user):
         return user_data
 
 
-def select_rua(letra, numero):                                                                                                          #* SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
+def select_rua(letra, numero):                                                                                  #* SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -582,7 +582,7 @@ def select_rua(letra, numero):                                                  
         return items
 
 
-def export_csv(data, filename):                                                                                                         #* EXPORTA DADOS EM CSV (CONFORME FUNÇÃO NO PYTHON)
+def export_csv(data, filename):                                                                                 #* EXPORTA DADOS EM CSV (CONFORME FUNÇÃO NO PYTHON)
     if data and len(data) > 0:
         csv_data = ';'.join(data[0].keys()) + '\n'
         for item in data:
@@ -607,7 +607,7 @@ def export_csv(data, filename):                                                 
         )
 
 
-def db_query_connect(query, dsn):                                                                                                       #* CONEXÃO E QUERY NO BANCO DE DADOS
+def db_query_connect(query, dsn):                                                                               #* CONEXÃO E QUERY NO BANCO DE DADOS
     dsn = f"DSN={dsn}"
     print(dsn)
     if dsn != 'DSN=SQLITE':
@@ -640,7 +640,7 @@ def db_query_connect(query, dsn):                                               
     return result, columns
 
 
-def get_user_permissions(user_id):                                                                                                      #* RETORNA LISTA DE PERMISSÕES DO USUÁRIO
+def get_user_permissions(user_id):                                                                              #* RETORNA LISTA DE PERMISSÕES DO USUÁRIO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -660,11 +660,11 @@ def get_user_permissions(user_id):                                              
             return []
 
 
-def check_key(hashed_pwd, pwd):                                                                                                         #* VERIFICA SENHA NO BANCO DE HASH
+def check_key(hashed_pwd, pwd):                                                                                 #* VERIFICA SENHA NO BANCO DE HASH
     return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
-def get_saldo_item(numero, letra, cod_item, cod_lote):                                                                                  #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
+def get_saldo_item(numero, letra, cod_item, cod_lote):                                                          #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -680,7 +680,7 @@ def get_saldo_item(numero, letra, cod_item, cod_lote):                          
     return saldo_item
 
 
-def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):                                                                          #* GERA ETIQUETA COM QRCODE
+def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):                                                  #* GERA ETIQUETA COM QRCODE
     width, height = 400, 400
     img  = Image.new('RGB', (width, height), color='white')
     cod_lote = f'LOTE: {cod_lote}'
@@ -714,7 +714,7 @@ def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):                  
     return img_base64
 
 
-def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga):                                #* INSERE REGISTRO NA TABELA DE HISTÓRICO
+def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga):        #* INSERE REGISTRO NA TABELA DE HISTÓRICO
     user_name_mov = session['user_name']
 
     with sqlite3.connect(db_path) as connection:
@@ -737,7 +737,8 @@ def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, t
         connection.commit()
 
 
-@app.route('/')                                                                                                                         #! ROTAS DE ACESSO | URL
+#! ROTAS DE ACESSO | URL
+@app.route('/')
 @verify_auth('CDE001')
 def index():
     create_tables()
@@ -794,7 +795,7 @@ def users():
     )
 
 
-@app.route('/api', methods=['GET', 'POST'])                                                                                             #* ROTA DE DATABASE MANAGER
+@app.route('/api', methods=['GET', 'POST'])                                                                     #* ROTA DE DATABASE MANAGER
 @verify_auth('DEV000')
 def api():
     if request.method == 'POST':
@@ -815,13 +816,13 @@ def api():
     )
 
 
-@app.route('/login')                                                                                                                    #* ROTA PAGINA DE LOGIN
+@app.route('/login')                                                                                            #* ROTA PAGINA DE LOGIN
 def pagina_login():
     return render_template('pages/login.html')
 
 
-@app.route('/login', methods=['POST'])                                                                                                  #* ROTA DE SESSÃO LOGIN
-def login():                                                                                                                            # TODO: função auxiliar
+@app.route('/login', methods=['POST'])                                                                          #* ROTA DE SESSÃO LOGIN
+def login():                                                                                                    # TODO: função auxiliar
     if request.method == 'POST':
         if 'logged_in' in session:
             return redirect(url_for('index'))
@@ -901,7 +902,7 @@ def login():                                                                    
         return redirect(url_for('login'))
 
 
-@app.route('/logout')                                                                                                                   #* ROTA DE SAÍDA DO USUÁRIO
+@app.route('/logout')                                                                                           #* ROTA DE SAÍDA DO USUÁRIO
 @verify_auth('CDE001')
 def logout():
     session.clear()
@@ -956,7 +957,7 @@ def searching():
             }
         )
 
-    else:                                                                       #? VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
+    else:                                               #? VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
         if len(input_code) == 6:
             input_code = input_code + ';'
 
@@ -1061,7 +1062,7 @@ def searching():
             )
 
 
-@app.route('/mov')                                                                                                                      # ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
+@app.route('/mov')                                                                                              # ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
 @verify_auth('MOV002')
 def mov():
     create_tables()
@@ -1145,7 +1146,7 @@ def faturado():
     )
 
 
-@app.route('/mov/moving', methods=['POST'])                                                                                             # ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
+@app.route('/mov/moving', methods=['POST'])                                                                     # ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
 @verify_auth('MOV002')
 def moving():
     numero          = int(request.form['end_number'])
@@ -1160,7 +1161,7 @@ def moving():
 
     print(f'OPERAÇÃO: {operacao}')
 
-    if is_end_completo:                                                                                                                 # MOVIMENTA ENDEREÇO COMPLETO
+    if is_end_completo:                                                                                         # MOVIMENTA ENDEREÇO COMPLETO
         items = select_rua(letra, numero)
         
         print(f'ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
@@ -1169,12 +1170,12 @@ def moving():
         cod_item   = str(request.form['cod_item'])
         lote_item  = str(request.form['cod_lote'])
         quantidade = int(request.form['quantidade'])
-        items      = [(cod_item, lote_item, quantidade)]                                                                                # MOVIMENTA ITEM ÚNICO
+        items      = [(cod_item, lote_item, quantidade)]                                                        # MOVIMENTA ITEM ÚNICO
         
         print(f'ITEM ÚNICO ({letra}.{numero}): {items}')
 
         saldo_item  = int(get_saldo_item(numero, letra, cod_item, lote_item))
-        if operacao in ('S', 'T', 'F') and quantidade > saldo_item:                                                                     #? IMPOSSIBILITA ESTOQUE NEGATIVO 
+        if operacao in ('S', 'T', 'F') and quantidade > saldo_item:                                             #? IMPOSSIBILITA ESTOQUE NEGATIVO 
             alert_type = 'OPERAÇÃO CANCELADA \n'
             alert_msg  = 'O saldo do item selecionado é INSUFICIENTE. \n'
             alert_more = ('''POSSÍVEIS SOLUÇÕES:
@@ -1190,7 +1191,7 @@ def moving():
                 url_return=url_for('mov')
             )
 
-    if operacao == 'T':                                                                                                                 #* TRANSFERENCIA
+    if operacao == 'T':                                                                                         #* TRANSFERENCIA
         destino_letter = str(request.form['destino_end_letra'])
         destino_number = int(request.form['destino_end_number'])
 
@@ -1198,13 +1199,13 @@ def moving():
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-                    #? SAÍDA DO ENDEREÇO DE ORIGEM
+    #? SAÍDA DO ENDEREÇO DE ORIGEM
                     insert_historico(
                         numero, letra, cod_item, 
                         lote_item, quantidade, 'TS', 
                         timestamp_out, id_carga
                     )
-                    #? ENTRADA NO ENDEREÇO DE DESTINO
+    #? ENTRADA NO ENDEREÇO DE DESTINO
                     insert_historico(
                         destino_number, destino_letter, cod_item, 
                         lote_item, quantidade, 'TE', 
@@ -1212,7 +1213,7 @@ def moving():
                     )
                     print(f'{letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
         
-    elif operacao == 'F':                                                                                                               #* FATURAMENTO
+    elif operacao == 'F':                                                                                       #* FATURAMENTO
         id_carga = str(request.form['id_carga']) + str(request.form['id_carga_seq'])
 
         if items:
@@ -1226,7 +1227,7 @@ def moving():
                     )
                     print(f'{letra}.{numero}: ', cod_item, lote_item, quantidade)
 
-    elif operacao == 'E' or operacao == 'S':                                                                                            #* OPERAÇÃO PADRÃO (entrada 'E' ou saída 'S')
+    elif operacao == 'E' or operacao == 'S':                                                                    #* OPERAÇÃO PADRÃO (entrada 'E' ou saída 'S')
         insert_historico(
             numero, letra, cod_item, 
             lote_item, quantidade, operacao, 
@@ -1234,16 +1235,16 @@ def moving():
         )
         print(f'{letra}.{numero}: ', cod_item, lote_item, quantidade)
     
-    else:                                                                                                                               #* OPERAÇÃO INVÁLIDA
+    else:                                                                                                       #* OPERAÇÃO INVÁLIDA
         print(f'[ERRO] {letra}.{numero}: ', cod_item, lote_item, quantidade, ': OPERAÇÃO INVÁLIDA')
 
     return redirect(url_for('mov'))
 
 
-@app.route('/get/clientes', methods=['GET'])                                                                                            # RETORNA FANTASIA CLIENTES (PARA SELECT2)
+@app.route('/get/clientes', methods=['GET'])                                                                    # RETORNA FANTASIA CLIENTES (PARA SELECT2)
 @verify_auth('CDE001')
 def get_fant_clientes():
-    with sqlite3.connect(db_path) as connection:                                                                                        # TODO: criar função auxiliar
+    with sqlite3.connect(db_path) as connection:                                                                # TODO: criar função auxiliar
         cursor = connection.cursor()
         cursor.execute('''
             SELECT DISTINCT fantasia_cliente 
@@ -1327,7 +1328,7 @@ def not_conclude_item(id_envase):
 
 @app.route('/envase/edit', methods=['GET', 'POST'])
 @verify_auth('ENV007')
-def envase_edit():                                                                                                                      # TODO: criar função auxiliar
+def envase_edit():                                                                                              # TODO: criar função auxiliar
     if request.method == 'POST':
 
         req_id_envase   = request.form['id_envase']
@@ -1381,7 +1382,7 @@ def envase_edit():                                                              
 
 @app.route('/envase/insert', methods=['POST'])
 @verify_auth('ENV006')
-def insert_envase():                                                                                                                    # TODO: criar função auxiliar
+def insert_envase():                                                                                            # TODO: criar função auxiliar
     if request.method == 'POST':
         linha           = request.form['linha']
         cod_item        = request.form['codinterno']
@@ -1746,7 +1747,7 @@ def carga_id(id_carga):
 
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
-        if cod_item:                                                #? ROTA: /mov/carga/<id_carga>?cod_item=xxx
+        if cod_item:                        #? ROTA: /mov/carga/<id_carga>?cod_item=xxx
             query = f'''
                 SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
                         i.desc_item, h.lote_item,
@@ -1768,7 +1769,7 @@ def carga_id(id_carga):
             dsn = dsn_name
             result_int, columns_int = db_query_connect(query, dsn)
 
-        #? SEARCH DE ITENS POR CARGA
+#? SEARCH DE ITENS POR CARGA
         query = f'''
             SELECT  crg.CODIGO_GRUPOPED                   AS NRO_CARGA,
                     crg.NRO_PEDIDO                        AS NRO_PEDIDO,
@@ -2057,7 +2058,7 @@ def saldo():
 
 @app.route('/export_csv/<tipo>', methods=['GET'])
 @verify_auth('CDE018')
-def export_csv_tipo(tipo):                                                                                                              #* EXPORT .csv
+def export_csv_tipo(tipo):                                                                                      #* EXPORT .csv
     if tipo == 'historico':
         data = get_all_historico()
         filename = 'exp_historico'
@@ -2095,7 +2096,7 @@ def export_csv_tipo(tipo):                                                      
     return export_csv(data, filename)
 
 
-if __name__ == '__main__':                                                                                                              #! __MAIN__
+if __name__ == '__main__':                                                                                      #! __MAIN__
 
     app.config['APP_VERSION'] = ['0.4.1', 'Junho/2024', False]
 
@@ -2139,7 +2140,7 @@ C:::::C                              D:::::D
     Pressione ENTER para sair...
             '''
 
-    if dir_os in debug_dir:         # Se o user for listado dev, modo_exec = debug
+    if dir_os in debug_dir: # Se o user for listado dev, modo_exec = debug
         db_path = os.getenv('DEBUG_DB_PATH')
         port, debug = 5100, True
         app.config['APP_VERSION'][2] = True
@@ -2150,7 +2151,7 @@ C:::::C                              D:::::D
         port, debug = 5005, False
         print(exec_head, start_head)
 
-    else:                           # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
+    else:   # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
         print(error_foot)
         sys.exit(2)
 
