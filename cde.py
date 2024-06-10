@@ -1501,6 +1501,7 @@ def producao_edit():
     id_user = session.get('id_user')
     user_permissions = get_user_permissions(id_user)
     user_permissions = [item['id_perm'] for item in user_permissions]
+
     if request.method == 'POST':
         req_id_producao = request.form['id_producao']
         litros          = request.form['litros']
@@ -1549,7 +1550,12 @@ def producao_edit():
             mode = 'onlyConcluded'
             prod_edit = get_producao()
 
-        return render_template('pages/processamento/processamento-edit.html', prod_edit=prod_edit, user_permissions=user_permissions, mode=mode)
+        return render_template(
+            'pages/processamento/processamento-edit.html', 
+            prod_edit=prod_edit, 
+            user_permissions=user_permissions, 
+            mode=mode
+        )
 
 
 @app.route('/processamento/insert', methods=['POST'])
