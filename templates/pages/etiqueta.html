@@ -35,7 +35,7 @@
 
                             <div class="two-split">
                                 <div>
-                                    <label for="cod_item">Código
+                                    <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
                                         <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                     </label><br>
                                     <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
@@ -74,34 +74,41 @@
 
         <script>
 
-            $("#formBuscarItens").submit(function(event) {
-                event.preventDefault();
-                var codigo = $("#input_code").val();
-                
-                buscarItens(codigo);
+            let ultimoCodigo = '';
+
+            $(function() {
+                $("#formBuscarItens").submit(function(event) {
+                    event.preventDefault();
+                    var codigo = $("#input_code").val();
+                    buscarItens(codigo);
+                    $("#input_code").val('');
+                });
             });
 
             $("#cod_item").change(function(event) {
                 event.preventDefault();
                 var codigo = $("#cod_item").val();
-                
                 buscarItens(codigo);
+                $("#input_code").val(ultimoCodigo);
             });
 
             function buscarItens(codigo) {
-
                 $.ajax({
                     type: "POST",
                     url: "/searching",
                     data: { input_code: codigo },
                     success: function(response) {
-
                         $("#desc_item").val(response.json_desc_item);
-                        $("#input_code").val("");
                         $("#cod_item").empty();
+                        if (response.json_cod_item_ocurr) {
+                            $("#json_cod_item_ocurr").text('( ' + response.json_cod_item_ocurr + ' )');
+                        } else {
+                            $("#json_cod_item_ocurr").text('');
+                        }
 
                         if (response.json_cod_item.length > 1) {
                             lockIcoHide("label-cod_item");
+                            ultimoCodigo = codigo
                         }
 
                         if (response.json_cod_item) {
@@ -111,9 +118,8 @@
                         } else {
                             $("#cod_item").append("<option value=''></option>");
                         }
-
                         $("#lote_item").val(response.json_cod_lote);
-
+                        
                         if (response.json_cod_lote === "") {
                             lockIcoHide("label-cod_lote")
                             $("#lote_item").prop("readonly", false);
@@ -131,7 +137,7 @@
                 document.getElementById("submitform").disabled = true;
             });
 
-                $("#field").submit(function(event) {
+                $("#form-field").submit(function(event) {
                      event.preventDefault();
 
                      var qr_text = $("#cod_item").val() + ";" + $("#lote_item").val();

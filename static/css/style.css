@@ -257,6 +257,7 @@ label {
     font-weight: bold;
     width: 100%;
     user-select: none;
+    font-family: "Inter", sans-serif;
 }
 
 br {
@@ -279,6 +280,7 @@ select, textarea, input {
     margin: 4px 8px 14px 8px;
     height: 42px;
     outline: none;
+    font-family: "Inter", sans-serif;
     transition: border-color 0.2s ease-out;
 }
 
