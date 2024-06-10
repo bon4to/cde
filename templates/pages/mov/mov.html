@@ -19,35 +19,35 @@
                 <div>
                     <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
                         <div>
-                            <label for="cod_str_qr"></label>
+                            <label for="input_code"></label>
                             <div class="split-horizontal input-container">
-                                <input type="text" style="width: 320px;" id="cod_str_qr" maxlength="14" name="cod_str_qr" required placeholder="QR-Code ou o Código de Barras...">
-                                <input class="subm" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                                <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou o Código de Barras...">
+                                <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
                             </div>
                             <hr>
                         </div>
                     </form>
 
-                    <form style="display: flex;" id="field" method="post" action="/mov/moving">
+                    <form style="display: flex;" id="form-field" method="post" action="/mov/moving">
                         <div id="produtoField">
                             <div>
-                                <label for="produto">Produto
+                                <label for="desc_item">Produto
                                     <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br>
                                 </label>
-                                <input name="produto" id="produto" type="text" value="{{ descITEM }}" required readonly placeholder="Descrição do produto..." onclick="maximizeText(this)">
+                                <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Descrição do desc_item..." onclick="maximizeText(this)">
                             </div>
                             <div class="split-horizontal">
                                 <div>
-                                    <label for="codsku">Código <span style="color: red" id="coditem_qnt"></span>
-                                        <img id="label-sku" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                    <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
+                                        <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                     </label><br>
-                                    <select class="address" id="codsku" name="codsku" required onchange="lockIcoShow()"></select>
+                                    <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
                                 </div>
                                 <div>
                                     <label for="lote_item">Lote
-                                        <img id="label-lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                        <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                     </label><br>
-                                    <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="lote" value="{{ codLOTE }}" required readonly placeholder="Lote (Ex.: CS0000)...">
+                                    <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Lote (Ex.: CS0000)...">
                                 </div>
                             </div>
                             <hr>
@@ -106,20 +106,20 @@
                                 <label for="end_letra">Endereço</label><br>
                                 <div class="endereco-container">
                                     <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
-                                        <option value="A"     >A</option>
-                                        <option value="B"     >B</option>
-                                        <option value="C"     >C</option>
-                                        <option value="D"     >D</option>
-                                        <option value="PP1"   >PP1</option>
-                                        <option value="PP2"   >PP2</option>
-                                        <option value="PP3"   >PP3</option>
-                                        <option value="PP4"   >PP4</option>
-                                        <option value="AM"    >AMOSTRA</option>
-                                        <option value="CAM"   >CÂMARA FRIA</option>
-                                        <option value="DEVOL" >DEVOLUÇÃO</option>
-                                        <option value="LOJA"  >LOJA</option>
-                                        <option value="PROD"  >PRODUÇÃO</option>
-                                        <option value="SEPAR" >SEPARAÇÃO</option>
+                                        <option value="A"    >A</option>
+                                        <option value="B"    >B</option>
+                                        <option value="C"    >C</option>
+                                        <option value="D"    >D</option>
+                                        <option value="PP1"  >PP1</option>
+                                        <option value="PP2"  >PP2</option>
+                                        <option value="PP3"  >PP3</option>
+                                        <option value="PP4"  >PP4</option>
+                                        <option value="AM"   >AMOSTRA</option>
+                                        <option value="CAM"  >CÂMARA FRIA</option>
+                                        <option value="DEVOL">DEVOLUÇÃO</option>
+                                        <option value="LOJA" >LOJA</option>
+                                        <option value="PROD" >PRODUÇÃO</option>
+                                        <option value="SEPAR">SEPARAÇÃO</option>
                                     </select>
                                 </div>
                             </div>
@@ -138,20 +138,20 @@
                                 <div class="endereco-container">
                                     <label for="destino_end_letra">Endereço de Destino</label><br>
                                     <select class="address-three" id="destino_end_letra" name="destino_end_letra" onchange="toggleEndNumber()">
-                                        <option value="A"     >A</option>
-                                        <option value="B"     >B</option>
-                                        <option value="C"     >C</option>
-                                        <option value="D"     >D</option>
-                                        <option value="PP1"   >PP1</option>
-                                        <option value="PP2"   >PP2</option>
-                                        <option value="PP3"   >PP3</option>
-                                        <option value="PP4"   >PP4</option>
-                                        <option value="AM"    >AMOSTRA</option>
-                                        <option value="CAM"   >CÂMARA FRIA</option>
-                                        <option value="DEVOL" >DEVOLUÇÃO</option>
-                                        <option value="LOJA"  >LOJA</option>
-                                        <option value="PROD"  >PRODUÇÃO</option>
-                                        <option value="SEPAR" >SEPARAÇÃO</option>
+                                        <option value="A"    >A</option>
+                                        <option value="B"    >B</option>
+                                        <option value="C"    >C</option>
+                                        <option value="D"    >D</option>
+                                        <option value="PP1"  >PP1</option>
+                                        <option value="PP2"  >PP2</option>
+                                        <option value="PP3"  >PP3</option>
+                                        <option value="PP4"  >PP4</option>
+                                        <option value="AM"   >AMOSTRA</option>
+                                        <option value="CAM"  >CÂMARA FRIA</option>
+                                        <option value="DEVOL">DEVOLUÇÃO</option>
+                                        <option value="LOJA" >LOJA</option>
+                                        <option value="PROD" >PRODUÇÃO</option>
+                                        <option value="SEPAR">SEPARAÇÃO</option>
                                     </select>
                                 </div>
                                 <div>
@@ -176,7 +176,7 @@
                                 </div>
                             </div>
                         </div>
-                        <input class="subm" type="submit" value="Registrar..." id="submitform">
+                        <input class="btn-fancy" type="submit" value="Registrar..." id="submitform">
                     </form>
                 </div>
             </div>
@@ -221,8 +221,8 @@
                         <tr>
                             <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
                             <td>{{ item['cod_item'] }}</td>
-                            <td>{{ item['produto'] }}</td>
-                            <td>{{ item['lote'] }}</td>
+                            <td>{{ item['desc_item'] }}</td>
+                            <td>{{ item['cod_lote'] }}</td>
                             <td>{{ item['saldo'] }}</td>
                         </tr>
                         {% endfor %}
@@ -237,49 +237,49 @@
             $(function() {
                 $("#formBuscarItens").submit(function(event) {
                     event.preventDefault();
-                    var codigo = $("#cod_str_qr").val();
+                    var codigo = $("#input_code").val();
                     buscarItens(codigo);
-                    $("#cod_str_qr").val('');
+                    $("#input_code").val('');
                 });
             });
 
-            $("#codsku").change(function(event) {
+            $("#cod_item").change(function(event) {
                 event.preventDefault();
-                var codigo = $("#codsku").val();
+                var codigo = $("#cod_item").val();
                 buscarItens(codigo);
-                $("#cod_str_qr").val(ultimoCodigo);
+                $("#input_code").val(ultimoCodigo);
             });
 
             function buscarItens(codigo) {
                 $.ajax({
                     type: "POST",
                     url: "/searching",
-                    data: { cod_str_qr: codigo },
+                    data: { input_code: codigo },
                     success: function(response) {
-                        $("#produto").val(response.descITEM);
-                        $("#codsku").empty();
-                        if (response.codITEMqnt) {
-                            $("#coditem_qnt").text('( ' + response.codITEMqnt + ' )');
+                        $("#desc_item").val(response.json_desc_item);
+                        $("#cod_item").empty();
+                        if (response.json_cod_item_ocurr) {
+                            $("#json_cod_item_ocurr").text('( ' + response.json_cod_item_ocurr + ' )');
                         } else {
-                            $("#coditem_qnt").text('');
+                            $("#json_cod_item_ocurr").text('');
                         }
 
-                        if (response.codITEM.length > 1) {
-                            lockIcoHide("label-sku");
+                        if (response.json_cod_item.length > 1) {
+                            lockIcoHide("label-cod_item");
                             ultimoCodigo = codigo
                         }
 
-                        if (response.codITEM) {
-                            response.codITEM.forEach(function(item) {
-                                $("#codsku").append("<option value='" + item + "'>" + item + "</option>");
+                        if (response.json_cod_item) {
+                            response.json_cod_item.forEach(function(item) {
+                                $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
                             });
                         } else {
-                            $("#codsku").append("<option value=''></option>");
+                            $("#cod_item").append("<option value=''></option>");
                         }
-                        $("#lote_item").val(response.codLOTE);
+                        $("#lote_item").val(response.json_cod_lote);
                         
-                        if (response.codLOTE === "") {
-                            lockIcoHide("label-lote")
+                        if (response.json_cod_lote === "") {
+                            lockIcoHide("label-cod_lote")
                             $("#lote_item").prop("readonly", false);
                         } else {
                             $("#lote_item").prop("readonly", true);
@@ -291,82 +291,10 @@
                 });
             }
 
-            function relerUltimoCodigo() {
-                if (!ultimoCodigo) {
-                    console.error("Nenhum código fornecido anteriormente.");
-                    return;
-                }
-    
-                buscarItens(ultimoCodigo);
-            }
-
-            document.getElementById("field").addEventListener("submit", function() {
+            document.getElementById("form-field").addEventListener("submit", function() {
                 document.getElementById("submitform").disabled = true;
             });
             
-        /*       
-        function toggleEndNumber() {
-            var end_letra = document.getElementById('end_letra').value;
-            var end_number_container = document.getElementById('end_number_container');
-
-            end_number_container.innerHTML = '';
-
-            if (end_letra === 'A') {
-                setOptions(['1', '2', '3'], end_number_container);
-            } else if (end_letra === 'B') {
-                setOptions(['4', '5', '6'], end_number_container);
-            } else if (end_letra === 'C') {
-                setOptions(['7', '8', '9'], end_number_container);
-            } else if (end_letra === 'D') {
-                setOptions(['10', '11', '12'], end_number_container);
-            } else {
-                // Voltar para um campo de número
-                var label = document.createElement('label');
-                label.htmlFor = 'end_number';
-                label.innerText = 'Número: ';
-                end_number_container.appendChild(label);
-
-                var br = document.createElement('br');
-                end_number_container.appendChild(br);
-
-                var input = document.createElement('input');
-                input.className = 'address';
-                input.type = 'number';
-                input.id = 'end_number';
-                input.name = 'end_number';
-                input.step = 'any';
-                input.min = '1';
-                input.max = '99999.9';
-                input.required = true;
-                input.placeholder = 'Número...';
-                end_number_container.appendChild(input);
-            }
-        }
-
-        function setOptions(options, container) {
-            var label = document.createElement('label');
-            label.htmlFor = 'end_number';
-            label.innerText = 'Número: ';
-            container.appendChild(label);
-
-            var br = document.createElement('br');
-            container.appendChild(br);
-
-            var select = document.createElement('select');
-            select.id = 'end_number';
-            select.name = 'end_number';
-            select.className = 'address';
-
-            for (var i = 0; i < options.length; i++) {
-                var option = document.createElement('option');
-                option.value = options[i];
-                option.text = options[i];
-                select.appendChild(option);
-            }
-
-            container.appendChild(select);
-        }
-        */  
         </script>
 
     <!-- SUPLEMENTO P/ FILTRO [LB-FILTER] -->

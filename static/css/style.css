@@ -345,7 +345,7 @@ img.footer:hover {
     filter: invert(95%)
 }
 
-.subm {
+.btn-fancy {
     width: 100%;
     height: 60px;
     font-size: 16px;
@@ -369,7 +369,7 @@ img.footer:hover {
     max-width: 256px;
 }
 
-.subm:hover, .subm:focus {
+.btn-fancy:hover, .btn-fancy:focus {
     box-shadow: 0 0 6px var(--cor-destaque);
     background-color: var(--cor-destaque);
     letter-spacing: 3px;
@@ -988,7 +988,7 @@ div.user-name.scrolled {
   width: 650px;
 }
 
-.item:hover .subm {
+.item:hover .btn-fancy {
     box-shadow: 0 0 6px var(--cor-destaque);
     background-color: var(--cor-destaque);
     letter-spacing: 3px;

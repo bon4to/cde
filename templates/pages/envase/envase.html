@@ -12,22 +12,22 @@
                     <div>
                         <div>
                             <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
-                                <label for="cod_str_qr"></label>
+                                <label for="input_code"></label>
                                 <div class="split-horizontal">
-                                    <input type="text" style="width: 320px;" id="cod_str_qr" maxlength="14" name="cod_str_qr" required placeholder="DUN-14 ou código do item...">
-                                    <input class="subm" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px; transform: rotate(90deg);" type="image" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
+                                    <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="DUN-14 ou código do item...">
+                                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px; transform: rotate(90deg);" type="image" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
                                 </div>
                                 <hr>
                             </form>
-                            <form style="display: flex;" id="field" method="post" action="/envase/insert">
+                            <form style="display: flex;" id="form-field" method="post" action="/envase/insert">
                                 <div>
-                                    <label for="produto">Produto<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
-                                    <input name="produto" id="produto" type="text" value="{{ descITEM }}" required readonly placeholder="Produto...">
+                                    <label for="desc_item">Produto<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
+                                    <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Produto...">
                                 </div>
                                 <div class="three-split">
                                     <div>
-                                        <label for="codsku">SKU<img id="label-sku" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
-                                        <select id="codsku" name="codinterno" class="address-three" required></select>
+                                        <label for="cod_item">SKU<img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
+                                        <select id="cod_item" name="codinterno" class="address-three" required></select>
                                     </div>
                                     <div>
                                         <label for="linha">Linha<img id="label-linha" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
@@ -62,10 +62,10 @@
                                     <textarea class="address-observ" id="observacao" name="observacao" placeholder="Observações..."></textarea>
                                 </div>
                                 <div style="display: flex;width: 100%;">
-                                    <input class="subm" style="max-width: none;" type="submit" value="Registrar...">
+                                    <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
                                     {% if 'privilegio' in session %}
                                         {% if session['privilegio'] <= 2 %}
-                                            <img class="subm" style="height: 30px; width: 30px; padding: 15px; margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
+                                            <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px; margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
                                         {% endif %}
                                     {% endif %}
                                 </div>
@@ -92,13 +92,13 @@
                         <div id="period-date" style="display: contents">
                             <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
                         </div>
-                        <a class="button-mini subm" style="margin-right: 8px" onclick="getHoje()" title="Hoje">
+                        <a class="button-mini btn-fancy" style="margin-right: 8px" onclick="getHoje()" title="Hoje">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-day.svg') }}" alt="">
                         </a>
-                        <a class="button-mini subm" style="margin-right: 8px" onclick="getSemana()" title="Semana">
+                        <a class="button-mini btn-fancy" style="margin-right: 8px" onclick="getSemana()" title="Semana">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-week.svg') }}" alt="">
                         </a>
-                        <a class="button-mini subm" style="margin: 0" onclick="limpaData()" title="Limpar">
+                        <a class="button-mini btn-fancy" style="margin: 0" onclick="limpaData()" title="Limpar">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                         </a>
                     </div>
@@ -214,12 +214,12 @@
             });
 
             function buscarLinhas() {
-                var item_selec = $("#produto").val();
+                var item_selec = $("#desc_item").val();
 
                 $.ajax({
                     type: "POST",
                     url: "/buscar_linhas",
-                    data: { produto: item_selec },
+                    data: { desc_item: item_selec },
                     success: function(response) {
 
                         $("#linha").empty();
@@ -244,37 +244,37 @@
             });
 
             function buscarItens() {
-                var codigo = $("#cod_str_qr").val();
+                var codigo = $("#input_code").val();
 
                 $.ajax({
                     type: "POST",
                     url: "/searching",
-                    data: { cod_str_qr: codigo },
+                    data: { input_code: codigo },
                     success: function(response) {
 
-                        $("#produto").val(response.descITEM);
-                        $("#cod_str_qr").val("");
-                        $("#codsku").empty();
+                        $("#desc_item").val(response.json_desc_item);
+                        $("#input_code").val("");
+                        $("#cod_item").empty();
 
                         buscarLinhas();
 
-                        if (response.codITEM.length > 1) {
-                            lockIcoHide("label-sku");
+                        if (response.json_cod_item.length > 1) {
+                            lockIcoHide("label-cod_item");
                         }
 
-                        if (response.codITEM) {
-                            response.codITEM.forEach(function(item) {
+                        if (response.json_cod_item) {
+                            response.json_cod_item.forEach(function(item) {
 
-                                $("#codsku").append("<option value='" + item + "'>" + item + "</option>");
+                                $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
                             });
                         } else {
-                            $("#codsku").append("<option value=''></option>");
+                            $("#cod_item").append("<option value=''></option>");
                         }
 
-                        $("#lote_item").val(response.codLOTE);
+                        $("#lote_item").val(response.json_cod_lote);
 
-                        if (response.codLOTE === "") {
-                            lockIcoHide("label-lote")
+                        if (response.json_cod_lote === "") {
+                            lockIcoHide("label-cod_lote")
 
                             $("#lote_item").prop("readonly", false);
                         } else {

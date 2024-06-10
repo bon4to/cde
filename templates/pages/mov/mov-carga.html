@@ -81,7 +81,7 @@
             </form>
             {% if 'privilegio' in session %}
                 {% if id_carga %}
-                <a class="button-mini subm" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
+                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>
                 {% else %}
@@ -123,7 +123,7 @@
                         </details>
                     </div>
                     <form action="{{ url_for('cargas') }}" method="post">
-                        <input class="subm" type="submit" value="Carregar Lista de Cargas..." id="submitform">
+                        <input class="btn-fancy" type="submit" value="Carregar Lista de Cargas..." id="submitform">
                     </form>
                 {% endif %}
                     <div style="max-height: 600px; overflow-y: auto;">

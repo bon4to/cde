@@ -23,7 +23,7 @@
                                     <h4 style="margin-top: 0; margin-bottom: 18px; text-align: center">
                                         {{ 'Administrador' if item['privilege_user'] <= 2 else 'Usuário Padrão' }}
                                     </h4>
-                                    <a class="subm" href="{{ url_for('users') }}">Voltar</a>
+                                    <a class="btn-fancy" href="{{ url_for('users') }}">Voltar</a>
                                 </div>
                             {% endfor %}
                         </form>

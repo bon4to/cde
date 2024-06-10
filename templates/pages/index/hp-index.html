@@ -20,7 +20,7 @@
                                     <h2 class="text-default">Processamento</h2>
                                     <p class="text-default bold"><span style="font-size: 14px" class="id-page">PRC010&nbsp;•&nbsp;</span>Programe o processamento.</p>
                                 </div>
-                                <a class="subm button-mini">
+                                <a class="btn-fancy button-mini">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/producao.svg') }}" alt="">
                                 </a>
                             </div>
@@ -31,7 +31,7 @@
                                     <h2 class="text-default">Etiquetas</h2>
                                     <p class="text-default bold"><span style="font-size: 14px" class="id-page">OUT014</span></p>
                                 </div>
-                                <a class="subm button-mini">
+                                <a class="btn-fancy button-mini">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/sticky-note.svg') }}" alt="">
                                 </a>
                             </div>
@@ -42,7 +42,7 @@
                                     <h2 class="text-default">Envase</h2>
                                     <p class="text-default bold"><span style="font-size: 14px" class="id-page">ENV006&nbsp;•&nbsp;</span>Programe o envase.</p>
                                 </div>
-                                <a class="subm button-mini">
+                                <a class="btn-fancy button-mini">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/recep-drop.svg') }}" alt="">
                                 </a>
                             </div>
@@ -54,7 +54,7 @@
                                     <h2 class="text-default">Rótulo</h2>
                                     <p class="text-default bold"><span style="font-size: 14px" class="id-page">OUT015</span></p>
                                 </div>
-                                <a class="subm button-mini">
+                                <a class="btn-fancy button-mini">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/shell.svg') }}" alt="">
                                 </a>
                             </div>
@@ -65,7 +65,7 @@
                                     <h2 class="text-default">Produtos</h2>
                                     <p class="text-default bold"><span style="font-size: 14px" class="id-page">ITE005</span></p>
                                 </div>
-                                <a class="subm button-mini">
+                                <a class="btn-fancy button-mini">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/produtos.svg') }}" alt="">
                                 </a>
                             </div>
@@ -77,18 +77,18 @@
                                     <h2 class="text-default">Estoque</h2>
                                     <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV004</span></p>
                                 </div>
-                                <a class="subm button-mini">
+                                <a class="btn-fancy button-mini">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/boxes.svg') }}" alt="">
                                 </a>
                             </div>
                         </div>
                     </div>
                     <div class="split-horizontal">
-                        <a class="subm button-mini" href="{{ url_for('index') }}">
+                        <a class="btn-fancy button-mini" href="{{ url_for('index') }}">
                             <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
                         </a>
                         <p style="color: #7e7e7e">Hugo Pietro | Ferramentas</p>
-                        <a class="subm button-mini{% if not session['privilegio'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
+                        <a class="btn-fancy button-mini{% if not session['privilegio'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
                         </a>
                     </div>

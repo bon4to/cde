@@ -77,10 +77,10 @@
                         </select>
                         <p class="alert">Campos com * são obrigatórios.</p>
                         <div style="display: flex;width: 100%;">
-                            <input class="subm" style="max-width: none;" type="submit" value="Cadastrar">
+                            <input class="btn-fancy" style="max-width: none;" type="submit" value="Cadastrar">
                             {% if 'privilegio' in session %}
                                 {% if session['privilegio'] <= 2 %}
-                                    <img class="subm" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
+                                    <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
                                 {% endif %}
                             {% endif %}
                         </div>

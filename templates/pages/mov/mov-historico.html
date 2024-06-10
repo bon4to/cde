@@ -29,17 +29,17 @@
                                 <option value="endereco">Endereço</option>
                                 <option value="operacao">Operação (Descrição)</option>
                                 <option value="quantidade">Quantidade</option>
-                                <option value="lote">Lote (Código)</option>
+                                <option value="cod_lote">Lote (Código)</option>
                                 <option value="user_name">Usuário (Nome)</option>
                                 <option value="timestamp">Horário (Data/Hora)</option>
                             </select>
-                            <input class="subm" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/text-search.svg') }}" alt="">
+                            <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/text-search.svg') }}" alt="">
                         </form>
                     </div>
                     {% if search_term %}
                     <div class="split-horizontal">
                         <h1 style="font-size: 22px">Critério de pesquisa: <span class="cor-web">"{{ search_term }}"</span> em <span class="cor-web">{{ search_row_text }}</span>.</h1>
-                        <a class="button-mini subm" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
+                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                         </a>
                     </div>
@@ -65,7 +65,7 @@
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['operacao'] }}</td>
                             <td>{{ item['quantidade'] }}</td>
-                            <td>{{ item['lote'] }}</td>
+                            <td>{{ item['cod_lote'] }}</td>
                             <td>{{ item['user_name'] }}</td>
                             <td>{{ item['timestamp'] }}</td>
                         </tr>

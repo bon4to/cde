@@ -12,7 +12,7 @@
                 <div class="log">
                     <div class="split-horizontal"><h1 class="title">Calculadora de Rótulos <span class="id-page">{{session['id_page']}}</h1></div>
                     <div style="max-width: 400px; justify-content: flex-start; margin: auto;">
-                        <form style="display: flex;" id="field" method="post" action="{{ url_for('rotulo') }}">
+                        <form style="display: flex;" id="form-field" method="post" action="{{ url_for('rotulo') }}">
                             <div class="two-split">
 
                                 <div>
@@ -44,7 +44,7 @@
                             <h3 id="resposta1" class="alert">Calculadora</h3>
                             <p id="resposta3">Digite os parâmetros...</p>
                             <div style="display: none" class="split-horizontal">
-                                <input class="subm" type="submit" value="Calcular...">
+                                <input class="btn-fancy" type="submit" value="Calcular...">
                             </div>
                         </form>
                     </div>

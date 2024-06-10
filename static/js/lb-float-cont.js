@@ -28,7 +28,7 @@ function toggleContainer() {
     if (container) {
         container.classList.toggle('show');
         try {
-            document.getElementById("cod_str_qr").focus();
+            document.getElementById("input_code").focus();
         } catch (error) {
             console.info('O campo flutuante não existe:', error)
         }

@@ -45,8 +45,8 @@
                                 <td>{{ item['id_carga'] }}</td>
                                 <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
                                 <td>{{ item['cod_item'] }}</td>
-                                <td>{{ item['produto'] }}</td>
-                                <td>{{ item['lote'] }}</td>
+                                <td>{{ item['desc_item'] }}</td>
+                                <td>{{ item['cod_lote'] }}</td>
                                 <td>{{ item['saldo'] }}</td>
                             </tr>
                             {% endfor %}
@@ -64,35 +64,35 @@
             });
 
             function buscarItens() {
-                var codigo = $("#cod_str_qr").val();
+                var codigo = $("#input_code").val();
 
                 $.ajax({
                     type: "POST",
                     url: "/searching",
-                    data: { cod_str_qr: codigo },
+                    data: { input_code: codigo },
                     success: function(response) {
 
-                        $("#produto").val(response.descITEM);
-                        $("#cod_str_qr").val("");
-                        $("#codsku").empty();
+                        $("#desc_item").val(response.json_desc_item);
+                        $("#input_code").val("");
+                        $("#cod_item").empty();
 
-                        if (response.codITEM.length > 1) {
-                            lockIcoHide("label-sku");
+                        if (response.json_cod_item.length > 1) {
+                            lockIcoHide("label-cod_item");
                         }
 
-                        if (response.codITEM) {
-                            response.codITEM.forEach(function(item) {
+                        if (response.json_cod_item) {
+                            response.json_cod_item.forEach(function(item) {
 
-                                $("#codsku").append("<option value='" + item + "'>" + item + "</option>");
+                                $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
                             });
                         } else {
-                            $("#codsku").append("<option value=''></option>");
+                            $("#cod_item").append("<option value=''></option>");
                         }
 
-                        $("#lote_item").val(response.codLOTE);
+                        $("#lote_item").val(response.json_cod_lote);
 
-                        if (response.codLOTE === "") {
-                            lockIcoHide("label-lote")
+                        if (response.json_cod_lote === "") {
+                            lockIcoHide("label-cod_lote")
 
                             $("#lote_item").prop("readonly", false);
                         } else {
@@ -107,7 +107,7 @@
                 });
             }
 
-            document.getElementById("field").addEventListener("submit", function() {
+            document.getElementById("form-field").addEventListener("submit", function() {
                     document.getElementById("submitform").disabled = true;
 
                 });

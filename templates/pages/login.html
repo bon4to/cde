@@ -19,7 +19,7 @@
                 {% if 'logged_in' not in session %}
                     <div class="log" style="width: 100%">
                         <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Entrar</h1>
-                        <form action="/login" method="post" onsubmit="showLoading()" id="field">
+                        <form action="/login" method="post" onsubmit="showLoading()" id="form-field">
                             <div>
                                 <div>
                                     <label for="login_user">Usuário</label><br>
@@ -30,8 +30,8 @@
                                     <input type="password" id="password_user" name="password_user" placeholder="Senha..." required>
                                 </div>
                                 <br>
-                                <p class="alert" id="custom-alert">{% if alerta_mensagem %}{{ alerta_mensagem }}{% else %}Sua sessão expirou, entre novamente!{% endif %}</p>
-                                <input class="subm" type="submit" value="Entrar" id="submitform">
+                                <p class="alert" id="custom-alert">{% if alert_msg %}{{ alert_msg }}{% else %}Sua sessão expirou, entre novamente!{% endif %}</p>
+                                <input class="btn-fancy" type="submit" value="Entrar" id="submitform">
                             </div>
 
                         </form>
@@ -51,9 +51,9 @@
                         </div>
                         <div class="form-login-input">
                             <div style="display: flex;width: 100%;">
-                                <img class="subm" style="height: 30px;width: 30px; padding: 15px;margin-right: 15px" onclick="window.location.href='{{ url_for('home') }}';" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
-                                <a class="subm" href="{{ url_for('logout') }}">Sair...</a>
-                                <img class="subm" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" onclick="window.location.href='{{ url_for('in_dev') }}';" src="{{ url_for('static', filename='svg/user-edit.svg') }}" alt="">
+                                <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-right: 15px" onclick="window.location.href='{{ url_for('home') }}';" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
+                                <a class="btn-fancy" href="{{ url_for('logout') }}">Sair...</a>
+                                <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" onclick="window.location.href='{{ url_for('in_dev') }}';" src="{{ url_for('static', filename='svg/user-edit.svg') }}" alt="">
 
                             </div>
                         </div>
@@ -64,7 +64,7 @@
             </div>
         </div>
         <script>
-            document.getElementById("field").addEventListener("submit", function() {
+            document.getElementById("form-field").addEventListener("submit", function() {
                     document.getElementById("submitform").disabled = true;
 
                 });

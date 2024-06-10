@@ -49,11 +49,11 @@
 
     <div class="alert-container">
         <div class="alert-content">
-            <h1 class="alert-type">{{ alerta_tipo | safe }}</h1>
-            <p style="display: block" class="alert-message">{{ alerta_mensagem | safe }}</p>
-            <p style="display: block" class="alert-more">{{ alerta_mais | safe }}</p>
+            <h1 class="alert-type">{{ alert_type | safe }}</h1>
+            <p style="display: block" class="alert-message">{{ alert_msg | safe }}</p>
+            <p style="display: block" class="alert-more">{{ alert_more | safe }}</p>
             <br>
-            <a class="subm" href="{{ url_return | safe }}">Voltar</a>
+            <a class="btn-fancy" href="{{ url_return | safe }}">Voltar</a>
         </div>
     </div>
 

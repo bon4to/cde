@@ -17,41 +17,41 @@
                         <div>
                             <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
 
-                                <label for="cod_str_qr"></label>
+                                <label for="input_code"></label>
                                 <div class="split-horizontal">
-                                    <input type="text" style="width: 320px;" id="cod_str_qr" maxlength="14" name="cod_str_qr" required placeholder="Leia o QR-Code ou o DUN-14...">
-                                    <input class="subm" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                                    <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o QR-Code ou o DUN-14...">
+                                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
                                 </div>
                                 <hr>
                             </form>
                         </div>
-                        <form style="display: flex; justify-content: flex-start" id="field" method="post" action="{{ url_for('etiqueta') }}">
+                        <form style="display: flex; justify-content: flex-start" id="form-field" method="post" action="{{ url_for('etiqueta') }}">
                             <div>
-                                <label for="produto">Produto
+                                <label for="desc_item">Produto
                                     <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                 </label><br>
-                                <input name="produto" id="produto" type="text" value="{{ descITEM }}" onclick="maximizeText(this)" required readonly placeholder="Produto...">
+                                <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" onclick="maximizeText(this)" required readonly placeholder="Produto...">
                             </div>
 
                             <div class="two-split">
                                 <div>
-                                    <label for="codsku">Código
-                                        <img id="label-sku" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                    <label for="cod_item">Código
+                                        <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                     </label><br>
-                                    <select class="address" id="codsku" name="codsku" required onchange="lockIcoShow()"></select>
+                                    <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
                                 </div>
 
                                 <div>
                                     <label for="lote_item">Lote
-                                        <img id="label-lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                        <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                     </label><br>
-                                    <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="lote" value="{{ codLOTE }}" required readonly placeholder="Lote...">
+                                    <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Lote...">
                                 </div>
                             </div>
                             <br>
                             <div style="display: flex;width: 100%;">
-                                <input class="subm" style="max-width: none;" type="submit" value="Emitir Etiqueta">
-                                <img class="subm" id="img_checkbox" style="height: 35px;width: 35px; padding: 12px;margin-left: 15px" src="{{ url_for('static', filename='svg/image-down.svg') }}" onclick="toggleCheckbox('img_checkbox','img_download')" alt="">
+                                <input class="btn-fancy" style="max-width: none;" type="submit" value="Emitir Etiqueta">
+                                <img class="btn-fancy" id="img_checkbox" style="height: 35px;width: 35px; padding: 12px;margin-left: 15px" src="{{ url_for('static', filename='svg/image-down.svg') }}" onclick="toggleCheckbox('img_checkbox','img_download')" alt="">
                             </div>
 
                             <div class="split-horizontal">
@@ -76,14 +76,14 @@
 
             $("#formBuscarItens").submit(function(event) {
                 event.preventDefault();
-                var codigo = $("#cod_str_qr").val();
+                var codigo = $("#input_code").val();
                 
                 buscarItens(codigo);
             });
 
-            $("#codsku").change(function(event) {
+            $("#cod_item").change(function(event) {
                 event.preventDefault();
-                var codigo = $("#codsku").val();
+                var codigo = $("#cod_item").val();
                 
                 buscarItens(codigo);
             });
@@ -93,29 +93,29 @@
                 $.ajax({
                     type: "POST",
                     url: "/searching",
-                    data: { cod_str_qr: codigo },
+                    data: { input_code: codigo },
                     success: function(response) {
 
-                        $("#produto").val(response.descITEM);
-                        $("#cod_str_qr").val("");
-                        $("#codsku").empty();
+                        $("#desc_item").val(response.json_desc_item);
+                        $("#input_code").val("");
+                        $("#cod_item").empty();
 
-                        if (response.codITEM.length > 1) {
-                            lockIcoHide("label-sku");
+                        if (response.json_cod_item.length > 1) {
+                            lockIcoHide("label-cod_item");
                         }
 
-                        if (response.codITEM) {
-                            response.codITEM.forEach(function(item) {
-                                $("#codsku").append("<option value='" + item + "'>" + item + "</option>");
+                        if (response.json_cod_item) {
+                            response.json_cod_item.forEach(function(item) {
+                                $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
                             });
                         } else {
-                            $("#codsku").append("<option value=''></option>");
+                            $("#cod_item").append("<option value=''></option>");
                         }
 
-                        $("#lote_item").val(response.codLOTE);
+                        $("#lote_item").val(response.json_cod_lote);
 
-                        if (response.codLOTE === "") {
-                            lockIcoHide("label-lote")
+                        if (response.json_cod_lote === "") {
+                            lockIcoHide("label-cod_lote")
                             $("#lote_item").prop("readonly", false);
                         } else {
                             $("#lote_item").prop("readonly", true);
@@ -127,28 +127,28 @@
                 });
             }
 
-            document.getElementById("field").addEventListener("submit", function() {
+            document.getElementById("form-field").addEventListener("submit", function() {
                 document.getElementById("submitform").disabled = true;
             });
 
                 $("#field").submit(function(event) {
                      event.preventDefault();
 
-                     var qr_text = $("#codsku").val() + ";" + $("#lote_item").val();
-                     var produto = $("#produto").val();
-                     var codsku = $("#codsku").val();
+                     var qr_text = $("#cod_item").val() + ";" + $("#lote_item").val();
+                     var desc_item = $("#desc_item").val();
+                     var cod_item = $("#cod_item").val();
                      var lote_item = $("#lote_item").val();
                      var check = $("#img_download").prop('checked');
 
-                     exibirQRCode(qr_text, produto, lote_item, codsku, check);
+                     exibirQRCode(qr_text, desc_item, lote_item, cod_item, check);
 
                 });
 
-                function exibirQRCode(qr_text, produto, lote_item, codsku, check) {
+                function exibirQRCode(qr_text, desc_item, lote_item, cod_item, check) {
                     $.ajax({
                         type: "POST",
                         url: "/etiqueta",
-                        data: { qr_text: qr_text, produto: produto, lote_item: lote_item, codsku: codsku, check: check },
+                        data: { qr_text: qr_text, desc_item: desc_item, lote_item: lote_item, cod_item: cod_item, check: check },
                         success: function(response) {
                             if (check === false) {
                                 $("#qrCodeImage").attr("src", "data:image/img;base64," + response);

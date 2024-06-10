@@ -295,7 +295,7 @@ def get_historico(page=1, per_page=10):                                         
 
         estoque = [{
             'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3],          'lote'      : row[4], 'quantidade' : row[5], 
+            'desc_item' : row[3],          'cod_lote'      : row[4], 'quantidade' : row[5], 
             'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque, row_count
@@ -316,7 +316,7 @@ def get_all_historico():
         
         estoque = [{
             'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3],          'lote'      : row[4], 'quantidade' : row[5], 
+            'desc_item' : row[3],          'cod_lote'      : row[4], 'quantidade' : row[5], 
             'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque
@@ -383,7 +383,7 @@ def get_end_lote():
 
         end_lote = [{
             'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
-            'produto' : row[3], 'lote' : row[4], 'saldo'   : row[5]
+            'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[5]
         } for row in cursor.fetchall()]
 
     return end_lote
@@ -411,7 +411,7 @@ def get_end_lote_fat():
 
         end_lote = [{
             'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
-            'produto' : row[3], 'lote' : row[4], 'saldo'   : row[6],
+            'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[6],
             'id_carga': float(row[5]) / 10
         } for row in cursor.fetchall()]
 
@@ -522,15 +522,15 @@ def verify_auth(id_page):
                         return f(*args, **kwargs)
                     else:
                         print('[ACESSO] NEGADO')
-                        alerta_tipo     = 'SEM PERMISSÕES \n'
-                        alerta_mensagem = 'Você não tem permissão para acessar esta página.\n'
-                        alerta_mais     = ('''SOLUÇÕES:
+                        alert_type = 'SEM PERMISSÕES \n'
+                        alert_msg  = 'Você não tem permissão para acessar esta página.\n'
+                        alert_more = ('''SOLUÇÕES:
                                        - Solicite ao seu supervisor um novo nível de acesso.''')
                         return render_template(
                             'components/menus/alert.html', 
-                            alerta_tipo=alerta_tipo,
-                            alerta_mensagem=alerta_mensagem, 
-                            alerta_mais=alerta_mais,
+                            alert_type=alert_type,
+                            alert_msg=alert_msg, 
+                            alert_more=alert_more,
                             url_return=url_for('index')
                         )
                 else:
@@ -593,16 +593,16 @@ def export_csv(data, filename):                                                 
 
         return csv_filename
     else:
-        alerta_tipo     = 'DOWNLOAD IMPEDIDO \n'
-        alerta_mensagem = 'A tabela não tem informações o suficiente para exportação. \n'
-        alerta_mais     = ('''POSSÍVEIS SOLUÇÕES:
+        alert_type = 'DOWNLOAD IMPEDIDO \n'
+        alert_msg  = 'A tabela não tem informações o suficiente para exportação. \n'
+        alert_more = ('''POSSÍVEIS SOLUÇÕES:
                        - Verifique se a tabela possui mais de uma linha.
                        - Contate o suporte. ''')
         return render_template(
             'components/menus/alert.html', 
-            alerta_tipo=alerta_tipo, 
-            alerta_mensagem=alerta_mensagem, 
-            alerta_mais=alerta_mais, 
+            alert_type=alert_type, 
+            alert_msg=alert_msg, 
+            alert_more=alert_more, 
             url_return=url_for('index')
         )
 
@@ -664,7 +664,7 @@ def check_key(hashed_pwd, pwd):                                                 
     return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
-def get_saldo_item(numero, letra, cod_item, lote):                                                                                      #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
+def get_saldo_item(numero, letra, cod_item, cod_lote):                                                                                  #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -675,15 +675,15 @@ def get_saldo_item(numero, letra, cod_item, lote):                              
             END), 0) as saldo
             FROM historico h
             WHERE rua_numero = ? AND rua_letra = ? AND desc_item = ? AND lote_item = ?;
-        ''', (numero, letra, cod_item, lote))
+        ''', (numero, letra, cod_item, cod_lote))
         saldo_item = cursor.fetchone()[0]
     return saldo_item
 
 
-def generate_etiqueta(qr_text, desc_item, cod_item, lote):                                                                              #* GERA ETIQUETA COM QRCODE
+def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):                                                                          #* GERA ETIQUETA COM QRCODE
     width, height = 400, 400
     img  = Image.new('RGB', (width, height), color='white')
-    lote = f'LOTE: {lote}'
+    cod_lote = f'LOTE: {cod_lote}'
     desc_item = f'{cod_item} - {desc_item}'
 
     qr_image = qr_code(qr_text)
@@ -693,9 +693,9 @@ def generate_etiqueta(qr_text, desc_item, cod_item, lote):                      
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype('arialbd.ttf', 30)
 
-    lote_bbox  = draw.textbbox((0, 0), lote, font=font)
+    lote_bbox  = draw.textbbox((0, 0), cod_lote, font=font)
     lote_width = lote_bbox[2] - lote_bbox[0]
-    draw.text(((width - lote_width) // 2, height // 1.5), lote, fill='black', font=font)
+    draw.text(((width - lote_width) // 2, height // 1.5), cod_lote, fill='black', font=font)
 
     text   = desc_item
     font   = ImageFont.truetype('arialbd.ttf', 22)
@@ -810,8 +810,9 @@ def api():
             query=query, 
             dsn=dsn
         )
-    
-    return render_template('pages/api.html')
+    return render_template(
+        'pages/api.html'
+    )
 
 
 @app.route('/login')                                                                                                                    #* ROTA PAGINA DE LOGIN
@@ -822,79 +823,80 @@ def pagina_login():
 @app.route('/login', methods=['POST'])                                                                                                  #* ROTA DE SESSÃO LOGIN
 def login():                                                                                                                            # TODO: função auxiliar
     if request.method == 'POST':
-        if 'logged_in' not in session:
-            login_user = str(request.form['login_user'])
-            password   = str(request.form['password_user'])
-
-            with sqlite3.connect(db_path) as connection:
-                cursor = connection.cursor()
-                cursor.execute('''
-                    SELECT privilege_user, nome_user, sobrenome_user,
-                           password_user, id_user, ult_acesso
-                    FROM users
-                    WHERE login_user = ?;
-                ''', (login_user,))
-
-                row = cursor.fetchone()
-
-                if row is not None:
-                    password_user = row[3]
-                    if check_key(password_user, password):
-                        privilege_user = row[0]
-                        nome_user      = row[1]
-                        sobrenome_user = row[2]
-                        id_user        = row[4]
-                        try:
-                            session['user_initials'] = f'{nome_user[0]}{sobrenome_user[0]}'
-                            session['user_name']     = f'{nome_user} {sobrenome_user}'
-                        finally:
-                            session['id_user']       = id_user
-                            session['logged_in']     = True
-                            session['privilegio']    = privilege_user
-
-                            msg = f'''[LOG-IN]\n{id_user} - {nome_user} {sobrenome_user}\n{request.remote_addr}'''
-                            tlg_msg(msg)
-
-                            acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                            password = "12345"
-                            if check_key(password_user, password):
-                                alerta_tipo     = 'REDEFINIR (SENHA) \n'
-                                alerta_mensagem = 'Você deve definir sua senha no seu primeiro acesso.'
-                                alerta_mais     = '/users/reset-key'
-                                url_return      = 'Digite sua nova senha...'
-
-                                return render_template(
-                                    'components/menus/alert-input.html', 
-                                    alerta_tipo=alerta_tipo,
-                                    alerta_mensagem=alerta_mensagem,
-                                    alerta_mais=alerta_mais, 
-                                    url_return=url_return
-                                )
-                            else:  # if ult_acesso:
-                                with connection:
-                                    cursor = connection.cursor()
-                                    cursor.execute('''
-                                        UPDATE users
-                                        SET ult_acesso = ?
-                                        WHERE id_user  = ?;
-                                    ''', (acesso, id_user))
-
-                                return redirect(url_for('index'))
-                    else:   # if not check_key(password_user, password):
-                        alerta_mensagem = 'A senha está incorreta. Tente novamente.'
-                        return render_template(
-                            'pages/login.html', 
-                            alerta_mensagem=alerta_mensagem
-                        )
-
-                else:  # if row is None:
-                    alerta_mensagem = 'O usuário não foi encontrado. Tente novamente.'
-                    return render_template(
-                        'pages/login.html', 
-                        alerta_mensagem=alerta_mensagem
-                    )
-        else:   # if 'logged_in' in session:
+        if 'logged_in' in session:
             return redirect(url_for('index'))
+    
+        input_login = str(request.form['login_user'])
+        input_pwd   = str(request.form['password_user'])
+
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT privilege_user, nome_user, sobrenome_user,
+                        password_user, id_user, ult_acesso
+                FROM users
+                WHERE login_user = ?;
+            ''', (input_login,))
+
+            row = cursor.fetchone()
+
+            if row is None:
+                alert_msg = 'O usuário não foi encontrado. Tente novamente.'
+                return render_template(
+                    'pages/login.html', 
+                    alert_msg=alert_msg
+                )   # if 'logged_in' in session:
+        
+            user_pwd = row[3]
+
+            if not check_key(user_pwd, input_pwd):
+                alert_msg = 'A senha está incorreta. Tente novamente.'
+                return render_template(
+                    'pages/login.html', 
+                    alert_msg=alert_msg
+                )
+        
+            privilege_user = row[0]
+            nome_user      = row[1]
+            sobrenome_user = row[2]
+            id_user        = row[4]
+
+            try:
+                session['user_initials'] = f'{nome_user[0]}{sobrenome_user[0]}'
+                session['user_name']     = f'{nome_user} {sobrenome_user}'
+            finally:
+                session['id_user']       = id_user
+                session['logged_in']     = True
+                session['privilegio']    = privilege_user
+
+                msg = f'''[LOG-IN]\n{id_user} - {nome_user} {sobrenome_user}\n{request.remote_addr}'''
+                tlg_msg(msg)
+
+                acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                input_pwd = "12345"
+                if check_key(user_pwd, input_pwd):
+                    alert_type = 'REDEFINIR (SENHA) \n'
+                    alert_msg  = 'Você deve definir sua senha no seu primeiro acesso.'
+                    alert_more = '/users/reset-key'
+                    url_return = 'Digite sua nova senha...'
+
+                    return render_template(
+                        'components/menus/alert-input.html', 
+                        alert_type=alert_type,
+                        alert_msg=alert_msg,
+                        alert_more=alert_more,
+                        url_return=url_return
+                    )
+                else:  # if ult_acesso:
+                    with connection:
+                        cursor = connection.cursor()
+                        cursor.execute('''
+                            UPDATE users
+                            SET ult_acesso = ?
+                            WHERE id_user  = ?;
+                        ''', (acesso, id_user))
+
+                    return redirect(url_for('index'))
     else:  # if not request.method == 'POST':
         return redirect(url_for('login'))
 
@@ -940,25 +942,25 @@ def reset_key():
 @app.route('/searching', methods=['POST'])
 @verify_auth('CDE001')
 def searching():
-    codigo = re.sub(r'[^0-9;]', '', (request.form['cod_str_qr'].strip()))
-    print(f'Código fornecido: {codigo}')
+    input_code = re.sub(r'[^0-9;]', '', (request.form['input_code'].strip()))
+    print(f'Código fornecido: {input_code}')
     
-    if len(codigo) == 4 or len(codigo) == 0:
+    if len(input_code) == 4 or len(input_code) == 0:
         desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO', '', '', ''
         return jsonify(
             {
-            'codITEM' : cod_item, 
-            'descITEM': desc_item, 
-            'codLOTE' : cod_lote, 
-            'codLINHA': cod_linha
+            'json_cod_item' : cod_item, 
+            'json_desc_item': desc_item, 
+            'json_cod_lote' : cod_lote, 
+            'json_cod_linha': cod_linha
             }
         )
 
     else:                                                                       #? VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
-        if len(codigo) == 6:
-            codigo = codigo + ';'
+        if len(input_code) == 6:
+            input_code = input_code + ';'
 
-        partes       = codigo.split(';')
+        partes       = input_code.split(';')
         cod_item     = []
         cod_item_qnt = None
 
@@ -1007,10 +1009,10 @@ def searching():
 
                 return jsonify(
                     {
-                    'codITEM': cod_item,
-                    'descITEM': desc_item, 
-                    'codLOTE': cod_lote, 
-                    'codITEMqnt': cod_item_qnt
+                    'json_cod_item': cod_item,
+                    'json_desc_item': desc_item, 
+                    'json_cod_lote': cod_lote, 
+                    'json_cod_item_ocurr': cod_item_qnt
                     }
                 )
 
@@ -1042,9 +1044,9 @@ def searching():
 
                 return jsonify(
                     {
-                    'codITEM' : cod_item, 
-                    'codLOTE' : cod_lote, 
-                    'descITEM': desc_item
+                    'json_cod_item' : cod_item, 
+                    'json_cod_lote' : cod_lote, 
+                    'json_desc_item': desc_item
                     }
                 )
 
@@ -1052,9 +1054,9 @@ def searching():
             desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
             return jsonify(
                 {
-                'codITEM' : cod_item, 
-                'codLOTE' : cod_lote, 
-                'descITEM': desc_item
+                'json_cod_item' : cod_item, 
+                'json_cod_lote' : cod_lote, 
+                'json_desc_item': desc_item
                 }
             )
 
@@ -1102,7 +1104,7 @@ def historico_search():
             'endereco': 'Endereço',
             'operacao': 'Operação (Descrição)',
             'quantidade': 'Quantidade',
-            'lote': 'Lote (Código)',
+            'cod_lote': 'Lote (Código)',
             'user_name': 'Usuário (Nome)',
             'timestamp': 'Horário (Data/Hora)'
         }
@@ -1164,8 +1166,8 @@ def moving():
         print(f'ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
     else:
-        cod_item   = str(request.form['codsku'])
-        lote_item  = str(request.form['lote'])
+        cod_item   = str(request.form['cod_item'])
+        lote_item  = str(request.form['cod_lote'])
         quantidade = int(request.form['quantidade'])
         items      = [(cod_item, lote_item, quantidade)]                                                                                # MOVIMENTA ITEM ÚNICO
         
@@ -1173,18 +1175,18 @@ def moving():
 
         saldo_item  = int(get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:                                                                     #? IMPOSSIBILITA ESTOQUE NEGATIVO 
-            alerta_tipo     = 'OPERAÇÃO CANCELADA \n'
-            alerta_mensagem = 'O saldo do item selecionado é INSUFICIENTE. \n'
-            alerta_mais     = ('''POSSÍVEIS SOLUÇÕES:
+            alert_type = 'OPERAÇÃO CANCELADA \n'
+            alert_msg  = 'O saldo do item selecionado é INSUFICIENTE. \n'
+            alert_more = ('''POSSÍVEIS SOLUÇÕES:
                             - Verifique se está movimentando o item correspondente.
                             - Verifique a quantidade de movimentação.
                             - Verifique a operação selecionada. ''')
             
             return render_template(
                 'components/menus/alert.html', 
-                alerta_tipo=alerta_tipo,
-                alerta_mensagem=alerta_mensagem,
-                alerta_mais=alerta_mais, 
+                alert_type=alert_type,
+                alert_msg=alert_msg,
+                alert_more=alert_more, 
                 url_return=url_for('mov')
             )
 
@@ -1708,28 +1710,28 @@ def cadastrar_usuario():
 
         except sqlite3.IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
-                alerta_tipo     = 'CADASTRO (USUÁRIO) \n'
-                alerta_mensagem = 'Não foi possível criar usuário... \n'
-                alerta_mais     = ('''MOTIVO:
+                alert_type = 'CADASTRO (USUÁRIO) \n'
+                alert_msg  = 'Não foi possível criar usuário... \n'
+                alert_more = ('''MOTIVO:
                                - Já existe um usuário com este login.''')
                 return render_template(
                     'components/menus/alert.html', 
-                    alerta_tipo=alerta_tipo,
-                    alerta_mensagem=alerta_mensagem,
-                    alerta_mais=alerta_mais, 
+                    alert_type=alert_type,
+                    alert_msg=alert_msg,
+                    alert_more=alert_more, 
                     url_return=url_for('users')
                 )
             else:
                 print('Erro: ', e)
-                alerta_tipo     = 'CADASTRO (USUÁRIO) \n'
-                alerta_mensagem = 'Não foi possível criar usuário... \n'
-                alerta_mais     = (f'''DESCRIÇÃO DO ERRO:
+                alert_type = 'CADASTRO (USUÁRIO) \n'
+                alert_msg  = 'Não foi possível criar usuário... \n'
+                alert_more = (f'''DESCRIÇÃO DO ERRO:
                                - {e}. \n''')
                 return render_template(
                     'components/menus/alert.html', 
-                    alerta_tipo=alerta_tipo,
-                    alerta_mensagem=alerta_mensagem, 
-                    alerta_mais=alerta_mais, 
+                    alert_type=alert_type,
+                    alert_msg=alert_msg, 
+                    alert_more=alert_more, 
                     url_return=url_for('users')
                 )
         else:
@@ -1929,11 +1931,11 @@ def produtos():
 def etiqueta():
     if request.method == 'POST':
         qr_text   = str(request.form['qr_text'])
-        desc_item = str(request.form['produto'])
-        cod_item  = str(request.form['codsku'])
-        lote      = str(request.form['lote_item'])
+        desc_item = str(request.form['desc_item'])
+        cod_item  = str(request.form['cod_item'])
+        cod_lote  = str(request.form['lote_item'])
 
-        return generate_etiqueta(qr_text, desc_item, cod_item, lote)
+        return generate_etiqueta(qr_text, desc_item, cod_item, cod_lote)
     return render_template('pages/etiqueta.html', produtos=produtos)
 
 
@@ -1990,7 +1992,7 @@ def rotulo():
 @app.route('/buscar_linhas', methods=['POST'])
 @verify_auth('ENV006')
 def buscar_linhas():
-    desc_item = request.form['produto']
+    desc_item = request.form['desc_item']
 
     def find_emb(desc_item):
         if 'PET' in desc_item:
@@ -2038,7 +2040,7 @@ def buscar_linhas():
             cod_linha = ''
             return jsonify(
                 {
-                'codLINHA': cod_linha
+                'json_cod_linha': cod_linha
                 }
             )
 
@@ -2078,16 +2080,16 @@ def export_csv_tipo(tipo):                                                      
         data = get_producao()
         filename = 'exp_prog_producao'
     else:
-        alerta_tipo     = 'DOWNLOAD IMPEDIDO \n'
-        alerta_mensagem = 'A tabela não tem informações suficientes para exportação. \n'
-        alerta_mais     = ('''POSSÍVEIS SOLUÇÕES:
+        alert_type = 'DOWNLOAD IMPEDIDO \n'
+        alert_msg  = 'A tabela não tem informações suficientes para exportação. \n'
+        alert_more = ('''POSSÍVEIS SOLUÇÕES:
                        - Verifique se a tabela possui mais de uma linha.
                        - Contate o suporte. ''')
         return render_template(
             'components/menus/alert.html', 
-            alerta_tipo=alerta_tipo, 
-            alerta_mensagem=alerta_mensagem,
-            alerta_mais=alerta_mais, 
+            alert_type=alert_type, 
+            alert_msg=alert_msg,
+            alert_more=alert_more, 
             url_return=url_for('index')
         )
     return export_csv(data, filename)

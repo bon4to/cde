@@ -52,23 +52,23 @@ function handleCheckChange() {
     const produtoField = document.getElementById('produtoField');
     const busca = document.getElementById('formBuscarItens');
     const quantidade = document.getElementById('quantidade');
-    const lote = document.getElementById('lote_item');
-    const codsku = document.getElementById('codsku');
+    const cod_lote = document.getElementById('lote_item');
+    const cod_item = document.getElementById('cod_item');
     
     if (checkbox.checked) {
         produtoField.style.display = 'none';
         busca.style.display = 'none';
         quantField.style.display = 'none';
         quantidade.required = false;
-        lote.required = false;
-        codsku.required = false;
+        cod_lote.required = false;
+        cod_item.required = false;
     } else {
         produtoField.style.display = 'block';
         busca.style.display = 'block';
         quantField.style.display = 'block';
         quantidade.required = true;
-        lote.required = true;
-        codsku.required = true;
+        cod_lote.required = true;
+        cod_item.required = true;
     }
 }
 
@@ -80,13 +80,13 @@ function lockIcoHide(idLabel) {
 
 // VISUAL DE CADEADOS
 function lockIcoShow() {
-    let label2 = document.getElementById("label-sku");
+    let label2 = document.getElementById("label-cod_item");
     let label3 = document.getElementById("label-linha");
 
     label2.style.opacity = '1';
     label3.style.opacity = '1';
 
-    let label1 = document.getElementById("label-lote");
+    let label1 = document.getElementById("label-cod_lote");
     label1.style.opacity = '1';
 }
 
@@ -104,7 +104,7 @@ function hideLoading() {
 
 // DESATIVAR LOTE
 $(document).ready(function () {
-    $('#produto').on('change', function () {
+    $('#desc_item').on('change', function () {
         // OBTÉM O VALOR SELECIONADO
         var selectedValue = $(this).val().toLowerCase();
 
@@ -113,7 +113,7 @@ $(document).ready(function () {
         var isEspumanteSelected = selectedValue.includes('espumante');
 
         // SELECIONA INPUT-LOTE
-        var inputLote = $('input[name="lote"]');
+        var inputLote = $('input[name="cod_lote"]');
 
         // TOGGLER
         if (isVinhoSelected || isEspumanteSelected) {
@@ -150,7 +150,7 @@ function maximizeText(text) {
 
         var closeButton = document.createElement('button');
         closeButton.innerText = '×';
-        closeButton.className = 'subm button-mini';
+        closeButton.className = 'btn-fancy button-mini';
         closeButton.addEventListener('click', function() {
             document.body.removeChild(popupOverlay);
         });

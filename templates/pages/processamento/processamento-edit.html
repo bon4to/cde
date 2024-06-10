@@ -11,26 +11,26 @@
                     <div class="centralizado">
                         <div>
                             {% for item in prod_edit %}
-                                <form style="display: flex;" id="field" method="post" action="/processamento/edit">
+                                <form style="display: flex;" id="form-field" method="post" action="/processamento/edit">
                                     <hr>
                                     <label for="liq_tipo"></label>
                                     <input id="liq_tipo" name="liq_tipo" value="{{ item['liq_tipo'] }}" disabled readonly>
                                     <hr>
                                     <div class="two-split">
                                         <div>
-                                            <label for="produto">Produto<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
-                                            <input class="address" value="{{ item['liq_linha'] }}" name="produto" id="produto" required disabled readonly>
+                                            <label for="desc_item">Produto<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
+                                            <input class="address" value="{{ item['liq_linha'] }}" name="desc_item" id="desc_item" required disabled readonly>
                                         </div>
                                         <div>
-                                            <label for="produto">Cor<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
-                                            <input class="address" value="{{ item['liq_cor'] }}" name="produto" id="produto" required disabled readonly>
+                                            <label for="desc_item">Cor<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
+                                            <input class="address" value="{{ item['liq_cor'] }}" name="desc_item" id="desc_item" required disabled readonly>
                                         </div>
                                     </div>
                                     <hr>
                                     <div class="three-split">
                                         <div>
-                                            <label for="codsku">Embalagem<img id="label-sku" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""></label><br>
-                                            <input id="codsku" value="{{ item['embalagem'] }}" name="codinterno" class="address-three" required disabled readonly>
+                                            <label for="cod_item">Embalagem<img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""></label><br>
+                                            <input id="cod_item" value="{{ item['embalagem'] }}" name="codinterno" class="address-three" required disabled readonly>
                                         </div>
                                         <div>
                                             <label for="linha">Linha<img id="label-linha" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""></label><br>
@@ -66,11 +66,11 @@
                                     <label for="id_producao" style="display: none"></label>
                                     <input value="{{ item['id_producao'] }}" name="id_producao" id="id_producao" style="display: none">
                                     <div style="display: flex;width: 100%;">
-                                        <input class="subm" style="max-width: none;" type="submit" value="Confirmar edição...">
+                                        <input class="btn-fancy" style="max-width: none;" type="submit" value="Confirmar edição...">
 
                                         {% if 'privilegio' in session %}
                                             {% if session['privilegio'] <= 2 %}
-                                                <img class="subm" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="" onclick="confirmDelete('{{ item['id_producao'] }}')">
+                                                <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="" onclick="confirmDelete('{{ item['id_producao'] }}')">
                                             {% endif %}
                                         {% endif %}
                                     </div>
@@ -121,7 +121,7 @@
                     </table>
                 </div>
                 <br>
-                <a class="subm" href="{{ url_for('producao') }}">Cancelar</a>
+                <a class="btn-fancy" href="{{ url_for('producao') }}">Cancelar</a>
             </div>
 
             <script>
