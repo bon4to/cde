@@ -6,127 +6,125 @@
 
         {% include 'shared/header/tl-header.html' %}
 
-            {% if 'privilegio' in session %}
-                {% if id_carga %}
-                    {% if cod_item %}
-                        <div class="tables-mobile">
-                            <span style="display:space-between: width: 100%;">
-                                <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
-                            </span>
-                            {% if result %}
-                                <table>
-                                    {% if result_int %}
-                                        <thead>
-                                            <tr>
-                                                <th>Endereço</th>
-                                                <th>Produto (Código)</th>
-                                                <th>Lote (Código)</th>
-                                                <th>Saldo</th>
+        {% if 'privilegio' in session %}
+            {% if id_carga %}
+                {% if cod_item %}
+                    <div class="tables-mobile">
+                        <span style="display:space-between: width: 100%;">
+                            <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
+                        </span>
+                        {% if result %}
+                            <table>
+                                {% if result_local %}
+                                    <thead>
+                                        <tr>
+                                            <th>Endereço</th>
+                                            <th>Produto (Código)</th>
+                                            <th>Lote (Código)</th>
+                                            <th>QTDE (Efetiva)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in result_local %}
+                                            <tr class="selectable-row">
+                                                <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
+                                                <td>{{ row[columns_local.index('cod_item')] }}</td>
+                                                <td>{{ row[columns_local.index('lote_item')] }}</td>
+                                                <td>{{ row[columns_local.index('saldo')] }}</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for row in result_int %}
-                                                <tr class="selectable-row">
-                                                    <td>{{ row[columns_int.index('rua_letra')] }}.{{ row[columns_int.index('rua_numero')] }}</td>
-                                                    <td>{{ row[columns_int.index('cod_item')] }}</td>
-                                                    <td>{{ row[columns_int.index('lote_item')] }}</td>
-                                                    <td>{{ row[columns_int.index('saldo')] }}</td>
-                                                </tr>
-                                            {% endfor %}
-                                        {% else %}
-                                            <div class="msg-error">
-                                                <details><summary>Não há saldo disponível para este item!</summary>
-                                                    Atualmente, não existe saldo suficiente para suprir esta carga.
-                                                </details>
-                                            </div>
-                                        {% endif %}
+                                        {% endfor %}
                                     </tbody>
-                                </table>
-                            {% endif %}
-                            <br>
-                        </div>
-                    {% endif %}
+                                {% else %}
+                                    <div class="msg-error">
+                                        <details><summary>Não há saldo disponível para este item!</summary>
+                                            Atualmente, não existe saldo suficiente para suprir esta carga.
+                                        </details>
+                                    </div>
+                                {% endif %}
+                            </table>
+                        {% endif %}
+                        <br>
+                    </div>
                 {% endif %}
             {% endif %}
-            
-            {% if id_carga %}
-                <div class="tables-container">
-                    <h1>Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
-                    <div style="max-height: 600px; overflow-y: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Item (Código)</th>
-                                    <th>Item (Descrição)</th>
-                                    <th>QTDE (Solicitada)</th>
+        {% endif %}
+        {% if id_carga %}
+            <div class="tables-container">
+                <h1>Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
+                <div style="max-height: 600px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pedido SEQ</th>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th>QTDE (Solicitada)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in result %}
+                                <tr class="selectable-row" onclick="sendCodItem('{{ row[columns.index('COD_ITEM')] }}', '{{ row[columns.index('NRO_CARGA')] }}')">
+                                    <td>{{ row[columns.index('NROPED_SEQ')] }}</td>
+                                    <td>{{ row[columns.index('COD_ITEM')] }}</td>
+                                    <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
+                                    <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in result %}
-                                    <tr class="selectable-row" onclick="sendCodItem('{{ row[columns.index('ITEM')] }}', '{{ row[columns.index('CODIGO_GRUPOPED')] }}')">
-                                        <td>{{ row[columns.index('ITEM')] }}</td>
-                                        <td style="text-wrap: balance;">{{ row[columns.index('ITEM_DESCRICAO')] }}</td>
-                                        <td>{{ row[columns.index('QTDE_SOLICITADA')] }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            {% endif %}
-
-            <form id="cod_item_form" method="GET" action="">
-                <input type="hidden" id="cod_item_input" name="cod_item">
-                <input type="hidden" id="carga_id_input" name="carga_id">
-            </form>
-            {% if 'privilegio' in session %}
-                {% if id_carga %}
-                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
+            </div>
+        {% endif %}
+        <form id="cod_item_form" method="GET" action="">
+            <input type="hidden" id="cod_item_input" name="cod_item">
+            <input type="hidden" id="carga_id_input" name="carga_id">
+        </form>
+        {% if 'privilegio' in session %}
+            {% if id_carga %}
+                <a class="button-mini subm" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>
-                {% else %}
-                
-            <div class="tables-mobile" >
-                <div class="split-horizontal">
-                    <h1>Cargas à Faturar <span class="id-page">{{session['id_page']}}</span></h1>
-                    <div class="aux-buttons">
+            {% else %}
+                <div class="tables-mobile" >
+                    <div class="split-horizontal">
+                        <h1>Cargas à Faturar <span class="id-page">{{session['id_page']}}</span></h1>
+                        <div class="aux-buttons">
+                            <form action="{{ url_for('cargas') }}" method="post">
+                                <button type="submit" style="all: unset">
+                                    <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
+                                </button>
+                            </form>
+                            <hr class="vert">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="goBack()">
+                        </div>
+                    </div>
+                    {% if alert %}
+                        {% if class_alert == 'error' %}
+                            <div class="msg-error">
+                                <details><summary>A lista não pôde ser carregada!</summary>
+                                    {{ alert | safe }}
+                                </details>
+                            </div>
+                        {% elif class_alert == 'success' %}
+                            <div class="msg-success">
+                                <details><summary>A lista foi carregada com sucesso!</summary>
+                                    {{ alert | safe }}
+                                </details>
+                            </div>
+                            <h1 class="subtitle">Selecione uma carga:</h1>
+                        {% endif %}
+                    {% else %}
+                        <div class="msg-info">
+                            <details><summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
+                                A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7; height: 16px; width: 16px; padding: 0; padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                            </details>
+                        </div>
                         <form action="{{ url_for('cargas') }}" method="post">
-                            <button type="submit" style="all: unset">
-                                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
-                            </button>
+                            <input class="subm" type="submit" value="Carregar Lista de Cargas..." id="submitform">
                         </form>
-                        <hr class="vert">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="goBack()">
-                    </div>
-                </div>
-                {% if alert %}
-                    {% if class_alert == 'error' %}
-                        <div class="msg-error">
-                            <details><summary>A lista não pôde ser carregada!</summary>
-                                {{ alert | safe }}
-                            </details>
-                        </div>
-                    {% elif class_alert == 'success' %}
-                        <div class="msg-success">
-                            <details><summary>A lista foi carregada com sucesso!</summary>
-                                {{ alert | safe }}
-                            </details>
-                        </div>
-                        <h1 class="subtitle">Selecione uma carga:</h1>
-
                     {% endif %}
-                {% else %}
-                    <div class="msg-info">
-                        <details><summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
-                            A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7; height: 16px; width: 16px; padding: 0; padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
-                        </details>
-                    </div>
-                    <form action="{{ url_for('cargas') }}" method="post">
-                        <input class="btn-fancy" type="submit" value="Carregar Lista de Cargas..." id="submitform">
-                    </form>
-                {% endif %}
-                    <div style="max-height: 600px; overflow-y: auto;">
+                    <div style="max-height: 440px; overflow-y: auto; width: 100%;">
                         {% if result %}
                             <table>
                                 <thead>
@@ -135,15 +133,19 @@
                                         <th>Pedido (Código)</th>
                                         <th>Cliente (Código)</th>
                                         <th>Cliente (Descrição)</th>
+                                        <th>Emissão (Data)</th>
+                                        <th>Entrega (Data)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for row in result %}
-                                        <tr class="selectable-row js_boot" data-id="{{ row[columns.index('CODIGO_GRUPOPED')] }}">
-                                            <td>{{ row[columns.index('CODIGO_GRUPOPED')] }}</td>
-                                            <td>{{ row[columns.index('NRO_PEDIDO')] }}.{{ row[columns.index('SEQ')] }}</td>
-                                            <td>{{ row[columns.index('CODIGO_CLIENTE')] }}</td>
-                                            <td style="text-wrap: balance;">{{ row[columns.index('FANTASIA')] }}</td>
+                                        <tr class="selectable-row js_boot" data-id="{{ row[columns.index('NRO_CARGA')] }}">
+                                            <td>{{ row[columns.index('NRO_CARGA')] }}</td>
+                                            <td>{{ row[columns.index('NRO_PEDIDO')] }}</td>
+                                            <td>{{ row[columns.index('COD_CLIENTE')] }}</td>
+                                            <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                            <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
+                                            <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -151,29 +153,27 @@
                         {% endif %}
                     </div>
                 </div>
-                {% endif %}
             {% endif %}
-            </div>
+        {% endif %}
+        </div>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var rows = document.querySelectorAll('.js_boot');
-                    rows.forEach(function(row) {
-                        row.addEventListener('click', function() {
-                            var idCarga = this.getAttribute('data-id');
-                            window.location.href = '/mov/carga/' + idCarga;
-                        });
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var rows = document.querySelectorAll('.js_boot');
+                rows.forEach(function(row) {
+                    row.addEventListener('click', function() {
+                        var idCarga = this.getAttribute('data-id');
+                        window.location.href = '/mov/carga/' + idCarga;
                     });
                 });
-
-                function sendCodItem(cod_item, carga_id) {
-                    document.getElementById('cod_item_input').value = cod_item;
-                    document.getElementById('carga_id_input').value = carga_id;
-                    var form = document.getElementById('cod_item_form');
-                    form.action = '/mov/carga/' + carga_id;
-                    form.submit();
-                }
-
-            </script>
+            });
+            function sendCodItem(cod_item, carga_id) {
+                document.getElementById('cod_item_input').value = cod_item;
+                document.getElementById('carga_id_input').value = carga_id;
+                var form = document.getElementById('cod_item_form');
+                form.action = '/mov/carga/' + carga_id;
+                form.submit();
+            }
+        </script>
 
         {% include 'shared/footer.html' %}
