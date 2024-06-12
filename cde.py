@@ -65,12 +65,7 @@ def check_ip():                                                                 
 
 
 @app.context_processor
-def inject_version():                                                                                           #? INJETA VARIAVEL DE VERSÃO AO AMBIENTE
-    return dict(app_version=app.config['APP_VERSION'])
-
-
-@app.context_processor
-def inject_page():                                                                                              #? RETORNA URL ACESSADA PEÇO USER
+def inject_page():                                                                                              #? RETORNA URL ACESSADA PELO USER
     current_page    = request.path
     if 'logged_in' in session:
         user_name   = session.get('user_name')
@@ -79,13 +74,9 @@ def inject_page():                                                              
     return {'current_page': current_page}
 
 
-def get_frase():                                                                                                #* BUSCA FRASE MOTIVACIONAL PARA /INDEX
-    with open('static/frases.txt', 'r', encoding='utf-8') as file:
-        frases = file.readlines()
-        frase = random.choice(frases).strip()
-        if not frase:
-            frase = 'Seja a mudança que você deseja ver no mundo.'
-    return frase
+@app.context_processor
+def inject_version():                                                                                           #? INJETA VARIAVEL DE VERSÃO AO AMBIENTE
+    return dict(app_version=app.config['APP_VERSION'])
 
 
 def create_tables():                                                                                            #* GERADOR DE TABELAS
@@ -201,17 +192,13 @@ def create_tables():                                                            
         connection.commit()
 
 
-def get_desc_itens():                                                                                           #// RETORNA APENAS DESCRIÇÃO DO ITEM
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT DISTINCT desc_item
-            FROM itens i
-            ORDER BY i.desc_item;
-        ''')
-
-        desc_item = [row[0] for row in cursor.fetchall()]
-    return desc_item
+def get_frase():                                                                                                #* BUSCA FRASE MOTIVACIONAL PARA /INDEX
+    with open('static/frases.txt', 'r', encoding='utf-8') as file:
+        frases = file.readlines()
+        frase = random.choice(frases).strip()
+        if not frase:
+            frase = 'Seja a mudança que você deseja ver no mundo.'
+    return frase
 
 
 def get_itens():                                                                                                #* RETORNA TODOS OS PARÂMETROS DO ITEM
@@ -227,6 +214,19 @@ def get_itens():                                                                
             'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2]
         } for row in cursor.fetchall()]
     return itens
+
+
+def get_desc_itens():                                                                                           #// RETORNA APENAS DESCRIÇÃO DO ITEM
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT DISTINCT desc_item
+            FROM itens i
+            ORDER BY i.desc_item;
+        ''')
+
+        desc_item = [row[0] for row in cursor.fetchall()]
+    return desc_item
 
 
 def get_producao():                                                                                             #* RETORNA TABELA DE PROGRAMAÇÃO (PROCESSAMENTO)
