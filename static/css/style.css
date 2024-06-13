@@ -14,6 +14,28 @@ html, body {
     color: var(--cor-destaque);
 }
 
+body.dark-mode {
+    background-color: #181818;
+    color: #ffffff;
+}
+
+body.dark-mode div {
+    background-color: #282828c7;
+    color: white
+}
+
+
+body.dark-mode button {
+    background-color: #444;
+    color: #ffffff;
+}
+
+
+body.dark-mode h1, h2, h3, p {
+    color: #ffffff;
+}
+
+
 span.id-page {
     font-size: 18px;
     font-family: Reddit Mono, monospace;
@@ -435,6 +457,7 @@ th {
     color: #fff;
     font-weight: bolder;
     border-bottom: 4px solid var(--cor-destaque);
+    
 }
 
 td {
