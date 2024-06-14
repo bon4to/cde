@@ -1473,6 +1473,21 @@ div.msg-info {
     background-color: #f0f0f0;
 }
 
+.selectable-row.sub-total td {
+    background-color: rgba(52, 49, 50, 0.1);
+    border-bottom: 4px solid var(--cor-destaque);
+    color: rgb(27, 26, 26);
+    transition: 0.1s ease-in-out all;
+
+}
+
+.selectable-row.sub-total:hover td {
+    background-color: var(--cor-destaque);
+    border-bottom: 4px solid rgba(52, 49, 50, 1);
+    color: white;
+    transition: 0.1s ease-in-out all;
+}
+
 h1.subtitle {
     font-size: 22px;
     color: #353535;

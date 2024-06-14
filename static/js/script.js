@@ -46,6 +46,7 @@ function toggleFields() {
     }
 }
 
+
 function handleCheckChange() {
     const checkbox = document.getElementById('is_end_completo');
     const quantField = document.getElementById('quantField');
@@ -72,11 +73,13 @@ function handleCheckChange() {
     }
 }
 
+
 // VISUAL DE CADEADOS
 function lockIcoHide(idLabel) {
     let label = document.getElementById(idLabel);
     label.style.opacity = '0';
 }
+
 
 // VISUAL DE CADEADOS
 function lockIcoShow() {
@@ -90,11 +93,13 @@ function lockIcoShow() {
     label1.style.opacity = '1';
 }
 
+
 function showLoading() {
     document.getElementById("loading-content").style.display = "fixed";
     document.getElementById("loading-content").style.opacity = "1";
 
 }
+
 
 function hideLoading() {
     document.getElementById("loading-content").style.display = "none";
@@ -159,8 +164,8 @@ function maximizeText(text) {
         popupOverlay.appendChild(popupContent);
         document.body.appendChild(popupOverlay);
     }
-    
 }
+
 
 // HEADER POP-UP
 window.addEventListener('scroll', function () {
@@ -201,6 +206,7 @@ function toggleCheckbox(placebo, checkbox) {
     }
 }
 
+
 function toggleEdit() {
     var elements = document.querySelectorAll('.hidden-button');
     elements.forEach(function(element) {
@@ -214,7 +220,7 @@ function toggleEdit() {
 
 
 // FUNÇÃO PARA CAPS
-function capitalizeTexto() {
+function capitalizeText() {
 
     let inputsTexto = document.querySelectorAll('input[type="text"]');
     inputsTexto.forEach(function (input) {
@@ -224,6 +230,7 @@ function capitalizeTexto() {
         });
     });
 }
+
 
 function toggleTable(linha) {
     let checkBox = document.getElementById("toggle_" + linha);
@@ -235,6 +242,7 @@ function toggleTable(linha) {
     }
 }
 
+
 function scrollFunction() {
     var button = document.getElementById("scroll-to-top-button");
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
@@ -244,6 +252,7 @@ function scrollFunction() {
     }
 }
 
+
 function scrollToTop() {
     var scrollToTopElement = document.documentElement;
     if (scrollToTopElement.scrollTop !== 0) {
@@ -252,6 +261,7 @@ function scrollToTop() {
         document.body.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
+
 
 function blockImg() {
     try {
@@ -268,6 +278,7 @@ function blockImg() {
     }
 }
 
+
 function goBack() {
     window.history.back();
 }
@@ -283,31 +294,34 @@ function togglePopUp() {
     }
 }
 
-const toggleTheme = document.getElementById('toggle-theme');
-toggleTheme.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
 
-    if (document.body.classList.contains('dark-mode')) {
-        localStorage.setItem('theme', 'dark');
-    } else {
-        localStorage.setItem('theme', 'light');
-    }
-});
+// const toggleTheme = document.getElementById('toggle-theme');
+// toggleTheme.addEventListener('click', () => {
+//     document.body.classList.toggle('dark-mode');
+// 
+//     if (document.body.classList.contains('dark-mode')) {
+//         localStorage.setItem('theme', 'dark');
+//     } else {
+//         localStorage.setItem('theme', 'light');
+//     }
+// });
 
-window.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-    }
-});
+
+// window.addEventListener('DOMContentLoaded', () => {
+//     const savedTheme = localStorage.getItem('theme');
+//     if (savedTheme === 'dark') {
+//         document.body.classList.add('dark-mode');
+//     }
+// });
 
 
 window.addEventListener("load", function() {
     hideLoading();
 });
 
+
 window.onload = function () {
-    capitalizeTexto();
+    capitalizeText();
     blockImg();
     updateFilterIndex();
     toggleContainer();
