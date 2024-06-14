@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Separação {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+    <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+
+    {% include 'shared/header/tl-header.html' %}
+    <div class="tables-container">
+        <h1>Lista de Itens da Carga <span class="cor-web">{{ id_carga }}</span></h1>
+        <div>
+            <table id="itemsTable">
+                <thead>
+                    <tr>
+                        <th>Carga (Código)</th>
+                        <th>Item (Código)</th>
+                        <th>Lote (Código)</th>
+                        <th>Quantidade</th>
+                        <th>Endereço</th>
+                        <th>Usuário</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <button onclick="clearItems()">LIMPAR</button>
+            <button onclick="reloadTables()">RECARREGAR</button>
+        </div>
+    </div>
+    <div class="tables-container" style="max-width: 20vw">
+        <h1>Subtotal Separado</h1>
+        <table id="subtotalsTable">
+            <thead>
+                <tr>
+                    <th>Item (Código)</th>
+                    <th>Subtotal (Quantidade)</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="tables-container" style="max-width: 20vw">
+        <h1>Todas as Separações</h1>
+        <table id="allSeparationsTable">
+            <thead>
+                <tr>
+                    <th>Chave</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button onclick="clearAllSeparations()">LIMPAR</button>
+        <br>
+        <p>(todos os registros em localStorage)<p>
+    </div>
+
+    <script>
+        const nroCarga = '{{ id_carga }}';
+
+        function getStorageKey() {
+            return `separacao-carga-${nroCarga}`;
+        }
+
+        function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id) {
+            let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+            let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id };
+            sepCarga.push(item);
+            localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+            renderItems();
+        }
+
+        function getSeparacao() {
+            return JSON.parse(localStorage.getItem(getStorageKey())) || [];
+        }
+
+        function removeItem(index) {
+            let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+            sepCarga.splice(index, 1);
+            localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+            renderItems();
+        }
+
+        function clearItems() {
+            localStorage.removeItem(getStorageKey());
+            renderItems();
+        }
+
+        function updateQuantity(index, newQuantity) {
+            let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+            sepCarga[index].qtde_solic = newQuantity;
+            localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+            renderItems();
+        }
+
+        function renderItems() {
+            const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+            itemsTable.innerHTML = '';
+            const sepCarga = getSeparacao();
+
+            sepCarga.forEach((item, index) => {
+                const row = itemsTable.insertRow();
+                row.insertCell(0).textContent = item.nrocarga;
+                row.insertCell(1).textContent = item.cod_item;
+                row.insertCell(2).textContent = item.lote_item;
+                row.insertCell(3).textContent = item.qtde_solic;
+                row.insertCell(4).textContent = item.rua_letra + '.' + item.rua_numero;
+                row.insertCell(5).textContent = item.user_id;
+                const actionsCell = row.insertCell(6);
+
+                const updateBtn = document.createElement('button');
+                updateBtn.textContent = 'Atualizar';
+                updateBtn.onclick = () => {
+                    const newQuantity = prompt('Informe a nova quantidade:', item.qtde_solic);
+                    if (newQuantity !== null) {
+                        updateQuantity(index, parseInt(newQuantity, 10));
+                    }
+                };
+                actionsCell.appendChild(updateBtn);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remover';
+                removeBtn.onclick = () => removeItem(index);
+                actionsCell.appendChild(removeBtn);
+            });
+
+            renderSubtotals();
+        }
+
+        function renderSubtotals() {
+            const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
+            subtotalsTable.innerHTML = '';
+            const sepCarga = getSeparacao();
+
+            let subtotals = {};
+
+            sepCarga.forEach(item => {
+                if (subtotals[item.cod_item]) {
+                    subtotals[item.cod_item] += item.qtde_solic;
+                } else {
+                    subtotals[item.cod_item] = item.qtde_solic;
+                }
+            });
+
+            for (const [cod_item, subtotal] of Object.entries(subtotals)) {
+                const row = subtotalsTable.insertRow();
+                row.insertCell(0).textContent = cod_item;
+                row.insertCell(1).textContent = subtotal;
+            }
+        }
+
+        function clearAllSeparations() {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key.startsWith('separacao-carga-')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            renderItems();
+            listAllSeparations();
+        }
+
+        function listAllSeparations() {
+            const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
+            allSeparationsTable.innerHTML = '';
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('separacao-carga-')) {
+                    const row = allSeparationsTable.insertRow();
+                    row.insertCell(0).textContent = key;
+                }
+            }
+        }
+
+        function reloadTables() {
+            listAllSeparations();
+            renderItems();
+            renderSubtotals();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            reloadTables();
+        });
+    </script>
+
+    {% include 'shared/footer.html' %}
