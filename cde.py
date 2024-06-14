@@ -1882,6 +1882,12 @@ def cargas():                                                                   
     return render_template('pages/mov/mov-carga.html', result=result)
 
 
+@app.route('/mov/carga/<int:id_carga>/separacao', methods=['GET', 'POST'])
+@verify_auth('MOV006')
+def carga_sep(id_carga):
+    return render_template('pages/mov/mov-carga-sep.html', id_carga=id_carga)
+
+
 @app.route('/produtos', methods=['GET', 'POST'])
 @verify_auth('ITE005')
 def produtos():

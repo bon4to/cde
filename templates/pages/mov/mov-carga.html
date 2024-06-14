@@ -5,11 +5,56 @@
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
-
+        {% if id_carga %}
+            <div class="tables-container" style="max-width: 50%">
+                <h1>Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
+                <div style="max-height: 600px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pedido SEQ</th>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th>QTDE (Solicitada)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set items = [] %}
+                            {% set subtotals = {} %}
+                            
+                            {% for row in result %}
+                                {% set cod_item = row[columns.index('COD_ITEM')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                {% set subtotal = subtotals.get(cod_item, 0) + qtde_solic %}
+                                {% set subtotals = subtotals.update({cod_item: subtotal}) or subtotals %}
+                                {% set items = items.append(row) or items %}
+                            {% endfor %}
+                            
+                            {% for cod_item, subtotal in subtotals.items() %}
+                                {% for row in items %}
+                                    {% if row[columns.index('COD_ITEM')] == cod_item %}
+                                        <tr>
+                                            <td>{{ row[columns.index('NROPED_SEQ')] }}</td>
+                                            <td>{{ row[columns.index('COD_ITEM')] }}</td>
+                                            <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
+                                            <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                <tr class="selectable-row sub-total" onclick="sendCodItem('{{ cod_item }}', '{{ id_carga }}', '{{ subtotal }}')">
+                                    <td colspan="3" style="text-align: right;">{{ cod_item }}</td>
+                                    <td>{{ subtotal }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
         {% if 'privilegio' in session %}
             {% if id_carga %}
                 {% if cod_item %}
-                    <div class="tables-mobile">
+                    <div class="tables-container" style="max-width: 40%">
                         <span style="display:space-between: width: 100%;">
                             <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
                         </span>
@@ -26,7 +71,17 @@
                                     </thead>
                                     <tbody>
                                         {% for row in result_local %}
-                                            <tr class="selectable-row">
+                                        <!--
+                                            <tr class="selectable-row" onclick="addItem(
+                                                '{{ id_carga }}', '{{ cod_item }}',
+                                                '{{ row[columns_local.index('lote_item')] }}',
+                                                '{{ row[columns_local.index('rua_letra')] }}',
+                                                '{{ row[columns_local.index('rua_numero')] }}',
+                                                '{{ qtde_solic }}',
+                                                '{{ session['user_id'] }}'
+                                            )">
+                                        -->
+                                            <tr class="selectable-row" onclick="pushItemIntoSeparacao({{ row[columns_local.index('saldo')] }})">
                                                 <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
                                                 <td>{{ row[columns_local.index('cod_item')] }}</td>
                                                 <td>{{ row[columns_local.index('lote_item')] }}</td>
@@ -34,6 +89,7 @@
                                             </tr>
                                         {% endfor %}
                                     </tbody>
+                                    <div id="inputContainer" class="hidden"></div>
                                 {% else %}
                                     <div class="msg-error">
                                         <details><summary>Não há saldo disponível para este item!</summary>
@@ -48,42 +104,22 @@
                 {% endif %}
             {% endif %}
         {% endif %}
-        {% if id_carga %}
-            <div class="tables-container">
-                <h1>Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
-                <div style="max-height: 600px; overflow-y: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Pedido SEQ</th>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th>QTDE (Solicitada)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in result %}
-                                <tr class="selectable-row" onclick="sendCodItem('{{ row[columns.index('COD_ITEM')] }}', '{{ row[columns.index('NRO_CARGA')] }}')">
-                                    <td>{{ row[columns.index('NROPED_SEQ')] }}</td>
-                                    <td>{{ row[columns.index('COD_ITEM')] }}</td>
-                                    <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
-                                    <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {% endif %}
+        
         <form id="cod_item_form" method="GET" action="">
             <input type="hidden" id="cod_item_input" name="cod_item">
             <input type="hidden" id="carga_id_input" name="carga_id">
+            <input type="hidden" id="qtde_item_input" name="qtde_solic">
         </form>
         {% if 'privilegio' in session %}
             {% if id_carga %}
-                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="Limpar">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                </a>
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="LIMPAR">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                    </a>
+                    <a class="button-mini btn-fancy" style="margin: 0" onclick="goBack()" title="VOLTAR">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" ">
+                    </a>
+                </div>
             {% else %}
                 <div class="tables-mobile" >
                     <div class="split-horizontal">
@@ -120,9 +156,7 @@
                                 A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7; height: 16px; width: 16px; padding: 0; padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
                             </details>
                         </div>
-                        <form action="{{ url_for('cargas') }}" method="post">
-                            <input class="btn-fancy" type="submit" value="Carregar Lista de Cargas..." id="submitform">
-                        </form>
+                        
                     {% endif %}
                     <div style="max-height: 440px; overflow-y: auto; width: 100%;">
                         {% if result %}
@@ -152,12 +186,38 @@
                             </table>
                         {% endif %}
                     </div>
+                    <br>    
                 </div>
             {% endif %}
         {% endif %}
-        </div>
+    </div>
 
         <script>
+                     
+            const nroCarga = '{{ id_carga }}';
+
+            function getStorageKey() {
+                return `separacao-carga-${nroCarga}`;
+            }
+
+            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id) {
+                let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id };
+                sepCarga.push(item);
+                localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+                
+            }
+
+            function getSeparacao() {
+                return JSON.parse(localStorage.getItem(getStorageKey())) || [];
+            }
+
+            function clearItems() {
+                localStorage.removeItem(getStorageKey());
+            }
+
+
+
             document.addEventListener('DOMContentLoaded', function() {
                 var rows = document.querySelectorAll('.js_boot');
                 rows.forEach(function(row) {
@@ -167,13 +227,53 @@
                     });
                 });
             });
-            function sendCodItem(cod_item, carga_id) {
+
+            function sendCodItem(cod_item, carga_id, qtde_solic) {
                 document.getElementById('cod_item_input').value = cod_item;
                 document.getElementById('carga_id_input').value = carga_id;
+                document.getElementById('qtde_item_input').value = qtde_solic;
                 var form = document.getElementById('cod_item_form');
                 form.action = '/mov/carga/' + carga_id;
                 form.submit();
             }
+
+
+            function pushItemIntoSeparacao(maxQuantity) {
+                const inputContainer = document.getElementById('inputContainer');
+                
+                inputContainer.innerHTML = '';
+
+                const label = document.createElement('label');
+                label.setAttribute('for', 'quantityInput');
+                label.textContent = 'Quantidade:';
+
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.id = 'quantityInput';
+                quantityInput.min = 1;
+                quantityInput.max = maxQuantity;
+
+                const submitBtn = document.createElement('button');
+                submitBtn.id = 'submitBtn';
+                submitBtn.textContent = 'Enviar';
+
+                inputContainer.appendChild(label);
+                inputContainer.appendChild(quantityInput);
+                inputContainer.appendChild(submitBtn);
+
+                inputContainer.classList.remove('hidden');
+
+                submitBtn.addEventListener('click', function() {
+                    const value = quantityInput.value;
+                    if (value > maxQuantity) {
+                        alert(`A quantidade máxima é ${maxQuantity}.`);
+                    } else {
+                        alert(`Você inseriu: ${value}`);
+                        inputContainer.classList.add('hidden');
+                    }
+                });
+            }
+
         </script>
 
         {% include 'shared/footer.html' %}
