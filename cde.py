@@ -523,13 +523,13 @@ def verify_auth(id_page):                                                       
                     else:
                         print('[ACESSO] NEGADO')
                         alert_type = 'SEM PERMISSÕES \n'
-                        alert_msg  = 'Você não tem permissão para acessar esta página.\n'
+                        alert_msge  = 'Você não tem permissão para acessar esta página.\n'
                         alert_more = ('''SOLUÇÕES:
                                        - Solicite ao seu supervisor um novo nível de acesso.''')
                         return render_template(
                             'components/menus/alert.html', 
                             alert_type=alert_type,
-                            alert_msg=alert_msg, 
+                            alert_msge=alert_msge, 
                             alert_more=alert_more,
                             url_return=url_for('index')
                         )
@@ -594,14 +594,14 @@ def export_csv(data, filename):                                                 
         return csv_filename
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
-        alert_msg  = 'A tabela não tem informações o suficiente para exportação. \n'
+        alert_msge  = 'A tabela não tem informações o suficiente para exportação. \n'
         alert_more = ('''POSSÍVEIS SOLUÇÕES:
                        - Verifique se a tabela possui mais de uma linha.
                        - Contate o suporte. ''')
         return render_template(
             'components/menus/alert.html', 
             alert_type=alert_type, 
-            alert_msg=alert_msg, 
+            alert_msge=alert_msge, 
             alert_more=alert_more, 
             url_return=url_for('index')
         )
@@ -842,19 +842,19 @@ def login():                                                                    
             row = cursor.fetchone()
 
             if row is None:
-                alert_msg = 'O usuário não foi encontrado. Tente novamente.'
+                alert_msge = 'O usuário não foi encontrado. Tente novamente.'
                 return render_template(
                     'pages/login.html', 
-                    alert_msg=alert_msg
+                    alert_msge=alert_msge
                 )   # if 'logged_in' in session:
         
             user_pwd = row[3]
 
             if not check_key(user_pwd, input_pwd):
-                alert_msg = 'A senha está incorreta. Tente novamente.'
+                alert_msge = 'A senha está incorreta. Tente novamente.'
                 return render_template(
                     'pages/login.html', 
-                    alert_msg=alert_msg
+                    alert_msge=alert_msge
                 )
         
             privilege_user = row[0]
@@ -877,14 +877,14 @@ def login():                                                                    
                 input_pwd = "12345"
                 if check_key(user_pwd, input_pwd):
                     alert_type = 'REDEFINIR (SENHA) \n'
-                    alert_msg  = 'Você deve definir sua senha no seu primeiro acesso.'
+                    alert_msge  = 'Você deve definir sua senha no seu primeiro acesso.'
                     alert_more = '/users/reset-key'
                     url_return = 'Digite sua nova senha...'
 
                     return render_template(
                         'components/menus/alert-input.html', 
                         alert_type=alert_type,
-                        alert_msg=alert_msg,
+                        alert_msge=alert_msge,
                         alert_more=alert_more,
                         url_return=url_return
                     )
@@ -1177,7 +1177,7 @@ def moving():
         saldo_item  = int(get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:                                             #? IMPOSSIBILITA ESTOQUE NEGATIVO 
             alert_type = 'OPERAÇÃO CANCELADA \n'
-            alert_msg  = 'O saldo do item selecionado é INSUFICIENTE. \n'
+            alert_msge  = 'O saldo do item selecionado é INSUFICIENTE. \n'
             alert_more = ('''POSSÍVEIS SOLUÇÕES:
                             - Verifique se está movimentando o item correspondente.
                             - Verifique a quantidade de movimentação.
@@ -1186,7 +1186,7 @@ def moving():
             return render_template(
                 'components/menus/alert.html', 
                 alert_type=alert_type,
-                alert_msg=alert_msg,
+                alert_msge=alert_msge,
                 alert_more=alert_more, 
                 url_return=url_for('mov')
             )
@@ -1712,26 +1712,26 @@ def cadastrar_usuario():
         except sqlite3.IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
                 alert_type = 'CADASTRO (USUÁRIO) \n'
-                alert_msg  = 'Não foi possível criar usuário... \n'
+                alert_msge  = 'Não foi possível criar usuário... \n'
                 alert_more = ('''MOTIVO:
                                - Já existe um usuário com este login.''')
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type=alert_type,
-                    alert_msg=alert_msg,
+                    alert_msge=alert_msge,
                     alert_more=alert_more, 
                     url_return=url_for('users')
                 )
             else:
                 print('Erro: ', e)
                 alert_type = 'CADASTRO (USUÁRIO) \n'
-                alert_msg  = 'Não foi possível criar usuário... \n'
+                alert_msge  = 'Não foi possível criar usuário... \n'
                 alert_more = (f'''DESCRIÇÃO DO ERRO:
                                - {e}. \n''')
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type=alert_type,
-                    alert_msg=alert_msg, 
+                    alert_msge=alert_msge, 
                     alert_more=alert_more, 
                     url_return=url_for('users')
                 )
@@ -1747,6 +1747,7 @@ def carga_id(id_carga):
     result_local, columns_local = [], []
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
+        qtde_solic = request.args.get('qtde_solic', '')
         print(cod_item)
         if cod_item:
             query = f'''
@@ -1805,7 +1806,7 @@ def carga_id(id_carga):
             ON i.ITEM = iped.ITEM
 
             WHERE crg.CODIGO_GRUPOPED = '{id_carga}' 
-            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS)
+            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
             AND CURRENT DATE
 
             LIMIT 100;
@@ -1825,8 +1826,8 @@ def carga_id(id_carga):
             'pages/mov/mov-carga.html',
             result=result, columns=columns, alert=alert,
             class_alert=class_alert, id_carga=id_carga, 
-            cod_item=cod_item, result_local=result_local, 
-            columns_local=columns_local
+            cod_item=cod_item, qtde_solic=qtde_solic,
+            result_local=result_local, columns_local=columns_local
         )
     result = []
     return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
@@ -1861,7 +1862,7 @@ def cargas():                                                                   
             ON i.ITEM = iped.ITEM
 
             WHERE crg.QTDE_FATUR != 0
-            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 3 MONTHS)
+            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
             AND CURRENT DATE
 
             ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
@@ -2096,14 +2097,14 @@ def export_csv_tipo(tipo):                                                      
         filename = 'exp_prog_producao'
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
-        alert_msg  = 'A tabela não tem informações suficientes para exportação. \n'
+        alert_msge  = 'A tabela não tem informações suficientes para exportação. \n'
         alert_more = ('''POSSÍVEIS SOLUÇÕES:
                        - Verifique se a tabela possui mais de uma linha.
                        - Contate o suporte. ''')
         return render_template(
             'components/menus/alert.html', 
             alert_type=alert_type, 
-            alert_msg=alert_msg,
+            alert_msge=alert_msge,
             alert_more=alert_more, 
             url_return=url_for('index')
         )
