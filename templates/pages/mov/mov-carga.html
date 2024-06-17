@@ -253,6 +253,7 @@
         <script>
                      
             const nroCarga = '{{ id_carga }}';
+            var codItem = '{{ cod_item }}';
 
             function getStorageKey() {
                 return `separacao-carga-${nroCarga}`;
@@ -302,14 +303,21 @@
                 form.submit();
             }
 
-            function showQuantityPopup(solicitado, maxEstoque, onSubmit) {
+            function showQuantityPopup(qtde_solic, maxEstoque, onSubmit) {
                 const popup = document.getElementById('quantityPopup');
                 const message = document.getElementById('popupMessage');
                 const input = document.getElementById('quantityInput');
                 const submitBtn = document.getElementById('submitBtn');
             
-                message.textContent = `Solicitado: ${solicitado} Em estoque: ${maxEstoque}`;
-                input.max = Math.min(solicitado, maxEstoque);
+                var necessita = parseInt(qtde_solic, 10) - parseInt(getQuantidadeLocalStorage(codItem, getStorageKey()), 10);
+
+                console.log(necessita)
+                console.log(qtde_solic)
+                console.log(getQuantidadeLocalStorage(codItem, getStorageKey()))
+                console.log(parseInt(qtde_solic, 10) - parseInt(getQuantidadeLocalStorage(codItem, getStorageKey()), 10))
+
+                message.textContent = `${necessita}/${qtde_solic} Estoque: ${maxEstoque}`;
+                input.max = Math.min(necessita, maxEstoque);
             
                 popup.classList.remove('hidden');
             
@@ -324,6 +332,17 @@
                 };
             }
             
+            function getQuantidadeLocalStorage(cod_item, storageKey) {
+                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
+                const quantidade = storage.reduce((acc, item) => {
+                    if (item.cod_item === cod_item) {
+                    return acc + item.qtde_solic;
+                    }
+                    return acc;
+                }, 0);
+                return quantidade;
+            }
+
             function pushItemIntoSeparacao(maxEstoque, solicitado) {
                 showQuantityPopup(solicitado, maxEstoque, function(value) {
                     alert(`Você inseriu: ${value}`);
