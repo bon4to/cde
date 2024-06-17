@@ -7,15 +7,21 @@
         {% include 'shared/header/tl-header.html' %}
         {% if id_carga %}
             <div class="tables-container" style="max-width: 50%">
-                <h1>Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
-                <div style="max-height: 600px; overflow-y: auto;">
+                <h1 style="margin-bottom: 8px">Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
+                <div id="standardTable" class="hidden" style="max-height: 500px; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <p>Lista Detalhada</p>
+                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/list-end.svg') }}" alt="">
+                        </div>
+                    </div>
                     <table>
                         <thead>
                             <tr>
                                 <th>Pedido SEQ</th>
                                 <th>Item (Código)</th>
                                 <th>Item (Descrição)</th>
-                                <th>QTDE (Solicitada)</th>
+                                <th style="width: 100px;">QTDE (Solicitada)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -30,25 +36,66 @@
                                 {% set items = items.append(row) or items %}
                             {% endfor %}
                             
-                            {% for cod_item, subtotal in subtotals.items() %}
+                            {% for row_cod_item, subtotal in subtotals.items() %}
                                 {% for row in items %}
-                                    {% if row[columns.index('COD_ITEM')] == cod_item %}
+                                    {% if row[columns.index('COD_ITEM')] == row_cod_item %}
                                         <tr>
-                                            <td>{{ row[columns.index('NROPED_SEQ')] }}</td>
+                                            <td style="background-color: #f0f0f0;">{{ row[columns.index('NROPED_SEQ')] }}</td>
                                             <td>{{ row[columns.index('COD_ITEM')] }}</td>
                                             <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
                                             <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                                <tr class="selectable-row sub-total" onclick="sendCodItem('{{ cod_item }}', '{{ id_carga }}', '{{ subtotal }}')">
-                                    <td colspan="3" style="text-align: right;">{{ cod_item }}</td>
+                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')">
+                                    <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
                                     <td>{{ subtotal }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                <div id="detailsTable" style="max-height: 500px; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <p>Lista Subtotal</p>
+                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th style="width: 100px;">QTDE (Solicitada)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set items = {} %}
+                            
+                            {% for row in result %}
+                                {% set row_cod_item = row[columns.index('COD_ITEM')] %}
+                                {% set desc_item = row[columns.index('DESC_ITEM')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                
+                                {% if row_cod_item in items %}
+                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
+                                {% else %}
+                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': qtde_solic}}) or items %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% for row_cod_item, item in items.items() %}
+                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')">
+                                    <td>{{ row_cod_item }}</td>
+                                    <td style="text-wrap: balance;">{{ item.desc }}</td>
+                                    <td>{{ item.qtde }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <br>
             </div>
         {% endif %}
         {% if 'privilegio' in session %}
@@ -60,7 +107,14 @@
                         </span>
                         {% if result %}
                             <table>
-                                {% if result_local %}
+                                {% if not result_local %}
+                                    <div class="msg-error">
+                                        <details>
+                                            <summary>Não há saldo disponível para este item!</summary>
+                                            Atualmente, não existe saldo suficiente para suprir esta carga.
+                                        </details>
+                                    </div>
+                                {% else %}
                                     <thead>
                                         <tr>
                                             <th>Endereço</th>
@@ -81,21 +135,15 @@
                                                 '{{ session['user_id'] }}'
                                             )">
                                         -->
-                                            <tr class="selectable-row" onclick="pushItemIntoSeparacao({{ row[columns_local.index('saldo')] }})">
+                                            <tr class="selectable-row" onclick="pushItemIntoSeparacao({{ row[columns_local.index('saldo')] }}, {{ request.args.get('qtde_solic') }} )">
                                                 <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
                                                 <td>{{ row[columns_local.index('cod_item')] }}</td>
                                                 <td>{{ row[columns_local.index('lote_item')] }}</td>
-                                                <td>{{ row[columns_local.index('saldo')] }}</td>
+                                                <td>{{ row[columns_local.index('saldo')] }}</td>    
                                             </tr>
                                         {% endfor %}
                                     </tbody>
                                     <div id="inputContainer" class="hidden"></div>
-                                {% else %}
-                                    <div class="msg-error">
-                                        <details><summary>Não há saldo disponível para este item!</summary>
-                                            Atualmente, não existe saldo suficiente para suprir esta carga.
-                                        </details>
-                                    </div>
                                 {% endif %}
                             </table>
                         {% endif %}
@@ -105,7 +153,7 @@
             {% endif %}
         {% endif %}
         
-        <form id="cod_item_form" method="GET" action="">
+        <form class="hidden" id="cod_item_form" method="GET" action="">
             <input type="hidden" id="cod_item_input" name="cod_item">
             <input type="hidden" id="carga_id_input" name="carga_id">
             <input type="hidden" id="qtde_item_input" name="qtde_solic">
@@ -121,7 +169,7 @@
                     </a>
                 </div>
             {% else %}
-                <div class="tables-mobile" >
+                <div class="tables-mobile" style=" max-width: 70%; margin: auto;">
                     <div class="split-horizontal">
                         <h1>Cargas à Faturar <span class="id-page">{{session['id_page']}}</span></h1>
                         <div class="aux-buttons">
@@ -138,13 +186,15 @@
                     {% if alert %}
                         {% if class_alert == 'error' %}
                             <div class="msg-error">
-                                <details><summary>A lista não pôde ser carregada!</summary>
+                                <details>
+                                    <summary>A lista não pôde ser carregada!</summary>
                                     {{ alert | safe }}
                                 </details>
                             </div>
                         {% elif class_alert == 'success' %}
                             <div class="msg-success">
-                                <details><summary>A lista foi carregada com sucesso!</summary>
+                                <details>
+                                    <summary>A lista foi carregada com sucesso!</summary>
                                     {{ alert | safe }}
                                 </details>
                             </div>
@@ -152,7 +202,8 @@
                         {% endif %}
                     {% else %}
                         <div class="msg-info">
-                            <details><summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
+                            <details>
+                                <summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
                                 A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7; height: 16px; width: 16px; padding: 0; padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
                             </details>
                         </div>
@@ -173,7 +224,7 @@
                                 </thead>
                                 <tbody>
                                     {% for row in result %}
-                                        <tr class="selectable-row js_boot" data-id="{{ row[columns.index('NRO_CARGA')] }}">
+                                        <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('NRO_CARGA')] }}">
                                             <td>{{ row[columns.index('NRO_CARGA')] }}</td>
                                             <td>{{ row[columns.index('NRO_PEDIDO')] }}</td>
                                             <td>{{ row[columns.index('COD_CLIENTE')] }}</td>
@@ -190,6 +241,13 @@
                 </div>
             {% endif %}
         {% endif %}
+        <div id="quantityPopup" class="dialog-overlay hidden">
+            <div class="dialog-box">
+                <p id="popupMessage"></p>
+                <input type="number" id="quantityInput" min="1">
+                <button id="submitBtn">Enviar</button>
+            </div>
+        </div>        
     </div>
 
         <script>
@@ -208,6 +266,15 @@
                 
             }
 
+            function toggleTableSubtotal() {
+                const standardTable = document.getElementById('standardTable');
+                const groupedTable = document.getElementById('detailsTable');
+    
+                standardTable.classList.toggle('hidden');
+                groupedTable.classList.toggle('hidden');
+            }
+
+
             function getSeparacao() {
                 return JSON.parse(localStorage.getItem(getStorageKey())) || [];
             }
@@ -216,10 +283,8 @@
                 localStorage.removeItem(getStorageKey());
             }
 
-
-
             document.addEventListener('DOMContentLoaded', function() {
-                var rows = document.querySelectorAll('.js_boot');
+                var rows = document.querySelectorAll('.js_query_selector');
                 rows.forEach(function(row) {
                     row.addEventListener('click', function() {
                         var idCarga = this.getAttribute('data-id');
@@ -237,42 +302,34 @@
                 form.submit();
             }
 
-
-            function pushItemIntoSeparacao(maxQuantity) {
-                const inputContainer = document.getElementById('inputContainer');
-                
-                inputContainer.innerHTML = '';
-
-                const label = document.createElement('label');
-                label.setAttribute('for', 'quantityInput');
-                label.textContent = 'Quantidade:';
-
-                const quantityInput = document.createElement('input');
-                quantityInput.type = 'number';
-                quantityInput.id = 'quantityInput';
-                quantityInput.min = 1;
-                quantityInput.max = maxQuantity;
-
-                const submitBtn = document.createElement('button');
-                submitBtn.id = 'submitBtn';
-                submitBtn.textContent = 'Enviar';
-
-                inputContainer.appendChild(label);
-                inputContainer.appendChild(quantityInput);
-                inputContainer.appendChild(submitBtn);
-
-                inputContainer.classList.remove('hidden');
-
-                submitBtn.addEventListener('click', function() {
-                    const value = quantityInput.value;
-                    if (value > maxQuantity) {
-                        alert(`A quantidade máxima é ${maxQuantity}.`);
+            function showQuantityPopup(solicitado, maxEstoque, onSubmit) {
+                const popup = document.getElementById('quantityPopup');
+                const message = document.getElementById('popupMessage');
+                const input = document.getElementById('quantityInput');
+                const submitBtn = document.getElementById('submitBtn');
+            
+                message.textContent = `Solicitado: ${solicitado} Em estoque: ${maxEstoque}`;
+                input.max = Math.min(solicitado, maxEstoque);
+            
+                popup.classList.remove('hidden');
+            
+                submitBtn.onclick = function() {
+                    const value = parseInt(input.value);
+                    if (value > 0 && value <= input.max) {
+                        popup.classList.add('hidden');
+                        onSubmit(value);
                     } else {
-                        alert(`Você inseriu: ${value}`);
-                        inputContainer.classList.add('hidden');
+                        alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
                     }
+                };
+            }
+            
+            function pushItemIntoSeparacao(maxEstoque, solicitado) {
+                showQuantityPopup(solicitado, maxEstoque, function(value) {
+                    alert(`Você inseriu: ${value}`);
                 });
             }
+            
 
         </script>
 
