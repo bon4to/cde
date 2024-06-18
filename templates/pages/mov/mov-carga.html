@@ -39,7 +39,7 @@
                             {% for row_cod_item, subtotal in subtotals.items() %}
                                 {% for row in items %}
                                     {% if row[columns.index('COD_ITEM')] == row_cod_item %}
-                                        <tr>
+                                        <tr class="unselectable-row">
                                             <td style="background-color: #f0f0f0;">{{ row[columns.index('NROPED_SEQ')] }}</td>
                                             <td>{{ row[columns.index('COD_ITEM')] }}</td>
                                             <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
@@ -55,7 +55,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="detailsTable" style="max-height: 500px; overflow-y: auto;">
+                <div id="detailedTable" style="max-height: 500px; overflow-y: auto;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                         <p>Lista Subtotal</p>
                         <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
@@ -132,10 +132,14 @@
                                                 '{{ row[columns_local.index('rua_letra')] }}',
                                                 '{{ row[columns_local.index('rua_numero')] }}',
                                                 '{{ qtde_solic }}',
-                                                '{{ session['user_id'] }}'
+                                                '{{ session['id_user'] }}'
                                             )">
                                         -->
-                                            <tr class="selectable-row" onclick="pushItemIntoSeparacao({{ row[columns_local.index('saldo')] }}, {{ request.args.get('qtde_solic') }} )">
+                                            <tr class="selectable-row" onclick="pushItemIntoSeparacao(
+                                                '{{ row[columns_local.index('saldo')]     }}', '{{ request.args.get('qtde_solic')         }}',
+                                                '{{ row[columns_local.index('rua_letra')] }}', '{{ row[columns_local.index('rua_numero')] }}',
+                                                '{{ row[columns_local.index('lote_item')] }}'
+                                            )">
                                                 <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
                                                 <td>{{ row[columns_local.index('cod_item')] }}</td>
                                                 <td>{{ row[columns_local.index('lote_item')] }}</td>
@@ -243,9 +247,24 @@
         {% endif %}
         <div id="quantityPopup" class="dialog-overlay hidden">
             <div class="dialog-box">
-                <p id="popupMessage"></p>
-                <input type="number" id="quantityInput" min="1">
-                <button id="submitBtn">Enviar</button>
+                <h1>Separar <span class="cor-web">{{ cod_item }}</span>:</h1>
+                <h1 class="sub-label">Separados:</h1>
+                <div class="flex-column">
+                    <h3 id="popupMessage"></h3>
+                    <p class="cor-web" style="font-weight: bold" id="popupFaltante"></p>
+                </div>
+                <h1 class="sub-label">Adicionar:</h1>
+                <div class="flex-column">
+                    <h3 class="cor-web" style="display: flex; justify-content: center;">
+                        <div style="border-bottom: 2px solid var(--cor-destaque); width: max-content;">
+                            <span>+</span>
+                            <input value="0" style="all: unset; width: 70px;" type="number" style="width: 40px;" id="quantityInput" min="1">
+                            <a id="maxBtn">MAX</a>
+                        </div>
+                    </h3>
+                    <p id="popupObs"></p>
+                </div>
+                <button class="btn-fancy" id="submitBtn" required>Enviar</button>
             </div>
         </div>        
     </div>
@@ -254,27 +273,26 @@
                      
             const nroCarga = '{{ id_carga }}';
             var codItem = '{{ cod_item }}';
+            var userID = '{{ session['id_user'] }}';
 
             function getStorageKey() {
                 return `separacao-carga-${nroCarga}`;
             }
 
-            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id) {
+            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic) {
                 let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id };
+                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, userID };
                 sepCarga.push(item);
                 localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
-                
             }
 
             function toggleTableSubtotal() {
                 const standardTable = document.getElementById('standardTable');
-                const groupedTable = document.getElementById('detailsTable');
+                const detailedTable = document.getElementById('detailedTable');
     
                 standardTable.classList.toggle('hidden');
-                groupedTable.classList.toggle('hidden');
+                detailedTable.classList.toggle('hidden');
             }
-
 
             function getSeparacao() {
                 return JSON.parse(localStorage.getItem(getStorageKey())) || [];
@@ -303,52 +321,82 @@
                 form.submit();
             }
 
-            function showQuantityPopup(qtde_solic, maxEstoque, onSubmit) {
+            function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
                 const popup = document.getElementById('quantityPopup');
-                const message = document.getElementById('popupMessage');
+                const obsv = document.getElementById('popupObs');
+                const info = document.getElementById('popupFaltante');
+                const msge = document.getElementById('popupMessage');
                 const input = document.getElementById('quantityInput');
                 const submitBtn = document.getElementById('submitBtn');
+                const maxBtn = document.getElementById('maxBtn');
             
-                var necessita = parseInt(qtde_solic, 10) - parseInt(getQuantidadeLocalStorage(codItem, getStorageKey()), 10);
+                var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
+                var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
 
-                console.log(necessita)
-                console.log(qtde_solic)
-                console.log(getQuantidadeLocalStorage(codItem, getStorageKey()))
-                console.log(parseInt(qtde_solic, 10) - parseInt(getQuantidadeLocalStorage(codItem, getStorageKey()), 10))
+                msge.textContent = `${qtde_separada} / ${qtde_solic}`;
+                obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
+                info.textContent = `(${qtde_faltante} faltante)`;
 
-                message.textContent = `${necessita}/${qtde_solic} Estoque: ${maxEstoque}`;
-                input.max = Math.min(necessita, maxEstoque);
-            
-                popup.classList.remove('hidden');
-            
-                submitBtn.onclick = function() {
-                    const value = parseInt(input.value);
-                    if (value > 0 && value <= input.max) {
-                        popup.classList.add('hidden');
-                        onSubmit(value);
-                    } else {
-                        alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
-                    }
+                maxEstoque = maxEstoque - this_qtde_separada
+                input.max = Math.min(qtde_faltante, maxEstoque);
+
+                maxBtn.onclick = function() {
+                    input.value = input.max;
                 };
+                
+                if (qtde_faltante <= 0) {
+                    alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
+                } else {
+                    popup.classList.remove('hidden');
+
+                    submitBtn.onclick = function() {
+                        const value = parseInt(input.value);
+                        if (value > 0 && value <= input.max) {
+                            popup.classList.add('hidden');
+                            onSubmit(value);
+                        } else {
+                            alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
+                        }
+                    };
+                }
             }
             
-            function getQuantidadeLocalStorage(cod_item, storageKey) {
+            function getQtdeItemLS(storageKey, cod_item) {
                 const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
                 const quantidade = storage.reduce((acc, item) => {
                     if (item.cod_item === cod_item) {
-                    return acc + item.qtde_solic;
+                        return acc + item.qtde_solic;
                     }
                     return acc;
                 }, 0);
                 return quantidade;
             }
 
-            function pushItemIntoSeparacao(maxEstoque, solicitado) {
-                showQuantityPopup(solicitado, maxEstoque, function(value) {
+            function getQtdeItemEnderecoLS(storageKey, cod_item, nroCarga, lote_item, rua_letra, rua_numero) {
+                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
+                const quantidade = storage.reduce((acc, item) => {
+                    if (
+                      item.cod_item === cod_item && 
+                      item.rua_letra === rua_letra && 
+                      item.rua_numero === rua_numero && 
+                      item.lote_item === lote_item 
+                    ) {
+                        return acc + item.qtde_solic;
+                    }
+                    return acc;
+                }, 0);
+                return quantidade;
+            }
+
+            function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lote_item) {
+                var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroCarga, lote_item, rua_letra, rua_numero);
+                showQuantityPopup(qtdeSolic, maxEstoque, this_qtde_separada, function(value) {
+                    showLoading();
+                    addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value)
+                    hideLoading();
                     alert(`Você inseriu: ${value}`);
                 });
             }
-            
 
         </script>
 
