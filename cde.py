@@ -1809,6 +1809,8 @@ def carga_id(id_carga):
             AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
             AND CURRENT DATE
 
+            ORDER BY COD_ITEM
+
             LIMIT 100;
         '''
 

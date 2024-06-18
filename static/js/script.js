@@ -293,6 +293,15 @@ function togglePopUp() {
     }
 }
 
+function toggleCart() {
+    const cartDropdown = document.getElementById('cart-dropdown');
+    cartDropdown.classList.toggle('hidden');
+
+    if (!cartDropdown.classList.contains('hidden')) {
+        renderSubtotals();
+    }
+}
+
 
 // const toggleTheme = document.getElementById('toggle-theme');
 // toggleTheme.addEventListener('click', () => {

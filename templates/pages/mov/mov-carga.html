@@ -8,14 +8,14 @@
         {% if id_carga %}
             <div class="tables-container" style="max-width: 50%">
                 <h1 style="margin-bottom: 8px">Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
-                <div id="standardTable" class="hidden" style="max-height: 500px; overflow-y: auto;">
+                <div id="standardTable" class="hidden">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                         <p>Lista Detalhada</p>
                         <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/list-end.svg') }}" alt="">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
                         </div>
                     </div>
-                    <table>
+                    <table style="max-height: 500px; overflow-y: auto;">
                         <thead>
                             <tr>
                                 <th>Pedido SEQ</th>
@@ -55,14 +55,14 @@
                         </tbody>
                     </table>
                 </div>
-                <div id="detailedTable" style="max-height: 500px; overflow-y: auto;">
+                <div id="detailedTable">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                         <p>Lista Subtotal</p>
                         <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
                         </div>
                     </div>
-                    <table>
+                    <table style="max-height: 500px; overflow-y: auto;">
                         <thead>
                             <tr>
                                 <th>Item (Código)</th>
@@ -86,16 +86,26 @@
                             {% endfor %}
                             
                             {% for row_cod_item, item in items.items() %}
-                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')">
+                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
+                                onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')">
                                     <td>{{ row_cod_item }}</td>
                                     <td style="text-wrap: balance;">{{ item.desc }}</td>
                                     <td>{{ item.qtde }}</td>
-                                </tr>
+                                </tr> 
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
                 <br>
+                <div class="cart-container">
+                    <button class="cart-button" onclick="toggleCart()">Separados<span class="item-count">0</span></button>
+                    <div class="cart-dropdown hidden" id="cart-dropdown">
+                        <ul class="cart-items">
+                            <!-- Itens do carrinho serão renderizados aqui -->
+                        </ul>
+                        <button class="checkout-button">Finalizar Separação</button>
+                    </div>
+                </div>
             </div>
         {% endif %}
         {% if 'privilegio' in session %}
@@ -125,16 +135,6 @@
                                     </thead>
                                     <tbody>
                                         {% for row in result_local %}
-                                        <!--
-                                            <tr class="selectable-row" onclick="addItem(
-                                                '{{ id_carga }}', '{{ cod_item }}',
-                                                '{{ row[columns_local.index('lote_item')] }}',
-                                                '{{ row[columns_local.index('rua_letra')] }}',
-                                                '{{ row[columns_local.index('rua_numero')] }}',
-                                                '{{ qtde_solic }}',
-                                                '{{ session['id_user'] }}'
-                                            )">
-                                        -->
                                             <tr class="selectable-row" onclick="pushItemIntoSeparacao(
                                                 '{{ row[columns_local.index('saldo')]     }}', '{{ request.args.get('qtde_solic')         }}',
                                                 '{{ row[columns_local.index('rua_letra')] }}', '{{ row[columns_local.index('rua_numero')] }}',
@@ -162,6 +162,7 @@
             <input type="hidden" id="carga_id_input" name="carga_id">
             <input type="hidden" id="qtde_item_input" name="qtde_solic">
         </form>
+
         {% if 'privilegio' in session %}
             {% if id_carga %}
                 <div style="display: flex; flex-direction: column; gap: 6px">
@@ -266,7 +267,7 @@
                 </div>
                 <button class="btn-fancy" id="submitBtn" required>Enviar</button>
             </div>
-        </div>        
+        </div>
     </div>
 
         <script>
@@ -274,6 +275,10 @@
             const nroCarga = '{{ id_carga }}';
             var codItem = '{{ cod_item }}';
             var userID = '{{ session['id_user'] }}';
+            var itemCount = 0;
+            if (nroCarga != '') {
+                renderSubtotals();
+            }
 
             function getStorageKey() {
                 return `separacao-carga-${nroCarga}`;
@@ -359,6 +364,55 @@
                         }
                     };
                 }
+            }
+
+            function renderSubtotals() {
+                const cartItemsContainer = document.querySelector('.cart-items');
+                cartItemsContainer.innerHTML = '';
+            
+                const sepCarga = getSeparacao();
+            
+                let subtotals = {};
+            
+                sepCarga.forEach(item => {
+                    if (subtotals[item.cod_item]) {
+                        subtotals[item.cod_item] += item.qtde_solic;
+                    } else {
+                        subtotals[item.cod_item] = item.qtde_solic;
+                    }
+                });
+            
+                const sortedEntries = Object.entries(subtotals).sort((a, b) => {
+                    const codA = a[0].toUpperCase();
+                    const codB = b[0].toUpperCase();
+            
+                    if (codA < codB) {
+                        return -1;
+                    }
+                    if (codA > codB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+            
+                let itemCount = 0;
+            
+                sortedEntries.forEach(([cod_item, subtotal]) => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('cart-item');
+                    listItem.innerHTML = `
+                        <span class="item-name">${cod_item} |</span>
+                        <span class="item-quantity cor-web">${subtotal}</span>
+                    `;
+                    cartItemsContainer.appendChild(listItem);
+                    itemCount += 1;
+                });
+            
+                updateItemCount(itemCount);
+            }
+
+            function updateItemCount(itemCount) {
+                document.querySelector('.item-count').textContent = itemCount;
             }
             
             function getQtdeItemLS(storageKey, cod_item) {
