@@ -23,8 +23,14 @@
                 <tbody>
                 </tbody>
             </table>
-            <button onclick="clearItems()">LIMPAR</button>
-            <button onclick="reloadTables()">RECARREGAR</button>
+            <div style="margin-top: 8px" class="flex-row">
+                <div class="button-mini btn-fancy" onclick="clearItems()">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                </div>
+                <div class="button-mini btn-fancy" onclick="reloadTables()">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
+                </div>
+            </div>
         </div>
     </div>
     <div class="tables-container" style="max-width: 20vw">
@@ -51,7 +57,11 @@
             <tbody>
             </tbody>
         </table>
-        <button onclick="clearAllSeparations()">LIMPAR</button>
+        <div style="margin-top: 8px" class="flex-row">
+            <div class="button-mini btn-fancy" onclick="clearAllSeparations()">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+            </div>
+        </div>
         <br>
         <p>(todos os registros em localStorage)<p>
     </div>
