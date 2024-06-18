@@ -95,9 +95,8 @@ function lockIcoShow() {
 
 
 function showLoading() {
-    document.getElementById("loading-content").style.display = "fixed";
+    document.getElementById("loading-content").style.display = "block";
     document.getElementById("loading-content").style.opacity = "1";
-
 }
 
 
@@ -246,9 +245,9 @@ function toggleTable(linha) {
 function scrollFunction() {
     var button = document.getElementById("scroll-to-top-button");
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-        button.classList.remove("hidden");
+        button.classList.remove("hidden-opacity");
     } else {
-        button.classList.add("hidden");
+        button.classList.add("hidden-opacity");
     }
 }
 
