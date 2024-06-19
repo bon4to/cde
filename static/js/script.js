@@ -142,6 +142,11 @@ function alterarCor() {
     document.documentElement.style.setProperty("--cor-destaque", novaCor);
 }
 
+function verifyCaptcha() {
+    const captcha = 'CONFIRMAR';
+    const userInput = prompt(`Por favor, digite '${captcha}' para confirmar a remoção:`);
+    return userInput === captcha;
+}
 
 function maximizeText(text) {
     if (text.value != '') {
