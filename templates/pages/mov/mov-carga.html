@@ -455,7 +455,8 @@
                 var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroCarga, lote_item, rua_letra, rua_numero);
                 showQuantityPopup(qtdeSolic, maxEstoque, this_qtde_separada, function(value) {
                     showLoading();
-                    addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value)
+                    addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value);
+                    renderSubtotals();
                     hideLoading();
                 });
             }
