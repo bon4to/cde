@@ -664,7 +664,7 @@ def check_key(hashed_pwd, pwd):                                                 
     return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
-def get_saldo_item(numero, letra, cod_item, cod_lote):                                                          #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
+def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):                                                          #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -675,7 +675,6 @@ def get_saldo_item(numero, letra, cod_item, cod_lote):                          
             END), 0) as saldo
             FROM historico h
             WHERE rua_numero = ? AND rua_letra = ? AND desc_item = ? AND lote_item = ?;
-        ''', (numero, letra, cod_item, cod_lote))
         saldo_item = cursor.fetchone()[0]
     return saldo_item
 
