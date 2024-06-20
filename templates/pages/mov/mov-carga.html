@@ -6,8 +6,18 @@
 
         {% include 'shared/header/tl-header.html' %}
         {% if id_carga %}
-            <div class="tables-container" style="max-width: 50%">
+            <div class="tables-container" style="max-width: 50%;">
                 <h1 style="margin-bottom: 8px">Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
+                <div class="cart-container">
+                    <button class="cart-button" onclick="toggleCart()">Itens Separados<span class="item-count">0</span>
+                    </button>
+                    <div class="cart-dropdown hidden" id="cart-dropdown">
+                        <ul class="cart-items">
+                            <!-- Itens serão renderizados aqui -->
+                        </ul>
+                        <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep', id_carga=id_carga) }}';">Finalizar Separação</button>
+                    </div>
+                </div>
                 <div id="standardTable" class="hidden">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                         <p>Lista Detalhada</p>
@@ -97,21 +107,12 @@
                     </table>
                 </div>
                 <br>
-                <div class="cart-container">
-                    <button class="cart-button" onclick="toggleCart()">Separados<span class="item-count">0</span></button>
-                    <div class="cart-dropdown hidden" id="cart-dropdown">
-                        <ul class="cart-items">
-                            <!-- Itens do carrinho serão renderizados aqui -->
-                        </ul>
-                        <button class="checkout-button">Finalizar Separação</button>
-                    </div>
-                </div>
             </div>
         {% endif %}
         {% if 'privilegio' in session %}
             {% if id_carga %}
                 {% if cod_item %}
-                    <div class="tables-container" style="max-width: 40%">
+                    <div class="tables-container glow-tl" style="max-width: 40%">
                         <span style="display:space-between: width: 100%;">
                             <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
                         </span>
@@ -143,7 +144,7 @@
                                                 <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
                                                 <td>{{ row[columns_local.index('cod_item')] }}</td>
                                                 <td>{{ row[columns_local.index('lote_item')] }}</td>
-                                                <td>{{ row[columns_local.index('saldo')] }}</td>    
+                                                <td {% if qtde_solic|int < row[columns_local.index('saldo')] %} style="color: green"{% else %} style="color: red"{% endif %}>{{ row[columns_local.index('saldo')] }}</td>    
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -248,7 +249,7 @@
         {% endif %}
         <div id="quantityPopup" class="dialog-overlay hidden">
             <div class="dialog-box">
-                <h1>Separar <span class="cor-web">{{ cod_item }}</span>:</h1>
+                <h1 style="margin-top: 8px;margin-bottom: 14px;">Separar <span class="cor-web">{{ cod_item }}</span>:</h1>
                 <h1 class="sub-label">Separados:</h1>
                 <div class="flex-column">
                     <h3 id="popupMessage"></h3>
@@ -265,7 +266,9 @@
                     </h3>
                     <p id="popupObs"></p>
                 </div>
-                <button class="btn-fancy" id="submitBtn" required>Enviar</button>
+                <br>
+                <button class="btn-fancy" id="submitBtn" required>Confirmar</button>
+                <a class="aux-button" onclick="hidePopUp()">Cancelar</a>
             </div>
         </div>
     </div>
@@ -284,9 +287,10 @@
                 return `separacao-carga-${nroCarga}`;
             }
 
-            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic) {
+            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
                 let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, userID };
+                let user_id = userID
+                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep, user_id };
                 sepCarga.push(item);
                 localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
             }
@@ -366,6 +370,11 @@
                 }
             }
 
+            function hidePopUp() {
+                const popup = document.getElementById('quantityPopup');
+                popup.classList.add('hidden');
+            }
+
             function renderSubtotals() {
                 const cartItemsContainer = document.querySelector('.cart-items');
                 cartItemsContainer.innerHTML = '';
@@ -376,9 +385,9 @@
             
                 sepCarga.forEach(item => {
                     if (subtotals[item.cod_item]) {
-                        subtotals[item.cod_item] += item.qtde_solic;
+                        subtotals[item.cod_item] += item.qtde_sep;
                     } else {
-                        subtotals[item.cod_item] = item.qtde_solic;
+                        subtotals[item.cod_item] = item.qtde_sep;
                     }
                 });
             
@@ -419,7 +428,7 @@
                 const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
                 const quantidade = storage.reduce((acc, item) => {
                     if (item.cod_item === cod_item) {
-                        return acc + item.qtde_solic;
+                        return acc + item.qtde_sep;
                     }
                     return acc;
                 }, 0);
@@ -435,7 +444,7 @@
                       item.rua_numero === rua_numero && 
                       item.lote_item === lote_item 
                     ) {
-                        return acc + item.qtde_solic;
+                        return acc + item.qtde_sep;
                     }
                     return acc;
                 }, 0);
@@ -448,7 +457,6 @@
                     showLoading();
                     addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value)
                     hideLoading();
-                    alert(`Você inseriu: ${value}`);
                 });
             }
 

@@ -6,31 +6,31 @@
 
     {% include 'shared/header/tl-header.html' %}
     <div class="tables-container">
-        <h1>Lista de Itens da Carga <span class="cor-web">{{ id_carga }}</span></h1>
+        <h1>Itens Separados da Carga <span class="cor-web">{{ id_carga }}</span></h1>
         <div>
             <table id="itemsTable">
                 <thead>
                     <tr>
                         <th>Carga (Código)</th>
+                        <th>Usuário</th>
+                        <th>Endereço</th>
                         <th>Item (Código)</th>
                         <th>Lote (Código)</th>
-                        <th>Quantidade</th>
-                        <th>Endereço</th>
-                        <th>Usuário</th>
-                        <th>Ações</th>
+                        <th>QTDE (Separado)</th>
                     </tr>
                 </thead>
                 <tbody>
                 </tbody>
             </table>
             <div style="margin-top: 8px" class="flex-row">
-                <div class="button-mini btn-fancy" onclick="clearItems()">
+                <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </div>
-                <div class="button-mini btn-fancy" onclick="reloadTables()">
+                <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
                 </div>
             </div>
+            <button class="btn-fancy" onclick="bulkInsertHistorico()">Movimentar</button>
         </div>
     </div>
     <div class="tables-container" style="max-width: 20vw">
@@ -39,7 +39,7 @@
             <thead>
                 <tr>
                     <th>Item (Código)</th>
-                    <th>Subtotal (Quantidade)</th>
+                    <th>Subtotal (QTDE)</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,13 +57,13 @@
             <tbody>
             </tbody>
         </table>
+        
+        <div style="margin: 10px"><p>(todos os registros em localStorage)<p></div>
         <div style="margin-top: 8px" class="flex-row">
-            <div class="button-mini btn-fancy" onclick="clearAllSeparations()">
+            <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
                 <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
             </div>
         </div>
-        <br>
-        <p>(todos os registros em localStorage)<p>
     </div>
 
     <script>
@@ -73,33 +73,32 @@
             return `separacao-carga-${nroCarga}`;
         }
 
-        function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id) {
-            let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-            let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_solic, user_id };
-            sepCarga.push(item);
-            localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
-            renderItems();
-        }
-
         function getSeparacao() {
             return JSON.parse(localStorage.getItem(getStorageKey())) || [];
         }
 
         function removeItem(index) {
-            let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-            sepCarga.splice(index, 1);
-            localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
-            renderItems();
+            const confirmation = confirm('Você tem certeza que deseja remover este item?');
+            if (confirmation) {
+                let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+                sepCarga.splice(index, 1);
+                localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+                renderItems();
+            }
         }
+        
 
         function clearItems() {
-            localStorage.removeItem(getStorageKey());
-            renderItems();
+            const confirmation = confirm(`Você tem certeza que deseja limpar a separacao de ${nroCarga}?`);
+            if (confirmation) {
+                localStorage.removeItem(getStorageKey());
+                renderItems();
+            }
         }
 
         function updateQuantity(index, newQuantity) {
             let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-            sepCarga[index].qtde_solic = newQuantity;
+            sepCarga[index].qtde_sep = newQuantity;
             localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
             renderItems();
         }
@@ -112,27 +111,34 @@
             sepCarga.forEach((item, index) => {
                 const row = itemsTable.insertRow();
                 row.insertCell(0).textContent = item.nrocarga;
-                row.insertCell(1).textContent = item.cod_item;
-                row.insertCell(2).textContent = item.lote_item;
-                row.insertCell(3).textContent = item.qtde_solic;
-                row.insertCell(4).textContent = item.rua_letra + '.' + item.rua_numero;
-                row.insertCell(5).textContent = item.user_id;
-                const actionsCell = row.insertCell(6);
+                row.insertCell(1).textContent = item.user_id;
+                row.insertCell(2).textContent = item.rua_letra + '.' + item.rua_numero;
+                row.insertCell(3).textContent = item.cod_item;
+                row.insertCell(4).textContent = item.lote_item;
+                row.insertCell(5).textContent = item.qtde_sep;
 
-                const updateBtn = document.createElement('button');
-                updateBtn.textContent = 'Atualizar';
+                const actionsDiv = document.createElement('div');
+                actionsDiv.classList.add('action-buttons');
+
+                /*
+                const updateBtn = document.createElement('div');
+                updateBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/hammer.svg') }}" alt="">';
                 updateBtn.onclick = () => {
-                    const newQuantity = prompt('Informe a nova quantidade:', item.qtde_solic);
+                    const newQuantity = prompt('Informe a nova quantidade:', item.qtde_sep);
                     if (newQuantity !== null) {
                         updateQuantity(index, parseInt(newQuantity, 10));
                     }
                 };
-                actionsCell.appendChild(updateBtn);
+                actionsDiv.appendChild(updateBtn);
+                */
 
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = 'Remover';
+                const removeBtn = document.createElement('div');
+                removeBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">';
+                removeBtn.title = `REMOVER DE ${item.cod_item}`
                 removeBtn.onclick = () => removeItem(index);
-                actionsCell.appendChild(removeBtn);
+                actionsDiv.appendChild(removeBtn);
+
+                row.appendChild(actionsDiv);
             });
 
             renderSubtotals();
@@ -147,9 +153,9 @@
 
             sepCarga.forEach(item => {
                 if (subtotals[item.cod_item]) {
-                    subtotals[item.cod_item] += item.qtde_solic;
+                    subtotals[item.cod_item] += item.qtde_sep;
                 } else {
-                    subtotals[item.cod_item] = item.qtde_solic;
+                    subtotals[item.cod_item] = item.qtde_sep;
                 }
             });
 
@@ -161,15 +167,58 @@
         }
 
         function clearAllSeparations() {
-            for (let i = localStorage.length - 1; i >= 0; i--) {
-                const key = localStorage.key(i);
-                if (key.startsWith('separacao-carga-')) {
-                    localStorage.removeItem(key);
+            const confirmation = confirm('Você tem certeza que deseja limpar TODAS as separações? Esta ação não pode ser desfeita.');
+            if (confirmation) {
+                if (!verifyCaptcha()) {
+                    alert('O captcha foi cancelado ou preenchido incorretamente.')
+                } else {
+                    for (let i = localStorage.length - 1; i >= 0; i--) {
+                        const key = localStorage.key(i);
+                        if (key.startsWith('separacao-carga-')) {
+                            localStorage.removeItem(key);
+                        }
+                    }
+                    reloadTables()
+                    alert('Operação concluída.')
                 }
             }
-            renderItems();
-            listAllSeparations();
         }
+
+        function bulkInsertHistorico() {
+            const confirmation = confirm(`[CARGA: ${nroCarga}] Você tem certeza que deseja finalizar a separação?`);
+            if (confirmation) {
+                const storageKey = getStorageKey();
+                const sepCarga = JSON.parse(localStorage.getItem(storageKey)) || [];
+                
+                if (sepCarga.length === 0) {
+                    alert('Não há dados para enviar.');
+                    return;
+                }
+            
+                fetch('/bulk_insert_historico', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(sepCarga),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Movimentação em massa realizada com sucesso.');
+                        localStorage.removeItem(storageKey); // limpa a separacao atual
+                    } else {
+                        alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert(`Erro ao realizar movimentação em massa: ${error.message}`);
+                });
+            } 
+        }
+        
+        
 
         function listAllSeparations() {
             const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
