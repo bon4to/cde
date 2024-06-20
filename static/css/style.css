@@ -1,9 +1,21 @@
 /* ESTILIZAÇÃO */
 
+:root {
+    --cor-cde: #3e5ea6;
+    --cor-hp: #8f7943;
+    --cor-tl: #ea5a26;
+    --programmed-l1: 255, 172, 160;
+    --programmed-l2: 181, 229, 140;
+    --programmed-l3: 165, 165, 255;
+    --programmed-l4: 255, 165, 80;
+    --programmed-l5: 165, 235, 255;
+    --programmed-l6: 255, 165, 225;
+    --programmed-l7: 255, 220, 165;
+}
 
 html, body {
     height: 100%;
-    font-family: 'Calibri Light', sans-serif;
+    font-family: 'Calibri', sans-serif;
     margin: 0;
     padding: 0;
     background-color: #ffffff;
@@ -219,7 +231,6 @@ h4 {
     flex-direction: column;
     align-items: center;
     bottom: 0;
-    min-height: 100%;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
     margin-top: auto;
     user-select: none;
@@ -459,13 +470,15 @@ th, td {
     max-width: 300px;
     text-overflow: ellipsis;
     white-space: nowrap;
+    overflow: hidden;
     font-variant-numeric: tabular-nums;
 }
 
 th {
     background-color: rgba(52, 49, 50, 1);
     color: #fff;
-    font-weight: bolder;
+    font-family: 'Calibri Light';
+    font-weight: bold;
     border-bottom: 4px solid var(--cor-destaque);
     
 }
@@ -987,7 +1000,7 @@ p.user-name {
     font-weight: bold;
     font-size: 20px;
     text-shadow: 0 0 10px #222222;
-    font-family: 'Calibri Light', sans-serif;
+    font-family: 'Calibri', sans-serif;
     right: 11.2%;
     cursor: pointer;
     pointer-events: auto;
@@ -1128,16 +1141,6 @@ th.calendar {
 
 .weekend {
     background-color: #f0f0f0;
-}
-
-:root {
-    --programmed-l1: 255, 172, 160;
-    --programmed-l2: 181, 229, 140;
-    --programmed-l3: 165, 165, 255;
-    --programmed-l4: 255, 165, 80;
-    --programmed-l5: 165, 235, 255;
-    --programmed-l6: 255, 165, 225;
-    --programmed-l7: 255, 220, 165;
 }
 
 .programmed-l1 {
@@ -1662,19 +1665,32 @@ h1.subtitle {
     background-color: #409642;
 }
 
+#table-filter {
+    background-color: #3e5ea640;
+    padding: 6px;
+    border: 1px solid var(--cor-cde);
+    border-radius: 12px;
+    justify-content: flex-end;
+    margin: 8px 0;
+}
+
+#table-filter input, select {
+    margin: 4px;
+}
+
 .glow-cde {
     background-color: #3e5ea640;
-    border: 1px solid var(--cor-destaque)
+    border: 1px solid var(--cor-cde);
 }
 
 .glow-tl {
     background-color: #ea5a2640;
-    border: 1px solid var(--cor-destaque)
+    border: 1px solid var(--cor-tl);
 }
 
 .glow-hp {
     background-color: #8f794340;
-    border: 1px solid var(--cor-destaque);
+    border: 1px solid var(--cor-hp);
 }
 
 
