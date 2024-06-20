@@ -406,7 +406,7 @@ def get_end_lote_fat():                                                         
                       h.desc_item, h.lote_item
             HAVING saldo   != 0
             AND h.id_carga != 0
-            ORDER BY h.desc_item;
+            ORDER BY h.id_carga DESC, h.desc_item;
         ''')
 
         end_lote = [{
@@ -416,6 +416,23 @@ def get_end_lote_fat():                                                         
         } for row in cursor.fetchall()]
 
     return end_lote
+
+
+def get_all_cargas():
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT DISTINCT id_carga
+            FROM historico
+            ORDER BY id_carga DESC;
+        ''')
+
+        all_cargas = [
+            int(str(row[0])[:-1]) 
+            for row in cursor.fetchall() 
+            if row[0] is not None and len(str(row[0])) > 1
+        ]
+    return all_cargas
 
 
 def get_ult_acesso():                                                                                           #* RETORNA ULTIMO ACESSO DO USUÁRIO
@@ -675,6 +692,7 @@ def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):                  
             END), 0) as saldo
             FROM historico h
             WHERE rua_numero = ? AND rua_letra = ? AND desc_item = ? AND lote_item = ?;
+        ''', (rua_numero, rua_letra, cod_item, cod_lote))
         saldo_item = cursor.fetchone()[0]
     return saldo_item
 
@@ -734,6 +752,39 @@ def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, t
             id_carga))
         
         connection.commit()
+
+
+@app.route('/bulk_insert_historico', methods=['POST'])
+def bulk_insert_historico():
+    sep_carga = request.json
+    timestamp_br = datetime.now(timezone(timedelta(hours=-3)))
+    timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
+    
+    try:
+        for item in sep_carga:
+            haveItem = get_saldo_item(item['rua_numero'], item['rua_letra'], item['cod_item'], item['lote_item'])
+            if haveItem < item['qtde_sep']:
+                return jsonify({'success': False, 'error': f'Saldo insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
+        
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            for item in sep_carga:
+                insert_historico(
+                    numero=item['rua_numero'],
+                    letra=item['rua_letra'],
+                    cod_item=item['cod_item'],
+                    lote_item=item['lote_item'],
+                    quantidade=item['qtde_sep'],
+                    operacao='F',
+                    timestamp_out=timestamp_out,
+                    id_carga=str(item['nrocarga']) + '0'
+                )
+            connection.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f'Erro ao inserir histórico: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 
 #! ROTAS DE ACESSO | URL
@@ -1838,36 +1889,71 @@ def carga_id(id_carga):
 @verify_auth('MOV006')
 def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
     if request.method == 'POST':
-        query = '''
-            SELECT DISTINCT 
-                crg.CODIGO_GRUPOPED AS NRO_CARGA,
-                crg.NRO_PEDIDO      AS NRO_PEDIDO,
-                ped.CODIGO_CLIENTE  AS COD_CLIENTE,
-                cl.FANTASIA         AS FANT_CLIENTE,
-                iped.DT_EMISSAO     AS DT_EMISSAO,
-                iped.DT_ENTREGA     AS DT_ENTREGA
+        all_cargas = get_all_cargas()
+        if all_cargas:
+            cargas_str_query = ', '.join(map(str, all_cargas))
+            query = f'''
+                SELECT DISTINCT 
+                    crg.CODIGO_GRUPOPED AS NRO_CARGA,
+                    crg.NRO_PEDIDO      AS NRO_PEDIDO,
+                    ped.CODIGO_CLIENTE  AS COD_CLIENTE,
+                    cl.FANTASIA         AS FANT_CLIENTE,
+                    iped.DT_EMISSAO     AS DT_EMISSAO,
+                    iped.DT_ENTREGA     AS DT_ENTREGA
 
-            FROM DB2ADMIN.ITEMPED iped
+                FROM DB2ADMIN.ITEMPED iped
 
-            JOIN DB2ADMIN.IGRUPOPE crg
-            ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
-            AND crg.SEQ = iped.SEQ
+                JOIN DB2ADMIN.IGRUPOPE crg
+                ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+                AND crg.SEQ = iped.SEQ
 
-            JOIN DB2ADMIN.PEDIDO ped
-            ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+                JOIN DB2ADMIN.PEDIDO ped
+                ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
 
-            JOIN DB2ADMIN.CLIENTE cl
-            ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+                JOIN DB2ADMIN.CLIENTE cl
+                ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
 
-            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
-            ON i.ITEM = iped.ITEM
+                JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+                ON i.ITEM = iped.ITEM
 
-            WHERE crg.QTDE_FATUR != 0
-            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
-            AND CURRENT DATE
+                WHERE crg.QTDE_FATUR != 0
+                AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
+                AND CURRENT DATE
+                AND crg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
 
-            ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
-        '''
+                ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
+            '''
+        else:
+            query = '''
+                SELECT DISTINCT 
+                    crg.CODIGO_GRUPOPED AS NRO_CARGA,
+                    crg.NRO_PEDIDO      AS NRO_PEDIDO,
+                    ped.CODIGO_CLIENTE  AS COD_CLIENTE,
+                    cl.FANTASIA         AS FANT_CLIENTE,
+                    iped.DT_EMISSAO     AS DT_EMISSAO,
+                    iped.DT_ENTREGA     AS DT_ENTREGA
+
+                FROM DB2ADMIN.ITEMPED iped
+
+                JOIN DB2ADMIN.IGRUPOPE crg
+                ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
+                AND crg.SEQ = iped.SEQ
+
+                JOIN DB2ADMIN.PEDIDO ped
+                ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+
+                JOIN DB2ADMIN.CLIENTE cl
+                ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+                JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+                ON i.ITEM = iped.ITEM
+
+                WHERE crg.QTDE_FATUR != 0
+                AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
+                AND CURRENT DATE
+
+                ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
+            '''
         
         dsn_name = 'HUGOPIET'
         dsn = dsn_name
