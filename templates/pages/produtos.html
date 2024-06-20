@@ -71,10 +71,10 @@
                     </div>
                 {% endif %}
                 <div style="justify-content: flex-end" >
-                    <label for="searchInput1"></label>
+                    <label for="filterInput"></label>
                     <label for="filterSelect"></label>
                     <div id="table-filter" style="display: none" >
-                        <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
+                        <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
                         <select class="address" id="filterSelect" onchange="updateFilterIndex()">
                             <option value="0">Item (Código)</option>
                             <option value="1">Item (Descrição)</option>
@@ -84,7 +84,7 @@
                     </div>
                 </div>
                     <div style="max-height: 600px; overflow-y: auto;">
-                        <table class="saldoTable">
+                        <table id="filterTable">
                             <tr>
                                 <th>Item (Código)</th>
                                 <th>Item (Descrição)</th>

@@ -196,24 +196,24 @@
                     </div>
                 </div>
                 <div style="justify-content: flex-end">
-                    <label for="searchInput1"></label>
+                    <label for="filterInput"></label>
                     <label for="filterSelect"></label>
                     <div id="table-filter" style="display: none" >
-                        <input type="text" class="searchInput" id="searchInput1" oninput="filterTable()" placeholder="Filtrar por...">
-                        <select class="address" name="filterIndex" id="filterSelect" onchange="updateFilterIndex()">
-                            <option value=1>Produto (Código)</option>
+                        <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                            <option value=1>Item (Código)</option>
                             <option value=0>Endereço</option>
-                            <option value=2>Produto (Descrição)</option>
+                            <option value=2>Item (Descrição)</option>
                             <option value=3>Lote (Código)</option>
                         </select>
                     </div>
                 </div>
                 <div class="table-overflow">
-                    <table class="saldoTable">
+                    <table id="filterTable">
                         <tr>
                             <th>Endereço</th>
-                            <th>Produto (Código)</th>
-                            <th>Produto (Descrição)</th>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
                             <th>Lote (Código)</th>
                             <th>Quantidade</th>
                         </tr>

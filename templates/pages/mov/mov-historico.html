@@ -18,14 +18,14 @@
                     </div>
                 </div>
                     <div style="justify-content: flex-end" >
-                        <label for="searchInput1"></label>
+                        <label for="filterInput"></label>
                         <label for="filterSelect"></label>
                         <div id="table-filter" style="display: none" >
                         <form style="display: flex; flex-direction: row" id="search-all" method="post" action="/mov/historico/search">
-                            <input type="text" class="searchInput" id="searchInput1" name="search_term" oninput="filterTable()" placeholder="Filtrar por...">
+                            <input type="text" class="filterInput" id="filterInput" name="search_term" oninput="filterTable()" placeholder="Filtrar por...">
                             <select class="address" id="filterSelect" name="search_index" onchange="updateFilterIndex()">
-                                <option value="cod_item">Produto (Código)</option>
-                                <option value="desc_item">Produto (Descrição)</option>
+                                <option value="cod_item">Item (Código)</option>
+                                <option value="desc_item">Item (Descrição)</option>
                                 <option value="endereco">Endereço</option>
                                 <option value="operacao">Operação (Descrição)</option>
                                 <option value="quantidade">Quantidade</option>
@@ -47,11 +47,11 @@
                 </div>
                     
                 <div style="max-height: 600px; overflow-y: auto;">
-                    <table class="saldoTable">
+                    <table id="filterTable">
                         <tr>
                             <th>Endereço</th>
-                            <th>Produto (Código)</th>
-                            <th>Produto (Descrição)</th>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
                             <th>Operação</th>
                             <th>Quantidade</th>
                             <th>Lote</th>

@@ -764,7 +764,7 @@ def bulk_insert_historico():
         for item in sep_carga:
             haveItem = get_saldo_item(item['rua_numero'], item['rua_letra'], item['cod_item'], item['lote_item'])
             if haveItem < item['qtde_sep']:
-                return jsonify({'success': False, 'error': f'Saldo insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
+                return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
         
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -2148,9 +2148,9 @@ def buscar_linhas():
             )
 
 
-@app.route('/saldo')
+@app.route('/estoque')
 @verify_auth('MOV004')
-def saldo():
+def estoque():
     saldo_visualization = get_saldo_view()
     return render_template(
         'pages/estoque.html', 
