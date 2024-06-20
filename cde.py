@@ -1150,8 +1150,8 @@ def historico_search():
         search_index = request.form['search_index']
         
         option_texts = {
-            'cod_item': 'Produto (Código)',
-            'desc_item': 'Produto (Descrição)',
+            'cod_item': 'Item (Código)',
+            'desc_item': 'Item (Descrição)',
             'endereco': 'Endereço',
             'operacao': 'Operação (Descrição)',
             'quantidade': 'Quantidade',
