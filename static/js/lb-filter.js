@@ -1,8 +1,6 @@
-// lb-filter por Lucas Bonato
-// versão: v1.0
+// lb-filter por Lucas G. Bonato
 
-
-const suplementstat_flt = ("Suplemento: [lb-filter v1.0]: ")
+const suplementstat_flt = ("Suplemento: [lb-filter v1.2]: ")
 
 // console.log(suplementstat_flt + "Iniciando...")
 try {
@@ -15,17 +13,19 @@ try {
 
 //FILTRO DE TABELA
 function filterTable() {
+    let input, table, select, filter, tbody, tr, td, i, txtValue;
 
-    let columnIndex = document.getElementById('filterSelect').value;
-    let input, filter, table, tbody, tr, td, i, txtValue;
-    input = document.querySelector(".searchInput");
+    select = document.getElementById("filterSelect");
+    input  = document.getElementById("filterInput");
+    table  = document.getElementById("filterTable");
+
+    tbody  = table.querySelector("tbody");
+    tr     = tbody.getElementsByTagName("tr");
     filter = input.value.toUpperCase();
-    table = document.querySelector(".saldoTable");
-    tbody = table.querySelector("tbody");
-    tr = tbody.getElementsByTagName("tr");
+    index  = select.value;
 
     for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[columnIndex];
+        td = tr[i].getElementsByTagName("td")[index];
         if (td) {
             txtValue = td.textContent || td.innerText;
             if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -55,7 +55,7 @@ function updateFilterIndex() {
 // OCULTAR FILTRO
 function toggleFilter() {
     let filter = document.getElementById('table-filter');
-    let input = document.getElementById('searchInput1');
+    let input = document.getElementById('filterInput');
 
     if (filter.style.display === 'flex') {
         filter.style.display = 'none';
