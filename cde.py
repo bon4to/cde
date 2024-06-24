@@ -5,6 +5,7 @@ import random
 import qrcode
 import pyodbc
 import base64
+import json
 import sys
 import io
 import re
@@ -577,6 +578,19 @@ def get_userdata(id_user):                                                      
         } for row in cursor.fetchall()]
 
         return user_data
+    
+
+@app.route('/upload-pdf', methods=['POST'])
+def upload_pdf():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if file:
+        filename = file.filename
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return jsonify({'success': 'File saved successfully'}), 200
 
 
 def select_rua(letra, numero):                                                                                  #* SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
@@ -1973,7 +1987,73 @@ def cargas():                                                                   
 @app.route('/mov/carga/<int:id_carga>/separacao', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep(id_carga):
-    return render_template('pages/mov/mov-carga-sep.html', id_carga=id_carga)
+    id_user = session.get('id_user')
+    user_info = get_userdata(id_user)
+    return render_template(
+        'pages/mov/mov-carga-sep.html', 
+        id_carga=id_carga, 
+        user_info=user_info
+    )
+
+
+
+@app.route('/mov/carga/<int:id_carga>/done', methods=['GET', 'POST'])
+@verify_auth('MOV006')
+def carga_done(id_carga):
+    id_user = session.get('id_user')
+    user_info = get_userdata(id_user)
+    return render_template(
+        'pages/mov/mov-carga-done.html', 
+        id_carga=id_carga, 
+        user_info=user_info
+    )
+
+
+@app.route('/save-localstorage', methods=['POST'])
+def save_localstorage():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'Nenhum dado recebido do localStorage.'}), 400
+        
+        items_data = data.get('data')
+        filename = data.get('filename')
+
+        if not items_data or not filename:
+            return jsonify({'error': 'Dados inválidos ou ausentes.'}), 400
+        
+        save_path = os.path.join(app.root_path, 'report/cargas', f'{filename}.json')
+
+        with open(save_path, 'w') as file:
+            json.dump(items_data, file)
+
+        return jsonify({'message': 'Dados do localStorage foram salvos com sucesso.'}), 200
+
+    except Exception as e:
+        print(f'Erro ao salvar dados do localStorage: {str(e)}')
+        return jsonify({'error': 'Erro interno ao salvar dados do localStorage.'}), 500
+    
+
+@app.route('/load-table-data', methods=['GET'])
+def load_table_data():
+    try:
+        filename = request.args.get('filename')
+        if not filename:
+            return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
+
+        filename = os.path.join(app.root_path, 'report/cargas', f'{filename}.json')
+
+        with open(filename, 'r') as file:
+            data = json.load(file)
+
+        return jsonify(data), 200
+    
+    except FileNotFoundError:
+        return jsonify({'error': 'Arquivo de dados da carga não encontrado.'}), 404
+    
+    except Exception as e:
+        return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
 
 
 @app.route('/produtos', methods=['GET', 'POST'])

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Separação {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+    <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+
+    {% include 'shared/header/tl-header.html' %}
+    <div class="tables-container" style="min-width: 100%; min-height:80px"></div>
+    <div class="flex-row" style="min-width: 100%;">
+        <div class="tables-container" style="min-width: 55vw;">
+            <h1>Cargas Emitidas <span class="cor-web">{{ id_carga }}</span></h1>
+            <div>
+                <table id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>Carga (Código)</th>
+                            <th>Usuário</th>
+                            <th>Endereço</th>
+                            <th>Item (Código)</th>
+                            <th>Lote (Código)</th>
+                            <th>QTDE (Separado)</th>
+                        </tr>
+                    </thead>
+                        <!-- execute renderItems(); -->
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="flex-row" style="margin: 8px 0">
+                    <div class="flex-row">
+                        <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
+                        </div>
+                        <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
+                        </div>
+                    </div>
+                    <div class="btn-fancy disabled" style="height: 45px; margin: 0" onclick="bulkInsertHistorico()">
+                        <span>FINALIZAR</span>
+                        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check-big.svg') }}" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tables-container" style="min-width: 20vw;">
+            <h1>Subtotal Separado</h1>
+            <table id="subtotalsTable">
+                <thead>
+                    <tr>
+                        <th>Item (Código)</th>
+                        <th>Subtotal (QTDE)</th>
+                    </tr>
+                </thead>
+                    <!-- execute renderSubtotals(); -->
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const nroCarga = '{{ id_carga }}';
+
+        function getStorageKey() {
+            return `separacao-carga-${nroCarga}`;
+        }
+
+        function getSeparacao() {
+            return new Promise((resolve, reject) => {
+                const localStorageData = localStorage.getItem(getStorageKey());
+        
+                if (localStorageData) {
+                    resolve(JSON.parse(localStorageData));
+                } else {
+                    fetch(`/load-table-data?filename=${getStorageKey()}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erro ao carregar dados do servidor');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            resolve(data);
+                        })
+                        .catch(error => {
+                            console.error('Erro ao carregar dados do servidor:', error);
+                            reject(error);
+                        });
+                }
+            });
+        }
+
+        function renderItems() {
+            const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+            itemsTable.innerHTML = '';
+            getSeparacao().then(sepCarga => {
+
+                console.log(sepCarga)
+
+                sepCarga.forEach((item, index) => {
+                    const row = itemsTable.insertRow();
+                    row.insertCell(0).textContent = item.nrocarga;
+                    row.insertCell(1).textContent = item.user_id;
+                    row.insertCell(2).textContent = item.rua_letra + '.' + item.rua_numero;
+                    row.insertCell(3).textContent = item.cod_item;
+                    row.insertCell(4).textContent = item.lote_item;
+                    row.insertCell(5).textContent = item.qtde_sep;
+                });
+            });
+        }
+
+        function renderSubtotals() {
+            const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
+            subtotalsTable.innerHTML = '';
+        
+            getSeparacao().then(sepCarga => {        
+                let subtotals = {};
+        
+                sepCarga.forEach(item => {
+                    if (subtotals[item.cod_item]) {
+                        subtotals[item.cod_item] += item.qtde_sep;
+                    } else {
+                        subtotals[item.cod_item] = item.qtde_sep;
+                    }
+                });
+        
+                console.log('subtotals:', subtotals);
+        
+                for (const [cod_item, subtotal] of Object.entries(subtotals)) {
+                    const row = subtotalsTable.insertRow();
+                    row.insertCell(0).textContent = cod_item;
+                    row.insertCell(1).textContent = subtotal;
+                }
+            }).catch(error => {
+                console.error('Erro ao obter separação:', error);
+            });
+        }
+        
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            getSeparacao().then(separacao => {
+                sendToServer(separacao, getStorageKey())
+            })
+
+            const userName = "{{ user_info['nome_user'] }} {{ user_info['sobrenome_user'] }}";
+            const currentDateTime = new Date().toLocaleString();
+
+            const tableData = [];
+            const rows = document.querySelectorAll("#itemsTable tbody tr");
+
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll("td").forEach(cell => {
+                    rowData.push(cell.innerText);
+                });
+                tableData.push(rowData);
+            });
+
+            const columns = [
+                { title: "Carga (Código)", dataKey: "id_carga" },
+                { title: "Endereço", dataKey: "rua_letra_endereco" },
+                { title: "Item (Código)", dataKey: "cod_item" },
+                { title: "Lote (Código)", dataKey: "lote_item" },
+                { title: "QTDE (Solicitada)", dataKey: "qtde_solic" }
+            ];
+
+            const data = tableData.map(row => ({
+                id_carga: row[0],
+                rua_letra_endereco: row[2],
+                cod_item: row[3],
+                lote_item: row[4],
+                qtde_solic: row[5]
+            }));
+
+            const addHeader = (doc) => {
+                doc.setFontSize(12);
+                doc.text(`Relatório de Cargas`, 10, 10);
+                doc.text(`Gerado por: ${userName}`, 10, 16);
+                doc.text(`Data/Hora: ${currentDateTime}`, 10, 22);
+            };
+
+            const addFooter = (doc, pageNumber) => {
+                const pageCount = doc.internal.getNumberOfPages();
+                doc.setFontSize(10);
+                doc.text(`Página ${pageNumber} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+                    align: 'center'
+                });
+            };
+
+            doc.autoTable({
+                head: [columns.map(col => col.title)],
+                body: data.map(item => columns.map(col => item[col.dataKey])),
+                didDrawPage: (data) => {
+                    addHeader(doc);
+                    addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
+                },
+                margin: { top: 30 }
+            });
+
+            const pdfName = `${getStorageKey()}.pdf`;
+            doc.save(pdfName)
+        }
+
+        function reloadTables() {
+            renderItems();
+            renderSubtotals();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            reloadTables();
+        });
+    </script>
+
+    {% include 'shared/footer.html' %}

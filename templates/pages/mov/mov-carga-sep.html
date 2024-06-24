@@ -7,7 +7,8 @@
     {% include 'shared/header/tl-header.html' %}
     <div class="tables-container">
         <h1>Itens Separados da Carga <span class="cor-web">{{ id_carga }}</span></h1>
-        <div>
+        <div class="msg-error hidden" id="alert-message"></div>
+        <div id="contentTable">
             <table id="itemsTable">
                 <thead>
                     <tr>
@@ -19,18 +20,27 @@
                         <th>QTDE (Separado)</th>
                     </tr>
                 </thead>
+                    <!-- execute renderItems(); -->
                 <tbody>
                 </tbody>
             </table>
-            <div style="margin-top: 8px" class="flex-row">
-                <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+            <div class="flex-row" style="margin: 8px 0">
+                <div class="flex-row">
+                    <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                    </div>
+                    <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
+                    </div>
+                    <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
+                    </div>
                 </div>
-                <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
+                <div class="btn-fancy" style="height: 45px; margin: 0" onclick="bulkInsertHistorico()">
+                    <span>FINALIZAR</span>
+                    <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check-big.svg') }}" alt="">
                 </div>
             </div>
-            <button class="btn-fancy" onclick="bulkInsertHistorico()">Movimentar</button>
         </div>
     </div>
     <div class="tables-container" style="max-width: 20vw">
@@ -42,6 +52,7 @@
                     <th>Subtotal (QTDE)</th>
                 </tr>
             </thead>
+                <!-- execute renderSubtotals(); -->
             <tbody>
             </tbody>
         </table>
@@ -51,17 +62,16 @@
         <table id="allSeparationsTable">
             <thead>
                 <tr>
-                    <th>Chave</th>
+                    <th>Chaves em localStorage</th>
                 </tr>
             </thead>
+                <!-- execute listAllSeparations(); -->
             <tbody>
             </tbody>
         </table>
-        
-        <div style="margin: 10px"><p>(todos os registros em localStorage)<p></div>
-        <div style="margin-top: 8px" class="flex-row">
+        <div style="margin: 8px 0" class="flex-row">
             <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
-                <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
             </div>
         </div>
     </div>
@@ -74,7 +84,26 @@
         }
 
         function getSeparacao() {
-            return JSON.parse(localStorage.getItem(getStorageKey())) || [];
+            return new Promise((resolve, reject) => {
+                const localStorageData = localStorage.getItem(getStorageKey());
+                if (localStorageData) {
+                    resolve(JSON.parse(localStorageData));
+                } else {
+                    fetch(`/load-table-data?filename=${getStorageKey()}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Erro ao carregar dados do servidor');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            reject(new Error('A carga selecionada já foi finalizada.'));
+                        })
+                        .catch(error => {
+                            reject(new Error('Nenhuma carga pendente neste código.'));
+                        });
+                }
+            });
         }
 
         function removeItem(index) {
@@ -86,7 +115,6 @@
                 renderItems();
             }
         }
-        
 
         function clearItems() {
             const confirmation = confirm(`Você tem certeza que deseja limpar a separacao de ${nroCarga}?`);
@@ -106,64 +134,76 @@
         function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             itemsTable.innerHTML = '';
-            const sepCarga = getSeparacao();
+            getSeparacao().then(sepCarga => {
 
-            sepCarga.forEach((item, index) => {
-                const row = itemsTable.insertRow();
-                row.insertCell(0).textContent = item.nrocarga;
-                row.insertCell(1).textContent = item.user_id;
-                row.insertCell(2).textContent = item.rua_letra + '.' + item.rua_numero;
-                row.insertCell(3).textContent = item.cod_item;
-                row.insertCell(4).textContent = item.lote_item;
-                row.insertCell(5).textContent = item.qtde_sep;
+                sepCarga.forEach((item, index) => {
+                    const row = itemsTable.insertRow();
+                    row.insertCell(0).textContent = item.nrocarga;
+                    row.insertCell(1).textContent = item.user_id;
+                    row.insertCell(2).textContent = item.rua_letra + '.' + item.rua_numero;
+                    row.insertCell(3).textContent = item.cod_item;
+                    row.insertCell(4).textContent = item.lote_item;
+                    row.insertCell(5).textContent = item.qtde_sep;
 
-                const actionsDiv = document.createElement('div');
-                actionsDiv.classList.add('action-buttons');
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.classList.add('action-buttons');
 
-                /*
-                const updateBtn = document.createElement('div');
-                updateBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/hammer.svg') }}" alt="">';
-                updateBtn.onclick = () => {
-                    const newQuantity = prompt('Informe a nova quantidade:', item.qtde_sep);
-                    if (newQuantity !== null) {
-                        updateQuantity(index, parseInt(newQuantity, 10));
-                    }
-                };
-                actionsDiv.appendChild(updateBtn);
-                */
+                    /*
+                    const updateBtn = document.createElement('div');
+                    updateBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/hammer.svg') }}" alt="">';
+                    updateBtn.onclick = () => {
+                        const newQuantity = prompt('Informe a nova quantidade:', item.qtde_sep);
+                        if (newQuantity !== null) {
+                            updateQuantity(index, parseInt(newQuantity, 10));
+                        }
+                    };
+                    actionsDiv.appendChild(updateBtn);
+                    */
 
-                const removeBtn = document.createElement('div');
-                removeBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">';
-                removeBtn.title = `REMOVER DE ${item.cod_item}`
-                removeBtn.onclick = () => removeItem(index);
-                actionsDiv.appendChild(removeBtn);
+                    const removeBtn = document.createElement('div');
+                    removeBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">';
+                    removeBtn.title = `REMOVER DE ${item.cod_item}`
+                    removeBtn.onclick = () => removeItem(index);
+                    actionsDiv.appendChild(removeBtn);
 
-                row.appendChild(actionsDiv);
+                    row.appendChild(actionsDiv);
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao obter separação:', error);
+
+                const alert = document.getElementById('alert-message')
+                const content = document.getElementById('contentTable')
+
+                alert.textContent = error.message;
+                alert.classList.toggle('hidden');
+                content.classList.add('hidden');
             });
-
-            renderSubtotals();
         }
 
         function renderSubtotals() {
             const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
             subtotalsTable.innerHTML = '';
-            const sepCarga = getSeparacao();
-
-            let subtotals = {};
-
-            sepCarga.forEach(item => {
-                if (subtotals[item.cod_item]) {
-                    subtotals[item.cod_item] += item.qtde_sep;
-                } else {
-                    subtotals[item.cod_item] = item.qtde_sep;
+        
+            getSeparacao().then(sepCarga => {        
+                let subtotals = {};
+        
+                sepCarga.forEach(item => {
+                    if (subtotals[item.cod_item]) {
+                        subtotals[item.cod_item] += item.qtde_sep;
+                    } else {
+                        subtotals[item.cod_item] = item.qtde_sep;
+                    }
+                });
+        
+                for (const [cod_item, subtotal] of Object.entries(subtotals)) {
+                    const row = subtotalsTable.insertRow();
+                    row.insertCell(0).textContent = cod_item;
+                    row.insertCell(1).textContent = subtotal;
                 }
+            }).catch(error => {
+                console.error('Erro ao obter separação:', error);
             });
-
-            for (const [cod_item, subtotal] of Object.entries(subtotals)) {
-                const row = subtotalsTable.insertRow();
-                row.insertCell(0).textContent = cod_item;
-                row.insertCell(1).textContent = subtotal;
-            }
         }
 
         function clearAllSeparations() {
@@ -217,8 +257,6 @@
                 });
             } 
         }
-        
-        
 
         function listAllSeparations() {
             const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
@@ -231,6 +269,94 @@
                     row.insertCell(0).textContent = key;
                 }
             }
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            getSeparacao().then(separacao => {
+                sendToServer(separacao, getStorageKey())
+            })
+
+            const userName = "{{ user_info['nome_user'] }} {{ user_info['sobrenome_user'] }}";
+            const currentDateTime = new Date().toLocaleString();
+
+            const tableData = [];
+            const rows = document.querySelectorAll("#itemsTable tbody tr");
+
+            rows.forEach(row => {
+                const rowData = [];
+                row.querySelectorAll("td").forEach(cell => {
+                    rowData.push(cell.innerText);
+                });
+                tableData.push(rowData);
+            });
+
+            const columns = [
+                { title: "Carga (Código)", dataKey: "id_carga" },
+                { title: "Endereço", dataKey: "rua_letra_endereco" },
+                { title: "Item (Código)", dataKey: "cod_item" },
+                { title: "Lote (Código)", dataKey: "lote_item" },
+                { title: "QTDE (Solicitada)", dataKey: "qtde_solic" }
+            ];
+
+            const data = tableData.map(row => ({
+                id_carga: row[0],
+                rua_letra_endereco: row[2],
+                cod_item: row[3],
+                lote_item: row[4],
+                qtde_solic: row[5]
+            }));
+
+            const addHeader = (doc) => {
+                doc.setFontSize(12);
+                doc.text('Relatório de Cargas', 10, 10);
+                doc.text(`Gerado por: ${userName}`, 10, 16);
+                doc.text(`Data/Hora: ${currentDateTime}`, 10, 22);
+            };
+
+            const addFooter = (doc, pageNumber) => {
+                const pageCount = doc.internal.getNumberOfPages();
+                doc.setFontSize(10);
+                doc.text(`Página ${pageNumber} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+                    align: 'center'
+                });
+            };
+
+            doc.autoTable({
+                head: [columns.map(col => col.title)],
+                body: data.map(item => columns.map(col => item[col.dataKey])),
+                didDrawPage: (data) => {
+                    addHeader(doc);
+                    addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
+                },
+                margin: { top: 30 }
+            });
+
+            const pdfName = `${getStorageKey()}.pdf`;
+            doc.save(pdfName)
+        }
+
+        function sendToServer(data, filename) {
+            const payload = {
+                data: data,
+                filename: filename
+            };
+        
+            fetch('/save-localstorage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Dados enviados com sucesso:', result);
+            })
+            .catch(error => {
+                console.error('Erro ao enviar dados para o servidor:', error);
+            });
         }
 
         function reloadTables() {
