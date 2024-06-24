@@ -69,7 +69,7 @@ span.id-page {
 .tables-container,
 .tables-mobile {
     flex: 1;
-    margin: 0 14px 14px;
+    margin: 0 14px 14px 0;
     box-sizing: border-box;
     background-color: #fff;
     border-radius: 24px;
@@ -480,6 +480,7 @@ th {
     font-family: 'Calibri Light';
     font-weight: bold;
     border-bottom: 4px solid var(--cor-destaque);
+    position: sticky;
     
 }
 
@@ -890,7 +891,7 @@ img.side-banner {
 }
 
 .disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     pointer-events: none;
 }
 
