@@ -2200,7 +2200,7 @@ def export_csv_tipo(tipo):                                                      
 
 if __name__ == '__main__':                                                                                      #! __MAIN__
 
-    app.config['APP_VERSION'] = ['0.4.1', 'Junho/2024', False]
+    app.config['APP_VERSION'] = ['0.4.2a', 'Junho/2024', False]
 
     # GET nome do diretório
     dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
