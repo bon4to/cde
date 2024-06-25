@@ -6,7 +6,7 @@
 
         {% include "shared/header/tl-header.html" %}
 
-        <div id="floating-container" draggable="false" class="form-container" style="position: relative">
+        <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
             <div class="split-horizontal" style="align-items: end">
                 <div>
                     <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()" style="scale: 0.7">
@@ -184,7 +184,7 @@
 
         <div class="tables-container" id="tables-cont">
                 <div class="split-horizontal">
-                    <h1>Saldo Atual do Estoque <span class="id-page">{{session['id_page']}}</span></h1>
+                    <h1>Saldo Atual do Estoque<span class="id-page">{{session['id_page']}}</span></h1>
                     <div class="aux-buttons">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">

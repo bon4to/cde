@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>Carga {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+        <title>Cargas {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
-        {% if id_carga %}
-            <div class="tables-container" style="max-width: 50%;">
-                <h1 style="margin-bottom: 8px">Itens da Carga <span class="cor-web">{{ id_carga }}</span>:</h1>
-                <div class="cart-container">
-                    <button class="cart-button" onclick="toggleCart()">Itens Separados<span class="item-count">0</span>
+        <div class="titles-container flex-row title-centerer">
+            <h1>CARGAS<span class="id-page">{{session['id_page']}}</span></h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                <hr class="vert">
+                <form action="{{ url_for('cargas') }}" method="post">
+                    <button type="submit" style="all: unset">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
                     </button>
+                </form>
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
+            {% if id_carga %}
+            <div class="tables-container" style="max-width: 55%;min-width: 55%;">
+                <h1 style="margin-bottom: 8px">Núm. Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                <div class="cart-container">
+                    <button class="cart-button" onclick="toggleCart()">Itens Separados<span class="item-count">0</span></button>
                     <div class="cart-dropdown hidden" id="cart-dropdown">
                         <ul class="cart-items">
                             <!-- Itens serão renderizados aqui -->
@@ -112,7 +126,7 @@
         {% if 'privilegio' in session %}
             {% if id_carga %}
                 {% if cod_item %}
-                    <div class="tables-container glow-tl" style="max-width: 40%">
+                    <div class="tables-container glow-tl">
                         <span style="display:space-between: width: 100%;">
                             <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
                         </span>
@@ -175,20 +189,7 @@
                     </a>
                 </div>
             {% else %}
-                <div class="tables-mobile" style=" max-width: 70%; margin: auto;">
-                    <div class="split-horizontal">
-                        <h1>Cargas à Faturar <span class="id-page">{{session['id_page']}}</span></h1>
-                        <div class="aux-buttons">
-                            <form action="{{ url_for('cargas') }}" method="post">
-                                <button type="submit" style="all: unset">
-                                    <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
-                                </button>
-                            </form>
-                            <hr class="vert">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="goBack()">
-                        </div>
-                    </div>
+                <div class="mobile-container" style=" max-width: 70%; margin: auto;">
                     {% if alert %}
                         {% if class_alert == 'error' %}
                             <div class="msg-error">
@@ -274,6 +275,8 @@
             </div>
         </div>
     </div>
+        </div>
+            
         <script>   
             const nroCarga = '{{ id_carga }}';
 

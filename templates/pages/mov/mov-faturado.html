@@ -5,57 +5,61 @@
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include "shared/header/tl-header.html" %}
-            
-                <div class="tables-container" id="tables-cont">
-                    <div class="split-horizontal">
-                        <h1>Separação de Faturados <span class="id-page">{{session['id_page']}}</span></h1>
-                        <div class="aux-buttons">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
-                            <hr class="vert">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-                        </div>
+
+        <div class="titles-container flex-row title-centerer">
+            <h1>FATURADOS<span class="id-page">{{session['id_page']}}</span></h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
+            <div class="tables-container" id="tables-cont">
+                <br>
+                <div style="justify-content: flex-end" >
+                    <label for="filterInput"></label>
+                    <label for="filterSelect"></label>
+                    <div id="table-filter" style="display: none" >
+                        <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                            <option value=0>Carga (Código)</option>
+                            <option value=2>Item (Código)</option>
+                            <option value=3>Item (Descrição)</option>
+                            <option value=1>Endereço (Letra)</option>
+                            <option value=4>Lote (Código)</option>
+                        </select>
                     </div>
-                    <div style="justify-content: flex-end" >
-                        <label for="filterInput"></label>
-                        <label for="filterSelect"></label>
-                        <div id="table-filter" style="display: none" >
-                            <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
-                            <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                                <option value=0>Carga (Código)</option>
-                                <option value=2>Item (Código)</option>
-                                <option value=3>Item (Descrição)</option>
-                                <option value=1>Endereço (Letra)</option>
-                                <option value=4>Lote (Código)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="table-overflow">
-                        <table id="filterTable">
-                            <tr>
-                                <th>Carga (Código - SEQ)</th>
-                                <th>Endereço</th>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th>Lote</th>
-                                <th>QTDE (Efetiva)</th>
-                            </tr>
-                            {% for item in saldo_atual %}
-                            <tr>
-                                <td>{{ item['id_carga'] }}</td>
-                                <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
-                                <td>{{ item['cod_item'] }}</td>
-                                <td>{{ item['desc_item'] }}</td>
-                                <td>{{ item['cod_lote'] }}</td>
-                                <td>{{ item['saldo'] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <a href="{{ url_for('export_csv_tipo', tipo='faturado') }}">
-                        Baixar tabela...
-                    </a>
                 </div>
+                <div class="table-overflow">
+                    <table id="filterTable">
+                        <tr>
+                            <th>Carga (Código - SEQ)</th>
+                            <th>Endereço</th>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
+                            <th>Lote</th>
+                            <th>QTDE (Efetiva)</th>
+                        </tr>
+                        {% for item in saldo_atual %}
+                        <tr>
+                            <td>{{ item['id_carga'] }}</td>
+                            <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
+                            <td>{{ item['cod_item'] }}</td>
+                            <td>{{ item['desc_item'] }}</td>
+                            <td>{{ item['cod_lote'] }}</td>
+                            <td>{{ item['saldo'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <a href="{{ url_for('export_csv_tipo', tipo='faturado') }}">
+                    Baixar tabela...
+                </a>
+            </div>
+        </div>
         <script>
 
             $("#formBuscarItens").submit(function(event) {

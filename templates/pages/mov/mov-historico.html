@@ -5,11 +5,15 @@
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
+        <div class="titles-container flex-row title-centerer">
+            <h1>HISTÓRICO<span class="id-page">{{session['id_page']}}</span></h1>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
 
-            <div class="tables-mobile">
+            <div class="mobile-container">
 
                 <div class="split-horizontal">
-                    <h1>Histórico de Movimentação <span class="id-page">{{session['id_page']}}</h1>
+                    <h1>Histórico de Movimentação<span class="id-page">{{session['id_page']}}</h1>
                     <div class="aux-buttons">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
                         <hr class="vert">
