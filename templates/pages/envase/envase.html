@@ -6,7 +6,7 @@
 
         {% include "shared/header/hp-header.html" %}
 
-            <div id="floating-container" draggable="false" class="form-container" style="position: relative">
+            <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
                 <hr>
                 <div class="centralizado">
                     <div>
@@ -76,7 +76,7 @@
             </div>
             <div class="tables-container" id="tables-cont">
                 <div class="split-horizontal">
-                    <h1>Programação de Envase <span class="id-page">{{session['id_page']}}</span></h1>
+                    <h1>Programação de Envase<span class="id-page">{{session['id_page']}}</span></h1>
                     <div class="aux-buttons">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" title="Calendário de Envase" onclick="window.location.href='{{ url_for('calendar_envase') }}';">
                         <hr class="vert">

@@ -8,7 +8,7 @@
 /*
 @media screen and (max-width: 1300px) {
     
-    .form-container {
+    .forms-container {
         max-width: none;
         width: 100%;
     }
@@ -76,7 +76,7 @@
     .svg {
         display: block;
     }
-    .tables-mobile {
+    .mobile-container {
         position: fixed;
         font-size: 8px;
         left: 0;
@@ -100,7 +100,7 @@
     div.log {
         height: 140%;
     }
-    .form-container, .form-login {
+    .forms-container, .form-login {
         display: flex;
         align-content: center;
         align-items: center;
@@ -175,7 +175,7 @@
     html {
         line-height: 1.0;
     }
-    .form-container {
+    .forms-container {
         scale: 0.75;
         top: 20px;
         position: unset;

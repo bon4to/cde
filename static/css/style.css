@@ -49,6 +49,7 @@ body.dark-mode h1, h2, h3, p {
 
 
 span.id-page {
+    margin-left: 8px;
     font-size: 18px;
     font-family: Reddit Mono, monospace;
     color: var(--cor-destaque)
@@ -65,11 +66,12 @@ span.id-page {
     background-color: #f1f1f1;
 }
 
-.form-container,
 .tables-container,
-.tables-mobile {
+.mobile-container,
+.titles-container,
+.forms-container {
     flex: 1;
-    margin: 0 14px 14px 0;
+    margin: 0 10px 14px 10px;
     box-sizing: border-box;
     background-color: #fff;
     border-radius: 24px;
@@ -77,6 +79,26 @@ span.id-page {
     padding: 12px 36px;
     padding-bottom: 22px;
     min-height: 75vh;
+}
+
+.titles-container {
+    min-height: 80px;
+    margin: 0 10px 16px 10px;
+    padding: 8px 36px;
+}
+
+.titles-container h1 {
+    font-family: "Inter";
+    height: 100%;
+    margin: 10px 0;
+    color: #181818;
+    display: flex;
+    align-items: center;
+}
+
+.title-centerer {
+    justify-content: space-between; 
+    align-items: center;
 }
 
 img {
@@ -182,6 +204,7 @@ h1 {
     font-weight: bold;
     pointer-events: none;
     margin-bottom: 8px;
+    color: #2f2f2f;
 }
 
 h1.title {
@@ -544,7 +567,7 @@ td {
     max-height: 130%;
 }
 
-.form-container {
+.forms-container {
     max-width: 450px;
     flex-direction: column;
     display: flex;
@@ -963,7 +986,7 @@ div.user-button {
     font-weight: bold;
     font-size: 18px;
     color: #888888ab;
-    font-family:'Chivo Mono', sans-serif;
+    font-family: 'Chivo Mono', sans-serif;
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(34, 34, 34, 0.65);
     top: 40px;
@@ -1528,6 +1551,7 @@ h1.sub-label {
 }
 
 h1.subtitle {
+    margin-top: 0;
     font-size: 22px;
     color: #353535;
     padding-left: 18px;
@@ -1607,8 +1631,8 @@ h1.subtitle {
 }
 
 .item-count {
-    background-color: #fff;
-    color: var(--cor-destaque);
+    background-color: var(--cor-destaque);
+    color: #fff;
     border-radius: 50%;
     padding: 2px;
     font-size: 14px;
@@ -1619,7 +1643,7 @@ h1.subtitle {
     align-content: center;
     font-weight: bold;
     position: absolute;
-    box-shadow: 0 0 4px var(--cor-destaque);
+    border: 2px solid #fff;
     
 }
 

@@ -6,7 +6,7 @@
 
         {% include 'shared/header/tl-header.html' %}
 
-            <div class="form-container split-horizontal menu-container" >
+            <div class="forms-container split-horizontal menu-container" >
                 <div style="display: flex; flex-direction: column">
                     <div>
                         <h1 class="saudacao" id="saud" style="text-align: center;margin-bottom: 8px;"></h1>
@@ -47,6 +47,17 @@
                                 </a>
                             </div>
                         </div>
+                        <div class="item" onclick="window.location.href='{{ url_for('produtos') }}';">
+                            <div class="split-horizontal algn-cntr">
+                                <div style="text-align: left">
+                                    <h2 class="text-default">Produtos</h2>
+                                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">ITE005</span></p>
+                                </div>
+                                <a class="btn-fancy button-mini">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/produtos.svg') }}" alt="">
+                                </a>
+                            </div>
+                        </div>
                         <div class="item" onclick="window.location.href='{{ url_for('faturado') }}';">
                             <div class="split-horizontal algn-cntr">
                                 <div style="text-align: left">
@@ -58,14 +69,14 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="item" onclick="window.location.href='{{ url_for('produtos') }}';">
+                        <div class="item featured" onclick="window.location.href='{{ url_for('cargas') }}';">
                             <div class="split-horizontal algn-cntr">
                                 <div style="text-align: left">
-                                    <h2 class="text-default">Produtos</h2>
-                                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">ITE005</span></p>
+                                    <h2 class="text-default">Cargas</h2>
+                                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV006&nbsp;•&nbsp;</span>Faça separações de carga.</p>
                                 </div>
                                 <a class="btn-fancy button-mini">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/produtos.svg') }}" alt="">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/boxes-packing.svg') }}" alt="">
                                 </a>
                             </div>
                         </div>
