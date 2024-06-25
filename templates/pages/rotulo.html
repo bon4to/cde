@@ -10,7 +10,7 @@
         <div draggable="false" class="form-login">
             <div class="split-horizontal">
                 <div class="log">
-                    <div class="split-horizontal"><h1 class="title">Calculadora de Rótulos <span class="id-page">{{session['id_page']}}</h1></div>
+                    <div class="split-horizontal"><h1 class="title">Calculadora de Rótulos<span class="id-page">{{session['id_page']}}</h1></div>
                     <div style="max-width: 400px; justify-content: flex-start; margin: auto;">
                         <form style="display: flex;" id="form-field" method="post" action="{{ url_for('rotulo') }}">
                             <div class="two-split">
@@ -49,7 +49,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="form-container" id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
+                <div class="forms-container" id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
                     <img class="svg-none" src="{{ url_for('static', filename='svg/tags.svg') }}" alt="">
                     <div class="centralizado">
                         <div>

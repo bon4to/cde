@@ -7,10 +7,10 @@
         {% include 'shared/header/cde-header.html' %}
 
     <!-- TABELA -->
-        <div draggable="false" class="form-container" style="padding: 12px 30px;">
+        <div draggable="false" class="forms-container" style="padding: 12px 30px;">
             <div class="split-horizontal">
                 <div>
-                    <h1>Cadastrar Usuário: <span class="id-page">{{session['id_page']}}</span></h1>
+                    <h1>Cadastrar Usuário:<span class="id-page">{{session['id_page']}}</span></h1>
                     <form action="/users/inserting" method="post">
                         <label for="login_user">Login: *</label>
                         <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>

@@ -10,7 +10,7 @@
                 {% if session['privilegio'] <= 2 %}
                     {% if alert %}
                         {% if class_alert == 'error' %}
-                            <div class="form-container" style="height: max-content;" class="disabled">
+                            <div class="forms-container" style="height: max-content;" class="disabled">
                                 <h1>Novo desc_item...</h1>
                                 <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
                                     <div>
@@ -35,9 +35,9 @@
                     {% endif %}
                 {% endif %}
             {% endif %}
-            <div class="tables-mobile" >
+            <div class="mobile-container" >
                 <div class="split-horizontal">
-                    <h1>Produtos Cadastrados <span class="id-page">{{session['id_page']}}</span></h1>
+                    <h1>Produtos Cadastrados<span class="id-page">{{session['id_page']}}</span></h1>
                     <div class="aux-buttons">
                         <form action="{{ url_for('produtos') }}" method="post">
                             <button type="submit" style="all: unset">

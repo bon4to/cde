@@ -7,7 +7,7 @@
         {% include "shared/header/hp-header.html" %}
 
         {% if mode == 'singleRow' %}
-            <div id="floating-container" draggable="false" class="form-container" style="position: relative">
+            <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
                     <div class="centralizado">
                         <div>
                             {% for item in prod_edit %}
@@ -82,7 +82,7 @@
         {% endif %}
         <div class="tables-container" id="tables-cont">
                 <div class="split-horizontal">
-                    <h1>Editar programação de Processamento <span class="id-page">{{session['id_page']}}</h1>
+                    <h1>Editar programação de Processamento<span class="id-page">{{session['id_page']}}</h1>
                     <div style="display: flex">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="window.location.href='{{ url_for('producao') }}';">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" onclick="window.location.href='{{ url_for('calendar_producao') }}';">
