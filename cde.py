@@ -1984,26 +1984,25 @@ def cargas():                                                                   
     return render_template('pages/mov/mov-carga.html', result=result)
 
 
-@app.route('/mov/carga/<int:id_carga>/separacao', methods=['GET', 'POST'])
+@app.route('/mov/separacao-pend/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep(id_carga):
     id_user = session.get('id_user')
     user_info = get_userdata(id_user)
     return render_template(
-        'pages/mov/mov-carga-sep.html', 
+        'pages/mov/mov-carga-separacao-pend.html', 
         id_carga=id_carga, 
         user_info=user_info
     )
 
 
-
-@app.route('/mov/carga/<int:id_carga>/done', methods=['GET', 'POST'])
+@app.route('/mov/separacao-done/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_done(id_carga):
     id_user = session.get('id_user')
     user_info = get_userdata(id_user)
     return render_template(
-        'pages/mov/mov-carga-done.html', 
+        'pages/mov/mov-carga-separacao-done.html', 
         id_carga=id_carga, 
         user_info=user_info
     )
@@ -2054,6 +2053,16 @@ def load_table_data():
     
     except Exception as e:
         return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
+    
+
+@app.route('/list-all-separations', methods=['GET'])
+def list_all_separations():
+    try:
+        directory = os.path.join(app.root_path, 'report/cargas')
+        files = [f for f in os.listdir(directory) if f.endswith('.json')]
+        return jsonify(files), 200
+    except Exception as e:
+        return jsonify({'error': f'Erro ao listar arquivos: {str(e)}'}), 500
 
 
 @app.route('/produtos', methods=['GET', 'POST'])
