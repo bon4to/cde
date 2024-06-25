@@ -5,11 +5,21 @@
     <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
     {% include 'shared/header/tl-header.html' %}
-    <div class="tables-container" style="min-width: 100%; min-height:80px"></div>
+    <div class="titles-container flex-row title-centerer">
+        <h1>SEPARAÇÃO<span class="id-page">{{session['id_page']}}</span></h1>
+        <div class="aux-buttons">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (PENDENTES)" alt="" onclick="window.location.href='{{ url_for('carga_sep', id_carga=id_carga) }}';">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+        </div>
+    </div>
     <div class="flex-row" style="min-width: 100%;">
-        <div class="tables-container" style="min-width: 55vw;">
-            <h1>Cargas Emitidas <span class="cor-web">{{ id_carga }}</span></h1>
-            <div>
+        <div class="tables-container" style="min-width: 40vw;">
+            <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+            <p style="justify-content: flex-start">Status:<span style="color: var(--cor-cde); margin-left: 4px">Finalizada</span></p>
+            <div class="msg-error hidden" id="alert-message"></div>
+            <div id="contentTable">
                 <table id="itemsTable">
                     <thead>
                         <tr>
@@ -34,15 +44,12 @@
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
                         </div>
                     </div>
-                    <div class="btn-fancy disabled" style="height: 45px; margin: 0" onclick="bulkInsertHistorico()">
-                        <span>FINALIZAR</span>
-                        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check-big.svg') }}" alt="">
-                    </div>
                 </div>
             </div>
         </div>
-        <div class="tables-container" style="min-width: 20vw;">
-            <h1>Subtotal Separado</h1>
+        <div class="tables-container" style="max-width: 20vw;">
+            <h1>Subtotal</h1>
+            <p style="justify-content: flex-start">Separação por Item</p>
             <table id="subtotalsTable">
                 <thead>
                     <tr>
@@ -55,7 +62,22 @@
                 </tbody>
             </table>
         </div>
+        <div class="tables-container" style="max-width: 20vw">
+            <h1>Separações</h1>
+            <p style="justify-content: flex-start">Status:<span style="color: var(--cor-cde); margin-left: 4px">Finalizada</span></p>
+            <table id="allSeparationsTable">
+                <thead>
+                    <tr>
+                        <th>Concluídos (em Cache)</th>
+                    </tr>
+                </thead>
+                    <!-- execute listAllSeparations(); -->
+                <tbody>
+                </tbody>
+            </table>
+        </div>
     </div>
+    
 
     <script>
         const nroCarga = '{{ id_carga }}';
@@ -69,7 +91,7 @@
                 const localStorageData = localStorage.getItem(getStorageKey());
         
                 if (localStorageData) {
-                    resolve(JSON.parse(localStorageData));
+                    reject(new Error('Há separação pendente neste código.'));
                 } else {
                     fetch(`/load-table-data?filename=${getStorageKey()}`)
                         .then(response => {
@@ -105,6 +127,16 @@
                     row.insertCell(4).textContent = item.lote_item;
                     row.insertCell(5).textContent = item.qtde_sep;
                 });
+            })
+            .catch(error => {
+                console.error('Erro ao obter separação:', error);
+
+                const alert = document.getElementById('alert-message')
+                const content = document.getElementById('contentTable')
+
+                alert.textContent = error.message;
+                alert.classList.toggle('hidden');
+                content.classList.add('hidden');
             });
         }
 
@@ -133,6 +165,31 @@
             }).catch(error => {
                 console.error('Erro ao obter separação:', error);
             });
+        }
+
+        function listAllSeparationsLocally() {
+            fetch('/list-all-separations')
+                .then(response => response.json())
+                .then(files => {
+                    const tableBody = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = ''; // Limpa o corpo da tabela
+
+                    if (files.error) {
+                        const row = tableBody.insertRow();
+                        const cell = row.insertCell(0);
+                        cell.colSpan = 1;
+                        cell.textContent = files.error;
+                    } else {
+                        files.forEach(file => {
+                            const row = tableBody.insertRow();
+                            const cell = row.insertCell(0);
+                            cell.textContent = file;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar dados do servidor:', error);
+                });
         }
         
         function generatePDF() {
@@ -205,6 +262,7 @@
         function reloadTables() {
             renderItems();
             renderSubtotals();
+            listAllSeparationsLocally();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

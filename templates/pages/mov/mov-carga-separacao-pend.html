@@ -5,73 +5,87 @@
     <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
     {% include 'shared/header/tl-header.html' %}
-    <div class="tables-container">
-        <h1>Itens Separados da Carga <span class="cor-web">{{ id_carga }}</span></h1>
-        <div class="msg-error hidden" id="alert-message"></div>
-        <div id="contentTable">
-            <table id="itemsTable">
-                <thead>
-                    <tr>
-                        <th>Carga (Código)</th>
-                        <th>Usuário</th>
-                        <th>Endereço</th>
-                        <th>Item (Código)</th>
-                        <th>Lote (Código)</th>
-                        <th>QTDE (Separado)</th>
-                    </tr>
-                </thead>
-                    <!-- execute renderItems(); -->
-                <tbody>
-                </tbody>
-            </table>
-            <div class="flex-row" style="margin: 8px 0">
-                <div class="flex-row">
-                    <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+    <div class="titles-container flex-row title-centerer">
+        <h1>SEPARAÇÃO<span class="id-page">{{session['id_page']}}</span></h1>
+        <div class="aux-buttons">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_done', id_carga=id_carga) }}';">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+        </div>
+    </div>
+    <div class="flex-row" style="min-width: 100%;">
+        <div class="tables-container" style="min-width: 40vw;">
+            <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+            <p style="justify-content: flex-start">Status:<span style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
+            <div class="msg-error hidden" id="alert-message"></div>
+            <div id="contentTable">
+                <table id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>Carga (Código)</th>
+                            <th>Usuário</th>
+                            <th>Endereço</th>
+                            <th>Item (Código)</th>
+                            <th>Lote (Código)</th>
+                            <th>QTDE (Separado)</th>
+                        </tr>
+                    </thead>
+                        <!-- execute renderItems(); -->
+                    <tbody>
+                    </tbody>
+                </table>
+                <div class="flex-row" style="margin: 8px 0">
+                    <div class="flex-row">
+                        <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                        </div>
+                        <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
+                        </div>
+                        <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
+                        </div>
                     </div>
-                    <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
+                    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="bulkInsertHistorico()">
+                        <span>FINALIZAR</span>
+                        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check-big.svg') }}" alt="">
                     </div>
-                    <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
-                    </div>
-                </div>
-                <div class="btn-fancy" style="height: 45px; margin: 0" onclick="bulkInsertHistorico()">
-                    <span>FINALIZAR</span>
-                    <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check-big.svg') }}" alt="">
                 </div>
             </div>
         </div>
-    </div>
-    <div class="tables-container" style="max-width: 20vw">
-        <h1>Subtotal Separado</h1>
-        <table id="subtotalsTable">
-            <thead>
-                <tr>
-                    <th>Item (Código)</th>
-                    <th>Subtotal (QTDE)</th>
-                </tr>
-            </thead>
-                <!-- execute renderSubtotals(); -->
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    <div class="tables-container" style="max-width: 20vw">
-        <h1>Todas as Separações</h1>
-        <table id="allSeparationsTable">
-            <thead>
-                <tr>
-                    <th>Chaves em localStorage</th>
-                </tr>
-            </thead>
-                <!-- execute listAllSeparations(); -->
-            <tbody>
-            </tbody>
-        </table>
-        <div style="margin: 8px 0" class="flex-row">
-            <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
-                <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+        <div class="tables-container" style="max-width: 20vw">
+            <h1>Subtotal</h1>
+            <p style="justify-content: flex-start">Separação por Item</p>
+            <table id="subtotalsTable">
+                <thead>
+                    <tr>
+                        <th>Item (Código)</th>
+                        <th>Subtotal (QTDE)</th>
+                    </tr>
+                </thead>
+                    <!-- execute renderSubtotals(); -->
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="tables-container" style="max-width: 20vw">
+            <h1>Separações</h1>
+            <p style="justify-content: flex-start">Status:<span style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
+            <table id="allSeparationsTable">
+                <thead>
+                    <tr>
+                        <th>Chaves em localStorage</th>
+                    </tr>
+                </thead>
+                    <!-- execute listAllSeparations(); -->
+                <tbody>
+                </tbody>
+            </table>
+            <div style="margin: 8px 0" class="flex-row">
+                <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                </div>
             </div>
         </div>
     </div>
@@ -100,7 +114,7 @@
                             reject(new Error('A carga selecionada já foi finalizada.'));
                         })
                         .catch(error => {
-                            reject(new Error('Nenhuma carga pendente neste código.'));
+                            reject(new Error('Nenhuma carga pendente ou iniciada neste código.'));
                         });
                 }
             });
@@ -246,6 +260,9 @@
                 .then(data => {
                     if (data.success) {
                         alert('Movimentação em massa realizada com sucesso.');
+                        getSeparacao().then(separacao => {
+                            sendToServer(separacao, getStorageKey())
+                        })
                         localStorage.removeItem(storageKey); // limpa a separacao atual
                     } else {
                         alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
@@ -274,9 +291,6 @@
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            getSeparacao().then(separacao => {
-                sendToServer(separacao, getStorageKey())
-            })
 
             const userName = "{{ user_info['nome_user'] }} {{ user_info['sobrenome_user'] }}";
             const currentDateTime = new Date().toLocaleString();
