@@ -23,10 +23,9 @@
                 <table id="itemsTable">
                     <thead>
                         <tr>
-                            <th>Carga (Código)</th>
-                            <th>Usuário</th>
                             <th>Endereço</th>
                             <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
                             <th>Lote (Código)</th>
                             <th>QTDE (Separado)</th>
                         </tr>
@@ -148,47 +147,45 @@
         function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             itemsTable.innerHTML = '';
-            getSeparacao().then(sepCarga => {
-
-                sepCarga.forEach((item, index) => {
+            getSeparacao().then(async sepCarga => { // Use async para poder usar await dentro do forEach
+        
+                for (let index = 0; index < sepCarga.length; index++) {
+                    const item = sepCarga[index];
                     const row = itemsTable.insertRow();
-                    row.insertCell(0).textContent = item.nrocarga;
-                    row.insertCell(1).textContent = item.user_id;
-                    row.insertCell(2).textContent = item.rua_letra + '.' + item.rua_numero;
-                    row.insertCell(3).textContent = item.cod_item;
-                    row.insertCell(4).textContent = item.lote_item;
-                    row.insertCell(5).textContent = item.qtde_sep;
-
+                    
+                    row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
+                    row.insertCell(1).textContent = item.cod_item;
+                    const descCell = row.insertCell(2);
+                    row.insertCell(3).textContent = item.lote_item;
+                    row.insertCell(4).textContent = item.qtde_sep;
+        
+        
+                    try {
+                        const descricao = await fetchItemDescription(item.cod_item);
+                        descCell.textContent = descricao;
+                    } catch (error) {
+                        console.error('Erro ao obter descrição:', error);
+                        descCell.textContent = 'Erro ao obter descrição';
+                    }
+        
                     const actionsDiv = document.createElement('div');
                     actionsDiv.classList.add('action-buttons');
-
-                    /*
-                    const updateBtn = document.createElement('div');
-                    updateBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/hammer.svg') }}" alt="">';
-                    updateBtn.onclick = () => {
-                        const newQuantity = prompt('Informe a nova quantidade:', item.qtde_sep);
-                        if (newQuantity !== null) {
-                            updateQuantity(index, parseInt(newQuantity, 10));
-                        }
-                    };
-                    actionsDiv.appendChild(updateBtn);
-                    */
-
+        
                     const removeBtn = document.createElement('div');
                     removeBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">';
-                    removeBtn.title = `REMOVER DE ${item.cod_item}`
+                    removeBtn.title = `REMOVER DE ${item.cod_item}`;
                     removeBtn.onclick = () => removeItem(index);
                     actionsDiv.appendChild(removeBtn);
-
+        
                     row.appendChild(actionsDiv);
-                });
+                }
             })
             .catch(error => {
                 console.error('Erro ao obter separação:', error);
-
+        
                 const alert = document.getElementById('alert-message')
                 const content = document.getElementById('contentTable')
-
+        
                 alert.textContent = error.message;
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
@@ -286,69 +283,6 @@
                     row.insertCell(0).textContent = key;
                 }
             }
-        }
-
-        function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            const userName = "{{ user_info['nome_user'] }} {{ user_info['sobrenome_user'] }}";
-            const currentDateTime = new Date().toLocaleString();
-
-            const tableData = [];
-            const rows = document.querySelectorAll("#itemsTable tbody tr");
-
-            rows.forEach(row => {
-                const rowData = [];
-                row.querySelectorAll("td").forEach(cell => {
-                    rowData.push(cell.innerText);
-                });
-                tableData.push(rowData);
-            });
-
-            const columns = [
-                { title: "Carga (Código)", dataKey: "id_carga" },
-                { title: "Endereço", dataKey: "rua_letra_endereco" },
-                { title: "Item (Código)", dataKey: "cod_item" },
-                { title: "Lote (Código)", dataKey: "lote_item" },
-                { title: "QTDE (Solicitada)", dataKey: "qtde_solic" }
-            ];
-
-            const data = tableData.map(row => ({
-                id_carga: row[0],
-                rua_letra_endereco: row[2],
-                cod_item: row[3],
-                lote_item: row[4],
-                qtde_solic: row[5]
-            }));
-
-            const addHeader = (doc) => {
-                doc.setFontSize(12);
-                doc.text('Relatório de Cargas', 10, 10);
-                doc.text(`Gerado por: ${userName}`, 10, 16);
-                doc.text(`Data/Hora: ${currentDateTime}`, 10, 22);
-            };
-
-            const addFooter = (doc, pageNumber) => {
-                const pageCount = doc.internal.getNumberOfPages();
-                doc.setFontSize(10);
-                doc.text(`Página ${pageNumber} de ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
-                    align: 'center'
-                });
-            };
-
-            doc.autoTable({
-                head: [columns.map(col => col.title)],
-                body: data.map(item => columns.map(col => item[col.dataKey])),
-                didDrawPage: (data) => {
-                    addHeader(doc);
-                    addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
-                },
-                margin: { top: 30 }
-            });
-
-            const pdfName = `${getStorageKey()}.pdf`;
-            doc.save(pdfName)
         }
 
         function sendToServer(data, filename) {
