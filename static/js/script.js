@@ -170,6 +170,112 @@ function maximizeText(text) {
     }
 }
 
+function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const userInfoElement = document.getElementById('userInfo');
+    const userName = userInfoElement.dataset.userName;
+    const currentDateTime = new Date().toLocaleString();
+
+    const tableData = [];
+    const rows = document.querySelectorAll("#itemsTable tbody tr");
+
+    rows.forEach(row => {
+        const rowData = [];
+        row.querySelectorAll("td").forEach(cell => {
+            rowData.push(cell.innerText);
+        });
+        tableData.push(rowData);
+    });
+
+    const columns = [
+        { title: "Endereço", dataKey: "rua_letra_endereco" },
+        { title: "Item (Código)", dataKey: "cod_item" },
+        { title: "Item (Descrição)", dataKey: "desc_item" },
+        { title: "Lote (Código)", dataKey: "lote_item" },
+        { title: "QTDE (Solicitada)", dataKey: "qtde_solic" }
+    ];
+
+    const data = tableData.map(row => ({
+        rua_letra_endereco: row[0],
+        cod_item: row[1],
+        desc_item: row[2],
+        lote_item: row[3],
+        qtde_solic: row[4]
+    }));
+
+    const addHeader = (doc) => {
+
+        /* 
+        var logo = document.getElementById('cdeLogo');
+        if (logo) {
+            const img = new Image();
+            img.src = logo.src;
+            doc.addImage(img, 'PNG', 10, 16, 46, 16);
+        }
+        */
+
+        doc.setLineWidth(0.4);
+        doc.line(10, 14, 200, 14);
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(16);
+        doc.text("Relatório de Cargas", 10, 22);
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(12);
+        doc.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
+        doc.text(`CARGA: ${nroCarga}`, 10, 34);
+
+        doc.setLineWidth(0.4);
+        doc.line(10, 38, 200, 38);
+    };
+
+    const addFooter = (doc, pageNumber) => {
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(userName, 10, doc.internal.pageSize.height - 10, {
+            align: 'left'
+        });
+        doc.text(`${pageNumber} / ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
+            align: 'center'
+        });
+        doc.text(currentDateTime, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 10, {
+            align: 'right'
+        });
+        doc.setLineWidth(0.4);
+        doc.line(10, doc.internal.pageSize.height - 20, 200, doc.internal.pageSize.height - 20);
+    };
+
+    doc.autoTable({
+        head: [columns.map(col => col.title)],
+        body: data.map(item => columns.map(col => item[col.dataKey])),
+        didDrawPage: (data) => {
+            addHeader(doc);
+            addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
+        },
+        margin: { top: 44 }
+    });
+
+    const pdfName = `${getStorageKey()}.pdf`;
+    doc.save(pdfName);
+}
+
+const fetchItemDescription = async (cod_item) => {
+    try {
+        const response = await fetch(`/get_description_json/${cod_item}`);
+        if (!response.ok) {
+            throw new Error('Erro ao obter descrição do item');
+        }
+        const data = await response.json();
+        return data.description; // Retorna a descrição obtida
+    } catch (error) {
+        console.error('Erro:', error);
+        return ''; // Retorna uma string vazia ou outro valor de erro
+    }
+};
+
 
 // HEADER POP-UP
 window.addEventListener('scroll', function () {
