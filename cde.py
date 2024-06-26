@@ -2008,6 +2008,24 @@ def carga_done(id_carga):
     )
 
 
+@app.route('/get_description_json/<cod_item>', methods=['GET'])
+def get_description(cod_item):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT desc_item
+            FROM itens
+            WHERE cod_item = ?;
+        ''', 
+        (cod_item,))
+        
+        resultado = cursor.fetchone()
+        if resultado is not None:
+            desc_item = resultado[0]
+            
+    return jsonify({"description": desc_item})
+
+
 @app.route('/save-localstorage', methods=['POST'])
 def save_localstorage():
     try:
