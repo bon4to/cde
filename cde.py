@@ -1840,6 +1840,10 @@ def carga_id(id_carga):
 
 
         #? SEARCH DE ITENS POR CARGA
+        
+        all_cargas = get_all_cargas()
+        cargas_str_query = ', '.join(map(str, all_cargas))
+        
         query = f'''
             SELECT  crg.CODIGO_GRUPOPED                   AS NRO_CARGA,
                     crg.NRO_PEDIDO                        AS NRO_PEDIDO,
@@ -1859,6 +1863,7 @@ def carga_id(id_carga):
             WHERE crg.CODIGO_GRUPOPED = '{id_carga}' 
             AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
             AND CURRENT DATE
+            AND crg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
 
             ORDER BY COD_ITEM
 
