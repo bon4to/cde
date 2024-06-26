@@ -580,19 +580,6 @@ def get_userdata(id_user):                                                      
         return user_data
     
 
-@app.route('/upload-pdf', methods=['POST'])
-def upload_pdf():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    if file:
-        filename = file.filename
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return jsonify({'success': 'File saved successfully'}), 200
-
-
 def select_rua(letra, numero):                                                                                  #* SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
