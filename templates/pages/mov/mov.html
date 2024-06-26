@@ -6,69 +6,81 @@
 
         {% include "shared/header/tl-header.html" %}
 
-        <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
-            <div class="split-horizontal" style="align-items: end">
-                <div>
-                    <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()" style="scale: 0.7">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/window-restore.svg') }}" alt="">
-                    </button>
-                </div>
+        <div class="titles-container flex-row title-centerer">
+            <h1>MOVIMENTAR<span class="id-page">{{session['id_page']}}</span></h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="CAMPO LATERAL" alt="" onclick="toggleContainer()">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
-
-            <div class="centralizado">
-                <div>
-                    <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
-                        <div>
-                            <label for="input_code"></label>
-                            <div class="split-horizontal input-container">
-                                <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou o Código de Barras...">
-                                <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
+            <div id="floating-container" draggable="false" class="forms-container" style="position: relative; max-width: max-content">
+                <div class="split-horizontal" style="align-items: end">
+                    <div>
+                        <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()" style="scale: 0.7">
+                            <img class="svg-gray" src="{{ url_for('static', filename='svg/window-restore.svg') }}" alt="">
+                        </button>
+                    </div>
+                </div>
+                <div class="centralizado">
+                    <div>
+                        <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
+                            <div>
+                                <label for="input_code"></label>
+                                <div class="split-horizontal input-container">
+                                    <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou o Código de Barras...">
+                                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                                </div>
+                                <hr>
+                            </div>
+                        </form>
+    
+                        <form style="display: flex;" id="form-field" method="post" action="/mov/moving">
+                            <div id="produtoField">
+                                <div>
+                                    <label for="desc_item">Produto
+                                        <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br>
+                                    </label>
+                                    <input class="address-one" name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Descrição do item..." onclick="maximizeText(this)">
+                                </div>
+                                <div class="split-horizontal">
+                                    <div>
+                                        <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
+                                            <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                        </label><br>
+                                        <select class="address-three" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
+                                    </div>
+                                    <div>
+                                        <label for="lote_item">Lote
+                                            <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                        </label><br>
+                                        <input class="address-three" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Ex.: CS0000">
+                                    </div>
+                                </div>
                             </div>
                             <hr>
-                        </div>
-                    </form>
-
-                    <form style="display: flex;" id="form-field" method="post" action="/mov/moving">
-                        <div id="produtoField">
-                            <div>
-                                <label for="desc_item">Produto
-                                    <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br>
-                                </label>
-                                <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Descrição do item..." onclick="maximizeText(this)">
-                            </div>
-                            <div class="split-horizontal">
+                            <div style="display: flex;">
                                 <div>
-                                    <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
-                                        <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                    </label><br>
-                                    <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
+                                    <select name="operacao" id="operacao" style="margin-top: 14px" class="address-three" onchange="toggleFields()">
+                                        <option value="E">Entrada</option>
+                                        <option value="S">Saída</option>
+                                        <option value="T">Transferir</option>
+                                        <option value="F">Faturado</option>
+                                    </select>
                                 </div>
-                                <div>
-                                    <label for="lote_item">Lote
-                                        <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                    </label><br>
-                                    <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Lote (Ex.: CS0000)...">
+                                <div style="display: flex; align-items: center">
+                                    <img id="svg-image" class="svg-orange" style="width: 22px; height: 22px; margin-left: 4px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
                                 </div>
-                            </div>
-                            <hr>
-                        </div>
-                        <div style="display: flex; ">
-                            <div>
-                                <select name="operacao" id="operacao" style="margin-top: 14px" class="address-three" onchange="toggleFields()">
-                                    <option value="E">Entrada</option>
-                                    <option value="S">Saída</option>
-                                    <option value="T">Transferir</option>
-                                    <option value="F">Faturado</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; align-items: center">
-                                <img id="svg-image" class="svg-orange" style="width: 22px; height: 22px; margin-left: 4px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
-                            </div>
-                            <div style="display: flex; align-items: center">
-                                <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; margin-left: 4px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
-                            </div>
-                            <div id="popup-field" style="display: none; right: 25px">
-                                <div class="back-modal" onclick="togglePopUp()"></div>
+                                <div style="display: flex; align-items: center">
+                                    <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; margin-left: 4px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
+                                </div>
+                                <div id="popup-field" style="display: none; right: 25px">
+                                    <div class="back-modal" onclick="togglePopUp()"></div>
                                     <div class="form-filter generic" style="width: 600px">
                                         <div class="split-horizontal">
                                             <h1>Configurações de Operação</h1>
@@ -95,105 +107,95 @@
                                     </div>
                                 </div>
                             </div>
-                        <div style="display: flex;">
-                            <div id="quantField">
-                                <label for="quantidade">Quantidade</label><br>
-                                <input class="address-one" type="number" id="quantidade" name="quantidade" min="1" placeholder="Quantidade..." required>
-                            </div>
-                        </div>
-                        <div style="display: flex;">
-                            <div>
-                                <label for="end_letra">Endereço</label><br>
-                                <div class="endereco-container">
-                                    <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
-                                        <option value="A"    >A</option>
-                                        <option value="B"    >B</option>
-                                        <option value="C"    >C</option>
-                                        <option value="D"    >D</option>
-                                        <option value="PP1"  >PP1</option>
-                                        <option value="PP2"  >PP2</option>
-                                        <option value="PP3"  >PP3</option>
-                                        <option value="PP4"  >PP4</option>
-                                        <option value="AM"   >AMOSTRA</option>
-                                        <option value="CAM"  >CÂMARA FRIA</option>
-                                        <option value="DEVOL">DEVOLUÇÃO</option>
-                                        <option value="LOJA" >LOJA</option>
-                                        <option value="PROD" >PRODUÇÃO</option>
-                                        <option value="SEPAR">SEPARAÇÃO</option>
-                                    </select>
+                            <div style="display: flex;">
+                                <div id="quantField">
+                                    <label for="quantidade">Quantidade</label><br>
+                                    <input class="address-one" type="number" id="quantidade" name="quantidade" min="1" placeholder="Quantidade..." required>
                                 </div>
                             </div>
-                            <div>
-                                <div id="end_number_container">
-                                    <label for="end_number"> </label><br>
-                                    <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
-                                </div>
-                            </div>
-                        </div>
-                        <div id="destinoFields" style="display: none;">
-                            <div style="text-align: center;">
-                                <img class="svg-orange" src="{{ url_for('static', filename='svg/square-arrow-down.svg') }}" alt="">
-                            </div>
-                            <div style="display: flex">
-                                <div class="endereco-container">
-                                    <label for="destino_end_letra">Endereço de Destino</label><br>
-                                    <select class="address-three" id="destino_end_letra" name="destino_end_letra" onchange="toggleEndNumber()">
-                                        <option value="A"    >A</option>
-                                        <option value="B"    >B</option>
-                                        <option value="C"    >C</option>
-                                        <option value="D"    >D</option>
-                                        <option value="PP1"  >PP1</option>
-                                        <option value="PP2"  >PP2</option>
-                                        <option value="PP3"  >PP3</option>
-                                        <option value="PP4"  >PP4</option>
-                                        <option value="AM"   >AMOSTRA</option>
-                                        <option value="CAM"  >CÂMARA FRIA</option>
-                                        <option value="DEVOL">DEVOLUÇÃO</option>
-                                        <option value="LOJA" >LOJA</option>
-                                        <option value="PROD" >PRODUÇÃO</option>
-                                        <option value="SEPAR">SEPARAÇÃO</option>
-                                    </select>
+                            <div style="display: flex;">
+                                <div>
+                                    <label for="end_letra">Endereço</label><br>
+                                    <div class="endereco-container">
+                                        <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
+                                            <option value="A"    >A</option>
+                                            <option value="B"    >B</option>
+                                            <option value="C"    >C</option>
+                                            <option value="D"    >D</option>
+                                            <option value="PP1"  >PP1</option>
+                                            <option value="PP2"  >PP2</option>
+                                            <option value="PP3"  >PP3</option>
+                                            <option value="PP4"  >PP4</option>
+                                            <option value="AM"   >AMOSTRA</option>
+                                            <option value="CAM"  >CÂMARA FRIA</option>
+                                            <option value="DEVOL">DEVOLUÇÃO</option>
+                                            <option value="LOJA" >LOJA</option>
+                                            <option value="PROD" >PRODUÇÃO</option>
+                                            <option value="SEPAR">SEPARAÇÃO</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="destino_end_number"> </label><br>
-                                    <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="99999.9" placeholder="Número...">
+                                    <div id="end_number_container">
+                                        <label for="end_number"> </label><br>
+                                        <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div id="cargaFields" style="display: none;">
-                            <div style="text-align: center;">
-                                <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
-                            </div>
-                            <div>
-                                <label for="id_carga">Número de Carga</label>
-                                <div style="display: flex; width: 100%">
-                                    <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
-                                    <select type="number" id="id_carga_seq" name="id_carga_seq" step="any" min="0" max="9" class="address-three" placeholder="Sequência...">
-                                        {% for index in range(0, 10) %}
-                                            <option value="{{ index }}">- {{ index }}</option>
-                                        {% endfor %}
-                                    </select>
+                            <div id="destinoFields" style="display: none;">
+                                <div style="text-align: center;">
+                                    <img class="svg-orange" src="{{ url_for('static', filename='svg/square-arrow-down.svg') }}" alt="">
+                                </div>
+                                <div style="display: flex">
+                                    <div class="endereco-container">
+                                        <label for="destino_end_letra">Endereço de Destino</label><br>
+                                        <select class="address-three" id="destino_end_letra" name="destino_end_letra" onchange="toggleEndNumber()">
+                                            <option value="A"    >A</option>
+                                            <option value="B"    >B</option>
+                                            <option value="C"    >C</option>
+                                            <option value="D"    >D</option>
+                                            <option value="PP1"  >PP1</option>
+                                            <option value="PP2"  >PP2</option>
+                                            <option value="PP3"  >PP3</option>
+                                            <option value="PP4"  >PP4</option>
+                                            <option value="AM"   >AMOSTRA</option>
+                                            <option value="CAM"  >CÂMARA FRIA</option>
+                                            <option value="DEVOL">DEVOLUÇÃO</option>
+                                            <option value="LOJA" >LOJA</option>
+                                            <option value="PROD" >PRODUÇÃO</option>
+                                            <option value="SEPAR">SEPARAÇÃO</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="destino_end_number"> </label><br>
+                                        <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="99999.9" placeholder="Número...">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <input class="btn-fancy" type="submit" value="Registrar..." id="submitform">
-                    </form>
+                            <div id="cargaFields" style="display: none;">
+                                <div style="text-align: center;">
+                                    <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
+                                </div>
+                                <div>
+                                    <label for="id_carga">Número de Carga</label>
+                                    <div style="display: flex; width: 100%">
+                                        <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
+                                        <select type="number" id="id_carga_seq" name="id_carga_seq" step="any" min="0" max="9" class="address-three" placeholder="Sequência...">
+                                            {% for index in range(0, 10) %}
+                                                <option value="{{ index }}">- {{ index }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <input class="btn-fancy" type="submit" value="Registrar..." id="submitform">
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="tables-container" id="tables-cont">
+            <div class="tables-container" id="tables-cont">
                 <div class="split-horizontal">
-                    <h1>Saldo Atual do Estoque<span class="id-page">{{session['id_page']}}</span></h1>
-                    <div class="aux-buttons">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-                        <hr class="vert">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="CAMPO LATERAL" alt="" onclick="toggleContainer()">
-                        <hr class="vert">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-                    </div>
+                    <h1>Saldo Atual do Estoque</h1>
                 </div>
                 <div style="justify-content: flex-end">
                     <label for="filterInput"></label>
@@ -215,7 +217,7 @@
                             <th>Item (Código)</th>
                             <th>Item (Descrição)</th>
                             <th>Lote (Código)</th>
-                            <th>Quantidade</th>
+                            <th>QTDE (Efetiva)</th>
                         </tr>
                         {% for item in saldo_atual %}
                         <tr>
@@ -229,8 +231,8 @@
                     </table>
                 </div>
                 <a href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Baixar tabela...</a>
+            </div>
         </div>
-
         <script>
             let ultimoCodigo = '';
 

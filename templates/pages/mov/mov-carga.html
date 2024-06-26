@@ -9,19 +9,21 @@
             <h1>CARGAS<span class="id-page">{{session['id_page']}}</span></h1>
             <div class="aux-buttons">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes-packing.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
                 <hr class="vert">
                 <form action="{{ url_for('cargas') }}" method="post">
                     <button type="submit" style="all: unset">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
                     </button>
                 </form>
-                <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
         <div class="flex-row" style="min-width: 100%;">
             {% if id_carga %}
-            <div class="tables-container" style="max-width: 55%;min-width: 55%;">
+            <div class="tables-container" style="max-width: 55%; min-width: 55%;">
                 <h1 style="margin-bottom: 8px">Núm. Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
                 <div class="cart-container">
                     <button class="cart-button" onclick="toggleCart()">Itens Separados<span class="item-count">0</span></button>
@@ -216,7 +218,7 @@
                         </div>
                         
                     {% endif %}
-                    <div style="max-height: 440px; overflow-y: auto; width: 100%;">
+                    <div style="max-height: 540px; overflow-y: auto; width: 100%;">
                         {% if result %}
                             <table>
                                 <thead>
