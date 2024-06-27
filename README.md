@@ -46,7 +46,7 @@
 				<li>Execute a aplicação:<br>
 					<code>python cde.py</code></li>
 				<li>Acesse a aplicação no navegador:<br>
-					<code>http://192.168.1.20:5005/</code><br>
+					<code>http://localhost:5005/</code><br>
 					ou (com instalação via setup.py):<br>
 					<code>http://cde.com:5005/</code></li>
 			</ol>
