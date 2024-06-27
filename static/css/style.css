@@ -96,6 +96,23 @@ span.id-page {
     align-items: center;
 }
 
+.titles-container a {
+    font-size: unset;
+    margin: unset;
+    pointer-events: all;
+    color: var(--cor-destaque)
+}
+
+.titles-container .dash {
+    color: var(--cor-destaque);
+    margin: 0 10px 0 10px;
+}
+
+.titles-container a:hover {
+    color: var(--cor-destaque);
+    text-decoration: underline;
+}
+
 .title-centerer {
     justify-content: space-between; 
     align-items: center;

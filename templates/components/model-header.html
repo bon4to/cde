@@ -20,11 +20,13 @@
         </div>
         {% if app_version[2] %}
             <div>
-                <p class="vers-info center-page" style="position: fixed; top: 40px; color: red;font-size: 26px; font-weight: bold">CLIENTE: DESENVOLVIMENTO</p>
-                <p class="vers-info center-page" style="position: fixed; top: 62px; color: red; font-weight: bold">(APENAS PARA DESENVOLVEDORES)</p>
+                <p class="version-info center-page flex-column" style="position: fixed; top: 46px; color: red; font-size: 26px; font-weight: bold; pointer-events: none; gap: 0">
+                    <span>CLIENTE: DESENVOLVIMENTO</span>
+                    <span style="font-size: 18px;">(APENAS PARA DESENVOLVEDORES)</span>
+                </p>
             </div>
         {% endif %}
-        <div class="split-horizontal">
+        <div class="split-horizontal" style="min-width: fit-content;">
             <!-- main-sidebar.html -->
             {% include 'shared/main-sidebar.html' %}
             <!-- header.html -->

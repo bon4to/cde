@@ -11,22 +11,28 @@
             <div class="aux-buttons">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="CAMPO LATERAL" alt="" onclick="toggleContainer()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
+        <div style="justify-content: flex-end">
+            <div id="table-filter" style="display: none" >
+                <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                    <option value=1>Item (Código)</option>
+                    <option value=0>Endereço</option>
+                    <option value=2>Item (Descrição)</option>
+                    <option value=3>Lote (Código)</option>
+                </select>
+            </div>
+        </div>
         <div class="flex-row" style="min-width: 100%;">
             <div id="floating-container" draggable="false" class="forms-container" style="position: relative; max-width: max-content">
-                <div class="split-horizontal" style="align-items: end">
-                    <div>
-                        <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()" style="scale: 0.7">
-                            <img class="svg-gray" src="{{ url_for('static', filename='svg/window-restore.svg') }}" alt="">
-                        </button>
-                    </div>
-                </div>
+                <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
+                </button>
                 <div class="centralizado">
                     <div>
                         <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
@@ -194,22 +200,6 @@
                 </div>
             </div>
             <div class="tables-container" id="tables-cont">
-                <div class="split-horizontal">
-                    <h1>Saldo Atual do Estoque</h1>
-                </div>
-                <div style="justify-content: flex-end">
-                    <label for="filterInput"></label>
-                    <label for="filterSelect"></label>
-                    <div id="table-filter" style="display: none" >
-                        <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
-                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                            <option value=1>Item (Código)</option>
-                            <option value=0>Endereço</option>
-                            <option value=2>Item (Descrição)</option>
-                            <option value=3>Lote (Código)</option>
-                        </select>
-                    </div>
-                </div>
                 <div class="table-overflow">
                     <table id="filterTable">
                         <tr>

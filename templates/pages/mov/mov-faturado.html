@@ -7,12 +7,15 @@
         {% include "shared/header/tl-header.html" %}
 
         <div class="titles-container flex-row title-centerer">
-            <h1>FATURADOS<span class="id-page">{{session['id_page']}}</span></h1>
+            <h1>
+                <a href="{{ url_for('mov') }}">MOV</a>
+                <span class="dash">/</span>
+                <span>FATURADO</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
             <div class="aux-buttons">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes-packing.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
@@ -20,7 +23,6 @@
         </div>
         <div class="flex-row" style="min-width: 100%;">
             <div class="tables-container" id="tables-cont">
-                <br>
                 <div style="justify-content: flex-end" >
                     <label for="filterInput"></label>
                     <label for="filterSelect"></label>

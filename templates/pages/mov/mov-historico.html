@@ -6,106 +6,109 @@
 
         {% include 'shared/header/tl-header.html' %}
         <div class="titles-container flex-row title-centerer">
-            <h1>HISTÓRICO<span class="id-page">{{session['id_page']}}</span></h1>
+            <h1>
+                <a href="{{ url_for('mov') }}">MOV</a>
+                <span class="dash">/</span>
+                <span>HISTÓRICO</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
             <div class="aux-buttons">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes-packing.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" alt="" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
-        <div class="flex-row" style="min-width: 100%;">
-            <div class="mobile-container">
-                    <div style="justify-content: flex-end" >
-                        <label for="filterInput"></label>
-                        <label for="filterSelect"></label>
-                        <div id="table-filter" style="display: none" >
-                        <form style="display: flex; flex-direction: row" id="search-all" method="post" action="/mov/historico/search">
-                            <input type="text" class="filterInput" id="filterInput" name="search_term" oninput="filterTable()" placeholder="Filtrar por...">
-                            <select class="address" id="filterSelect" name="search_index" onchange="updateFilterIndex()">
-                                <option value="cod_item">Item (Código)</option>
-                                <option value="desc_item">Item (Descrição)</option>
-                                <option value="endereco">Endereço</option>
-                                <option value="operacao">Operação (Descrição)</option>
-                                <option value="quantidade">Quantidade</option>
-                                <option value="cod_lote">Lote (Código)</option>
-                                <option value="user_name">Usuário (Nome)</option>
-                                <option value="timestamp">Horário (Data/Hora)</option>
-                            </select>
-                            <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/text-search.svg') }}" alt="">
-                        </form>
-                    </div>
-                    {% if search_term %}
-                    <div class="split-horizontal">
-                        <h1 style="font-size: 22px">Critério de pesquisa: <span class="cor-web">"{{ search_term }}"</span> em <span class="cor-web">{{ search_row_text }}</span>.</h1>
-                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
-                    
-                <div style="max-height: 600px; overflow-y: auto;">
-                    <table id="filterTable">
-                        <tr>
-                            <th>Endereço</th>
-                            <th>Item (Código)</th>
-                            <th>Item (Descrição)</th>
-                            <th>Operação</th>
-                            <th>Quantidade</th>
-                            <th>Lote</th>
-                            <th>Usuário</th>
-                            <th>Horário</th>
-                        </tr>
-                        {% for item in estoque %}
-                        <tr>
-                            <td>{{ item['endereco'] }}</td>
-                            <td>{{ item['cod_item'] }}</td>
-                            <td>{{ item['desc_item'] }}</td>
-                            <td>{{ item['operacao'] }}</td>
-                            <td>{{ item['quantidade'] }}</td>
-                            <td>{{ item['cod_lote'] }}</td>
-                            <td>{{ item['user_name'] }}</td>
-                            <td>{{ item['timestamp'] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                
-                <a href="{{ url_for('export_csv_tipo', tipo='historico') }}">
-                    Baixar tabela...
-                </a>
-                    
-                <div class="pagination">
-                    {% if page > 1 %}
-                    <a href="{{ url_for('historico', page=page-1) }}">&laquo; Anterior</a>
-                    {% endif %}
-                
-                    {% if page > 3 %}
-                    <a href="{{ url_for('historico', page=1) }}">1</a>
-                    <span>...</span>
-                    {% endif %}
-                
-                    {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
-                        <a href="{{ url_for('historico', page=p) }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
-                    {% endfor %}
-                
-                    {% if page < total_pages - 2 %}
-                    <span>...</span>
-                    <a href="{{ url_for('historico', page=total_pages) }}">{{ total_pages }}</a>
-                    {% endif %}
-                
-                    {% if page < total_pages %}
-                    <a href="{{ url_for('historico', page=page+1) }}">Próximo &raquo;</a>
-                    {% endif %}
-                </div>
-                {% if row_count %}
-                    <p>{{ row_count }} registros</p>
-                {% endif %}
+        <div style="justify-content: flex-end">
+            <div id="table-filter" style="display: none;">
+                <form style="display: flex; flex-direction: row" id="search-all" method="post" action="/mov/historico/search">
+                    <input type="text" class="filterInput address" id="filterInput" name="search_term" oninput="filterTable()" placeholder="Filtrar por...">
+                    <select class="address" id="filterSelect" name="search_index" onchange="updateFilterIndex()">
+                        <option value="cod_item">Item (Código)</option>
+                        <option value="desc_item">Item (Descrição)</option>
+                        <option value="endereco">Endereço</option>
+                        <option value="operacao">Operação (Descrição)</option>
+                        <option value="quantidade">Quantidade</option>
+                        <option value="cod_lote">Lote (Código)</option>
+                        <option value="user_name">Usuário (Nome)</option>
+                        <option value="timestamp">Horário (Data/Hora)</option>
+                    </select>
+                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/text-search.svg') }}" alt="">
+                </form>
             </div>
         </div>
+        <div class="flex-row" style="min-width: 100%;">
+            <div class="mobile-container">
+                <div style="justify-content: flex-end" >
+                {% if search_term %}
+                <div class="split-horizontal">
+                    <h1 style="font-size: 22px">Critério de pesquisa: <span class="cor-web">"{{ search_term }}"</span> em <span class="cor-web">{{ search_row_text }}</span>.</h1>
+                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+                
+            <div style="max-height: 600px; overflow-y: auto;">
+                <table id="filterTable">
+                    <tr>
+                        <th>Endereço</th>
+                        <th>Item (Código)</th>
+                        <th>Item (Descrição)</th>
+                        <th>Operação</th>
+                        <th>Quantidade</th>
+                        <th>Lote</th>
+                        <th>Usuário</th>
+                        <th>Horário</th>
+                    </tr>
+                    {% for item in estoque %}
+                    <tr>
+                        <td>{{ item['endereco'] }}</td>
+                        <td>{{ item['cod_item'] }}</td>
+                        <td>{{ item['desc_item'] }}</td>
+                        <td>{{ item['operacao'] }}</td>
+                        <td>{{ item['quantidade'] }}</td>
+                        <td>{{ item['cod_lote'] }}</td>
+                        <td>{{ item['user_name'] }}</td>
+                        <td>{{ item['timestamp'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            
+            <a href="{{ url_for('export_csv_tipo', tipo='historico') }}">
+                Baixar tabela...
+            </a>
+                
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="{{ url_for('historico', page=page-1) }}">&laquo; Anterior</a>
+                {% endif %}
+            
+                {% if page > 3 %}
+                <a href="{{ url_for('historico', page=1) }}">1</a>
+                <span>...</span>
+                {% endif %}
+            
+                {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+                    <a href="{{ url_for('historico', page=p) }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
+                {% endfor %}
+            
+                {% if page < total_pages - 2 %}
+                <span>...</span>
+                <a href="{{ url_for('historico', page=total_pages) }}">{{ total_pages }}</a>
+                {% endif %}
+            
+                {% if page < total_pages %}
+                <a href="{{ url_for('historico', page=page+1) }}">Próximo &raquo;</a>
+                {% endif %}
+            </div>
+            {% if row_count %}
+                <p>{{ row_count }} registros</p>
+            {% endif %}
+        </div>
+    </div>
 
         {% include 'shared/footer.html' %}
