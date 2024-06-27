@@ -2255,6 +2255,16 @@ def estoque():
         'pages/estoque.html', 
         saldo_visualization=saldo_visualization
     )
+    
+    
+@app.route('/estoque-enderecado')
+@verify_auth('MOV004')
+def estoque_enderecado():
+    end_lote = get_end_lote()
+    return render_template(
+        'pages/estoque-enderecado.html',
+        saldo_atual=end_lote
+    )
 
 
 @app.route('/export_csv/<tipo>', methods=['GET'])
