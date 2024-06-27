@@ -3,7 +3,7 @@
     </head>
     <body>
         <div class="user-name">
-            <!-- <img id="toggle-theme" class="svg-white" src="{{ url_for('static', filename='svg/moon.svg') }}" alt=""> -->
+            <!-- <img id="toggle-theme" class="svg-invert-hover" src="{{ url_for('static', filename='svg/moon.svg') }}" alt=""> -->
             <p class="user-name" id="userInfo" data-user-name="{{ session.get('user_name', '') }}" onclick="window.location.href='{{ url_for('login') }}';">
                 {{ session.get('user_name', '') }}
             </p>
