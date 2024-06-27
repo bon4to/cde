@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Estoque {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANS LÉGUA</title>
+        <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+
+            {% include 'shared/header/tl-header.html' %}
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="{{ url_for('mov') }}">MOV</a>
+                <span class="dash">/</span>
+                <span>ESTOQUE</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin-off.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" onclick="toggleFilter()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            </div>
+        </div>
+        <div style="justify-content: flex-end">
+            <div id="table-filter" style="display: none" >
+                <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                    <option value=1>Item (Código)</option>
+                    <option value=0>Endereço</option>
+                    <option value=2>Item (Descrição)</option>
+                    <option value=3>Lote (Código)</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
+            <div class="tables-container" id="tables-cont" style="max-width: 100vh;">
+                <div class="split-horizontal">
+                    <p>Visualização de Estoque (Endereçado)</p>
+                </div>
+                <div style="justify-content: flex-end">
+                    <label for="filterInput"></label>
+                    <label for="filterSelect"></label>
+                    <div id="table-filter" style="display: none" >
+                        <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                            <option value=1>Item (Código)</option>
+                            <option value=0>Endereço</option>
+                            <option value=2>Item (Descrição)</option>
+                            <option value=3>Lote (Código)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-overflow">
+                    <table id="filterTable">
+                        <tr>
+                            <th>Endereço</th>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
+                            <th>Lote (Código)</th>
+                            <th>QTDE (Efetiva)</th>
+                        </tr>
+                        {% for item in saldo_atual %}
+                        <tr>
+                            <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
+                            <td>{{ item['cod_item'] }}</td>
+                            <td>{{ item['desc_item'] }}</td>
+                            <td>{{ item['cod_lote'] }}</td>
+                            <td>{{ item['saldo'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <a href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Baixar tabela...</a>
+            </div>
+        </div>
+
+
+        {% include 'shared/footer.html' %}
