@@ -262,6 +262,50 @@ function generatePDF() {
     doc.save(pdfName);
 }
 
+function renderSubtotals() {
+    const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
+    subtotalsTable.innerHTML = '';
+
+    getSeparacao().then(sepCarga => {        
+        let subtotals = {};
+
+        sepCarga.forEach(item => {
+            if (subtotals[item.cod_item]) {
+                subtotals[item.cod_item] += item.qtde_sep;
+            } else {
+                subtotals[item.cod_item] = item.qtde_sep;
+            }
+        });
+
+        for (const [cod_item, subtotal] of Object.entries(subtotals)) {
+            const row = subtotalsTable.insertRow();
+            row.insertCell(0).textContent = cod_item;
+            row.insertCell(1).textContent = subtotal;
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao obter separação:', error);
+    });
+}
+
+function clearAllSeparations() {
+    const confirmation = confirm('Você tem certeza que deseja limpar TODAS as separações? Esta ação não pode ser desfeita.');
+    if (confirmation) {
+        if (!verifyCaptcha()) {
+            alert('O captcha foi cancelado ou preenchido incorretamente.')
+        } else {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key.startsWith('separacao-carga-')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            reloadTables();
+            alert('Operação concluída.');
+        }
+    }
+}
+
 const fetchItemDescription = async (cod_item) => {
     try {
         const response = await fetch(`/get_description_json/${cod_item}`);
@@ -406,11 +450,16 @@ function togglePopUp() {
 
 function toggleCart() {
     const cartDropdown = document.getElementById('cart-dropdown');
-    cartDropdown.classList.toggle('hidden');
+    const itemsCountElement = document.querySelector('.item-count');
+    const itemsCount = parseInt(itemsCountElement.textContent, 10);
 
-    if (!cartDropdown.classList.contains('hidden')) {
-        renderSubtotals();
-    }
+    if (itemsCount > 0) {
+        cartDropdown.classList.toggle('hidden');
+
+        if (!cartDropdown.classList.contains('hidden')) {
+            renderCartSubtotals();
+        }
+    }    
 }
 
 
