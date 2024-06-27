@@ -6,9 +6,23 @@
 
     {% include 'shared/header/tl-header.html' %}
     <div class="titles-container flex-row title-centerer">
-        <h1>SEPARAÇÃO<span class="id-page">{{session['id_page']}}</span></h1>
+        <h1>
+            <a href="{{ url_for('mov') }}">MOV</a>
+            <span class="dash">/</span>
+            <a href="{{ url_for('cargas') }}">CARGAS</a>
+            <span class="dash">/</span>
+            <span>SEPARAÇÃO</span>
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
         <div class="aux-buttons">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_done', id_carga=id_carga) }}';">
+            <div class="flex-row" style="margin: 8px 0">
+                <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+                    <img class="svg-invert" style="height: unset; width: unset;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                </div>
+            </div>
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=id_carga) }}';">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
             <hr class="vert">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
@@ -36,15 +50,17 @@
                 </table>
                 <div class="flex-row" style="margin: 8px 0">
                     <div class="flex-row">
-                        <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                        </div>
                         <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
                         </div>
-                        <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
+                        <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                         </div>
+                        {% if session['privilegio'] == 1 %}
+                            <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="btn-fancy" style="height: 45px; margin: 0" onclick="bulkInsertHistorico()">
                         <span>FINALIZAR</span>
@@ -77,15 +93,17 @@
                         <th>Chaves em localStorage</th>
                     </tr>
                 </thead>
-                    <!-- execute listAllSeparations(); -->
+                    <!-- execute listSeparationsLocalStorage(); -->
                 <tbody>
                 </tbody>
             </table>
-            <div style="margin: 8px 0" class="flex-row">
-                <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+            {% if session['privilegio'] == 1 %}
+                <div style="margin: 8px 0" class="flex-row">
+                    <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -94,6 +112,14 @@
 
         function getStorageKey() {
             return `separacao-carga-${nroCarga}`;
+        }
+        
+        function redirectToCarga() {
+            const cargaInput = document.getElementById('cargaInput').value;
+            if (cargaInput > 0) {
+                const url = `/mov/separacao-pend/${cargaInput}`;
+                window.location.href = url;
+            }
         }
 
         function getSeparacao() {
@@ -162,6 +188,7 @@
         
                     try {
                         const descricao = await fetchItemDescription(item.cod_item);
+                        descCell.style.textWrap = "balance";
                         descCell.textContent = descricao;
                     } catch (error) {
                         console.error('Erro ao obter descrição:', error);
@@ -192,49 +219,6 @@
             });
         }
 
-        function renderSubtotals() {
-            const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
-            subtotalsTable.innerHTML = '';
-        
-            getSeparacao().then(sepCarga => {        
-                let subtotals = {};
-        
-                sepCarga.forEach(item => {
-                    if (subtotals[item.cod_item]) {
-                        subtotals[item.cod_item] += item.qtde_sep;
-                    } else {
-                        subtotals[item.cod_item] = item.qtde_sep;
-                    }
-                });
-        
-                for (const [cod_item, subtotal] of Object.entries(subtotals)) {
-                    const row = subtotalsTable.insertRow();
-                    row.insertCell(0).textContent = cod_item;
-                    row.insertCell(1).textContent = subtotal;
-                }
-            }).catch(error => {
-                console.error('Erro ao obter separação:', error);
-            });
-        }
-
-        function clearAllSeparations() {
-            const confirmation = confirm('Você tem certeza que deseja limpar TODAS as separações? Esta ação não pode ser desfeita.');
-            if (confirmation) {
-                if (!verifyCaptcha()) {
-                    alert('O captcha foi cancelado ou preenchido incorretamente.')
-                } else {
-                    for (let i = localStorage.length - 1; i >= 0; i--) {
-                        const key = localStorage.key(i);
-                        if (key.startsWith('separacao-carga-')) {
-                            localStorage.removeItem(key);
-                        }
-                    }
-                    reloadTables()
-                    alert('Operação concluída.')
-                }
-            }
-        }
-
         function bulkInsertHistorico() {
             const confirmation = confirm(`[CARGA: ${nroCarga}] Você tem certeza que deseja finalizar a separação?`);
             if (confirmation) {
@@ -258,9 +242,10 @@
                     if (data.success) {
                         alert('Movimentação em massa realizada com sucesso.');
                         getSeparacao().then(separacao => {
-                            sendToServer(separacao, getStorageKey())
+                            sendToServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
                         })
-                        localStorage.removeItem(storageKey); // limpa a separacao atual
+                        localStorage.removeItem(storageKey);    // limpa a separacao atual do localStorage
+                        reloadTables();                         // atualiza tabelas no front-end
                     } else {
                         alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
                     }
@@ -269,10 +254,10 @@
                     console.error('Erro:', error);
                     alert(`Erro ao realizar movimentação em massa: ${error.message}`);
                 });
-            } 
+            }
         }
 
-        function listAllSeparations() {
+        function listSeparationsLocalStorage() {
             const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
             allSeparationsTable.innerHTML = '';
 
@@ -308,7 +293,7 @@
         }
 
         function reloadTables() {
-            listAllSeparations();
+            listSeparationsLocalStorage();
             renderItems();
             renderSubtotals();
         }

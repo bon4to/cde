@@ -6,9 +6,23 @@
 
     {% include 'shared/header/tl-header.html' %}
     <div class="titles-container flex-row title-centerer">
-        <h1>SEPARAÇÃO<span class="id-page">{{session['id_page']}}</span></h1>
+        <h1>
+            <a href="{{ url_for('mov') }}">MOV</a>
+            <span class="dash">/</span>
+            <a href="{{ url_for('cargas', id_carga=id_carga) }}">CARGAS</a>
+            <span class="dash">/</span>
+            <span>SEPARAÇÃO</span>
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
         <div class="aux-buttons">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (PENDENTES)" alt="" onclick="window.location.href='{{ url_for('carga_sep', id_carga=id_carga) }}';">
+            <div class="flex-row" style="margin: 8px 0">
+                <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+                    <img class="svg-invert" style="height: unset; width: unset;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                </div>
+            </div>
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (PENDENTES)" alt="" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
             <hr class="vert">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
@@ -23,10 +37,9 @@
                 <table id="itemsTable">
                     <thead>
                         <tr>
-                            <th>Carga (Código)</th>
-                            <th>Usuário</th>
                             <th>Endereço</th>
                             <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
                             <th>Lote (Código)</th>
                             <th>QTDE (Separado)</th>
                         </tr>
@@ -40,9 +53,10 @@
                         <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
                         </div>
-                        <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
-                        </div>
+                    </div>
+                    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="generatePDF()">
+                        <span>GERAR RELATÓRIO</span>
+                        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
                     </div>
                 </div>
             </div>
@@ -71,7 +85,7 @@
                         <th>Concluídos (em Cache)</th>
                     </tr>
                 </thead>
-                    <!-- execute listAllSeparations(); -->
+                    <!-- execute listSeparationsLocalStorage(); -->
                 <tbody>
                 </tbody>
             </table>
@@ -86,6 +100,14 @@
             return `separacao-carga-${nroCarga}`;
         }
 
+        function redirectToCarga() {
+            const cargaInput = document.getElementById('cargaInput').value;
+            if (cargaInput > 0) {
+                const url = `/mov/separacao-done/${cargaInput}`;
+                window.location.href = url;
+            }
+        }
+        
         function getSeparacao() {
             return new Promise((resolve, reject) => {
                 const localStorageData = localStorage.getItem(getStorageKey());
@@ -114,65 +136,48 @@
         function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             itemsTable.innerHTML = '';
-            getSeparacao().then(sepCarga => {
-
-                console.log(sepCarga)
-
-                sepCarga.forEach((item, index) => {
+            getSeparacao().then(async sepCarga => { // Use async para poder usar await dentro do forEach
+        
+                for (let index = 0; index < sepCarga.length; index++) {
+                    const item = sepCarga[index];
                     const row = itemsTable.insertRow();
-                    row.insertCell(0).textContent = item.nrocarga;
-                    row.insertCell(1).textContent = item.user_id;
-                    row.insertCell(2).textContent = item.rua_letra + '.' + item.rua_numero;
-                    row.insertCell(3).textContent = item.cod_item;
-                    row.insertCell(4).textContent = item.lote_item;
-                    row.insertCell(5).textContent = item.qtde_sep;
-                });
+                    
+                    row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
+                    row.insertCell(1).textContent = item.cod_item;
+                    const descCell = row.insertCell(2);
+                    row.insertCell(3).textContent = item.lote_item;
+                    row.insertCell(4).textContent = item.qtde_sep;
+        
+        
+                    try {
+                        const descricao = await fetchItemDescription(item.cod_item);
+                        descCell.style.textWrap = "balance";
+                        descCell.textContent = descricao;
+                    } catch (error) {
+                        console.error('Erro ao obter descrição:', error);
+                        descCell.textContent = 'Erro ao obter descrição';
+                    }
+        
+                }
             })
             .catch(error => {
                 console.error('Erro ao obter separação:', error);
-
+        
                 const alert = document.getElementById('alert-message')
                 const content = document.getElementById('contentTable')
-
+        
                 alert.textContent = error.message;
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
             });
         }
 
-        function renderSubtotals() {
-            const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
-            subtotalsTable.innerHTML = '';
-        
-            getSeparacao().then(sepCarga => {        
-                let subtotals = {};
-        
-                sepCarga.forEach(item => {
-                    if (subtotals[item.cod_item]) {
-                        subtotals[item.cod_item] += item.qtde_sep;
-                    } else {
-                        subtotals[item.cod_item] = item.qtde_sep;
-                    }
-                });
-        
-                console.log('subtotals:', subtotals);
-        
-                for (const [cod_item, subtotal] of Object.entries(subtotals)) {
-                    const row = subtotalsTable.insertRow();
-                    row.insertCell(0).textContent = cod_item;
-                    row.insertCell(1).textContent = subtotal;
-                }
-            }).catch(error => {
-                console.error('Erro ao obter separação:', error);
-            });
-        }
-
-        function listAllSeparationsLocally() {
+        function listSeparationsFromServer() {
             fetch('/list-all-separations')
                 .then(response => response.json())
                 .then(files => {
                     const tableBody = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
-                    tableBody.innerHTML = ''; // Limpa o corpo da tabela
+                    tableBody.innerHTML = '';
 
                     if (files.error) {
                         const row = tableBody.insertRow();
@@ -195,7 +200,7 @@
         function reloadTables() {
             renderItems();
             renderSubtotals();
-            listAllSeparationsLocally();
+            listSeparationsFromServer();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
