@@ -8,8 +8,8 @@
 
     <!-- TABELA -->
         <div draggable="false" style="height: max-content" class="form-login">
-            <div class="split-horizontal">
-                <div class="log">
+            <div class="flex-row">
+                <div class="log" style="width: 400px;">
                     <h1 class="cor-web" style="margin-top: 30px;text-align: center;">Oops! Não está pronto!</h1>
                     <div>
                         <h3 style="margin-top: 18px">ESTOU TRABALHANDO...</h3>
@@ -22,8 +22,7 @@
                     </a>
                     </div>
                 </div>
-                <div class="tables-container" id="tables-cont" style="max-width: 580px; margin: 10px;">
-                    <img class="svg-hover" src="{{ url_for('static', filename='svg/gears.svg') }}" alt="">
+                <div id="tables-cont" style="max-width: 500px; margin: 10px;">
                     <div class="centralizado">
                         <div>
                             <img class="side-banner" style="height: 300px; filter: unset; border-radius: 20px;" src="{{ url_for('static', filename='img/under-development.png') }}" alt="">

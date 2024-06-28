@@ -120,7 +120,7 @@ img {
 }
 
 .banner {
-    height: 120px;
+    height: 100px;
     z-index: 1000;
     overflow: hidden;
     user-select: none;

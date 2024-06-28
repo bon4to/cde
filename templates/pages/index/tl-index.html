@@ -5,7 +5,23 @@
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
-
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="#">TL</a>
+                <span class="dash">/</span>
+                <span>HOME</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIOS" alt="" onclick="window.location.href='{{ url_for('login') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/log-out.svg') }}" title="SAIR" alt="" onclick="window.location.href='{{ url_for('logout') }}';">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
             <div class="forms-container split-horizontal menu-container" >
                 <div style="display: flex; flex-direction: column">
                     <div>
@@ -95,6 +111,7 @@
                     <img class="side-banner" src="{{ url_for('static', filename='img/tl-side-banner.jpg') }}" alt="">
                 </div>
             </div>
+        </div>
 
             <script>
                 function getSaudacao() {
