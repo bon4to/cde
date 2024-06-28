@@ -1,59 +1,68 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>Rótulos {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+        <title>Rótulo {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | CDE</title>
+        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
-        {% include 'shared/header/hp-header.html' %}
+        {% include 'shared/header/cde-header.html' %}
 
-    <!-- TABELA -->
-        <div draggable="false" class="form-login">
-            <div class="split-horizontal">
-                <div class="log">
-                    <div class="split-horizontal"><h1 class="title">Calculadora de Rótulos<span class="id-page">{{session['id_page']}}</h1></div>
-                    <div style="max-width: 400px; justify-content: flex-start; margin: auto;">
-                        <form style="display: flex;" id="form-field" method="post" action="{{ url_for('rotulo') }}">
-                            <div class="two-split">
-
-                                <div>
-                                    <label for="diametro_inicial" >Diâmetro (Externo)</label><br>
-                                    <input class="address" maxlength="6" id="diametro_inicial" type="number" name="diametro_minimo" oninput="verificarComprimento()" required placeholder="Diâmetro...">
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="{{ url_for('home') }}">CDE</a>
+                <span class="dash">/</span>
+                <span>RÓTULO</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
+            <div draggable="false" class="form-login">
+                <div class="flex-row">
+                    <div class="log">
+                        <div style="max-width: 400px; justify-content: flex-start; margin: auto;">
+                            <form style="display: flex;" id="form-field" method="post" action="{{ url_for('rotulo') }}">
+                                <div class="two-split">
+                                    <div>
+                                        <label for="diametro_inicial" >Diâmetro (Externo)</label><br>
+                                        <input class="address" maxlength="6" id="diametro_inicial" type="number" name="diametro_minimo" oninput="verificarComprimento()" required placeholder="Diâmetro...">
+                                    </div>
+                                    <div>
+                                        <label for="diametro_minimo">Diâmetro (Interno)</label><br>
+                                        <input class="address" maxlength="6" id="diametro_minimo" type="number" name="diametro_minimo" oninput="verificarComprimento()" required placeholder="Diâmetro...">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label for="diametro_minimo">Diâmetro (Interno)</label><br>
-                                    <input class="address" maxlength="6" id="diametro_minimo" type="number" name="diametro_minimo" oninput="verificarComprimento()" required placeholder="Diâmetro...">
+                                <hr>
+                                <div class="two-split">
+                                    <div>
+                                        <label for="espessura_fita">Rótulo (Espessura)</label><br>
+                                        <input class="address" maxlength="6" name="espessura_fita" id="espessura_fita" type="number" oninput="verificarComprimento()"  required placeholder="Espessura...">
+                                    </div>
+    
+                                    <div>
+                                        <label for="espessura_papelao">Tubete (Espessura)</label><br>
+                                        <input class="address" maxlength="6" type="number" id="espessura_papelao" name="espessura_papelao" oninput="verificarComprimento()"  required placeholder="Espessura...">
+                                    </div>
                                 </div>
-                            </div>
-                            <hr>
-                            <div class="two-split">
-                                <div>
-                                    <label for="espessura_fita">Rótulo (Espessura)</label><br>
-                                    <input class="address" maxlength="6" name="espessura_fita" id="espessura_fita" type="number" oninput="verificarComprimento()"  required placeholder="Espessura...">
+                                    <div>
+                                        <label for="compr_rotulo">Rótulo (Comprimento)</label><br>
+                                        <input  type="number" maxlength="6" id="compr_rotulo" name="compr_rotulo" oninput="verificarComprimento()"  required placeholder="Distância do início de um rótulo ao início de outro...">
+                                    </div>
+                                <hr>
+                                <h3 id="resposta1" class="alert">Calculadora</h3>
+                                <p id="resposta3">Digite os parâmetros...</p>
+                                <div style="display: none" class="split-horizontal">
+                                    <input class="btn-fancy" type="submit" value="Calcular...">
                                 </div>
-
-                                <div>
-                                    <label for="espessura_papelao">Tubete (Espessura)</label><br>
-                                    <input class="address" maxlength="6" type="number" id="espessura_papelao" name="espessura_papelao" oninput="verificarComprimento()"  required placeholder="Espessura...">
-                                </div>
-                            </div>
-                                <div>
-                                    <label for="compr_rotulo">Rótulo (Comprimento)</label><br>
-                                    <input  type="number" maxlength="6" id="compr_rotulo" name="compr_rotulo" oninput="verificarComprimento()"  required placeholder="Distância do início de um rótulo ao início de outro...">
-                                </div>
-                            <hr>
-                            <h3 id="resposta1" class="alert">Calculadora</h3>
-                            <p id="resposta3">Digite os parâmetros...</p>
-                            <div style="display: none" class="split-horizontal">
-                                <input class="btn-fancy" type="submit" value="Calcular...">
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
-                </div>
-                <div class="forms-container" id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
-                    <img class="svg-hover" src="{{ url_for('static', filename='svg/tags.svg') }}" alt="">
-                    <div class="centralizado">
-                        <div>
-                            <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="">
+                    <div id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
+                        <div class="centralizado">
+                            <div>
+                                <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="">
+                            </div>
                         </div>
                     </div>
                 </div>

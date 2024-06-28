@@ -1,75 +1,82 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>Etiquetas {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | HUGO PIETRO</title>
-        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+        <title>Etiquetas {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | CDE</title>
+        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
-        {% include 'shared/header/hp-header.html' %}
+        {% include 'shared/header/cde-header.html' %}
 
-    <!-- TABELA -->
-        <div draggable="false" class="form-login">
-            <div class="split-horizontal">
-                <div class="log">
-                    <div class="split-horizontal">
-                        <h1 class="title">Emissor de Etiquetas<span class="id-page">{{session['id_page']}}</h1>
-                    </div>
-                    <div style="max-width: 400px; justify-content: flex-start; margin: auto">
-                        <div>
-                            <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
-
-                                <label for="input_code"></label>
-                                <div class="split-horizontal">
-                                    <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o QR-Code ou o DUN-14...">
-                                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="{{ url_for('home') }}">CDE</a>
+                <span class="dash">/</span>
+                <span>ETIQUETA</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
+            <div draggable="false" class="form-login">
+                <div class="flex-row">
+                    <div class="log">
+                        <div style="max-width: 400px; justify-content: flex-start; margin: auto">
+                            <div>
+                                <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
+                                    <label for="input_code"></label>
+                                    <div class="split-horizontal">
+                                        <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o QR-Code ou o DUN-14...">
+                                        <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                                    </div>
+                                    <hr>
+                                </form>
+                            </div>
+                            <form style="display: flex; justify-content: flex-start" id="form-field" method="post" action="{{ url_for('etiqueta') }}">
+                                <div>
+                                    <label for="desc_item">Produto
+                                        <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                    </label><br>
+                                    <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" onclick="maximizeText(this)" required readonly placeholder="Produto...">
                                 </div>
-                                <hr>
+    
+                                <div class="two-split">
+                                    <div>
+                                        <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
+                                            <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                        </label><br>
+                                        <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
+                                    </div>
+    
+                                    <div>
+                                        <label for="lote_item">Lote
+                                            <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                        </label><br>
+                                        <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Lote...">
+                                    </div>
+                                </div>
+                                <br>
+                                <div style="display: flex;width: 100%;">
+                                    <input class="btn-fancy" style="max-width: none;" type="submit" value="Emitir Etiqueta">
+                                    <img class="btn-fancy" id="img_checkbox" style="height: 35px;width: 35px; padding: 12px;margin-left: 15px" src="{{ url_for('static', filename='svg/image-down.svg') }}" onclick="toggleCheckbox('img_checkbox','img_download')" alt="">
+                                </div>
+    
+                                <div class="split-horizontal">
+                                    <input class="check_box" style="display: none" type="checkbox" id="img_download" name="img_download">
+                                </div>
                             </form>
                         </div>
-                        <form style="display: flex; justify-content: flex-start" id="form-field" method="post" action="{{ url_for('etiqueta') }}">
-                            <div>
-                                <label for="desc_item">Produto
-                                    <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                </label><br>
-                                <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" onclick="maximizeText(this)" required readonly placeholder="Produto...">
-                            </div>
-
-                            <div class="two-split">
-                                <div>
-                                    <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
-                                        <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                    </label><br>
-                                    <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
-                                </div>
-
-                                <div>
-                                    <label for="lote_item">Lote
-                                        <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                    </label><br>
-                                    <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Lote...">
-                                </div>
-                            </div>
-                            <br>
-                            <div style="display: flex;width: 100%;">
-                                <input class="btn-fancy" style="max-width: none;" type="submit" value="Emitir Etiqueta">
-                                <img class="btn-fancy" id="img_checkbox" style="height: 35px;width: 35px; padding: 12px;margin-left: 15px" src="{{ url_for('static', filename='svg/image-down.svg') }}" onclick="toggleCheckbox('img_checkbox','img_download')" alt="">
-                            </div>
-
-                            <div class="split-horizontal">
-                                <input class="check_box" style="display: none" type="checkbox" id="img_download" name="img_download">
-                            </div>
-                        </form>
                     </div>
-                </div>
-                <div class="forms-container" id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
-                    <img class="svg-hover" src="{{ url_for('static', filename='svg/tags.svg') }}" alt="">
-                    <div class="centralizado">
-                        <div class="centralizado" style="background-color: #4373b6; border-radius: 20px; width: 450px; height: 450px;">
-                            <img id="qrCodeImage" style="border-radius: 10px;" src="" alt="">
+                    <div id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
+                        <div class="centralizado">
+                            <div class="centralizado" style="background-color: #4373b6; border-radius: 20px; width: 450px; height: 450px;">
+                                <img id="qrCodeImage" style="border-radius: 10px;" src="" alt="">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div>    
 
 
         <script>

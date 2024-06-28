@@ -6,6 +6,35 @@
 
         {% include 'shared/header/hp-header.html' %}
 
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <span>PRODUTOS</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <form action="{{ url_for('produtos') }}" method="post">
+                    <button type="submit" style="all: unset">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE ITENS">
+                    </button>
+                </form>
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="window.location.href='{{ url_for('home_hp') }}';">
+            </div>
+        </div>
+        <div style="justify-content: flex-end" >
+            <label for="filterInput"></label>
+            <label for="filterSelect"></label>
+            <div id="table-filter" style="display: none" >
+                <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                    <option value="0">Item (Código)</option>
+                    <option value="1">Item (Descrição)</option>
+                    <option value="2">Código de Barras (DUN-14)</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
             {% if 'privilegio' in session %}
                 {% if session['privilegio'] <= 2 %}
                     {% if alert %}
@@ -36,19 +65,6 @@
                 {% endif %}
             {% endif %}
             <div class="mobile-container" >
-                <div class="split-horizontal">
-                    <h1>Produtos Cadastrados<span class="id-page">{{session['id_page']}}</span></h1>
-                    <div class="aux-buttons">
-                        <form action="{{ url_for('produtos') }}" method="post">
-                            <button type="submit" style="all: unset">
-                                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE ITENS">
-                            </button>
-                        </form>
-                        <hr class="vert">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="window.location.href='{{ url_for('home_hp') }}';">
-                    </div>
-                </div>
                 {% if alert %}
                     {% if class_alert == 'error' %}
                         <div class="msg-error">
@@ -70,19 +86,6 @@
                         </details>
                     </div>
                 {% endif %}
-                <div style="justify-content: flex-end" >
-                    <label for="filterInput"></label>
-                    <label for="filterSelect"></label>
-                    <div id="table-filter" style="display: none" >
-                        <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
-                        <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                            <option value="0">Item (Código)</option>
-                            <option value="1">Item (Descrição)</option>
-                            <option value="2">Código de Barras (DUN-14)</option>
-
-                        </select>
-                    </div>
-                </div>
                     <div style="max-height: 600px; overflow-y: auto;">
                         <table id="filterTable">
                             <tr>
@@ -103,5 +106,6 @@
                     Baixar tabela...
                 </a>
             </div>
+        </div>
 
         {% include 'shared/footer.html' %}
