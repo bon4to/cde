@@ -5,7 +5,19 @@
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/hp-header.html' %}
-
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="{{ url_for('envase') }}">ENVASE</a>
+                <span class="dash">/</span>
+                <span>EDITAR</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="window.location.href='{{ url_for('envase') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" onclick="window.location.href='{{ url_for('calendar_envase') }}';">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
             <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
                 <hr>
                 <div class="centralizado">
@@ -71,13 +83,6 @@
                 </div>
             </div>
             <div class="tables-container" id="tables-cont">
-                <div class="split-horizontal">
-                    <h1>Editar programação de Envase<span class="id-page">{{session['id_page']}}</span></h1>
-                    <div style="display: flex">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="window.location.href='{{ url_for('envase') }}';">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" onclick="window.location.href='{{ url_for('calendar_envase') }}';">
-                    </div>
-                </div>
                 <div style="justify-content: flex-end" >
                     <label for="filterInput"></label>
                     <label for="filterSelect"></label>
@@ -113,6 +118,7 @@
                 <br>
                 <a class="btn-fancy" href="{{ url_for('envase') }}">Cancelar</a>
             </div>
+        </div>
             <script>
                 $(document).ready(function(){
                     $('[data-toggle="tooltip"]').tooltip();

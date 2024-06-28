@@ -6,8 +6,21 @@
 
         {% include "shared/header/hp-header.html" %}
 
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="{{ url_for('producao') }}">PROCESS</a>
+                <span class="dash">/</span>
+                <span>EDITAR</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="window.location.href='{{ url_for('producao') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" onclick="window.location.href='{{ url_for('calendar_producao') }}';">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
         {% if mode == 'singleRow' %}
-            <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
+                <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
                     <div class="centralizado">
                         <div>
                             {% for item in prod_edit %}
@@ -61,13 +74,13 @@
                                                 </div>
                                             {% endif %}
                                         {% endif %}
-
+    
                                     </div>
                                     <label for="id_producao" style="display: none"></label>
                                     <input value="{{ item['id_producao'] }}" name="id_producao" id="id_producao" style="display: none">
                                     <div style="display: flex;width: 100%;">
                                         <input class="btn-fancy" style="max-width: none;" type="submit" value="Confirmar edição...">
-
+    
                                         {% if 'privilegio' in session %}
                                             {% if session['privilegio'] <= 2 %}
                                                 <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="" onclick="confirmDelete('{{ item['id_producao'] }}')">
@@ -81,13 +94,6 @@
             </div>
         {% endif %}
         <div class="tables-container" id="tables-cont">
-                <div class="split-horizontal">
-                    <h1>Editar programação de Processamento<span class="id-page">{{session['id_page']}}</h1>
-                    <div style="display: flex">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="window.location.href='{{ url_for('producao') }}';">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" onclick="window.location.href='{{ url_for('calendar_producao') }}';">
-                    </div>
-                </div>
                 <div style="justify-content: flex-end" >
                     <label for="filterInput"></label>
                     <label for="filterSelect"></label>
@@ -123,6 +129,8 @@
                 <br>
                 <a class="btn-fancy" href="{{ url_for('producao') }}">Cancelar</a>
             </div>
+        </div>
+
 
             <script>
                 $(document).ready(function(){

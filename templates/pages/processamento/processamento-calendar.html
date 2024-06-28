@@ -5,25 +5,35 @@
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include "shared/header/hp-header.html" %}
-        <div class="form-login">
-            <div class="split-horizontal">
-                <h1>Calendário de Processamento</h1>
-                <div class="aux-buttons">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="window.location.href='{{ url_for('producao') }}';">
-                </div>
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="{{ url_for('producao') }}">PROCESS</a>
+                <span class="dash">/</span>
+                <span>CALENDÁRIO</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="window.location.href='{{ url_for('producao') }}';">
             </div>
-            <div id="calendar-container"></div>
-            <div>
-                <div class="legend-container">
-                    <div class="legend-item" style="background-color: rgba(var(--programmed-l1), 1);">1</div>
-                    <div class="legend-item" style="background-color: rgba(var(--programmed-l2), 1);">2</div>
-                    <div class="legend-item" style="background-color: rgba(var(--programmed-l3), 1);">3</div>
-                    <div class="legend-item" style="background-color: rgba(var(--programmed-l4), 1);">4</div>
-                    <div class="legend-item" style="background-color: rgba(var(--programmed-l5), 1);">5</div>
-                    <!-- INATIVOS
-                        <div class="legend-item" style="background-color: rgba(var(--programmed-l6), 1);">6</div>
-                        <div class="legend-item" style="background-color: rgba(var(--programmed-l7), 1);">7</div>
-                    -->
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
+            <div class="form-login">
+                <div class="split-horizontal">
+                    <h1>Calendário de Processamento</h1>
+                </div>
+                <div id="calendar-container"></div>
+                <div>
+                    <div class="legenda-container">
+                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l1), 1);">1</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l2), 1);">2</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l3), 1);">3</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l4), 1);">4</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l5), 1);">5</div>
+                        <!-- INATIVOS
+                            <div class="legenda-item" style="background-color: rgba(var(--programmed-l6), 1);">6</div>
+                            <div class="legenda-item" style="background-color: rgba(var(--programmed-l7), 1);">7</div>
+                        -->
+                    </div>
                 </div>
             </div>
         </div>

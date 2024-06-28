@@ -5,7 +5,38 @@
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include "shared/header/hp-header.html" %}
-
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <span>ENVASE</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" title="Calendário de Envase" onclick="window.location.href='{{ url_for('calendar_envase') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="Mostrar/Ocultar Formulário" alt="" onclick="toggleContainer()">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="Filtros para a tabela..." onclick="toggleFilter()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="goBack()">
+            </div>
+        </div>
+        <div>
+            <div style="display: none;" class="flex-row" id="table-filter">
+                <input type="date" class="address" id="filterDate1" onchange="filterByDate()">
+                <div id="period-date" style="display: contents">
+                    <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
+                </div>
+                <a class="button-mini btn-fancy" onclick="getHoje()" title="Hoje">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-day.svg') }}" alt="">
+                </a>
+                <a class="button-mini btn-fancy" onclick="getSemana()" title="Semana">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-week.svg') }}" alt="">
+                </a>
+                <a class="button-mini btn-fancy" onclick="limpaData()" title="Limpar">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%;">
             <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
                 <hr>
                 <div class="centralizado">
@@ -75,79 +106,53 @@
                 </div>
             </div>
             <div class="tables-container" id="tables-cont">
-                <div class="split-horizontal">
-                    <h1>Programação de Envase<span class="id-page">{{session['id_page']}}</span></h1>
-                    <div class="aux-buttons">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" title="Calendário de Envase" onclick="window.location.href='{{ url_for('calendar_envase') }}';">
-                        <hr class="vert">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="Mostrar/Ocultar Formulário" alt="" onclick="toggleContainer()">
-                        <hr class="vert">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="Filtros para a tabela..." onclick="toggleFilter()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="goBack()">
-                    </div>
-                </div>
-                <div class="split-horizontal">
-                    <div style="display: flex; flex-direction: row">
-                        <input type="date" class="address" id="filterDate1" onchange="filterByDate()">
-                        <div id="period-date" style="display: contents">
-                            <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
-                        </div>
-                        <a class="button-mini btn-fancy" style="margin-right: 8px" onclick="getHoje()" title="Hoje">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-day.svg') }}" alt="">
-                        </a>
-                        <a class="button-mini btn-fancy" style="margin-right: 8px" onclick="getSemana()" title="Semana">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-week.svg') }}" alt="">
-                        </a>
-                        <a class="button-mini btn-fancy" style="margin: 0" onclick="limpaData()" title="Limpar">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                        </a>
-                    </div>
-                </div>
-                <div style="justify-content: flex-end" >
-                    <label for="filterDate1"></label>
-                    <div id="table-filter" style="position: absolute; display: none; right: 25px">
-                        <div class="back-modal" onclick="toggleFilter()"></div>
-                            <div class="form-filter generic" style="">
-                                <div style="padding: 5px;display: flex;max-height: 40px;align-items: center;justify-content: center;">
-                                    <div class="split-horizontal" style="align-items: center">
-                                        <h3 style="font-size: 24px">Filtros</h3>
-                                        <div style="scale: 0.7">
-                                            <div class="pin" id="fix-move-btn" onclick="toggleFilter()">
-                                                <img style="height: 30px;width: 30px" class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                <!--
+                    <div style="justify-content: flex-end" >
+                        <label for="filterDate1"></label>
+                        <div id="table-filter" style="position: absolute; display: none; right: 25px">
+                            <div class="back-modal" onclick="toggleFilter()"></div>
+                                <div class="form-filter generic" style="">
+                                    <div style="padding: 5px;display: flex;max-height: 40px;align-items: center;justify-content: center;">
+                                        <div class="split-horizontal" style="align-items: center">
+                                            <h3 style="font-size: 24px">Filtros</h3>
+                                            <div style="scale: 0.7">
+                                                <div class="pin" id="fix-move-btn" onclick="toggleFilter()">
+                                                    <img style="height: 30px;width: 30px" class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                <hr>
+                                <div style="padding: 20px;">
+                                    <p class="cor-web">Linhas</p>
+                                    <div style="display: flex; flex-direction: column">
+                                        <div>
+                                            <input type="checkbox" class="check" id="toggle_linha1" onclick="toggleTable('linha1')" checked>
+                                            <label for="toggle_linha1">Linha 1</label>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="check" id="toggle_linha2" onclick="toggleTable('linha2')" checked>
+                                            <label for="toggle_linha2">Linha 2</label>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="check" id="toggle_linha3" onclick="toggleTable('linha3')" checked>
+                                            <label for="toggle_linha3">Linha 3</label>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="check" id="toggle_linha4" onclick="toggleTable('linha4')" checked>
+                                            <label for="toggle_linha4">Linha 4</label>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="check" id="toggle_linha5" onclick="toggleTable('linha5')" checked>
+                                            <label for="toggle_linha5">Linha 5</label>
+                                        </div>
+                                    </div>
+                                    <br>
                                 </div>
-                            <hr>
-                            <div style="padding: 20px;">
-                                <p class="cor-web">Linhas</p>
-                                <div style="display: flex; flex-direction: column">
-                                    <div>
-                                        <input type="checkbox" class="check" id="toggle_linha1" onclick="toggleTable('linha1')" checked>
-                                        <label for="toggle_linha1">Linha 1</label>
-                                    </div>
-                                    <div>
-                                        <input type="checkbox" class="check" id="toggle_linha2" onclick="toggleTable('linha2')" checked>
-                                        <label for="toggle_linha2">Linha 2</label>
-                                    </div>
-                                    <div>
-                                        <input type="checkbox" class="check" id="toggle_linha3" onclick="toggleTable('linha3')" checked>
-                                        <label for="toggle_linha3">Linha 3</label>
-                                    </div>
-                                    <div>
-                                        <input type="checkbox" class="check" id="toggle_linha4" onclick="toggleTable('linha4')" checked>
-                                        <label for="toggle_linha4">Linha 4</label>
-                                    </div>
-                                    <div>
-                                        <input type="checkbox" class="check" id="toggle_linha5" onclick="toggleTable('linha5')" checked>
-                                        <label for="toggle_linha5">Linha 5</label>
-                                    </div>
-                                </div>
-                                <br>
                             </div>
                         </div>
                     </div>
-                </div>
+                    -->
                 {% for linha_indice in range(1, 6) %}
                     <div class="table-overflow section-linhas programmed-l{{ linha_indice }}" id="linha{{ linha_indice }}_table">
                         <h4>Linha {{ linha_indice }}</h4>
@@ -193,6 +198,7 @@
                     Baixar tabela...
                 </a>
             </div>
+        </div>
         <script>
             getSemana()
 

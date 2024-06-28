@@ -252,7 +252,7 @@
         function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             itemsTable.innerHTML = '';
-            getSeparacao().then(async sepCarga => { // Use async para poder usar await dentro do forEach
+            getSeparacao().then(async sepCarga => {
         
                 for (let index = 0; index < sepCarga.length; index++) {
                     const item = sepCarga[index];
@@ -263,8 +263,7 @@
                     const descCell = row.insertCell(2);
                     row.insertCell(3).textContent = item.lote_item;
                     row.insertCell(4).textContent = item.qtde_sep;
-        
-        
+                    
                     try {
                         const descricao = await fetchItemDescription(item.cod_item);
                         descCell.style.textWrap = "balance";

@@ -81,6 +81,7 @@ span.id-page {
     min-height: 80px;
     padding: 8px 36px;
     margin: 0 10px 16px 10px;
+    transition: width 0.3s ease-out;
 }
 
 .titles-container h1 {
@@ -1301,13 +1302,13 @@ th.calendar {
     visibility: visible;
 }
 
-.legend-container {
+.legenda-container {
     display: flex;
     margin-top: 20px;
     justify-content: center;
 }
 
-.legend-item {
+.legenda-item {
     width: 20px;
     height: 20px;
     font-size: 14px;

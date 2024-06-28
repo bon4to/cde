@@ -7,10 +7,28 @@
         {% include 'shared/header/cde-header.html' %}
 
     <!-- TABELA -->
+    <div class="titles-container flex-row title-centerer">
+        <h1>
+            <a href="{{ url_for('home') }}">CDE</a>
+            <span class="dash">/</span>
+            <span>USUÁRIOS</span>
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
+        <div class="aux-buttons">
+            {% if 'privilegio' in session %}
+                {% if session['privilegio'] <= 2 %}
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="EDITAR USUÁRIOS" alt="" onclick="toggleEdit()">
+                {% endif %}
+            {% endif %}
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+        </div>
+    </div>
+    <div class="flex-row" style="min-width: 100%;">
         <div draggable="false" class="forms-container" style="padding: 12px 30px;">
             <div class="split-horizontal">
                 <div>
-                    <h1>Cadastrar Usuário:<span class="id-page">{{session['id_page']}}</span></h1>
+                    <h1>Cadastrar Usuário</h1>
                     <form action="/users/inserting" method="post">
                         <label for="login_user">Login: *</label>
                         <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
@@ -57,7 +75,6 @@
                                 <label for="nome_user">Nome: *</label><br>
                                 <input class="address" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
                             </div>
-
                             <div>
                                 <label for="sobrenome_user">Sobrenome: *</label><br>
                                 <input class="address" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
@@ -78,14 +95,9 @@
                         <p class="alert">Campos com * são obrigatórios.</p>
                         <div style="display: flex;width: 100%;">
                             <input class="btn-fancy" style="max-width: none;" type="submit" value="Cadastrar">
-                            {% if 'privilegio' in session %}
-                                {% if session['privilegio'] <= 2 %}
-                                    <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
-                                {% endif %}
-                            {% endif %}
+                            
                         </div>
                     </form>
-                    
                 </div>
             </div>
         </div>
@@ -119,6 +131,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
     <script>
         function redirectToEdit(idUser) {
