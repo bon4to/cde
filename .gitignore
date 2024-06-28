@@ -1,9 +1,10 @@
-.env
-.history
-.idea
-__pycache__
-venv
-translegua.db
 dbg_translegua.db
 cde_database.db
+translegua.db
+__pycache__
+.history
+.vscode
 report
+.idea
+venv
+.env
