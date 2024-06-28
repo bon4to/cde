@@ -1845,25 +1845,25 @@ def carga_id(id_carga):
         cargas_str_query = ', '.join(map(str, all_cargas))
         
         query = f'''
-            SELECT  crg.CODIGO_GRUPOPED                   AS NRO_CARGA,
-                    crg.NRO_PEDIDO                        AS NRO_PEDIDO,
+            SELECT  icrg.CODIGO_GRUPOPED                   AS NRO_CARGA,
+                    icrg.NRO_PEDIDO                        AS NRO_PEDIDO,
                     (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
                     CAST(iped.ITEM AS VARCHAR(255))       AS COD_ITEM,
                     i.ITEM_DESCRICAO                      AS DESC_ITEM,
                     CAST(iped.QTDE_SOLICITADA AS INTEGER) AS QTDE_SOLIC
             FROM DB2ADMIN.ITEMPED iped
 
-            JOIN DB2ADMIN.IGRUPOPE crg
-            ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
-            AND crg.SEQ = iped.SEQ
+            JOIN DB2ADMIN.IGRUPOPE icrg
+            ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+            AND icrg.SEQ = iped.SEQ
 
             JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
             ON i.ITEM = iped.ITEM
 
-            WHERE crg.CODIGO_GRUPOPED = '{id_carga}' 
+            WHERE icrg.CODIGO_GRUPOPED = '{id_carga}' 
             AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
             AND CURRENT DATE
-            AND crg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
+            AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
 
             ORDER BY COD_ITEM
 
@@ -1900,21 +1900,25 @@ def cargas():                                                                   
             cargas_str_query = ', '.join(map(str, all_cargas))
             query = f'''
                 SELECT DISTINCT 
-                    crg.CODIGO_GRUPOPED AS NRO_CARGA,
-                    crg.NRO_PEDIDO      AS NRO_PEDIDO,
-                    ped.CODIGO_CLIENTE  AS COD_CLIENTE,
-                    cl.FANTASIA         AS FANT_CLIENTE,
-                    iped.DT_EMISSAO     AS DT_EMISSAO,
-                    iped.DT_ENTREGA     AS DT_ENTREGA
+                    icrg.CODIGO_GRUPOPED AS NRO_CARGA,
+                    icrg.NRO_PEDIDO      AS NRO_PEDIDO,
+                    ped.CODIGO_CLIENTE   AS COD_CLIENTE,
+                    cl.FANTASIA          AS FANT_CLIENTE,
+                    iped.DT_EMISSAO      AS DT_EMISSAO,
+                    iped.DT_ENTREGA      AS DT_ENTREGA, 
+                    crg.OBSERVACAO       AS OBS_CARGA
 
                 FROM DB2ADMIN.ITEMPED iped
 
-                JOIN DB2ADMIN.IGRUPOPE crg
-                ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
-                AND crg.SEQ = iped.SEQ
+                JOIN DB2ADMIN.IGRUPOPE icrg
+                ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+                AND icrg.SEQ = iped.SEQ                                                             -- #TODO: VALIDAR ESTE CRITÉRIO DO JOIN
 
                 JOIN DB2ADMIN.PEDIDO ped
-                ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
+                ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+                
+                JOIN DB2ADMIN.GRUPOPED crg
+                ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
                 JOIN DB2ADMIN.CLIENTE cl
                 ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
@@ -1922,44 +1926,15 @@ def cargas():                                                                   
                 JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
                 ON i.ITEM = iped.ITEM
 
-                WHERE crg.QTDE_FATUR != 0
+                WHERE icrg.QTDE_FATUR != 0
                 AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
                 AND CURRENT DATE
-                AND crg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
+                AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
 
-                ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
+                ORDER BY icrg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
             '''
         else:
-            query = '''
-                SELECT DISTINCT 
-                    crg.CODIGO_GRUPOPED AS NRO_CARGA,
-                    crg.NRO_PEDIDO      AS NRO_PEDIDO,
-                    ped.CODIGO_CLIENTE  AS COD_CLIENTE,
-                    cl.FANTASIA         AS FANT_CLIENTE,
-                    iped.DT_EMISSAO     AS DT_EMISSAO,
-                    iped.DT_ENTREGA     AS DT_ENTREGA
-
-                FROM DB2ADMIN.ITEMPED iped
-
-                JOIN DB2ADMIN.IGRUPOPE crg
-                ON crg.NRO_PEDIDO = iped.NRO_PEDIDO
-                AND crg.SEQ = iped.SEQ
-
-                JOIN DB2ADMIN.PEDIDO ped
-                ON crg.NRO_PEDIDO = ped.NRO_PEDIDO
-
-                JOIN DB2ADMIN.CLIENTE cl
-                ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-
-                JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
-                ON i.ITEM = iped.ITEM
-
-                WHERE crg.QTDE_FATUR != 0
-                AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
-                AND CURRENT DATE
-
-                ORDER BY crg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
-            '''
+            query = '''SELECT 'SEM CARGAS' AS MSG;'''
         
         dsn_name = 'HUGOPIET'
         dsn = dsn_name

@@ -244,6 +244,7 @@
                                         <th>Cliente (Descrição)</th>
                                         <th>Emissão (Data)</th>
                                         <th>Entrega (Data)</th>
+                                        <th>Observação</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -256,6 +257,7 @@
                                                 <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
                                                 <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
                                                 <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
+                                                <td>{{ row[columns.index('OBS_CARGA')] }}</td>
                                             </tr>
                                         {% endif %}
                                     {% endfor %}
