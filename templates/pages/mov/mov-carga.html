@@ -34,14 +34,16 @@
         <div class="flex-row" style="min-width: 100%;">
             {% if id_carga %}
             <div class="tables-container" style="max-width: 55%; min-width: 55%;">
-                <h1 style="margin-bottom: 8px">Núm. Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
-                <div class="cart-container">
-                    <button class="cart-button" onclick="toggleCart()">Itens Separados<span class="item-count" id="item-count">0</span></button>
-                    <div class="cart-dropdown hidden" id="cart-dropdown">
-                        <ul class="cart-items">
-                            <!-- Itens serão renderizados aqui -->
-                        </ul>
-                        <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Finalizar Separação</button>
+                <div class="split-horizontal">
+                    <h1 style="margin-bottom: 8px">Núm. Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                    <div class="cart-container">
+                        <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                        <div class="cart-dropdown hidden" id="cart-dropdown">
+                            <ul class="cart-items">
+                                <!-- Itens serão renderizados aqui -->
+                            </ul>
+                            <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Finalizar Separação</button>
+                        </div>
                     </div>
                 </div>
                 <div id="detailedTable" class="hidden">
@@ -226,7 +228,7 @@
                         <div class="msg-info">
                             <details>
                                 <summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
-                                A atualização é solicitada no ícone <img class="svg" style="opacity: 0.7; height: 16px; width: 16px; padding: 0; padding-left: 4px;" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                                A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
                             </details>
                         </div>
                         
@@ -298,7 +300,7 @@
             var codItem = '{{ cod_item }}';
             var userID  = '{{ session['id_user'] }}';
             var itemCount = 0;
-
+            
             if (nroCarga != '') {
                 renderCartSubtotals();
             }

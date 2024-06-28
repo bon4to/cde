@@ -1,13 +1,13 @@
 /* ESTILIZAÇÃO */
 
 :root {
-    --cor-cde: #3e5ea6;
     --cor-hp: #8f7943;
     --cor-tl: #ea5a26;
+    --cor-cde: #3e5ea6;
     --programmed-l1: 255, 172, 160;
     --programmed-l2: 181, 229, 140;
     --programmed-l3: 165, 165, 255;
-    --programmed-l4: 255, 165, 80;
+    --programmed-l4: 255, 165, 080;
     --programmed-l5: 165, 235, 255;
     --programmed-l6: 255, 165, 225;
     --programmed-l7: 255, 220, 165;
@@ -1403,6 +1403,14 @@ div.msg-info {
     background-color: rgba(128, 180, 240, 0.5);
 }
 
+.msg-svg {
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    margin: 0 2px;
+}
+
 .popup-overlay {
     top: 0;
     left: 0;
@@ -1564,10 +1572,13 @@ h1.subtitle {
 }
 
 .cart-button {
+    height: 40px;
     border: none;
     color: white;
     font-size: 16px;
     cursor: pointer;
+    text-wrap: nowrap;
+    width: min-content;
     position: relative;
     padding: 10px 20px;
     border-radius: 12px;
@@ -1604,6 +1615,7 @@ h1.subtitle {
 }
 
 .cart-dropdown {
+    right: 0;
     top: 45px;
     z-index: 1;
     padding: 12px;

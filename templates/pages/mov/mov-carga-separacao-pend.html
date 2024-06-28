@@ -29,10 +29,21 @@
         </div>
     </div>
     <div class="flex-row" style="min-width: 100%;">
-        <div class="tables-container" style="min-width: 40vw;">
-            <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+        <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
+            <div class="split-horizontal">
+                <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                <div class="cart-container">
+                    <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                    <div class="cart-dropdown hidden" id="cart-dropdown">
+                        <ul class="cart-items">
+                            <!-- Itens serão renderizados aqui -->
+                        </ul>
+                        <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Finalizar Separação</button>
+                    </div>
+                </div>
+            </div>
             <p style="justify-content: flex-start">Status:<span style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
-            <div class="msg-error hidden" id="alert-message"></div>
+            <div class="hidden" id="alert-message"></div>
             <div id="contentTable">
                 <table id="itemsTable">
                     <thead>
@@ -69,22 +80,23 @@
                 </div>
             </div>
         </div>
-        <div class="tables-container" style="max-width: 20vw">
-            <h1>Subtotal</h1>
-            <p style="justify-content: flex-start">Separação por Item</p>
-            <table id="subtotalsTable">
-                <thead>
-                    <tr>
-                        <th>Item (Código)</th>
-                        <th>Subtotal (QTDE)</th>
-                    </tr>
-                </thead>
-                    <!-- execute renderSubtotals(); -->
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <div class="tables-container" style="max-width: 20vw">
+        <!--
+            <div class="tables-container" id="sepSubtotalsContainer" style="max-width: 20vw">
+                <h1>Subtotal</h1>
+                <p style="justify-content: flex-start">Separação por Item</p>
+                <table id="subtotalsTable">
+                    <thead>
+                        <tr>
+                            <th>Item (Código)</th>
+                            <th>Subtotal (QTDE)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        -->
+        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
             <h1>Separações</h1>
             <p style="justify-content: flex-start">Status:<span style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
             <table id="allSeparationsTable">
@@ -110,6 +122,12 @@
     <script>
         const nroCarga = '{{ id_carga }}';
 
+        var itemCount = 0;
+
+        if (nroCarga != '') {
+            renderCartSubtotals();
+        }
+
         function getStorageKey() {
             return `separacao-carga-${nroCarga}`;
         }
@@ -120,6 +138,67 @@
                 const url = `/mov/separacao-pend/${cargaInput}`;
                 window.location.href = url;
             }
+        }
+
+        function renderCartSubtotals() {
+            const cartItemsContainer = document.querySelector('.cart-items');
+            cartItemsContainer.innerHTML = '';
+        
+            getSeparacao().then(sepCarga => {
+                let subtotals = {};
+        
+                sepCarga.forEach(item => {
+                    if (subtotals[item.cod_item]) {
+                        subtotals[item.cod_item] += item.qtde_sep;
+                    } else {
+                        subtotals[item.cod_item] = item.qtde_sep;
+                    }
+                });
+        
+                const sortedEntries = Object.entries(subtotals).sort((a, b) => {
+                    const codA = a[0].toUpperCase();
+                    const codB = b[0].toUpperCase();
+        
+                    if (codA < codB) {
+                        return -1;
+                    }
+                    if (codA > codB) {
+                        return 1;
+                    }
+                    return 0;
+                });
+        
+                let itemCount = 0;
+        
+                sortedEntries.forEach(([cod_item, subtotal]) => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('cart-item');
+                    listItem.innerHTML = `
+                        <span class="item-name">${cod_item} |</span>
+                        <span class="item-quantity cor-web">${subtotal}</span>
+                    `;
+                    cartItemsContainer.appendChild(listItem);
+                    itemCount += 1;
+        
+                    const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
+                    if (row) {
+                        let subtotalCell = row.querySelector('.subtotal-cell');
+                        if (!subtotalCell) {
+                            subtotalCell = document.createElement('td');
+                            subtotalCell.classList.add('subtotal-cell');
+                            row.appendChild(subtotalCell);
+                        }
+                        subtotalCell.textContent = subtotal;
+                    }
+                });
+                updateItemCount(itemCount);
+            }).catch(error => {
+                console.error('Erro ao obter separação:', error);
+            });
+        }
+        
+        function updateItemCount(itemCount) {
+            document.querySelector('.item-count').textContent = itemCount;
         }
 
         function getSeparacao() {
@@ -136,10 +215,10 @@
                             return response.json();
                         })
                         .then(data => {
-                            reject(new Error('A carga selecionada já foi finalizada.'));
+                            reject(new Error(304));
                         })
                         .catch(error => {
-                            reject(new Error('Nenhuma carga pendente ou iniciada neste código.'));
+                            reject(new Error(404));
                         });
                 }
             });
@@ -208,12 +287,29 @@
                 }
             })
             .catch(error => {
-                console.error('Erro ao obter separação:', error);
-        
                 const alert = document.getElementById('alert-message')
                 const content = document.getElementById('contentTable')
-        
-                alert.textContent = error.message;
+
+                var errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`
+
+                if (error.message == 304) {
+                    errorMessage = `<div class="msg-success">
+                                        <details>
+                                            <summary>A carga selecionada já foi finalizada.</summary>
+                                            Caso necessite visualizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}"> acima.
+                                        </details>
+                                    </div>`;
+                }
+                else if (error.message == 404) {
+                    errorMessage = `<div class="msg-error">
+                                        <details>
+                                            <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
+                                            Inicie a <a style="all: unset; cursor: pointer; color: blue" href="/mov/carga">separação da carga</a> para fazer o faturamento.
+                                        </details>
+                                    </div>`;
+                }
+
+                alert.innerHTML = errorMessage;
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
             });
@@ -245,10 +341,11 @@
                             sendToServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
                         })
                         localStorage.removeItem(storageKey);    // limpa a separacao atual do localStorage
-                        reloadTables();                         // atualiza tabelas no front-end
                     } else {
                         alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
                     }
+                    reloadTables();                             // atualiza tabelas no front-end
+                    updateItemCount(0);
                 })
                 .catch(error => {
                     console.error('Erro:', error);
@@ -295,7 +392,7 @@
         function reloadTables() {
             listSeparationsLocalStorage();
             renderItems();
-            renderSubtotals();
+            renderCartSubtotals();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

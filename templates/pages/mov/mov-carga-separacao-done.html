@@ -29,10 +29,10 @@
         </div>
     </div>
     <div class="flex-row" style="min-width: 100%;">
-        <div class="tables-container" style="min-width: 40vw;">
+        <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
             <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
-            <p style="justify-content: flex-start">Status:<span style="color: var(--cor-cde); margin-left: 4px">Finalizada</span></p>
-            <div class="msg-error hidden" id="alert-message"></div>
+            <p style="justify-content: flex-start">Status:<span style="color: green; margin-left: 4px">Finalizada</span></p>
+            <div class="hidden" id="alert-message"></div>
             <div id="contentTable">
                 <table id="itemsTable">
                     <thead>
@@ -61,7 +61,7 @@
                 </div>
             </div>
         </div>
-        <div class="tables-container" style="max-width: 20vw;">
+        <div class="tables-container" id="sepSubtotalsContainer" style="max-width: 20vw;">
             <h1>Subtotal</h1>
             <p style="justify-content: flex-start">Separação por Item</p>
             <table id="subtotalsTable">
@@ -76,9 +76,9 @@
                 </tbody>
             </table>
         </div>
-        <div class="tables-container" style="max-width: 20vw">
+        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
             <h1>Separações</h1>
-            <p style="justify-content: flex-start">Status:<span style="color: var(--cor-cde); margin-left: 4px">Finalizada</span></p>
+            <p style="justify-content: flex-start">Status:<span style="color: green; margin-left: 4px">Finalizada</span></p>
             <table id="allSeparationsTable">
                 <thead>
                     <tr>
@@ -91,7 +91,6 @@
             </table>
         </div>
     </div>
-    
 
     <script>
         const nroCarga = '{{ id_carga }}';
@@ -113,12 +112,12 @@
                 const localStorageData = localStorage.getItem(getStorageKey());
         
                 if (localStorageData) {
-                    reject(new Error('Há separação pendente neste código.'));
+                    reject(new Error(304));
                 } else {
                     fetch(`/load-table-data?filename=${getStorageKey()}`)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error('Erro ao carregar dados do servidor');
+                                throw new Error(404);
                             }
                             return response.json();
                         })
@@ -126,7 +125,6 @@
                             resolve(data);
                         })
                         .catch(error => {
-                            console.error('Erro ao carregar dados do servidor:', error);
                             reject(error);
                         });
                 }
@@ -136,7 +134,7 @@
         function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             itemsTable.innerHTML = '';
-            getSeparacao().then(async sepCarga => { // Use async para poder usar await dentro do forEach
+            getSeparacao().then(async sepCarga => {
         
                 for (let index = 0; index < sepCarga.length; index++) {
                     const item = sepCarga[index];
@@ -147,7 +145,6 @@
                     const descCell = row.insertCell(2);
                     row.insertCell(3).textContent = item.lote_item;
                     row.insertCell(4).textContent = item.qtde_sep;
-        
         
                     try {
                         const descricao = await fetchItemDescription(item.cod_item);
@@ -161,12 +158,31 @@
                 }
             })
             .catch(error => {
-                console.error('Erro ao obter separação:', error);
-        
                 const alert = document.getElementById('alert-message')
                 const content = document.getElementById('contentTable')
-        
-                alert.textContent = error.message;
+                const subtotals = document.getElementById('sepSubtotalsContainer')
+
+                var errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`
+
+                if (error.message == 304) {
+                    errorMessage = `<div class="msg-info">
+                                        <details>
+                                            <summary>Há uma separação pendente neste código!</summary>
+                                            Para visualizá-la, filtre por 'pendentes' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}"> acima.
+                                        </details>
+                                    </div>`;
+                }
+                else if (error.message == 404) {
+                    errorMessage = `<div class="msg-error">
+                                        <details>
+                                            <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
+                                            Inicie a <a style="all: unset; cursor: pointer; color: blue" href="/mov/carga">separação da carga</a> para fazer o faturamento.
+                                        </details>
+                                    </div>`;
+                }
+
+                subtotals.classList.add('hidden');
+                alert.innerHTML = errorMessage;
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
             });
