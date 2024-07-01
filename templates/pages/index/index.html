@@ -105,7 +105,7 @@
                             </div>
                         </div>
                     {% endif %}
-                    <div class="side-banner">
+                    <div>
                         <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
                     </div>
                 </div>
@@ -124,6 +124,13 @@
         </div>
         
         <script>
+
+            function confirmLogout() {
+                if (confirm('Você tem certeza que deseja sair?')) {
+                    window.location.href = '{{ url_for('logout') }}';
+                }
+            }
+
             function getSaudacao() {
                 let saudacao;
                 let horaAtual = new Date().getHours();
@@ -139,13 +146,6 @@
             }
             let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
             document.getElementById("saud").innerHTML = salute;
-            
-            function confirmLogout() {
-                if (confirm('Você tem certeza que deseja sair?')) {
-                    window.location.href = '{{ url_for('logout') }}';
-                }
-            }
-
         </script>
 
         {% include 'shared/footer.html' %}

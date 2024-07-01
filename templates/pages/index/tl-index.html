@@ -28,11 +28,12 @@
                         <div style="display: flex; flex-direction: column">
                             <div>
                                 <div class="salute-text">
-                                    <h1 class="saudacao" id="saud" style="margin-bottom: 8px;"></h1>
+                                    <h1 class="saudacao" id="salute-text" style="margin-bottom: 8px;"></h1>
                                     <p class="phrase" id="frase-motivacional">“{{ frase }}”</p>
                                     <!-- <hr style="margin-bottom: 14px;"> -->
                                 </div>
                             </div>
+                            <hr style="margin-left: 20px; width: 20%;">
                             <div class="container-grid">
                                 <div class="item featured" onclick="window.location.href='{{ url_for('mov') }}';">
                                     <div class="split-horizontal algn-cntr">
@@ -119,23 +120,24 @@
             </div>
         </div>
 
-                    <script>
-                        function getSaudacao() {
-                            let saudacao;
-                            let horaAtual = new Date().getHours();
+        <script>
 
-                            if (horaAtual >= 5 && horaAtual < 12) {
-                                saudacao = "Bom dia, ";
-                            } else if (horaAtual >= 12 && horaAtual < 18) {
-                                saudacao = "Boa tarde, ";
-                            } else {
-                                saudacao = "Boa noite, ";
-                            }
-                            return saudacao;
-                        }
-                        let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
-                        document.getElementById("saud").innerHTML = salute;
+            function getSaudacao() {
+                let saudacao;
+                let horaAtual = new Date().getHours();
 
-                    </script>
+                if (horaAtual >= 5 && horaAtual < 12) {
+                    saudacao = "Bom dia, ";
+                } else if (horaAtual >= 12 && horaAtual < 18) {
+                    saudacao = "Boa tarde, ";
+                } else {
+                    saudacao = "Boa noite, ";
+                }
+                return saudacao;
+            }
+            let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
+            document.getElementById("salute-text").innerHTML = salute;
 
-                {% include 'shared/footer.html' %}
+        </script>
+
+    {% include 'shared/footer.html' %}

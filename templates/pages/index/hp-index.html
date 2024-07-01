@@ -33,6 +33,7 @@
                                     <!-- <hr style="margin-bottom: 14px;"> -->
                                 </div>
                             </div>
+                            <hr style="margin-left: 20px; width: 20%;">
                             <div class="container-grid">
                                 <div class="item featured" onclick="window.location.href='{{ url_for('producao') }}';">
                                     <div class="split-horizontal algn-cntr">
@@ -122,21 +123,23 @@
         </div>
 
         <script>
-            function getSaudacao() {
-            let saudacao;
-            let horaAtual = new Date().getHours();
 
-            if (horaAtual >= 5 && horaAtual < 12) {
-                saudacao = "Bom dia, ";
-            } else if (horaAtual >= 12 && horaAtual < 18) {
-                saudacao = "Boa tarde, ";
-            } else {
-                saudacao = "Boa noite, ";
+            function getSaudacao() {
+                let saudacao;
+                let horaAtual = new Date().getHours();
+
+                if (horaAtual >= 5 && horaAtual < 12) {
+                    saudacao = "Bom dia, ";
+                } else if (horaAtual >= 12 && horaAtual < 18) {
+                    saudacao = "Boa tarde, ";
+                } else {
+                    saudacao = "Boa noite, ";
+                }
+                return saudacao;
             }
-            return saudacao;
-        }
-        let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
-        document.getElementById("saud").innerHTML = salute;
+            let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
+            document.getElementById("saud").innerHTML = salute;
+            
         </script>
 
         {% include 'shared/footer.html' %}
