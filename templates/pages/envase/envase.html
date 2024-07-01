@@ -180,7 +180,7 @@
                                         <td style="width: 80px;">{{ item['data_entr_antec'] }}</td>
                                         <td style="width: 80px;">{{ item['data_envase'] }}</td>
                                         <td class="tb-checkbox">
-                                            <input type="checkbox" oninput="confirmConcluir('{{ item['id_envase'] }}', this)" style="width: 16px; height: auto" {% if item['concluido'] %} checked {% endif %} {% if item['concluido'] %} disabled {% endif %}>
+                                            <input type="checkbox" oninput="confirmConcluir('{{ item['id_envase'] }}', this)" style="width: 16px; height: auto" {% if item['flag_concluido'] %} checked {% endif %} {% if item['flag_concluido'] %} disabled {% endif %}>
                                         </td>
                                         <td class="td-more" data-toggle="tooltip" title="obs.:&#10;{{ item['observacao'] }}">
                                             <img class="svg-gray table-more" style="height: 15px;width: 15px; padding: 2px" src="{{ url_for('static', filename='svg/info.svg') }}" alt="">
@@ -209,15 +209,19 @@
             $(document).ready(function() {
                 function getFantasiaClientes() {
                     $.get('/get/clientes', function(data) {
-                        data.forEach(function(cliente) {
-                            $('#cliente').append('<option>' + cliente.fantasia_cliente + '</option>');
-                        });
-
-                        $('#cliente').select2();
+                        if (data.class_alert === 'success') {
+                            data.clientes.forEach(function(cliente) {
+                                $('#cliente').append('<option>' + cliente.FANTASIA + '</option>');
+                            });
+                            $('#cliente').select2();
+                        } else {
+                            console.error(data.alert);
+                        }
                     });
                 }
                 getFantasiaClientes();
             });
+                       
 
             function buscarLinhas() {
                 var item_selec = $("#desc_item").val();

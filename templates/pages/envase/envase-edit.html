@@ -109,7 +109,7 @@
                                 <td>{{ item['quantidade'] }}</td>
                                 <td>{{ item['data_entr_antec'] }}</td>
                                 <td>{{ item['data_envase'] }}</td>
-                                <td class="tb-checkbox"><input type="checkbox" oninput="confirmConcluir('{{ item['id_envase'] }}', this)" style="width: 16px; height: auto" {% if not item['concluido'] %} disabled {% endif %} {% if item['concluido'] %} checked {% endif %}></td>
+                                <td class="tb-checkbox"><input type="checkbox" oninput="confirmConcluir('{{ item['id_envase'] }}', this)" style="width: 16px; height: auto" {% if not item['flag_concluido'] %} disabled {% endif %} {% if item['flag_concluido'] %} checked {% endif %}></td>
                                 <td class="td-more" data-toggle="tooltip" title="obs.:&#10;{{ item['observacao'] }}"><img class="svg-gray table-more" src="{{ url_for('static', filename='svg/info.svg') }}" alt=""></td>
                             </tr>
                         {% endfor %}

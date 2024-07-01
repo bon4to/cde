@@ -182,14 +182,14 @@
                                 <th>Concluído</th>
                             </tr>
                             {% for item in producao %}
-                                {% if item['linha'] == linha_indice and not item['concluido'] %}
+                                {% if item['linha'] == linha_indice and not item['flag_concluido'] %}
                                     <tr>
                                         <td style="width: 100px;">{{ item['liq_tipo'] }}</td>
                                         <td style="width: 100px;">{{ item['liq_linha'] }} {{ item['liq_cor'] }}</td>
                                         <td style="width: 100px;">{{ '{:,.0f}'.format(item['litros']).replace(',', '.') }}</td>
                                         <td style="width: 80px;">{{ item['data_entr_antec'] }}</td>
                                         <td style="width: 80px;">{{ item['data_producao'] }}</td>
-                                        <td class="tb-checkbox"><input type="checkbox" oninput="confirmConcluir('{{ item['id_producao'] }}', this)" style="width: 16px; height: auto" {% if item['concluido'] %} checked {% endif %} {% if item['concluido'] %} disabled {% endif %}></td>
+                                        <td class="tb-checkbox"><input type="checkbox" oninput="confirmConcluir('{{ item['id_producao'] }}', this)" style="width: 16px; height: auto" {% if item['flag_concluido'] %} checked {% endif %} {% if item['flag_concluido'] %} disabled {% endif %}></td>
                                         <td class="td-more"><img class="svg-gray table-more" style="height: 15px;width: 15px; padding: 2px" src="{{ url_for('static', filename='svg/info.svg') }}" alt="">
                                             <span class="tooltiptext">{% if item['observacao'] %}{{ item['observacao'] }}{% else %}...{% endif %}</span>
                                         </td>

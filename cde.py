@@ -21,7 +21,7 @@ from math import pi, ceil
 
 
 # PARÂMETROS
-load_dotenv()   
+load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
@@ -48,18 +48,18 @@ def check_session_expiry():                                                     
 @app.before_request
 def check_ip():                                                                                                 #// CHECA LISTA DE IPS (MODO DEBUG)
     client_ip = request.remote_addr
+    if not debug:
+        blacklist = os.getenv('BLACKLIST')
+        if client_ip in blacklist:
+            msg = f'{client_ip} na Blacklist.'
+            tlg_msg(msg)
+            abort(403)
     """
-    if debug:
+    else:
         current_server_ip = request.host
         adm_ip = os.getenv('ADM_IPS').split(';')
         if client_ip not in current_server_ip and client_ip not in adm_ip:
             msg = f'{client_ip}'
-            tlg_msg(msg)
-            abort(403)
-    else:
-        blacklist = os.getenv('BLACKLIST')
-        if client_ip in blacklist:
-            msg = f'{client_ip} na Blacklist.'
             tlg_msg(msg)
             abort(403)
     """
@@ -86,33 +86,33 @@ def create_tables():                                                            
 
 # TABELA DE PROGRAMAÇÃO DO ENVASE
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS envase (
+            CREATE TABLE IF NOT EXISTS prog_envase (
                 id_envase        INTEGER PRIMARY KEY AUTOINCREMENT,
-                linha            INTEGER(3),
+                cod_linha        INTEGER(3),
                 cod_cliente      INTEGER(10),
                 cod_item         VARCHAR(6),
-                quantidade       INTEGER(20),
+                qtde_solic       INTEGER(20),
                 data_entr_antec  DATETIME,
                 data_envase      DATETIME,
                 observacao       VARCHAR(100),
-                concluido        BOOLEAN
+                flag_concluido   BOOLEAN DEFAULT FALSE
             );
         ''')
 
 # TABELA DE PROGRAMAÇÃO DA PROCESSAMENTO
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS producao (
+            CREATE TABLE IF NOT EXISTS prog_producao (
                 id_producao      INTEGER PRIMARY KEY AUTOINCREMENT,
-                linha            INTEGER(3),
+                cod_linha        INTEGER(3),
                 liq_tipo         VARCHAR(10),
                 liq_linha        VARCHAR(30),
                 liq_cor          VARCHAR(30),
                 embalagem        VARCHAR(10),
-                litros           INTEGER(20),
+                lts_solic        INTEGER(20),
                 data_entr_antec  DATETIME,
                 data_producao    DATETIME,
                 observacao       VARCHAR(100),
-                concluido        BOOLEAN
+                flag_concluido   BOOLEAN DEFAULT FALSE
             );
         ''')
 
@@ -163,7 +163,7 @@ def create_tables():                                                            
                 id_user          INTEGER,
                 id_perm          VARCHAR(6)
             );
-        ''')                                                                                                    #TODO! mudar id_perm: integer para varchar(6)
+        ''')
 
 # TABELA DE ITENS
         cursor.execute('''
@@ -234,18 +234,18 @@ def get_producao():                                                             
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT  p.id_producao, p.linha, p.liq_linha,
-                    p.liq_cor, p.embalagem, p.litros,
+            SELECT  p.id_producao, p.cod_linha, p.liq_linha,
+                    p.liq_cor, p.embalagem, p.lts_solic,
                     p.data_entr_antec, p.data_producao, p.observacao,
-                    p.concluido, p.liq_tipo
-            FROM producao p
+                    p.flag_concluido, p.liq_tipo
+            FROM prog_producao p
             ORDER BY p.data_producao;
         ''')
         producao_list = [{
             'id_producao'     : row[0], 'linha'        : row[1], 'liq_linha' : row[2], 
             'liq_cor'         : row[3], 'embalagem'    : row[4], 'litros'    : row[5], 
             'data_entr_antec' : row[6], 'data_producao': row[7], 'observacao': row[8],
-            'concluido'       : row[9], 'liq_tipo'     : row[10]
+            'flag_concluido'  : row[9], 'liq_tipo'     : row[10]
         } for row in cursor.fetchall()]
         
     return producao_list
@@ -255,11 +255,11 @@ def get_envase():                                                               
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT  p.id_envase, p.linha, c.fantasia_cliente,
-                    i.cod_item, i.desc_item, p.quantidade,
+            SELECT  p.id_envase, p.cod_linha, c.fantasia_cliente,
+                    i.cod_item, i.desc_item, p.qtde_solic,
                     p.data_entr_antec, p.data_envase, p.observacao,
-                    p.concluido
-            FROM envase p
+                    p.flag_concluido
+            FROM prog_envase p
             JOIN itens i ON p.cod_item = i.cod_item
             JOIN clientes c ON p.cod_cliente = c.cod_cliente
             ORDER BY p.data_envase;
@@ -269,7 +269,7 @@ def get_envase():                                                               
             'id_envase'       : row[0], 'linha'       : row[1], 'fantasia_cliente' : row[2], 
             'cod_item'        : row[3], 'desc_item'   : row[4], 'quantidade'       : row[5],
             'data_entr_antec' : row[6], 'data_envase' : row[7], 'observacao'       : row[8],
-            'concluido'       : row[9]
+            'flag_concluido'  : row[9]
         } for row in cursor.fetchall()]
 
     return envase_list
@@ -296,7 +296,7 @@ def get_historico(page=1, per_page=10):                                         
 
         estoque = [{
             'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3],          'cod_lote'      : row[4], 'quantidade' : row[5], 
+            'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade' : row[5], 
             'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque, row_count
@@ -1292,21 +1292,37 @@ def moving():
     return redirect(url_for('mov'))
 
 
-@app.route('/get/clientes', methods=['GET'])                                                                    # RETORNA FANTASIA CLIENTES (PARA SELECT2)
+@app.route('/get/clientes', methods=['GET'])
 @verify_auth('CDE001')
 def get_fant_clientes():
-    with sqlite3.connect(db_path) as connection:                                                                # TODO: criar função auxiliar
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT DISTINCT fantasia_cliente 
-            FROM clientes;
-        ''')
+    query = '''
+        SELECT FANTASIA
+        FROM DB2ADMIN.CLIENTE;
+    '''
 
-        fant_clientes = [{
-            'fantasia_cliente': row[0]
-        } for row in cursor.fetchall()]
+    dsn_name = 'HUGOPIET'
+    dsn = dsn_name
+    result, columns = db_query_connect(query, dsn)
 
-    return fant_clientes
+    clientes = [{'FANTASIA': '(indefinido)'}]
+    if result:
+        for row in result:
+            cliente = {columns[i]: row[i] for i in range(len(columns))}
+            clientes.append(cliente)
+        alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
+        class_alert = 'success'
+    else:
+        alert = 'Nenhum cliente encontrado.'
+        class_alert = 'error'
+
+    response = {
+        'clientes': clientes,
+        'alert': alert,
+        'class_alert': class_alert
+    }
+
+    return jsonify(response)
+
 
 
 @app.route('/envase', methods=['GET'])
@@ -1339,7 +1355,7 @@ def delete_item(id_envase):
         cursor = connection.cursor()
         cursor.execute('''
             DELETE 
-            FROM envase
+            FROM prog_envase
             WHERE id_envase = ?;
         ''', 
         (id_envase,))
@@ -1353,8 +1369,8 @@ def conclude_item(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            UPDATE envase
-            SET concluido = true
+            UPDATE prog_envase
+            SET flag_concluido = TRUE
             WHERE id_envase = ?;
         ''',
         (id_envase,))
@@ -1368,8 +1384,8 @@ def not_conclude_item(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            UPDATE envase
-            SET concluido = false
+            UPDATE prog_envase
+            SET flag_concluido = false
             WHERE id_envase = ?;
         ''',
         (id_envase,))
@@ -1386,13 +1402,13 @@ def envase_edit():                                                              
         quantidade      = request.form['quantidade']
         data_entr_antec = request.form['data_antec']
         data_envase     = request.form['data_envase']
-        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao'])
+        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao']).upper()
 
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                UPDATE envase
-                SET quantidade = ?,
+                UPDATE prog_envase
+                SET qtde_solic = ?,
                     data_entr_antec = ?,
                     data_envase = ?,
                     observacao = ?
@@ -1407,11 +1423,11 @@ def envase_edit():                                                              
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                SELECT  p.linha, c.fantasia_cliente, i.cod_item,
-                        i.desc_item, p.quantidade, p.data_entr_antec,
+                SELECT  p.cod_linha, c.fantasia_cliente, i.cod_item,
+                        i.desc_item, p.qtde_solic, p.data_entr_antec,
                         p.data_envase, p.observacao, p.id_envase,
-                        p.concluido
-                FROM envase p
+                        p.flag_concluido
+                FROM prog_envase p
                 JOIN itens i ON p.cod_item = i.cod_item
                 JOIN clientes c ON p.cod_cliente = c.cod_cliente
                 WHERE id_envase = ?;
@@ -1419,10 +1435,10 @@ def envase_edit():                                                              
             (req_id_envase,))
 
             env_edit = [{
-                'linha'      : row[0], 'fantasia_cliente': row[1], 'cod_item'       : row[2],
-                'desc_item'  : row[3], 'quantidade'      : row[4], 'data_entr_antec': row[5],
-                'data_envase': row[6], 'observacao'      : row[7], 'id_envase'      : row[8],
-                'concluido'  : row[9]
+                'linha'         : row[0], 'fantasia_cliente': row[1], 'cod_item'       : row[2],
+                'desc_item'     : row[3], 'quantidade'      : row[4], 'data_entr_antec': row[5],
+                'data_envase'   : row[6], 'observacao'      : row[7], 'id_envase'      : row[8],
+                'flag_concluido': row[9]
             } for row in cursor.fetchall()]
 
         return render_template(
@@ -1441,7 +1457,7 @@ def insert_envase():                                                            
         data_entr_antec = request.form['data_antec']
         data_envase     = request.form['data_envase']
         cliente         = request.form['cliente']
-        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao'])
+        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao']).upper()
 
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -1458,10 +1474,10 @@ def insert_envase():                                                            
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                INSERT INTO envase (
-                    linha, cod_cliente, cod_item,
-                    quantidade, data_entr_antec, data_envase,
-                    observacao, concluido ) 
+                INSERT INTO prog_envase (
+                    cod_linha, cod_cliente, cod_item,
+                    qtde_solic, data_entr_antec, data_envase,
+                    observacao, flag_concluido ) 
                 VALUES (
                     ?, ?, ?,
                     ?, ?, ?,
@@ -1510,7 +1526,7 @@ def delete_producao(id_producao):
         cursor = connection.cursor()
         cursor.execute('''
             DELETE 
-            FROM producao 
+            FROM prog_producao 
             WHERE id_producao = ?;
         ''', 
         (id_producao,))
@@ -1524,8 +1540,8 @@ def conclude_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            UPDATE producao
-            SET concluido = true
+            UPDATE prog_producao
+            SET flag_concluido = true
             WHERE id_producao = ?;
         ''', 
         (id_producao,))
@@ -1539,8 +1555,8 @@ def not_conclude_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            UPDATE producao
-            SET concluido = false
+            UPDATE prog_producao
+            SET flag_concluido = false
             WHERE id_producao = ?;
         ''',
         (id_producao,))
@@ -1561,13 +1577,13 @@ def producao_edit():
         litros          = request.form['litros']
         data_entr_antec = request.form['data_antec']
         data_producao   = request.form['data_producao']
-        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao'])
+        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao']).upper()
 
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                UPDATE producao
-                SET litros          = ?,
+                UPDATE prog_producao
+                SET lts_solic          = ?,
                     data_entr_antec = ?,
                     data_producao   = ?,
                     observacao      = ?
@@ -1583,21 +1599,21 @@ def producao_edit():
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('''
-                    SELECT  p.linha, p.liq_linha, p.liq_cor, p.embalagem,
-                            p.litros, p.data_entr_antec, p.data_producao,
-                            p.observacao, p.id_producao, p.concluido,
+                    SELECT  p.cod_linha, p.liq_linha, p.liq_cor, p.embalagem,
+                            p.lts_solic, p.data_entr_antec, p.data_producao,
+                            p.observacao, p.id_producao, p.flag_concluido,
                             p.liq_tipo
-                    FROM producao p
+                    FROM prog_producao p
                     WHERE ? = p.id_producao
                     ORDER BY p.data_producao;
                 ''', 
                 (req_id_producao,))
 
                 prod_edit = [{
-                    'linha'        : row[0], 'liq_linha' : row[1], 'liq_cor'        : row[2],
-                    'embalagem'    : row[3], 'litros'    : row[4], 'data_entr_antec': row[5],
-                    'data_producao': row[6], 'observacao': row[7], 'id_producao'    : row[8],
-                    'concluido'    : row[9], 'liq_tipo'  : row[10]
+                    'linha'         : row[0], 'liq_linha' : row[1], 'liq_cor'        : row[2],
+                    'embalagem'     : row[3], 'litros'    : row[4], 'data_entr_antec': row[5],
+                    'data_producao' : row[6], 'observacao': row[7], 'id_producao'    : row[8],
+                    'flag_concluido': row[9], 'liq_tipo'  : row[10]
                 } for row in cursor.fetchall()]
 
         else:
@@ -1624,16 +1640,16 @@ def insert_producao():
         litros          = request.form['litros']
         data_entr_antec = request.form['data_antec']
         data_producao   = request.form['data_producao']
-        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao'])
+        observacao      = re.sub(r'\r\n|\r|\n|<br>', ' ', request.form['observacao']).upper()
 
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute(''' 
-                INSERT INTO producao (  
-                    linha, liq_linha, liq_cor,
-                    embalagem, litros, data_entr_antec,
+                INSERT INTO prog_producao (  
+                    cod_linha, liq_linha, liq_cor,
+                    embalagem, lts_solic, data_entr_antec,
                     data_producao, observacao, liq_tipo, 
-                    concluido ) 
+                    flag_concluido ) 
                 VALUES (
                     ?, ?, ?,
                     ?, ?, ?,
@@ -2284,7 +2300,7 @@ def export_csv_tipo(tipo):                                                      
 
 if __name__ == '__main__':                                                                                      #! __MAIN__
 
-    app.config['APP_VERSION'] = ['0.4.2b', 'Junho/2024', False]
+    app.config['APP_VERSION'] = ['0.4.3', 'Junho/2024', False]
 
     # GET nome do diretório
     dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
@@ -2326,7 +2342,7 @@ C:::::C                              D:::::D
     Pressione ENTER para sair...
             '''
 
-    if dir_os in debug_dir: # Se o user for listado dev, modo_exec = debug
+    if dir_os in debug_dir:         # Se o user for listado dev, modo_exec = debug
         db_path = os.getenv('DEBUG_DB_PATH')
         port, debug = 5100, True
         app.config['APP_VERSION'][2] = True
@@ -2337,7 +2353,7 @@ C:::::C                              D:::::D
         port, debug = 5005, False
         print(exec_head, start_head)
 
-    else:   # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
+    else:                           # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
         print(error_foot)
         sys.exit(2)
 
