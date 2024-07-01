@@ -123,7 +123,7 @@ $(document).ready(function () {
         if (isVinhoSelected || isEspumanteSelected) {
             // INPUT-LOTE -> READ-ONLY
             inputLote.prop('readonly', true);
-            inputLote.val('VINHO');
+            inputLote.val('VINHOS');
         } else {
             // LOTE -> WRITE
             inputLote.prop('readonly', false);

@@ -67,10 +67,10 @@ def check_ip():                                                                 
 
 @app.context_processor
 def inject_page():                                                                                              #? RETORNA URL ACESSADA PELO USER
-    current_page    = request.path
+    current_page  = request.path
     if 'logged_in' in session:
-        user_name   = session.get('user_name')
-        id_user     = session.get('id_user')
+        user_name = session.get('user_name')
+        id_user   = session.get('id_user')
         print(f"{id_user} - [{user_name}] | ", current_page)
     return {'current_page': current_page}
 
@@ -122,11 +122,11 @@ def create_tables():                                                            
                 id_mov           INTEGER PRIMARY KEY AUTOINCREMENT,
                 rua_numero       INTEGER(6),
                 rua_letra        VARCHAR(10),
-                desc_item        VARCHAR(6),
+                cod_item         VARCHAR(6),
                 lote_item        VARCHAR(8),
                 quantidade       INTEGER,
                 operacao         VARCHAR(15),
-                user_name        VARCHAR(30),
+                user_name        VARCHAR(30),   -- id_user INTEGER,
                 id_carga         INTEGER(6),
                 time_mov         DATETIME
             );
@@ -285,12 +285,18 @@ def get_historico(page=1, per_page=10):                                         
         row_count = cursor.fetchone()[0]
 
         cursor.execute('''
-            SELECT  h.rua_numero, h.rua_letra, h.desc_item,
-                    i.desc_item, h.lote_item, h.quantidade,
-                    h.operacao, h.user_name, h.time_mov
+            SELECT  
+                h.rua_numero, h.rua_letra, h.cod_item,
+                i.desc_item, h.lote_item, h.quantidade,
+                h.operacao, u.id_user||' - '||u.nome_user,
+                h.time_mov
             FROM historico h
-            JOIN itens i ON h.desc_item = i.cod_item
+            
+            JOIN itens i ON h.cod_item = i.cod_item
+            JOIN users u ON h.id_user = u.id_user
+            
             ORDER BY h.time_mov DESC
+            
             LIMIT ? OFFSET ?;
         ''', (per_page, offset))
 
@@ -307,17 +313,22 @@ def get_all_historico():                                                        
         cursor = connection.cursor()
         
         cursor.execute('''
-            SELECT  h.rua_numero, h.rua_letra, h.desc_item,
-                    i.desc_item, h.lote_item, h.quantidade,
-                    h.operacao, h.user_name, h.time_mov
+            SELECT  
+                h.rua_numero, h.rua_letra, h.cod_item,
+                i.desc_item, h.lote_item, h.quantidade,
+                h.operacao, u.id_user||' - '||u.nome_user, 
+                h.time_mov
             FROM historico h
-            JOIN itens i ON h.desc_item = i.cod_item
+            
+            JOIN itens i ON h.cod_item = i.cod_item
+            JOIN users u ON h.id_user = u.id_user
+            
             ORDER BY h.time_mov DESC;
         ''')
         
         estoque = [{
             'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3],          'cod_lote'      : row[4], 'quantidade' : row[5], 
+            'desc_item' : row[3],          'cod_lote'   : row[4], 'quantidade': row[5], 
             'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque
@@ -375,8 +386,8 @@ def get_end_lote():                                                             
                        END
                     ) as saldo
             FROM historico h
-            JOIN itens i ON h.desc_item = i.cod_item
-            GROUP BY h.rua_numero, h.rua_letra, h.desc_item, 
+            JOIN itens i ON h.cod_item = i.cod_item
+            GROUP BY h.rua_numero, h.rua_letra, h.cod_item, 
                      h.lote_item
             HAVING saldo != 0
             ORDER BY h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
@@ -402,12 +413,12 @@ def get_end_lote_fat():                                                         
                          END
                     ) as saldo
             FROM historico h
-            JOIN itens i ON h.desc_item = i.cod_item
+            JOIN itens i ON h.cod_item = i.cod_item
             GROUP BY  h.id_carga,  h.rua_numero, h.rua_letra,
-                      h.desc_item, h.lote_item
+                      h.cod_item, h.lote_item
             HAVING saldo   != 0
             AND h.id_carga != 0
-            ORDER BY h.id_carga DESC, h.desc_item;
+            ORDER BY h.id_carga DESC, h.cod_item;
         ''')
 
         end_lote = [{
@@ -456,9 +467,9 @@ def get_saldo_view():                                                           
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT i.desc_item, t.desc_item, t.saldo, t.time_mov
+            SELECT i.desc_item, i.cod_item, t.saldo, t.time_mov
             FROM ( 
-                SELECT desc_item,
+                SELECT cod_item,
                 SUM(CASE 
                     WHEN operacao IN ('E', 'TE') THEN quantidade
                     WHEN operacao IN ('S', 'TS') THEN (quantidade * -1)
@@ -466,14 +477,14 @@ def get_saldo_view():                                                           
                     END
                 ) as saldo,
                 MAX(time_mov) as time_mov,
-                ROW_NUMBER() OVER(PARTITION BY desc_item ORDER BY MAX(time_mov) DESC) as rn
+                ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
                 FROM historico h
-                GROUP BY desc_item
+                GROUP BY cod_item
                 HAVING saldo != 0
             ) t
-            JOIN itens i ON t.desc_item = i.cod_item
+            JOIN itens i ON t.cod_item = i.cod_item
             WHERE rn = 1
-            ORDER BY t.desc_item;
+            ORDER BY t.cod_item;
         ''')
 
         saldo_visualization = [{
@@ -584,7 +595,7 @@ def select_rua(letra, numero):                                                  
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT desc_item, lote_item, 
+            SELECT cod_item, lote_item, 
             COALESCE(SUM(CASE 
                 WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
                 WHEN operacao = 'S' OR operacao = 'TS' THEN (quantidade * -1)
@@ -592,7 +603,7 @@ def select_rua(letra, numero):                                                  
             END), 0) as saldo
             FROM historico
             WHERE rua_letra = ? AND rua_numero = ?
-            GROUP BY desc_item, lote_item;
+            GROUP BY cod_item, lote_item;
         ''', (letra, numero))
         
         items = cursor.fetchall()
@@ -692,7 +703,7 @@ def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):                  
                 ELSE (quantidade * -1)
             END), 0) as saldo
             FROM historico h
-            WHERE rua_numero = ? AND rua_letra = ? AND desc_item = ? AND lote_item = ?;
+            WHERE rua_numero = ? AND rua_letra = ? AND cod_item = ? AND lote_item = ?;
         ''', (rua_numero, rua_letra, cod_item, cod_lote))
         saldo_item = cursor.fetchone()[0]
     return saldo_item
@@ -734,23 +745,23 @@ def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):                  
 
 def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga):        #* INSERE REGISTRO NA TABELA DE HISTÓRICO
     user_name_mov = session['user_name']
+    id_user_mov = session['id_user']
 
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
             INSERT INTO historico (
-                rua_numero, rua_letra, desc_item,
+                rua_numero, rua_letra, cod_item,
                 lote_item, quantidade, operacao,
-                user_name, time_mov, id_carga )
+                time_mov, id_carga, id_user)
             VALUES (
                 ?, ?, ?,
                 ?, ?, ?,
-                ?, ?, ? );
+                ?, ?, ?);
             ''',
             (numero, letra, cod_item,
-            lote_item, quantidade, operacao,
-            user_name_mov, timestamp_out, 
-            id_carga))
+            lote_item, quantidade, operacao, timestamp_out, 
+            id_carga, id_user_mov))
         
         connection.commit()
 
@@ -794,7 +805,7 @@ def bulk_insert_historico():
 def index():
     create_tables()
 
-    print(f"[SERVIDOR] USUÁRIO: {session['user_name']}")
+    print(f"[SERVIDOR] USUÁRIO: {session['id_user']}")
     return redirect(url_for('home'))
 
 
@@ -1022,10 +1033,10 @@ def searching():
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('''
-                    SELECT desc_item, cod_item
-                    FROM itens
-                    WHERE dun14 = ?
-                    ORDER BY cod_item;
+                    SELECT i.desc_item, i.cod_item
+                    FROM itens i
+                    WHERE i.dun14 = ?
+                    ORDER BY i.cod_item;
                 ''',
                 (cod_barra,))
 
@@ -1040,10 +1051,10 @@ def searching():
                     with sqlite3.connect(db_path) as connection:
                         cursor = connection.cursor()
                         cursor.execute('''
-                            SELECT desc_item    
-                            FROM itens
-                            WHERE cod_item = ?
-                            ORDER BY cod_item;
+                            SELECT i.desc_item    
+                            FROM itens i
+                            WHERE i.cod_item = ?
+                            ORDER BY i.cod_item;
                         ''',
                         (cod_item[0],))
 
@@ -1053,7 +1064,7 @@ def searching():
                     if row:
                         desc_item = row[0][0]
                         if 'VINHO' in desc_item:
-                            cod_lote = 'VINHO'
+                            cod_lote = 'VINHOS'
                         else:
                             cod_lote = ''
                 else:
@@ -1080,9 +1091,9 @@ def searching():
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('''
-                    SELECT desc_item
-                    FROM itens
-                    WHERE cod_item = ?;
+                    SELECT i.desc_item
+                    FROM itens i
+                    WHERE i.cod_item = ?;
                 ''', 
                 (codigos_itens,))
 
@@ -1090,7 +1101,7 @@ def searching():
                 if resultado is not None:
                     desc_item = resultado[0]
                     if 'VINHO' in desc_item:
-                        cod_lote = 'VINHO'
+                        cod_lote = 'VINHOS'
                 else:
                     desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
 
@@ -1157,7 +1168,7 @@ def historico_search():
             'operacao': 'Operação (Descrição)',
             'quantidade': 'Quantidade',
             'cod_lote': 'Lote (Código)',
-            'user_name': 'Usuário (Nome)',
+            'id_user': 'Usuário (Nome)',
             'timestamp': 'Horário (Data/Hora)'
         }
 
@@ -1837,12 +1848,12 @@ def carga_id(id_carga):
                 FROM historico h
 
                 JOIN itens i 
-                ON h.desc_item = i.cod_item
+                ON h.cod_item = i.cod_item
 
                 WHERE i.cod_item = "{str(cod_item)}"
                 
                 GROUP BY  h.rua_numero, h.rua_letra, 
-                          h.desc_item, h.lote_item
+                          h.cod_item, h.lote_item
                 HAVING saldo != 0
 
                 ORDER BY h.lote_item DESC, h.rua_letra ASC,
@@ -1861,8 +1872,8 @@ def carga_id(id_carga):
         cargas_str_query = ', '.join(map(str, all_cargas))
         
         query = f'''
-            SELECT  icrg.CODIGO_GRUPOPED                   AS NRO_CARGA,
-                    icrg.NRO_PEDIDO                        AS NRO_PEDIDO,
+            SELECT  icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
+                    icrg.NRO_PEDIDO                       AS NRO_PEDIDO,
                     (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
                     CAST(iped.ITEM AS VARCHAR(255))       AS COD_ITEM,
                     i.ITEM_DESCRICAO                      AS DESC_ITEM,
@@ -1996,9 +2007,9 @@ def get_description(cod_item):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT desc_item
-            FROM itens
-            WHERE cod_item = ?;
+            SELECT i.desc_item
+            FROM itens i
+            WHERE i.cod_item = ?;
         ''', 
         (cod_item,))
         
@@ -2208,7 +2219,7 @@ def buscar_linhas():
                     return tipo, volume
 
         return '', ''
-
+        
     if desc_item:
         tipo_embal, lit_embal = find_emb(desc_item)
         if tipo_embal:
