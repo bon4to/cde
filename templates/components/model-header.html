@@ -2,25 +2,31 @@
         {% include 'components/head.html' %}
     </head>
     <body>
-        <div class="user-name">
-            <!-- <img id="toggle-theme" class="svg-invert-hover" src="{{ url_for('static', filename='svg/moon.svg') }}" alt=""> -->
-            <p class="user-name" id="userInfo" data-user-name="{{ session.get('user_name', '') }}" onclick="window.location.href='{{ url_for('login') }}';">
-                {{ session.get('user_name', '') }}
-            </p>
-            <div style="pointer-events: none" class="user-logger">
-                <a style="color: var(--cor-destaque); pointer-events: auto; font-size: 16px;text-shadow: 20px #fff" href="{{ url_for('logout') }}">
-                    {{ 'SAIR' if session.get('logged_in', False) else '' }}
-                </a>
+        <div class="logged-header">
+            <div class="user-name">
+                <!-- <img id="toggle-theme" class="svg-invert-hover" src="{{ url_for('static', filename='svg/moon.svg') }}" alt=""> -->
+                {% if 'privilegio' in session %}
+                    <div class="flex-row">
+                        <div class="flex-column" style="gap: 0">
+                            <p class="user-name" id="userInfo" data-user-name="{{ session.get('user_name', '') }}" onclick="window.location.href='{{ url_for('login') }}';">
+                                {{ session.get('user_name', '') }}
+                            </p>
+                            <div style="pointer-events: none" class="user-logger">
+                                <a href="{{ url_for('logout') }}">
+                                    {{ 'SAIR' if session.get('logged_in', False) else '' }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="user-button" onclick="window.location.href='{{ url_for('login') }}';">
+                            {{ session.get('user_initials', '') }}
+                        </div>
+                    </div>
+                {% endif %}
             </div>
-            {% if 'privilegio' in session %}
-                <div class="user-button" onclick="window.location.href='{{ url_for('login') }}';">
-                    {{ session.get('user_initials', '') }}
-                </div>
-            {% endif %}
         </div>
         {% if app_version[2] %}
             <div>
-                <p class="version-info center-page flex-column" style="position: fixed; top: 46px; color: red; font-size: 26px; font-weight: bold; pointer-events: none; gap: 0">
+                <p class="version-info debug-text center-page flex-column" style="top: 45px">
                     <span>CLIENTE: DESENVOLVIMENTO</span>
                     <span style="font-size: 18px;">(APENAS PARA DESENVOLVEDORES)</span>
                 </p>

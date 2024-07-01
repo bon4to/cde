@@ -13,116 +13,118 @@
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIOS" alt="" onclick="window.location.href='{{ url_for('login') }}';">
                 <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
                 <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/log-out.svg') }}" title="VOLTAR" alt="" onclick="confirmLogout()">
             </div>
         </div>
         <div class="flex-row" style="min-width: 100%;">
-            <div class="forms-container menu-container" >
-                {% if 'privilegio' in session %}
-                    <div style="display: flex; flex-direction: column">
-                        <div>
+            <div class="forms-container menu-container flex-column">
+                <div class="flex-row" style="min-width: 100%;">
+                    {% if 'privilegio' in session %}
+                        <div style="display: flex; flex-direction: column">
                             <div>
-                                <h1 class="saudacao" id="saud" style="text-align: center;margin-bottom: 8px;"></h1>
-                                <p class="phrase" id="frase-motivacional">“{{ frase }}”</p>
-                                <!-- <hr style="margin-bottom: 14px;"> -->
-                            </div>
-                        </div>
-                        <div class="container-grid">
-                            <div class="item featured" onclick="window.location.href='{{ url_for('home_hp') }}';">
-                                <div class="split-horizontal algn-cntr">
-                                    <div style="text-align: left">
-                                        <h2 class="text-default">Hugo Pietro</h2>
-                                        <p class="text-default bold">Acesse as ferramentas da empresa!</p>
-                                    </div>
-                                    <a class="btn-fancy button-mini">
-                                        <img class="svg" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt="">
-                                    </a>
+                                <div class="salute-text">
+                                    <h1 class="saudacao" id="saud"></h1>
+                                    <p class="phrase" id="frase-motivacional">“{{ frase }}”</p>
                                 </div>
                             </div>
-                            <div class="item" onclick="window.location.href='{{ url_for('login') }}';">
-                                <div class="split-horizontal algn-cntr">
-                                    <div style="text-align: left">
-                                        <h2 class="text-default">Conta</h2>
-                                        <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE003</span></p>
-                                    </div>
-                                    <a class="btn-fancy button-mini">
-                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-user.svg') }}" alt="">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="item featured" onclick="window.location.href='{{ url_for('home_tl') }}';" >
-                                <div class="split-horizontal algn-cntr">
-                                    <div style="text-align: left">
-                                        <h2 class="text-default">Trans Légua</h2>
-                                        <p class="text-default bold">Acesse as ferramentas da empresa!</p>
-                                    </div>
-                                    <a class="btn-fancy button-mini">
-                                        <img class="svg" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt="">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="item" onclick="window.location.href='{{ url_for('in_dev') }}';">
-                                <div class="split-horizontal algn-cntr">
-                                    <div style="text-align: left">
-                                        <h2 class="text-default">Ajuda</h2>
-                                        <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE004</span></p>
-                                    </div>
-                                    <a class="btn-fancy button-mini">
-                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-help.svg') }}" alt="">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="item" onclick="window.location.href='{{ url_for('users') }}';">
-                                <div class="split-horizontal algn-cntr">
-                                    <div style="text-align: left">
-                                        <h2 class="text-default">Usuários</h2>
-                                        <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE016</span></p>
-                                    </div>
-                                    <a class="btn-fancy button-mini">
-                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                                    </a>
-                                </div>
-                            </div>
-                            {% if session['privilegio'] <= 1 %}
-                                <div class="item featured" onclick="window.location.href='{{ url_for('api') }}';">
+                            <hr style="margin-left: 20px; width: 20%;">
+                            <div class="container-grid">
+                                <div class="item featured" onclick="window.location.href='{{ url_for('home_hp') }}';">
                                     <div class="split-horizontal algn-cntr">
                                         <div style="text-align: left">
-                                            <h2 class="text-default">Database</h2>
-                                            <p class="text-default bold">Consultas no banco de dados.</p>
+                                            <h2 class="text-default">Hugo Pietro</h2>
+                                            <p class="text-default bold">Acesse as ferramentas da empresa!</p>
                                         </div>
                                         <a class="btn-fancy button-mini">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/database-zap.svg') }}" alt="">
+                                            <img class="svg" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt="">
                                         </a>
                                     </div>
                                 </div>
-                            {% endif %}
+                                <div class="item" onclick="window.location.href='{{ url_for('login') }}';">
+                                    <div class="split-horizontal algn-cntr">
+                                        <div style="text-align: left">
+                                            <h2 class="text-default">Conta</h2>
+                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE003</span></p>
+                                        </div>
+                                        <a class="btn-fancy button-mini">
+                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-user.svg') }}" alt="">
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="item featured" onclick="window.location.href='{{ url_for('home_tl') }}';" >
+                                    <div class="split-horizontal algn-cntr">
+                                        <div style="text-align: left">
+                                            <h2 class="text-default">Trans Légua</h2>
+                                            <p class="text-default bold">Acesse as ferramentas da empresa!</p>
+                                        </div>
+                                        <a class="btn-fancy button-mini">
+                                            <img class="svg" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt="">
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="item" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                                    <div class="split-horizontal algn-cntr">
+                                        <div style="text-align: left">
+                                            <h2 class="text-default">Ajuda</h2>
+                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE004</span></p>
+                                        </div>
+                                        <a class="btn-fancy button-mini">
+                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-help.svg') }}" alt="">
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="item" onclick="window.location.href='{{ url_for('users') }}';">
+                                    <div class="split-horizontal algn-cntr">
+                                        <div style="text-align: left">
+                                            <h2 class="text-default">Usuários</h2>
+                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE016</span></p>
+                                        </div>
+                                        <a class="btn-fancy button-mini">
+                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
+                                        </a>
+                                    </div>
+                                </div>
+                                {% if session['privilegio'] <= 1 %}
+                                    <div class="item featured" onclick="window.location.href='{{ url_for('api') }}';">
+                                        <div class="split-horizontal algn-cntr">
+                                            <div style="text-align: left">
+                                                <h2 class="text-default">Database</h2>
+                                                <p class="text-default bold">Consultas no banco de dados.</p>
+                                            </div>
+                                            <a class="btn-fancy button-mini">
+                                                <img class="svg-invert" src="{{ url_for('static', filename='svg/database-zap.svg') }}" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="split-horizontal">
-                            <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
-                                <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
-                            </a>
-                            <p style="color: #7e7e7e">Collaborative Developed Enviroment (CDE)</p>
-    
-                            <a class="btn-fancy button-mini{% if not session['privilegio'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                            </a>
-    
-                        </div>
-                {% endif %}
+                    {% endif %}
+                    <div class="side-banner">
+                        <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
+                    </div>
                 </div>
-                <div class="side-banner">
-                    <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
+                <div class="split-horizontal">
+                    <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
+                        <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
+                    </a>
+                    <p style="color: #7e7e7e">Collaborative Developed Enviroment (CDE)</p>
+
+                    <a class="btn-fancy button-mini{% if not session['privilegio'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
+                    </a>
+
                 </div>
             </div>
         </div>
-
-            <script>
-                function getSaudacao() {
+        
+        <script>
+            function getSaudacao() {
                 let saudacao;
                 let horaAtual = new Date().getHours();
 
@@ -137,6 +139,13 @@
             }
             let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
             document.getElementById("saud").innerHTML = salute;
-            </script>
+            
+            function confirmLogout() {
+                if (confirm('Você tem certeza que deseja sair?')) {
+                    window.location.href = '{{ url_for('logout') }}';
+                }
+            }
 
-           {% include 'shared/footer.html' %}
+        </script>
+
+        {% include 'shared/footer.html' %}

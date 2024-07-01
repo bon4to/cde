@@ -28,12 +28,12 @@
         <div draggable="false" class="forms-container" style="padding: 12px 30px;">
             <div class="split-horizontal">
                 <div>
-                    <h1>Cadastrar Usuário</h1>
+                    <h2 style="justify-content: flex-start">Cadastrar Usuário</h2>
                     <form action="/users/inserting" method="post">
-                        <label for="login_user">Login: *</label>
+                        <label for="login_user">Login: <span style="color: red">*</span></label>
                         <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
                         <div class="split-horizontal">
-                            <label for="password_user">Senha: *</label><label class="cor-web" style="text-align: right;" id="password_strength"></label>
+                            <label for="password_user">Senha: <span style="color: red">*</span></label><label class="cor-web" style="text-align: right;" id="password_strength"></label>
                         </div>
                         <input type="password" id="password_user" name="password_user" placeholder="Senha de usuário..." required>
 
@@ -54,13 +54,13 @@
                                     strength = 0;
                                 }
                                 if (strength === 0) {
-                                    passwordStrength.textContent = 'Fraca *';
+                                    passwordStrength.textContent = 'Fraca <span style="color: red">*</span>';
                                     passwordStrength.style.color = 'red';
                                 } else if (strength === 1) {
-                                    passwordStrength.textContent = 'Média **';
+                                    passwordStrength.textContent = 'Média <span style="color: red">*</span>*';
                                     passwordStrength.style.color = 'orange';
                                 } else {
-                                    passwordStrength.textContent = 'Forte ***';
+                                    passwordStrength.textContent = 'Forte <span style="color: red">*</span>**';
                                     passwordStrength.style.color = 'green';
                                 }
                             }
@@ -72,16 +72,16 @@
                         </script>
                         <div class="split-horizontal">
                             <div>
-                                <label for="nome_user">Nome: *</label><br>
+                                <label for="nome_user">Nome: <span style="color: red">*</span></label><br>
                                 <input class="address" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
                             </div>
                             <div>
-                                <label for="sobrenome_user">Sobrenome: *</label><br>
+                                <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label><br>
                                 <input class="address" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
                             </div>
                         </div>
 
-                        <label for="privilege_user">Tipo de Usuário: *</label>
+                        <label for="privilege_user">Tipo de Usuário: <span style="color: red">*</span></label>
                         <select id="privilege_user" name="privilege_user" required>
                             {% if 'privilegio' in session %}
                                 <option value="3">Padrão</option>
@@ -103,9 +103,8 @@
         </div>
         <div draggable="false" class="tables-container" style="width: 600px">
             <div class="split-horizontal">
-                <div style="width: 100%; max-height: 535px;">
-                    <h1>Usuários do Sistema</h1>
-                    <div class="table-overflow" style="max-height: 440px;">
+                <div style="width: 100%;">
+                    <div class="table-overflow" style="max-height: 620px;">
                         <table id="filterTable">
                             <tr>
                                 <th>Usuário (Cód.)</th>
@@ -125,9 +124,6 @@
                         </table>
                     </div>
                     <br>
-                </div>
-                <div class="side-banner" style="height: 100%; margin-top:auto;margin-bottom:auto;padding: 10px">
-                    <img class="side-banner" style="height: 450px; width: 450px; border-radius: 20px; " src="{{ url_for('static', filename='img/side-user.jpg') }}" alt="">
                 </div>
             </div>
         </div>
