@@ -4,19 +4,21 @@
                         --cor-destaque: #8f7943;
                     }
                 </style>
-                <header class="main-header">
-                    <div class="logo-container">
-                        <img id="cdeLogo" class="logo" src="{{ url_for('static', filename='img/cde-logo.png') }}" style="height: 38px;width: auto;margin-right: 40px" alt="">
-                        <img class="logo" src="{{ url_for('static', filename='img/hp-logo.png') }}" style="height: 38px;width: auto" alt="">
-                    </div>
-                </header>
-                <section class="banner text-overlay">
-                    <img class="blurable" draggable="false" src="{{ url_for('static', filename='img/hp-banner.jpg') }}" style="top:-740px;" alt="">
-                    <div>
-                        <img src="{{ url_for('static', filename='img/hp-logo.png') }}" alt="" style="pointer-events: none;position: absolute;height: 50px;width: auto;top: 30px;left: 130px;">
-                    </div>
-                </section>
-            {% include 'components/dropdown/dropdown-hp.html' %}
+                <div class="hidden">
+                    <header class="main-header">
+                        <div class="logo-container">
+                            <img id="cdeLogo" class="logo" src="{{ url_for('static', filename='img/cde-logo.png') }}" style="height: 38px;width: auto;margin-right: 40px" alt="">
+                            <img class="logo" src="{{ url_for('static', filename='img/hp-logo.png') }}" style="height: 38px;width: auto" alt="">
+                        </div>
+                    </header>
+                    <section class="banner text-overlay">
+                        <img class="blurable" draggable="false" src="{{ url_for('static', filename='img/hp-banner.jpg') }}" style="top:-740px;" alt="">
+                        <div>
+                            <img src="{{ url_for('static', filename='img/hp-logo.png') }}" alt="" style="pointer-events: none;position: absolute;height: 50px;width: auto;top: 30px;left: 130px;">
+                        </div>
+                    </section>
+                </div>
+            {% include 'components/dropdown/dropdown-cde.html' %}
 
                 <!-- (content) -->
                 <div class="view-width">

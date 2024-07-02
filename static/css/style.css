@@ -64,7 +64,7 @@ span.id-page {
     display: flex;
     flex-wrap: wrap;
     min-width: 500px;
-    min-height: 65vh;
+    min-height: 75vh;
     padding: 20px 100px;
     height: max-content;
     background-color: #f1f1f1;
@@ -86,6 +86,7 @@ span.id-page {
 }
 
 .titles-container {
+    min-width: 75vw;
     min-height: 80px;
     padding: 8px 36px;
     margin: 0 10px 16px 10px;
@@ -266,6 +267,22 @@ h4 {
 
 .salute-text {
     margin-left: 20px;
+}
+
+.pre-footer {
+    bottom: 0;
+    height: 10px;
+    display: flex;
+    z-index: 1001;
+    padding: 5px 0;
+    position: fixed;
+    min-width: 100%;
+    user-select: none;
+    align-items: center;
+    pointer-events: none;
+    background-color: #333132;
+    justify-content: space-between;
+    border-top: 2px solid var(--cor-destaque);
 }
 
 #footer {
@@ -613,14 +630,16 @@ hr {
     width: 50%;
     margin: 10px auto;
     border: 1px solid transparent;
-    border-top: 2px solid #d4d4d4;
+    border-top: 1px solid #d4d4d4;
+    border-bottom: 1px solid #d4d4d4;
 }
 
 hr.vert {
     height: 50%;
     margin: auto 10px;
     border: 1px solid transparent;
-    border-right: 2px solid #d4d4d4;
+    border-right: 1px solid #d4d4d4;
+    border-left: 1px solid #d4d4d4;
 }
 
 div.aux-buttons {
@@ -867,14 +886,11 @@ div.log {
 }
 
 .version-info {
-    top: 10px;
-    right: 10px;
-    padding: 10px;
     z-index: 1100;
     color: white;
-    font-size: 16px;
-    position: fixed;
+    font-size: 12px;
     user-select: none;
+    align-content: center;
     mix-blend-mode: difference;
     background-color: transparent;
 }
@@ -1252,7 +1268,6 @@ th.calendar {
     display: flex;
     padding: 16px;
     color: white;
-    cursor: pointer;
     font-size: 14px;
     transition: none;
     font-weight: bold;
@@ -1262,6 +1277,11 @@ th.calendar {
 .dropbtn:hover {
     background-color: #fff;
     color: var(--cor-destaque);
+}
+
+.dropbtn:hover .hyperlink {
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .dropbtn:hover .svg-invert {
@@ -1388,8 +1408,8 @@ p.phrase {
 }
 
 #scroll-to-top-button {
-    right: 20px;
-    bottom: 20px;
+    right: 24px;
+    bottom: 32px;
     opacity: 0.5;
     z-index: 1000;
     position: fixed;

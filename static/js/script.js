@@ -320,7 +320,7 @@ const fetchItemDescription = async (cod_item) => {
     }
 };
 
-
+/*
 // HEADER POP-UP
 window.addEventListener('scroll', function () {
     // ENCONTRA A POSIÇÃO Y = VERTICAL
@@ -344,6 +344,7 @@ window.addEventListener('scroll', function () {
         document.querySelector('div.user-logger').classList.remove('scrolled');
     }
 });
+ */
 
 
 // CHECKBOX DOWNLOAD

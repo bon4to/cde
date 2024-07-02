@@ -11,56 +11,57 @@
         {% include 'shared/header/cde-header.html' %}
 
     <!-- TABELA -->
-        <div draggable="false" class="form-login center-page" style="padding: 20px; position: absolute">
-            <div class="two-split" style="grid-gap: 30px">
-                <div id="tables-cont">
-                    <img class="side-banner" style="width: 450px;height: auto;border-radius: 20px;margin-left: unset;" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
-                </div>
-                {% if 'logged_in' not in session %}
-                    <div class="log" style="width: 100%">
-                        <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Entrar</h1>
-                        <form action="/login" method="post" onsubmit="showLoading()" id="form-field">
+        <div style="display: flex;min-width: 100%;margin: 0 auto;align-items: center;justify-content: center;">
+            <div draggable="false" class="form-login" style="padding: 20px; position: absolute">
+                <div class="two-split" style="grid-gap: 30px">
+                    <div id="tables-cont">
+                        <img class="side-banner" style="width: 450px;height: auto;border-radius: 20px;margin-left: unset;" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
+                    </div>
+                    {% if 'logged_in' not in session %}
+                        <div class="log" style="width: 100%">
+                            <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Entrar</h1>
+                            <form action="/login" method="post" onsubmit="showLoading()" id="form-field">
+                                <div>
+                                    <div>
+                                        <label for="login_user">Usuário</label><br>
+                                        <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
+                                    </div>
+                                    <div>
+                                        <label for="password_user">Senha</label><br>
+                                        <input type="password" id="password_user" name="password_user" placeholder="Senha..." required>
+                                    </div>
+                                    <br>
+                                    <p class="alert" id="custom-alert">{% if alert_msge %}{{ alert_msge }}{% else %}Sua sessão expirou, entre novamente!{% endif %}</p>
+                                    <input class="btn-fancy" type="submit" value="Entrar" id="submitform">
+                                </div>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="log" style="width: 100%">
+                            <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Usuário</h1>
                             <div>
-                                <div>
-                                    <label for="login_user">Usuário</label><br>
-                                    <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
+                                <div style="margin-bottom: 10px; margin-top: 8px;" class="centralizado">
+                                    <div class="user-button bigger">
+                                        {{ session.get('user_initials', '') }}
+                                    </div>
                                 </div>
-                                <div>
-                                    <label for="password_user">Senha</label><br>
-                                    <input type="password" id="password_user" name="password_user" placeholder="Senha..." required>
-                                </div>
-                                <br>
-                                <p class="alert" id="custom-alert">{% if alert_msge %}{{ alert_msge }}{% else %}Sua sessão expirou, entre novamente!{% endif %}</p>
-                                <input class="btn-fancy" type="submit" value="Entrar" id="submitform">
+                                <h3>{{ session.get('user_name', 'Faça seu Login!') }}</h3>
+                                <h4 style="margin-top: 0; margin-bottom: 18px; text-align: center">{{ 'Administrador' if session.get('privilegio') <= 2 else 'Usuário Padrão' }}</h4>
+    
                             </div>
-
-                        </form>
-                    </div>
-                {% else %}
-                    <div class="log" style="width: 100%">
-                        <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Usuário</h1>
-                        <div>
-                            <div style="margin-bottom: 10px; margin-top: 8px;" class="centralizado">
-                                <div class="user-button bigger">
-                                    {{ session.get('user_initials', '') }}
+                            <div class="form-login-input">
+                                <div style="display: flex;width: 100%;">
+                                    <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-right: 15px" onclick="window.location.href='{{ url_for('home') }}';" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
+                                    <a class="btn-fancy" href="{{ url_for('logout') }}">Sair...</a>
+                                    <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" onclick="window.location.href='{{ url_for('in_dev') }}';" src="{{ url_for('static', filename='svg/user-edit.svg') }}" alt="">
+    
                                 </div>
                             </div>
-                            <h3>{{ session.get('user_name', 'Faça seu Login!') }}</h3>
-                            <h4 style="margin-top: 0; margin-bottom: 18px; text-align: center">{{ 'Administrador' if session.get('privilegio') <= 2 else 'Usuário Padrão' }}</h4>
-
+    
                         </div>
-                        <div class="form-login-input">
-                            <div style="display: flex;width: 100%;">
-                                <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-right: 15px" onclick="window.location.href='{{ url_for('home') }}';" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
-                                <a class="btn-fancy" href="{{ url_for('logout') }}">Sair...</a>
-                                <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" onclick="window.location.href='{{ url_for('in_dev') }}';" src="{{ url_for('static', filename='svg/user-edit.svg') }}" alt="">
-
-                            </div>
-                        </div>
-
-                    </div>
-                {% endif %}
-
+                    {% endif %}
+    
+                </div>
             </div>
         </div>
         <script>

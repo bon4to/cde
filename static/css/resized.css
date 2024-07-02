@@ -1,9 +1,17 @@
 /* ESTILIZAÇÃO P/ TELAS MENORES*/
 @media screen and (max-width: 1300px) {
-    header.main-header, .sidebar, #footer, section.banner.text-overlay, .user-name, .side-banner {
+    header.main-header, .sidebar, #footer, section.banner.text-overlay, .user-name, .side-banner, .logged-header {
         display: none;
     }
-    
+    .view-width {
+        max-width: unset
+    }
+    .container-grid {
+        grid-template-columns: 1.2fr 1.2fr;
+    }
+    .item {
+        grid-column: span 2;
+    }
 }
 /*
 @media screen and (max-width: 1300px) {

@@ -4,18 +4,20 @@
                         --cor-destaque: #3e5ea6;
                     }
                 </style>
-                <header class="main-header">
-                    <div class="logo-container">
-                        <img id="cdeLogo" class="logo" src="{{ url_for('static', filename='img/cde-logo.png') }}" style="height: 38px;width: auto;margin-right: 40px" alt="">
-                        <img class="logo" src="{{ url_for('static', filename='img/lb-logo.png') }}" style="height: 38px;width: auto" alt="">
-                    </div>
-                </header>
-                <section class="banner text-overlay">
-                    <img class="blurable" draggable="false" src="{{ url_for('static', filename='img/cde-banner.jpg') }}" style="top:-550px" alt="">
-                    <div>
-                        <img src="{{ url_for('static', filename='img/cde-logo.png') }}" alt="" style="pointer-events: none;position: absolute;height: 50px;width: auto;top: 30px;left: 130px;">
-                    </div>
-                </section>
+                <div class="hidden">
+                    <header class="main-header">
+                        <div class="logo-container">
+                            <img id="cdeLogo" class="logo" src="{{ url_for('static', filename='img/cde-logo.png') }}" style="height: 38px;width: auto;margin-right: 40px" alt="">
+                            <img class="logo" src="{{ url_for('static', filename='img/lb-logo.png') }}" style="height: 38px;width: auto" alt="">
+                        </div>
+                    </header>
+                    <section class="banner text-overlay">
+                        <img class="blurable" draggable="false" src="{{ url_for('static', filename='img/cde-banner.jpg') }}" style="top:-550px" alt="">
+                        <div>
+                            <img src="{{ url_for('static', filename='img/cde-logo.png') }}" alt="" style="pointer-events: none;position: absolute;height: 50px;width: auto;top: 30px;left: 130px;">
+                        </div>
+                    </section>
+                </div>
             {% include 'components/dropdown/dropdown-cde.html' %}
 
                 <!-- (content) -->

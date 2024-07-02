@@ -1,28 +1,27 @@
-            <!-- main-sidebar.html -->
 
-                <div class="sidebar" style="position: static; max-width: 70px; width: 70px">
-                    <div id="sidebar" class="sidebar">
-                        <a href="{{ url_for('index') }}" class="nav-link">
-                            <img class="svg-hover" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt=""><br>INÍCIO (CDE)
-                        </a>
-                        {% if 'privilegio' in session %}
-                            <a href="{{ url_for('home_hp') }}" class="nav-link">
-                                <img class="svg-hover" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt=""><br>HUGO PIETRO
-                            </a>
-                            <a href="{{ url_for('home_tl') }}" class="nav-link">
-                                <img class="svg-hover" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt=""><br>TRANSLÉGUA
-                            </a>
-                            {% if session['privilegio'] <= 2 %}
+<div class="sidebar" style="position: static; max-width: 70px; width: 70px">
+    <div id="sidebar" class="sidebar">
+        <a href="{{ url_for('index') }}" class="nav-link">
+            <img class="svg-hover" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt=""><br>INÍCIO (CDE)
+        </a>
+        {% if 'privilegio' in session %}
+            <a href="{{ url_for('home_hp') }}" class="nav-link">
+                <img class="svg-hover" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt=""><br>HUGO PIETRO
+            </a>
+            <a href="{{ url_for('home_tl') }}" class="nav-link">
+                <img class="svg-hover" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt=""><br>TRANSLÉGUA
+            </a>
+            {% if session['privilegio'] <= 2 %}
 
-                            {% endif %}
+            {% endif %}
 
-                            {% if session['privilegio'] == 1 %}
-                            <a href="{{ url_for('api') }}" class="nav-link">
-                                <svg class="svg-hover" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-zap"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 15 21.84"/><path d="M21 5V8"/><path d="M21 12L18 17H22L19 22"/><path d="M3 12A9 3 0 0 0 14.59 14.87"/></svg>
-                                <br>DATABASE
-                            </a>
-                            {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
-        <!-- header.html -->
+            {% if session['privilegio'] == 1 %}
+            <a href="{{ url_for('api') }}" class="nav-link">
+                <svg class="svg-hover" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-zap"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 15 21.84"/><path d="M21 5V8"/><path d="M21 12L18 17H22L19 22"/><path d="M3 12A9 3 0 0 0 14.59 14.87"/></svg>
+                <br>DATABASE
+            </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
