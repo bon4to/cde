@@ -101,8 +101,15 @@ function showLoading() {
 
 
 function hideLoading() {
-    document.getElementById("loading-content").style.display = "none";
     document.getElementById("loading-content").style.opacity = "0";
+    document.getElementById("loading-content").style.display = "none";
+}
+
+
+function confirmLogout() {
+    if (confirm('Você tem certeza que deseja sair?')) {
+        window.location.href = '/logout';
+    }
 }
 
 
@@ -174,8 +181,8 @@ function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const userInfoElement = document.getElementById('userInfo');
-    const userName = userInfoElement.dataset.userName;
+    const userInfoElement = document.getElementById('userInfo').innerText;
+    const userName = userInfoElement;
     const currentDateTime = new Date().toLocaleString();
 
     const tableData = [];
@@ -206,16 +213,6 @@ function generatePDF() {
     }));
 
     const addHeader = (doc) => {
-
-        /* 
-        var logo = document.getElementById('cdeLogo');
-        if (logo) {
-            const img = new Image();
-            img.src = logo.src;
-            doc.addImage(img, 'PNG', 10, 16, 46, 16);
-        }
-        */
-
         doc.setLineWidth(0.4);
         doc.line(10, 14, 200, 14);
 
@@ -226,7 +223,10 @@ function generatePDF() {
         doc.setFont("times", "normal");
         doc.setFontSize(12);
         doc.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
-        doc.text(`CARGA: ${nroCarga}`, 10, 34);
+        
+        if (typeof nroCarga !== 'undefined') {
+            doc.text(`CARGA: ${nroCarga}`, 10, 34);
+        }
 
         doc.setLineWidth(0.4);
         doc.line(10, 38, 200, 38);
@@ -235,15 +235,17 @@ function generatePDF() {
     const addFooter = (doc, pageNumber) => {
         const pageCount = doc.internal.getNumberOfPages();
         doc.setFontSize(10);
-        doc.text(userName, 10, doc.internal.pageSize.height - 10, {
-            align: 'left'
-        });
-        doc.text(`${pageNumber} / ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, {
-            align: 'center'
-        });
-        doc.text(currentDateTime, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 10, {
-            align: 'right'
-        });
+
+        if (typeof userName === 'string') {
+            doc.text(userName, 10, doc.internal.pageSize.height - 10, { align: 'left' });
+        }
+
+        doc.text(`${pageNumber} / ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+
+        if (typeof currentDateTime === 'string') {
+            doc.text(currentDateTime, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 10, { align: 'right' });
+        }
+
         doc.setLineWidth(0.4);
         doc.line(10, doc.internal.pageSize.height - 20, 200, doc.internal.pageSize.height - 20);
     };
@@ -261,6 +263,7 @@ function generatePDF() {
     const pdfName = `${getStorageKey()}.pdf`;
     doc.save(pdfName);
 }
+
 
 function renderSubtotals() {
     const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];

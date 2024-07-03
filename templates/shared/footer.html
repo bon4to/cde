@@ -18,7 +18,7 @@
                         {{ session.get('id_user', '') }} - {{ session.get('user_name', '') }}
                     </div>
                 {% else %}
-                    <div class="version-info" id="userInfo" onclick="window.location.href='{{ url_for('login') }}';">
+                    <div class="version-info" onclick="window.location.href='{{ url_for('login') }}';">
                         (faça login para acessar o sistema)
                     </div>
                 {% endif %}

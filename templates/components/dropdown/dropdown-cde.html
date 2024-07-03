@@ -7,54 +7,67 @@
                 </div>
                 
                 {% if 'privilegio' in session %}
-                    <div class="dropdown">
-                        <button class="dropbtn" onclick="window.location.href='{{ url_for('home_hp') }}';">
-                            <span class="hyperlink">HUGO PIETRO</span>
-                            <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
-                        </button>
-                        <div class="dropdown-content">
-                            <a href="{{ url_for('producao') }}">PRC010 | PROCESSAMENTO</a>
-                            <a href="{{ url_for('envase') }}">ENV006 | ENVASE</a>
-                            <a href="{{ url_for('produtos') }}">ITE005 | PRODUTOS</a>
-                            <a href="{{ url_for('etiqueta') }}">OUT014 | ETIQUETA</a>
-                            <a href="{{ url_for('rotulo') }}">OUT015 | RÓTULO</a>
+                    <div class="split-horizontal">
+                        <div>
+                            <div class="dropdown">
+                                <button class="dropbtn" onclick="window.location.href='{{ url_for('home_hp') }}';">
+                                    <span class="hyperlink">HUGO PIETRO</span>
+                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                </button>
+                                <div class="dropdown-content">
+                                    <a href="{{ url_for('producao') }}">PRC010 | PROCESSAMENTO</a>
+                                    <a href="{{ url_for('envase') }}">ENV006 | ENVASE</a>
+                                    <a href="{{ url_for('produtos') }}">ITE005 | PRODUTOS</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="dropbtn" onclick="window.location.href='{{ url_for('home_tl') }}';">
+                                    <span class="hyperlink">TRANSLÉGUA</span>
+                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                </button>
+                                <div class="dropdown-content">
+                                    <a href="{{ url_for('mov') }}">MOV002 | MOVIMENTAR</a>
+                                    <a href="{{ url_for('historico') }}">MOV003 | HISTÓRICO</a>
+                                    <a href="{{ url_for('estoque') }}">MOV004 | ESTOQUE</a>
+                                    <a href="{{ url_for('faturado') }}">MOV005 | FATURADO</a>
+                                    <a href="{{ url_for('cargas') }}">MOV006 | CARGAS</a>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="dropbtn">
+                                    <span>OUTROS</span>
+                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                </button>
+                                <div class="dropdown-content">
+                                    <a href="{{ url_for('etiqueta') }}">OUT014 | ETIQUETA</a>
+                                    <a href="{{ url_for('rotulo') }}">OUT015 | RÓTULO</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-row" style="gap: 0">
+                            <div class="dropdown">
+                                <button class="dropbtn">
+                                    <span>SISTEMA</span>
+                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                </button>
+                                <div class="dropdown-content" style="right: 0; left:unset">
+                                    {% if session['privilegio'] <= 2 %}
+                                        <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
+                                    {% endif %}
+                                    <a href="{{ url_for('in_dev') }}">CDE017 | REGISTROS</a>
+                                    <a href="{{ url_for('in_dev') }}">CONFIGURAÇÕES</a>
+                                    <a href="{{ url_for('in_dev') }}">AJUDA</a>
+                                    <a href="{{ url_for('logout') }}">SAIR</a>
+                                </div>
+                            </div>
+                            <div style="margin: 4px;display: flex;">
+                                <hr class="vert" style="width: 0;">
+                            </div>
+                            <div class="user-button"onclick="window.location.href='{{ url_for('login') }}';">
+                                {{ session.get('user_initials', '') }}
+                            </div>
                         </div>
                     </div>
-                    <div class="dropdown">
-                        <button class="dropbtn" onclick="window.location.href='{{ url_for('home_tl') }}';">
-                            <span class="hyperlink">TRANSLÉGUA</span>
-                            <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
-                        </button>
-                        <div class="dropdown-content">
-                            <a href="{{ url_for('mov') }}">MOV002 | MOVIMENTAR</a>
-                            <a href="{{ url_for('historico') }}">MOV003 | HISTÓRICO</a>
-                            <a href="{{ url_for('estoque') }}">MOV004 | ESTOQUE</a>
-                            <a href="{{ url_for('faturado') }}">MOV005 | FATURADO</a>
-                            <a href="{{ url_for('cargas') }}">MOV006 | CARGAS</a>
-                        </div>
-                    </div>
-                    <div class="dropdown">
-                        <button class="dropbtn">
-                            <span>SISTEMA</span>
-                            <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
-                        </button>
-                        <div class="dropdown-content">
-                            {% if session['privilegio'] <= 2 %}
-                                <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
-                            {% endif %}
-                            <a href="{{ url_for('in_dev') }}">CDE017 | REGISTROS</a>
-                            <a href="{{ url_for('in_dev') }}">CONFIGURAÇÕES</a>
-                            <a href="{{ url_for('in_dev') }}">AJUDA</a>
-                            <a href="{{ url_for('logout') }}">SAIR</a>
-                        </div>
-                    </div>
-                    {% if session['privilegio'] == 1 %}
-                        <div class="dropdown" onclick="window.location.href='{{ url_for('api') }}';">
-                            <button class="dropbtn" style="height: 48px; width: 48px;">
-                                <svg style="height: 15px; width: 15px; padding: 0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-database-zap"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 15 21.84"/><path d="M21 5V8"/><path d="M21 12L18 17H22L19 22"/><path d="M3 12A9 3 0 0 0 14.59 14.87"/></svg>
-                            </button>
-                        </div>
-                    {% endif %}
                     <!--
                     {% if session['privilegio'] <= 1 %}
                         <div class="dropdown">

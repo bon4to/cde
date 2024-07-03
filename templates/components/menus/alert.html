@@ -46,15 +46,16 @@
     }
 
 </style>
-
+<div style="display: flex;min-width: 100%; margin: 0 auto; align-items: center; justify-content: center;">
     <div class="alert-container">
         <div class="alert-content">
             <h1 class="alert-type">{{ alert_type | safe }}</h1>
             <p style="display: block" class="alert-message">{{ alert_msge | safe }}</p>
             <p style="display: block" class="alert-more">{{ alert_more | safe }}</p>
             <br>
-            <a class="btn-fancy" href="{{ url_return | safe }}">Voltar</a>
+            <a class="btn-fancy" onclick="goBack()">Voltar</a>
         </div>
     </div>
+</div>
 
 {% include 'shared/footer.html' %}

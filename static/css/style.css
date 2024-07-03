@@ -89,6 +89,7 @@ span.id-page {
     min-width: 75vw;
     min-height: 80px;
     padding: 8px 36px;
+    max-height: 84px;
     margin: 0 10px 16px 10px;
     transition: width 0.3s ease-out;
 }
@@ -216,7 +217,7 @@ div.back-modal {
     opacity: 0.5;
     z-index: 2000;
     position: fixed;
-    background-color: white;
+    background-color: #fff;
 }
 
 h1 {
@@ -913,11 +914,10 @@ div.log {
     animation: fadeInFromTop 0.3s ease-out forwards;
 }
 
-img.side-banner {
-    width: auto;
+.side-banner {
+    width: 387px;
     height: 580px;
     object-fit: cover;
-    margin-left: 24px;
     position: relative;
     border-radius: 20px;
 }
@@ -994,7 +994,7 @@ div.user-button {
 div.user-button.bigger {
     width: 80px; 
     height: 80px;
-    cursor: none;
+    cursor: unset;
     z-index: unset;
     font-size: 34px; 
     position: static; 
@@ -1006,6 +1006,17 @@ div.user-button.scrolled {
     height: 32px;
     font-size: 16px;
     line-height: 32px;
+}
+
+.navigation-bar .user-button {
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    font-size: 14px;
+    margin: 10px 12px;
+    align-items: center;
+    justify-content: center;
 }
 
 div.logged-header {
