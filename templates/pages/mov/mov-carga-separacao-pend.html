@@ -67,7 +67,7 @@
                         <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                         </div>
-                        {% if session['privilegio'] == 1 %}
+                        {% if session['user_grant'] == 1 %}
                             <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
                             </div>
@@ -109,7 +109,7 @@
                 <tbody>
                 </tbody>
             </table>
-            {% if session['privilegio'] == 1 %}
+            {% if session['user_grant'] == 1 %}
                 <div style="margin: 8px 0" class="flex-row">
                     <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
                         <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">

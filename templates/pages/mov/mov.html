@@ -96,8 +96,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        {% if 'privilegio' in session %}
-                                            {% if session['privilegio'] <= 2 %}
+                                        {% if 'user_grant' in session %}
+                                            {% if session['user_grant'] <= 2 %}
                                                 <div id="enderecoCompletoContainer">
                                                     <p style="justify-content: left">Movimentação/Faturamento completo de Endereço.</p>
                                                     <input type="checkbox" class="check" id="is_end_completo" name="is_end_completo" onchange="handleCheckChange()"><br>
@@ -245,7 +245,7 @@
             function buscarItens(codigo) {
                 $.ajax({
                     type: "POST",
-                    url: "/searching",
+                    url: "/search_item",
                     data: { input_code: codigo },
                     success: function(response) {
                         $("#desc_item").val(response.json_desc_item);

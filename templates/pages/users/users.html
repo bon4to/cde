@@ -15,8 +15,8 @@
             <span class="id-page">{{session['id_page']}}</span>
         </h1>
         <div class="aux-buttons">
-            {% if 'privilegio' in session %}
-                {% if session['privilegio'] <= 2 %}
+            {% if 'user_grant' in session %}
+                {% if session['user_grant'] <= 2 %}
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="EDITAR USUÁRIOS" alt="" onclick="toggleEdit()">
                 {% endif %}
             {% endif %}
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="flex-row" style="min-width: 100%;">
-        <div draggable="false" class="forms-container" style="padding: 12px 30px;">
+        <div draggable="false" class="forms-container" style="padding: 12px 30px;display: unset; max-height: 550px; min-height: unset;">
             <div class="split-horizontal">
                 <div>
                     <h2 style="justify-content: flex-start">Cadastrar Usuário</h2>
@@ -54,14 +54,11 @@
                                     strength = 0;
                                 }
                                 if (strength === 0) {
-                                    passwordStrength.textContent = 'Fraca <span style="color: red">*</span>';
-                                    passwordStrength.style.color = 'red';
+                                    passwordStrength.innerHTML = '<span style="color: red">Fraca *</span>';
                                 } else if (strength === 1) {
-                                    passwordStrength.textContent = 'Média <span style="color: red">*</span>*';
-                                    passwordStrength.style.color = 'orange';
+                                    passwordStrength.innerHTML = '<span style="color: orange">Média **</span>';
                                 } else {
-                                    passwordStrength.textContent = 'Forte <span style="color: red">*</span>**';
-                                    passwordStrength.style.color = 'green';
+                                    passwordStrength.innerHTML = '<span style="color: green">Forte ***</span>';
                                 }
                             }
 
@@ -83,10 +80,10 @@
 
                         <label for="privilege_user">Tipo de Usuário: <span style="color: red">*</span></label>
                         <select id="privilege_user" name="privilege_user" required>
-                            {% if 'privilegio' in session %}
+                            {% if 'user_grant' in session %}
                                 <option value="3">Padrão</option>
                                 <option value="2">Administrador</option>
-                                {% if session['privilegio'] <= 1 %}
+                                {% if session['user_grant'] <= 1 %}
                                     <option value="4">Espectador</option>
                                     <option value="1">Desenvolvedor</option>
                                 {% endif %}
@@ -116,7 +113,7 @@
                                 <tr>
                                     <td>{{ item['cod_user'] }}</td>
                                     <td>{{ item['user_name'] }}</td>
-                                    <td>{{ item['privilegio'] }}</td>
+                                    <td>{{ item['user_grant'] }}</td>
                                     <td>{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
                                     <td class="td-more hidden-button" data-toggle="tooltip" ><img class="svg-link table-more" src="{{ url_for('static', filename='svg/edit-link.svg') }}" onclick="redirectToEdit('{{ item['cod_user'] }}')" alt=""></td>
                                 </tr>

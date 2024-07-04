@@ -349,7 +349,7 @@ def get_users():                                                                
         ''')
 
         users_list = [{
-            'user_name'  : f'{row[0]} {row[1]}', 'privilegio': row[2], 
+            'user_name'  : f'{row[0]} {row[1]}', 'user_grant': row[2], 
             'ult_acesso' : row[3],               'cod_user'  : row[4],
         } for row in cursor.fetchall()]
 
@@ -496,7 +496,7 @@ def get_saldo_view():                                                           
 
 
 def tlg_msg(msg):                                                                                               #* MENSAGEM DO TELEGRAM
-    if not session.get('privilegio') == 1:
+    if not session.get('user_grant') == 1:
         if debug:
             print('[Telegram] não pôde ser enviada em modo debug')
         else:
@@ -543,7 +543,7 @@ def verify_auth(id_page):                                                       
             if 'logged_in' in session:
                 id_user = session.get('id_user')
                 session['id_page'] = f'{id_page}'
-                if not session.get('privilegio') <= 2:
+                if not session.get('user_grant') <= 2:
                     user_permissions = get_user_permissions(id_user)
                     user_permissions = [item['id_perm'] for item in user_permissions]
                     if id_page in user_permissions:
@@ -757,11 +757,12 @@ def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, t
             VALUES (
                 ?, ?, ?,
                 ?, ?, ?,
-                ?, ?, ?);
+                ?, ?, ?);                
             ''',
             (numero, letra, cod_item,
-            lote_item, quantidade, operacao, timestamp_out, 
-            id_carga, id_user_mov))
+            lote_item, quantidade, operacao, 
+            timestamp_out, id_carga, id_user_mov)
+        )
         
         connection.commit()
 
@@ -798,7 +799,6 @@ def bulk_insert_historico():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-
 #! ROTAS DE ACESSO | URL
 @app.route('/')
 @verify_auth('CDE001')
@@ -819,7 +819,7 @@ def debug():
 @verify_auth('CDE001')
 def home():
     return render_template(
-        'pages/index/index.html', 
+        'pages/index/cde-index.html', 
         frase=get_frase()
     )
 
@@ -930,7 +930,7 @@ def login():                                                                    
             finally:
                 session['id_user']       = id_user
                 session['logged_in']     = True
-                session['privilegio']    = privilege_user
+                session['user_grant']    = privilege_user
 
                 msg = f'''[LOG-IN]\n{id_user} - {nome_user} {sobrenome_user}\n{request.remote_addr}'''
                 tlg_msg(msg)
@@ -940,7 +940,7 @@ def login():                                                                    
                 if check_key(user_pwd, input_pwd):
                     alert_type = 'REDEFINIR (SENHA) \n'
                     alert_msge  = 'Você deve definir sua senha no seu primeiro acesso.'
-                    alert_more = '/users/reset-key'
+                    alert_more = '/users/reset-password'
                     url_return = 'Digite sua nova senha...'
 
                     return render_template(
@@ -971,9 +971,9 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/users/reset-key', methods=['POST'])
+@app.route('/users/reset-password', methods=['POST'])
 @verify_auth('CDE001')
-def reset_key():
+def reset_password():
     password      = request.form['input']
     password_user = hash_key(password)
     id_user       = session.get('id_user')
@@ -1002,9 +1002,9 @@ def reset_key():
     return redirect(url_for('index'))
 
 
-@app.route('/searching', methods=['POST'])
+@app.route('/search_item', methods=['POST'])
 @verify_auth('CDE001')
-def searching():
+def search_item():
     input_code = re.sub(r'[^0-9;]', '', (request.form['input_code'].strip()))
     print(f'Código fornecido: {input_code}')
     
@@ -1182,7 +1182,7 @@ def historico_search():
             estoque=filtered_estoque, 
             search_term=search_term, 
             page = 0, max=max, min=min, 
-            total_pages=0, 
+            total_pages=0,
             search_row_text=search_row_text
         )
     
@@ -2311,7 +2311,7 @@ def export_csv_tipo(tipo):                                                      
 
 if __name__ == '__main__':                                                                                      #! __MAIN__
 
-    app.config['APP_VERSION'] = ['0.4.3', 'Junho/2024', False]
+    app.config['APP_VERSION'] = ['0.4.3', 'Julho/2024', False]
 
     # GET nome do diretório
     dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()

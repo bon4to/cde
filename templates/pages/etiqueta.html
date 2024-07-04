@@ -102,7 +102,7 @@
             function buscarItens(codigo) {
                 $.ajax({
                     type: "POST",
-                    url: "/searching",
+                    url: "/search_item",
                     data: { input_code: codigo },
                     success: function(response) {
                         $("#desc_item").val(response.json_desc_item);

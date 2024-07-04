@@ -13,7 +13,7 @@
                 <div class="version-info">CDE | v{{ app_version[0] }} (beta)</div>
             </div>
             <div style="display: flex; justify-content: flex-end">
-                {% if 'privilegio' in session %}
+                {% if 'user_grant' in session %}
                     <div class="version-info" id="userInfo" onclick="window.location.href='{{ url_for('login') }}';">
                         {{ session.get('id_user', '') }} - {{ session.get('user_name', '') }}
                     </div>

@@ -66,8 +66,8 @@
                                         </div>
                                     </div>
                                     <div>
-                                        {% if 'privilegio' in session %}
-                                            {% if 10 in user_permissions or 13 in user_permissions or session['privilegio'] <= 2 %}
+                                        {% if 'user_grant' in session %}
+                                            {% if 10 in user_permissions or 13 in user_permissions or session['user_grant'] <= 2 %}
                                                 <div>
                                                     <label for="observacao">Observação</label><br>
                                                     <textarea class="address-observ" id="observacao" name="observacao" placeholder="Observações...">{{ item['observacao'] }}</textarea>
@@ -81,8 +81,8 @@
                                     <div style="display: flex;width: 100%;">
                                         <input class="btn-fancy" style="max-width: none;" type="submit" value="Confirmar edição...">
     
-                                        {% if 'privilegio' in session %}
-                                            {% if session['privilegio'] <= 2 %}
+                                        {% if 'user_grant' in session %}
+                                            {% if session['user_grant'] <= 2 %}
                                                 <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="" onclick="confirmDelete('{{ item['id_producao'] }}')">
                                             {% endif %}
                                         {% endif %}

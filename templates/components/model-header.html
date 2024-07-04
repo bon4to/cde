@@ -6,7 +6,7 @@
             <div class="logged-header">
                 <div class="user-name">
                     <img id="toggle-theme" class="svg-invert-hover" src="{{ url_for('static', filename='svg/moon.svg') }}" alt="">
-                    {% if 'privilegio' in session %}
+                    {% if 'user_grant' in session %}
                         <div class="flex-row">
                             <div class="flex-column" style="gap: 0">
                                 <p class="user-name" id="userInfo" data-user-name="{{ session.get('user_name', '') }}" onclick="window.location.href='{{ url_for('login') }}';">

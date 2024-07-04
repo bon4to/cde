@@ -94,8 +94,8 @@
                                 </div>
                                 <div style="display: flex;width: 100%;">
                                     <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
-                                    {% if 'privilegio' in session %}
-                                        {% if session['privilegio'] <= 2 %}
+                                    {% if 'user_grant' in session %}
+                                        {% if session['user_grant'] <= 2 %}
                                             <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px; margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
                                         {% endif %}
                                     {% endif %}
@@ -258,7 +258,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/searching",
+                    url: "/search_item",
                     data: { input_code: codigo },
                     success: function(response) {
 

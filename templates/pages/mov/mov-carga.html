@@ -155,7 +155,7 @@
             </div>
             
         {% endif %}
-        {% if 'privilegio' in session %}
+        {% if 'user_grant' in session %}
             {% if id_carga %}
                 {% if cod_item %}
                     <div class="tables-container glow-tl">
@@ -210,7 +210,7 @@
             <input type="hidden" id="qtde_item_input" name="qtde_solic">
         </form>
 
-        {% if 'privilegio' in session %}
+        {% if 'user_grant' in session %}
             {% if id_carga %}
                 <div style="display: flex; flex-direction: column; gap: 6px">
                     <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="LIMPAR">

@@ -1,12 +1,12 @@
             <div class="navigation-bar">
                 <div style="height: 48px;width: auto;display: flex;justify-content: center;align-items: center; padding: 0 10px; cursor: pointer;" onclick="window.location.href='{{ url_for('home') }}';">
-                    <img style="height: 20px; width: auto;" class="svg" src="{{ url_for('static', filename='img/cde-logo.png') }}" alt="">
+                    <img style="height: 20px; width: auto;" class="svg" src="{{ url_for('static', filename='img/cde-logo-w.png') }}" alt="">
                 </div>
                 <div style="margin: 4px;display: flex;">
                     <hr class="vert" style="width: 0;">
                 </div>
                 
-                {% if 'privilegio' in session %}
+                {% if 'user_grant' in session %}
                     <div class="split-horizontal">
                         <div>
                             <div class="dropdown">
@@ -51,7 +51,7 @@
                                     <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
                                 </button>
                                 <div class="dropdown-content" style="right: 0; left:unset">
-                                    {% if session['privilegio'] <= 2 %}
+                                    {% if session['user_grant'] <= 2 %}
                                         <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
                                     {% endif %}
                                     <a href="{{ url_for('in_dev') }}">CDE017 | REGISTROS</a>
@@ -63,13 +63,13 @@
                             <div style="margin: 4px;display: flex;">
                                 <hr class="vert" style="width: 0;">
                             </div>
-                            <div class="user-button"onclick="window.location.href='{{ url_for('login') }}';">
+                            <div class="user-button"onclick=" window.location.href='{{ url_for('login') }}';">
                                 {{ session.get('user_initials', '') }}
                             </div>
                         </div>
                     </div>
                     <!--
-                    {% if session['privilegio'] <= 1 %}
+                    {% if session['user_grant'] <= 1 %}
                         <div class="dropdown">
                             <button class="dropbtn" style="height: 48px">
                                 <img class="svg-inv" style="padding: 0; height: 18px;width: 18px" src="{{ url_for('static', filename='svg/wbg-logo.svg') }}" alt="">

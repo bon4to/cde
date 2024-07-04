@@ -35,8 +35,8 @@
             </div>
         </div>
         <div class="flex-row" style="min-width: 100%;">
-            {% if 'privilegio' in session %}
-                {% if session['privilegio'] <= 2 %}
+            {% if 'user_grant' in session %}
+                {% if session['user_grant'] <= 2 %}
                     {% if alert %}
                         {% if class_alert == 'error' %}
                             <div class="forms-container" style="height: max-content;" class="disabled">

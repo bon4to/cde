@@ -1,143 +1,102 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
+{% extends "pages/index/index.html" %}
+    
+    {% block title %}
         <title>Página Inicial | TRANS LÉGUA</title>
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
-        <div class="titles-container flex-row title-centerer">
-            <h1>
-                <a href="#">TL</a>
-                <span class="dash">/</span>
-                <span>HOME</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIOS" alt="" onclick="window.location.href='{{ url_for('login') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="SAIR" alt="" onclick="goBack()">
+    {% endblock title %}
+
+    {% block brow %}
+        <h1>
+            <a href="/home">INICIO</a>
+            <span class="dash">/</span>
+            <a href="/home">CDE</a>
+            <span class="dash">/</span>
+            <span>TL</span>
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
+        <div class="aux-buttons">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIOS" alt="" onclick="window.location.href='{{ url_for('login') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="SAIR" alt="" onclick="goBack()">
+        </div>
+    {% endblock brow %}
+    
+    {% block grid_buttons %}
+        <div class="item featured" onclick="window.location.href='{{ url_for('mov') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Movimentar</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV002&nbsp;•&nbsp;</span>Faça movimentações no estoque.</p>
+                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/boxes-packing.svg') }}" alt="">
+                </a>
             </div>
         </div>
-        <div class="flex-row" style="min-width: 100%;">
-            <div class="forms-container menu-container flex-column">
-                <div class="flex-row" style="min-width: 100%;">
-                    {% if 'privilegio' in session %}
-                        <div style="display: flex; flex-direction: column">
-                            <div>
-                                <div class="salute-text">
-                                    <h1 class="saudacao" id="salute-text" style="margin-bottom: 8px;"></h1>
-                                    <p class="phrase" id="frase-motivacional">“{{ frase }}”</p>
-                                    <!-- <hr style="margin-bottom: 14px;"> -->
-                                </div>
-                            </div>
-                            <hr style="margin-left: 20px; width: 20%;">
-                            <div class="container-grid">
-                                <div class="item featured" onclick="window.location.href='{{ url_for('mov') }}';">
-                                    <div class="split-horizontal algn-cntr">
-                                        <div style="text-align: left">
-                                            <h2 class="text-default">Movimentar</h2>
-                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV002&nbsp;•&nbsp;</span>Faça movimentações no estoque.</p>
-                                        </div>
-                                        <a class="btn-fancy button-mini">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/boxes-packing.svg') }}" alt="">
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="item" onclick="window.location.href='{{ url_for('historico') }}';">
-                                    <div class="split-horizontal algn-cntr">
-                                        <div style="text-align: left">
-                                            <h2 class="text-default">Histórico</h2>
-                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV003</span></p>
-                                        </div>
-                                        <a class="btn-fancy button-mini">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/history.svg') }}" alt="">
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="item" onclick="window.location.href='{{ url_for('estoque') }}';">
-                                    <div class="split-horizontal algn-cntr">
-                                        <div style="text-align: left">
-                                            <h2 class="text-default">Estoque</h2>
-                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV004</span></p>
-                                        </div>
-                                        <a class="btn-fancy button-mini">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/boxes.svg') }}" alt="">
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="item" onclick="window.location.href='{{ url_for('produtos') }}';">
-                                    <div class="split-horizontal algn-cntr">
-                                        <div style="text-align: left">
-                                            <h2 class="text-default">Produtos</h2>
-                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">ITE005</span></p>
-                                        </div>
-                                        <a class="btn-fancy button-mini">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/produtos.svg') }}" alt="">
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="item" onclick="window.location.href='{{ url_for('faturado') }}';">
-                                    <div class="split-horizontal algn-cntr">
-                                        <div style="text-align: left">
-                                            <h2 class="text-default">Faturado</h2>
-                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV005</span></p>
-                                        </div>
-                                        <a class="btn-fancy button-mini">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="item featured" onclick="window.location.href='{{ url_for('cargas') }}';">
-                                    <div class="split-horizontal algn-cntr">
-                                        <div style="text-align: left">
-                                            <h2 class="text-default">Cargas</h2>
-                                            <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV006&nbsp;•&nbsp;</span>Faça separações de carga.</p>
-                                        </div>
-                                        <a class="btn-fancy button-mini">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/truck.svg') }}" alt="">
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                    <div class="side-banner" style="background-color: var(--cor-destaque)">
-                        <img class="side-banner" src="{{ url_for('static', filename='img/tl-side-banner.jpg') }}" alt="">
-                    </div>
+        <div class="item" onclick="window.location.href='{{ url_for('historico') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Histórico</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV003</span></p>
                 </div>
-                <div class="split-horizontal">
-                    <a class="btn-fancy button-mini" href="{{ url_for('index') }}">
-                        <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
-                    </a>
-                    <p style="color: #7e7e7e">Trans Légua | Ferramentas</p>
-                    <a class="btn-fancy button-mini{% if not session['privilegio'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                    </a>
-                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/history.svg') }}" alt="">
+                </a>
             </div>
         </div>
+        <div class="item" onclick="window.location.href='{{ url_for('estoque') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Estoque</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV004</span></p>
+                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/boxes.svg') }}" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="item" onclick="window.location.href='{{ url_for('produtos') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Produtos</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">ITE005</span></p>
+                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/produtos.svg') }}" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="item" onclick="window.location.href='{{ url_for('faturado') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Faturado</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV005</span></p>
+                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="item featured" onclick="window.location.href='{{ url_for('cargas') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Cargas</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV006&nbsp;•&nbsp;</span>Faça separações de carga.</p>
+                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/truck.svg') }}" alt="">
+                </a>
+            </div>
+        </div>
+    {% endblock grid_buttons %}
 
-        <script>
-
-            function getSaudacao() {
-                let saudacao;
-                let horaAtual = new Date().getHours();
-
-                if (horaAtual >= 5 && horaAtual < 12) {
-                    saudacao = "Bom dia, ";
-                } else if (horaAtual >= 12 && horaAtual < 18) {
-                    saudacao = "Boa tarde, ";
-                } else {
-                    saudacao = "Boa noite, ";
-                }
-                return saudacao;
-            }
-            let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
-            document.getElementById("salute-text").innerHTML = salute;
-
-        </script>
-
-    {% include 'shared/footer.html' %}
+    {% block side_banner %}
+        <div class="side-banner" style="background-color: var(--cor-destaque)">
+            <img class="side-banner" src="{{ url_for('static', filename='img/tl-side-banner.jpg') }}" alt="">
+        </div>
+    {% endblock side_banner %}

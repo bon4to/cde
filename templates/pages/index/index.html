@@ -1,38 +1,44 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>Página Inicial | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+        {% block title %}
+            <title>Página Inicial | CDE</title>
+            <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
-        {% include 'shared/header/cde-header.html' %}
+            {% include 'shared/header/cde-header.html' %}
+        {% endblock title %}
         <div class="titles-container flex-row title-centerer">
-            <h1>
-                <a href="#">CDE</a>
-                <span class="dash">/</span>
-                <span>HOME</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIOS" alt="" onclick="window.location.href='{{ url_for('login') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/log-out.svg') }}" title="VOLTAR" alt="" onclick="confirmLogout()">
-            </div>
+            {% block brow %}
+                <h1>
+                    <a href="#">CDE</a>
+                    <span class="dash">/</span>
+                    <span>HOME</span>
+                    <span class="id-page">{{session['id_page']}}</span>
+                </h1>
+                <div class="aux-buttons">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIOS" alt="" onclick="window.location.href='{{ url_for('login') }}';">
+                    <hr class="vert">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                    <hr class="vert">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/exit.svg') }}" title="VOLTAR" alt="" onclick="confirmLogout()">
+                </div>
+            {% endblock brow %}
         </div>
         <div class="flex-row" style="min-width: 100%;">
-            <div class="forms-container menu-container flex-column">
+            <div class="forms-container menu-container flex-column" style="border-radius: 44px; min-height: unset">
                 <div class="flex-row" style="min-width: 100%;">
-                    {% if 'privilegio' in session %}
-                        <div style="display: flex; flex-direction: column">
+                    {% if 'user_grant' in session %}
+                        <div style="display: flex; flex-direction: column; justify-content: space-between">
                             <div>
-                                <div class="salute-text">
-                                    <h1 class="saudacao" id="saud"></h1>
-                                    <p class="phrase" id="frase-motivacional">“{{ frase }}”</p>
+                                <div>
+                                    <div class="salute-text">
+                                        <h1 class="saudacao" id="saudacao"></h1>
+                                        <p class="phrase" id="frase-motivacional">“{{ frase }}”</p>
+                                    </div>
                                 </div>
+                                <hr style="margin-left: 20px; width: 20%;">
                             </div>
-                            <hr style="margin-left: 20px; width: 20%;">
                             <div class="container-grid">
                                 {% block grid_buttons %}
                                     <div class="item featured" onclick="window.location.href='{{ url_for('home_hp') }}';">
@@ -90,7 +96,7 @@
                                             </a>
                                         </div>
                                     </div>
-                                    {% if session['privilegio'] <= 1 %}
+                                    {% if session['user_grant'] <= 1 %}
                                         <div class="item featured" onclick="window.location.href='{{ url_for('api') }}';">
                                             <div class="split-horizontal algn-cntr">
                                                 <div style="text-align: left">
@@ -105,28 +111,28 @@
                                     {% endif %}
                                 {% endblock grid_buttons %}
                             </div>
+                            <div class="split-horizontal" style="padding: 10px 20px;width: auto;">
+                                <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
+                                    <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
+                                </a>
+                                <p style="color: #7e7e7e">Collaborative Developed Enviroment (CDE)</p>
+                                <a class="btn-fancy button-mini{% if not session['user_grant'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
+                                </a>
+                            </div>
                         </div>
                     {% endif %}
-                    <div class="side-banner" style="background-color: var(--cor-destaque)">
-                        <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
-                    </div>
-                </div>
-                <div class="split-horizontal">
-                    <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
-                        <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
-                    </a>
-                    <p style="color: #7e7e7e">Collaborative Developed Enviroment (CDE)</p>
 
-                    <a class="btn-fancy button-mini{% if not session['privilegio'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                    </a>
-
+                    {% block side_banner %}  
+                        <div class="side-banner" style="background-color: var(--cor-destaque)">
+                            <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
+                        </div>
+                    {% endblock side_banner %}
                 </div>
             </div>
         </div>
         
         <script>
-
             function getSaudacao() {
                 let saudacao;
                 let horaAtual = new Date().getHours();
@@ -141,7 +147,7 @@
                 return saudacao;
             }
             let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
-            document.getElementById("saud").innerHTML = salute;
+            document.getElementById("saudacao").innerHTML = salute;
         </script>
 
         {% include 'shared/footer.html' %}

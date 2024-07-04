@@ -70,8 +70,8 @@
                                     </div>
                                     <div style="display: flex;width: 100%;">
                                         <input class="btn-fancy" style="max-width: none;" type="submit" value="Confirmar edição...">
-                                        {% if 'privilegio' in session %}
-                                            {% if 6 in user_permissions or 9 in user_permissions or session['privilegio'] <= 2 %}
+                                        {% if 'user_grant' in session %}
+                                            {% if 6 in user_permissions or 9 in user_permissions or session['user_grant'] <= 2 %}
                                                 <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="" onclick="confirmDelete('{{ item['id_envase'] }}')">
                                            {% endif %}
                                         {% endif %}
@@ -146,7 +146,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "/searching",
+                        url: "/search_item",
                         data: { input_code: codigo },
                         success: function(response) {
 
