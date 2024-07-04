@@ -467,24 +467,47 @@ function toggleCart() {
 }
 
 
-// const toggleTheme = document.getElementById('toggle-theme');
-// toggleTheme.addEventListener('click', () => {
-//     document.body.classList.toggle('dark-mode');
-// 
-//     if (document.body.classList.contains('dark-mode')) {
-//         localStorage.setItem('theme', 'dark');
-//     } else {
-//         localStorage.setItem('theme', 'light');
-//     }
-// });
+function toggleTheme() {
+    const root = document.documentElement;
+    document.documentElement.classList.toggle('dark');
+
+    if (document.documentElement.classList.contains('dark')) {
+        localStorage.setItem('theme', 'dark');
+        //root.style.setProperty('--cor-cde-rgb', '53, 80, 141');
+        //root.style.setProperty('--cor-tl-rgb', '206, 80, 34');
+        //root.style.setProperty('--cor-hp-rgb', '123, 104, 57');
+        
+        root.style.setProperty('--programmed-l1', '155, 072, 060');
+        root.style.setProperty('--programmed-l2', '081, 129, 040');
+        root.style.setProperty('--programmed-l3', '065, 065, 155');
+        root.style.setProperty('--programmed-l4', '155, 065, -20');
+        root.style.setProperty('--programmed-l5', '065, 135, 155');
+        root.style.setProperty('--programmed-l6', '155, 065, 125');
+        root.style.setProperty('--programmed-l7', '155, 120, 065');
+    } else {
+        localStorage.setItem('theme', 'light');
+        //root.style.setProperty('--cor-cde-rgb', '62, 94, 166');
+        //root.style.setProperty('--cor-tl-rgb', '234, 90, 38');
+        //root.style.setProperty('--cor-hp-rgb', '143, 121, 67');
+        
+        root.style.setProperty('--programmed-l1', ' 255, 172, 160');
+        root.style.setProperty('--programmed-l2', ' 181, 229, 140');
+        root.style.setProperty('--programmed-l3', ' 165, 165, 255');
+        root.style.setProperty('--programmed-l4', ' 255, 165, 080');
+        root.style.setProperty('--programmed-l5', ' 165, 235, 255');
+        root.style.setProperty('--programmed-l6', ' 255, 165, 225');
+        root.style.setProperty('--programmed-l7', ' 255, 220, 165');
+
+    }
+}
 
 
-// window.addEventListener('DOMContentLoaded', () => {
-//     const savedTheme = localStorage.getItem('theme');
-//     if (savedTheme === 'dark') {
-//         document.body.classList.add('dark-mode');
-//     }
-// });
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+    }
+});
 
 
 window.addEventListener("load", function() {

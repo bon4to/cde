@@ -39,7 +39,7 @@
                                 </div>
                                 <hr style="margin-left: 20px; width: 20%;">
                             </div>
-                            <div class="container-grid">
+                            <div class="container-grid" style="margin-bottom: 32px">
                                 {% block grid_buttons %}
                                     <div class="item featured" onclick="window.location.href='{{ url_for('home_hp') }}';">
                                         <div class="split-horizontal algn-cntr">
@@ -111,7 +111,7 @@
                                     {% endif %}
                                 {% endblock grid_buttons %}
                             </div>
-                            <div class="split-horizontal" style="padding: 10px 20px;width: auto;">
+                            <div class="split-horizontal" style="padding: 0 20px;width: auto;">
                                 <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
                                     <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
                                 </a>

@@ -29,7 +29,19 @@
                             </select>
                             <div>
                                 <label for="sql_query"></label>
-                                <textarea class="address-observ" style="height: 180px; overflow-wrap: nowrap; width: 800px;" id="sql_query" name="sql_query" placeholder="SQL Query..." required>{% if query %}{{ query }}{% else %}SELECT * FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM;{% endif %}</textarea>
+                                <textarea 
+                                    class="address-observ"
+                                    style="
+                                        height: 180px; 
+                                        overflow-wrap: nowrap; 
+                                        width: 800px;
+                                        font-family: 'Fira Code', monospace;
+                                    "
+                                    id="sql_query" 
+                                    name="sql_query" 
+                                    placeholder="SQL Query..." 
+                                    required
+                                >{% if query %}{{ query }}{% else %}SELECT * FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM;{% endif %}</textarea>
                             </div>
                             <p class="alert" id="custom-alert">{% if alert_msge %}{{ alert_msge }}{% else %}{% endif %}</p>
                             <input class="btn-fancy" type="submit" value="Consultar" id="submitform">

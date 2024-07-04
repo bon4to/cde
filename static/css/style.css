@@ -4,6 +4,9 @@
     --cor-hp: #8f7943;
     --cor-tl: #ea5a26;
     --cor-cde: #3e5ea6;
+    --cor-hp-rgb: 143, 121, 67;
+    --cor-tl-rgb: 234, 90, 38;
+    --cor-cde-rgb: 62, 94, 166;
     --programmed-l1: 255, 172, 160;
     --programmed-l2: 181, 229, 140;
     --programmed-l3: 165, 165, 255;
@@ -24,25 +27,6 @@ html, body {
 
 .cor-web {
     color: var(--cor-destaque);
-}
-
-body.dark-mode {
-    color: #ffffff;
-    background-color: #181818;
-}
-
-body.dark-mode div {
-    color: white;
-    background-color: #282828c7;
-}
-
-body.dark-mode button {
-    color: #ffffff;
-    background-color: #444;
-}
-
-body.dark-mode h1, h2, h3, p {
-    color: #ffffff;
 }
 
 span.id-page {
@@ -83,6 +67,109 @@ span.id-page {
     margin: 0 10px 14px 10px;
     background-color: #fff;
     box-shadow: 0 0 22px rgba(0, 0, 0, 0.2);
+}
+
+html.dark, 
+html.dark body,
+html.dark div.container {
+    background-color: #222222;
+    color: #f7f7f7;
+}
+
+html.dark h1,
+html.dark h2, 
+html.dark h3, 
+html.dark label {
+    color: #f7f7f7;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+    color: #f7f7f7;
+    border-color: #1d1d1d;
+    background-color: #272727;
+}
+
+html.dark hr {
+    border-color: #1d1d1d;
+}
+
+html.dark .navigation-bar hr {
+    border-color: #f7f7f7;
+}
+
+html.dark .tables-container,
+html.dark .mobile-container,
+html.dark .titles-container,
+html.dark .form-login,
+html.dark .forms-container {
+    color: #f7f7f7;
+    background-color: #292929;
+    box-shadow: 0 0 22px rgba(0, 0, 0, 0.6);
+}
+
+html.dark .item {
+    color: #f7f7f7;
+    border-color: #1b1b1b;
+    background-color: #252525;
+}
+
+html.dark .item:hover {
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.6);
+}
+
+html.dark #footer {
+    background-color: #1a1a1a;
+}
+
+html.dark .btn-fancy {
+    background-color: #1a1a1a;
+}
+
+html.dark .btn-fancy:hover {
+    background-color: var(--cor-destaque);
+}
+
+html.dark .btn-fancy .svg,
+html.dark .btn-fancy .svg-inv {
+    filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+html.dark .btn-fancy .svg-invert {
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+html.dark .side-banner {
+    filter: brightness(0.9);
+}
+
+html.dark .item p,
+html.dark .item h2 {
+    color: #fff;
+}
+
+html.dark .svg-gray {
+    filter: invert(130%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+html.dark .svg-gray:hover {
+    background-color: #dbdbdb;
+}
+
+html.dark, html.dark th, td {
+    border-color: #363636;
+}
+
+html.dark, html.dark th {
+    background-color: #141414;
+    border-bottom: 4px solid var(--cor-destaque);
+}
+
+html.dark, html.dark td {
+    border-color: #363636;
+    background-color: #222222;
+    color: #fff;
 }
 
 .titles-container {
@@ -297,7 +384,7 @@ h4 {
     padding-bottom: 22px;
     flex-direction: column;
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
-    background-color: rgba(34, 34, 34, 0.92);
+    background-color: rgb(44, 44, 44);
 }
 
 #footer p, #footer ul {
@@ -762,21 +849,20 @@ button.bit-button {
     padding: 16px;
 }
 
-#floating-container {
+.floating-container {
     width: 450px;
     z-index: 990;
     display: none;
     position: fixed;
     height: max-content;
-    background-color: white;
-    transition: all 0.5s ease;
+    transition: scale 0.5s ease;
 }
 
-#floating-container.show {
+.floating-container.show {
     display: inline;
 }
 
-#floating-container.unfixed {
+.floating-container.unfixed {
     top: 100px;
     left: 10px;
 }
@@ -1107,7 +1193,7 @@ div.user-name {
     padding-left: 20px;
     border-radius: 5px;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid #f0f0f0;
     background-color: #f3f3f3;
 }
@@ -1648,7 +1734,7 @@ h1.subtitle {
     position: relative;
     padding: 10px 20px;
     border-radius: 12px;
-    transition: all 0.3s;
+    transition: background-color 0.3s;
     background-color: rgba(52, 49, 50, 1);
 }
 
@@ -1716,7 +1802,7 @@ h1.subtitle {
     margin-top: 10px;
     padding: 10px 20px;
     border-radius: 12px;
-    transition: all 0.3s;
+    transition: background-color 0.3s;
     background-color: #4CAF50;
 }
 
