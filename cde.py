@@ -965,7 +965,6 @@ def login():                                                                    
 
 
 @app.route('/logout')                                                                                           #* ROTA DE SAÍDA DO USUÁRIO
-@verify_auth('CDE001')
 def logout():
     session.clear()
     return redirect(url_for('login'))
