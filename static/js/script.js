@@ -466,10 +466,11 @@ function toggleCart() {
     }    
 }
 
-
 function toggleTheme() {
     const root = document.documentElement;
     document.documentElement.classList.toggle('dark');
+
+    var img = document.getElementById('toggle-theme');
 
     if (document.documentElement.classList.contains('dark')) {
         localStorage.setItem('theme', 'dark');
@@ -497,18 +498,8 @@ function toggleTheme() {
         root.style.setProperty('--programmed-l5', ' 165, 235, 255');
         root.style.setProperty('--programmed-l6', ' 255, 165, 225');
         root.style.setProperty('--programmed-l7', ' 255, 220, 165');
-
     }
 }
-
-
-window.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-    }
-});
-
 
 window.addEventListener("load", function() {
     hideLoading();
@@ -520,8 +511,8 @@ window.onload = function () {
     blockImg();
     updateFilterIndex();
     toggleContainer();
+    themeIcon();
     hideLoading();
-
 };
 
 window.onscroll = function() {

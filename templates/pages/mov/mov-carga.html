@@ -80,7 +80,7 @@
                                     {% for row in items %}
                                         {% if row[columns.index('COD_ITEM')] == row_cod_item %}
                                             <tr class="unselectable-row">
-                                                <td style="background-color: #f0f0f0;">{{ row[columns.index('NROPED_SEQ')] }}</td>
+                                                <td class="over-row">{{ row[columns.index('NROPED_SEQ')] }}</td>
                                                 <td>{{ row[columns.index('COD_ITEM')] }}</td>
                                                 <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
                                                 <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>

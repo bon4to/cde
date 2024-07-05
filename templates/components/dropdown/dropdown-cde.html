@@ -57,6 +57,9 @@
                                     {% if session['user_grant'] <= 2 %}
                                         <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
                                     {% endif %}
+                                    {% if session['user_grant'] <= 2 %}
+                                        <a href="{{ url_for('api') }}">DEV000 | DATABASE</a>
+                                    {% endif %}
                                     <a href="{{ url_for('in_dev') }}">CDE017 | REGISTROS</a>
                                     <a href="{{ url_for('in_dev') }}">CONFIGURAÇÕES</a>
                                     <a href="{{ url_for('in_dev') }}">AJUDA</a>

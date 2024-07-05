@@ -17,3 +17,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
+
+<script>
+    (function() {
+        const savedTheme = localStorage.getItem('theme');
+        var img = document.getElementById('toggle-theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    })();
+</script>

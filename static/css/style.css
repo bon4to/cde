@@ -14,6 +14,9 @@
     --programmed-l5: 165, 235, 255;
     --programmed-l6: 255, 165, 225;
     --programmed-l7: 255, 220, 165;
+    --dark-background: #252525;
+    --dark-element: #292929;
+    --light-text: #f7f7f7;
 }
 
 html, body {
@@ -69,24 +72,27 @@ span.id-page {
     box-shadow: 0 0 22px rgba(0, 0, 0, 0.2);
 }
 
-html.dark, 
+html.dark {
+    background-color: var(--dark-background);
+}
+
 html.dark body,
 html.dark div.container {
-    background-color: #222222;
-    color: #f7f7f7;
+    background-color: var(--dark-background);
+    color: var(--dark-text);
 }
 
 html.dark h1,
 html.dark h2, 
 html.dark h3, 
 html.dark label {
-    color: #f7f7f7;
+    color: var(--dark-text);
 }
 
 html.dark input,
 html.dark textarea,
 html.dark select {
-    color: #f7f7f7;
+    color: var(--dark-text);
     border-color: #1d1d1d;
     background-color: #272727;
 }
@@ -95,32 +101,87 @@ html.dark hr {
     border-color: #1d1d1d;
 }
 
+html.dark div.msg-info,
+html.dark div.msg-error,
+html.dark div.msg-success {
+    color: var(--dark-text);
+}
+
 html.dark .navigation-bar hr {
-    border-color: #f7f7f7;
+    border-color: var(--dark-text);
 }
 
 html.dark .tables-container,
 html.dark .mobile-container,
 html.dark .titles-container,
+html.dark .cart-dropdown,
+html.dark .form-filter,
+html.dark .dialog-box,
 html.dark .form-login,
 html.dark .forms-container {
-    color: #f7f7f7;
-    background-color: #292929;
+    color: var(--dark-text);
+    background-color: var(--dark-element);
     box-shadow: 0 0 22px rgba(0, 0, 0, 0.6);
 }
 
+td.over-row {
+    background-color: #f0f0f0;
+}
+
+html.dark #toggle-theme {
+    border-radius: 20%;
+    padding: 2px;
+    background-color: #00000052;
+}
+
+html.dark td.over-row {
+    background-color: #2e2e2e;
+}
+
+html.dark .selectable-row.sub-total td {
+    color: var(--dark-text);
+}
+
+html.dark  .selectable-row.sub-total:hover td {
+    opacity: 1;
+    border-bottom: 4px solid #fff;
+}
+
+html.dark .selectable-row:hover td {
+    color: var(--cor-destaque);
+    background-color: #1d1d1d;
+}
+
 html.dark .item {
-    color: #f7f7f7;
+    color: var(--dark-text);
     border-color: #1b1b1b;
-    background-color: #252525;
+    background-color: var(--dark-background);
 }
 
 html.dark .item:hover {
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.6);
 }
 
-html.dark #footer {
-    background-color: #1a1a1a;
+html.dark .back-modal {
+    background-color: var(--dark-background)
+}
+
+html.dark #footer,
+html.dark .pre-footer {
+    background-color: #222222;
+}
+
+html.dark .pagination a,
+html.dark .pagination span {
+    color: var(--dark-text);
+}
+
+html.dark .pagination a:hover {
+    color: #1a1a1a;
+}
+
+html.dark p {
+    color: var(--dark-text);
 }
 
 html.dark .btn-fancy {
@@ -168,8 +229,36 @@ html.dark, html.dark th {
 
 html.dark, html.dark td {
     border-color: #363636;
-    background-color: #222222;
+    background-color: var(--dark-background);
     color: #fff;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background-color: var(--dark-element);
+    border-radius: 10px;
+    border: 3px solid #535353;
+}
+html.dark ::-webkit-scrollbar-track {
+    background-color: var(--dark-background);
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    border: 3px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .titles-container {
@@ -1637,6 +1726,7 @@ div.msg-info {
 }
 
 .selectable-row:hover td {
+    color: var(--cor-destaque);
     background-color: #f0f0f0;
 }
 
