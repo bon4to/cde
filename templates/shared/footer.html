@@ -19,25 +19,27 @@
                     </div>
                 {% else %}
                     <div class="version-info" onclick="window.location.href='{{ url_for('login') }}';">
-                        (faça login para acessar o sistema)
+                        (faça login!)
                     </div>
                 {% endif %}
             </div>
-            <div class="version-info" style="display: flex; justify-content: flex-start">
-                <span id="current-time"></span>
+            <div style="display: flex; justify-content: flex-start">
+                <span class="version-info" id="current-time"></span>
             </div>
         </div>
-        <div id="footer" style="position: static">
+        <div id="footer">
             <div class="three-split" style="width: 100%; align-items: start;">
-                <div>
-                    <p style="font-weight: bold;color: white;margin-bottom: 10px">Desenvolvido por</p>
-                    <img style="width: 120px;margin-top: 4px; margin-right: 0" class="logo" src="{{ url_for('static', filename='img/lb-logo.png') }}" alt="">
-                    <p style="margin-top: 4px;font-weight: normal; color: white">Lucas G. Bonato</p>
-                    <p style="margin-top: -2px;font-weight: bold; color: white">2023-2024</p>
+                <div class="flex-column section">
+                    <p style="font-weight: 500;">Desenvolvido por</p>
+                    <img style="width: 100px; margin: 0 auto" class="logo" src="{{ url_for('static', filename='img/lb-logo.png') }}" alt="">
+                    <div>
+                        <p>Lucas G. Bonato</p>
+                        <p style="font-weight: 500;">2023-2024</p>
+                    </div>
                 </div>
-                <div>
-                    <p style="font-weight: bold; color: white;margin-bottom: 10px">Comunicação</p>
-                    <p style="font-weight: normal; color: white">Entre em contato<br> comigo:</p>
+                <div class="flex-column section">
+                    <p style="font-weight: 500;">Comunicação</p>
+                    <p>Entre em contato comigo!</p>
                     <ul class="footer-links">
                         <li>
                             <a href="https://linkedin.com/in/lucas-bonato/" target="_blank">
@@ -46,7 +48,7 @@
                         </li>
                         <li>
                             <a href="https://github.com/bon4to" target="_blank">
-                                <img style="height: 18px;width: 18px" class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/github.svg') }}" alt="GitHub">
+                                <img style="height: 18px; width: 18px" class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/github.svg') }}" alt="GitHub">
                             </a>
                         </li>
                         <li>
@@ -56,13 +58,15 @@
                         </li>
                     </ul>
                 </div>
-                <div>
-                    <p style="font-weight: bold;color: white;margin-bottom: 10px">Direitos</p>
-                    <p style="font-weight: normal; color: white">Todos os direitos<br>reservados</p>
-                    <p style="color: white;margin-top: 6px"> &copy; 2024</p>
+                <div class="flex-column section">
+                    <p style="font-weight: 500;">Direitos</p>
+                    <p>Todos os direitos reservados</p>
+                    <a href="https://github.com/bon4to/cde/blob/main/LICENSE" target="_blank">Licença</a>
+                    <p> &copy; 2024</p>
                 </div>
             </div>
         </div>
+
         <script>
             document.addEventListener('DOMContentLoaded', (event) => {
                 const now = new Date();

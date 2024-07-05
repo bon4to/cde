@@ -1,0 +1,33 @@
+{% extends "pages/index/index.html" %}
+    
+    {% block title %}
+        <title>Sobre | HUGO PIETRO</title>
+        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+
+        {% include 'shared/header/cde-header.html' %}
+    {% endblock title %}
+
+    {% block brow %}
+        <h1>
+            <a href="/home">INICIO</a>
+            <span class="dash">/</span>
+            <a href="/home">CDE</a>
+            <span class="dash">/</span>
+            <span>SOBRE</span>
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
+        <div class="aux-buttons">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIOS" alt="" onclick="window.location.href='{{ url_for('login') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+        </div>
+    {% endblock brow %}
+        
+    {% block grid_buttons %}
+    {% endblock grid_buttons %}
+
+    {% block side_banner %}
+    {% endblock side_banner %}

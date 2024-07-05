@@ -1677,6 +1677,15 @@ def insert_producao():
     return redirect(url_for('producao'))
 
 
+
+@app.route('/about')
+@verify_auth('CDE001')
+def about():
+    return render_template(
+        'pages/about.html',
+        about=True
+    )
+
 @app.route('/users/edit', methods=['POST', 'GET'])
 @verify_auth('CDE016')
 def users_edit():

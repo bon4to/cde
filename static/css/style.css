@@ -489,7 +489,7 @@ h4 {
     display: flex;
     color: white;
     margin-top: auto;
-    padding-top: 36px;
+    padding-top: 22px;
     user-select: none;
     text-align: center;
     align-items: center;
@@ -499,9 +499,19 @@ h4 {
     background-color: rgb(44, 44, 44);
 }
 
+#footer .section {
+    margin: auto; 
+    width: 120px;
+    height: 110px; 
+    padding-bottom: 32px;
+    justify-content: space-between;
+}
+
 #footer p, #footer ul {
+    color: white;
     margin: 0;
     padding: 0;
+    font-size: 12px;
 }
 
 #footer ul {
@@ -515,6 +525,7 @@ h4 {
 }
 
 #footer a {
+    margin: 0;
     color: white;
     font-weight: bold;
     text-decoration: none;
@@ -1152,15 +1163,14 @@ p.alert {
 }
 
 div.user-logger {
-    margin-top: -6px;
     display: flex;
     font-size: 18px;
+    margin-top: -6px;
     font-weight: bold;
     text-align: center;
     letter-spacing: 1px;
     pointer-events: auto;
     align-items: flex-end;
-    justify-content: flex-end;
     transition: ease all 0.5s;
     justify-content: flex-end;
     text-shadow: 0 0 14px rgba(0, 0, 0, 0.6);
@@ -1265,18 +1275,6 @@ div.user-name {
     z-index: 1100;
     transition: ease all 0.3s;
     height: max-content;
-}
-
-
-.modal {
-    border: 0;
-    padding: 1em;
-    max-width: 50ch;
-    box-shadow: 0 0 1em rgb(0 0 0 / .3);
-
-    & > * {
-        margin: 0 0 0.5rem 0;
-    }
 }
 
 .container-grid {
@@ -1458,8 +1456,8 @@ th.calendar {
     text-decoration: none;
     font-family: 'Chivo Mono', monospace;
     background-color: rgba(34, 34, 34, 1);
-    border-right: 1px solid rgba(34, 34, 34, 1);
     border-left: 1px solid rgba(34, 34, 34, 1);
+    border-right: 1px solid rgba(34, 34, 34, 1);
 }
 
 .dropdown-content a:hover {
@@ -1612,11 +1610,11 @@ th.calendar {
 }
 
 p.phrase {
-    font-size: 14px;
     margin: 4px 0;
+    display: flex;
+    font-size: 14px;
     color: #7e7e7e;
     text-align: left;
-    display: flex;
     justify-content: flex-start;
 }
 
