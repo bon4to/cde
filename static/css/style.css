@@ -22,7 +22,7 @@
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
+    min-height: 100%;
     line-height: 1.5;
     background-color: #f1f1f1;
     font-family: 'Calibri', sans-serif;
@@ -72,6 +72,17 @@ span.id-page {
     box-shadow: 0 0 22px rgba(0, 0, 0, 0.2);
 }
 
+
+.dark {
+    --programmed-l1: 155, 072, 060;
+    --programmed-l2: 081, 129, 040;
+    --programmed-l3: 065, 065, 155;
+    --programmed-l4: 155, 065, -20;
+    --programmed-l5: 065, 135, 155;
+    --programmed-l6: 155, 065, 125;
+    --programmed-l7: 155, 120, 065;
+}
+
 html.dark {
     background-color: var(--dark-background);
 }
@@ -95,6 +106,10 @@ html.dark select {
     color: var(--dark-text);
     border-color: #1d1d1d;
     background-color: #272727;
+}
+
+html.dark div.glow-tl {
+    background-color: #ea5a2640;
 }
 
 html.dark hr {
@@ -182,6 +197,14 @@ html.dark .pagination a:hover {
 
 html.dark p {
     color: var(--dark-text);
+}
+
+html.dark p.link {
+    color: #3a77e8;
+}
+
+html.dark label {
+    font-weight: 300;
 }
 
 html.dark .btn-fancy {
@@ -560,11 +583,11 @@ select, textarea, input {
     border: 1px solid #dcdcdc;
     background-color: #efefef;
     font-family: "Inter", sans-serif;
-    transition: border-color 0.2s ease-out;
 }
 
 select:focus, textarea:focus, input:focus {
     border-bottom: 2px solid var(--cor-destaque);
+    transition: border-color 0.2s ease-out;
 }
 
 input.check {
@@ -1459,6 +1482,7 @@ th.calendar {
     color: white;
     font-size: 14px;
     transition: none;
+    text-wrap: nowrap;
     font-weight: bold;
     background-color: transparent;
 }
