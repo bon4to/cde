@@ -55,6 +55,8 @@
             <h1>API Results</h1>
             <div style="max-height: 600px; overflow: auto;">
             {% if result %}
+                {% set row_count = result|length %}
+                <div>Total de Resultados: {{ row_count }}</div>
                 {% if columns %}
                     <table>
                         <thead>

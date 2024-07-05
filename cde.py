@@ -868,9 +868,9 @@ def api():
 
         return render_template(
             'pages/api.html', 
-            result=result, 
-            columns=columns, 
-            query=query, 
+            result=result,
+            columns=columns,
+            query=query,
             dsn=dsn
         )
     return render_template(
@@ -1418,11 +1418,11 @@ def envase_edit():                                                              
             cursor = connection.cursor()
             cursor.execute('''
                 UPDATE prog_envase
-                SET qtde_solic = ?,
+                SET qtde_solic      = ?,
                     data_entr_antec = ?,
-                    data_envase = ?,
-                    observacao = ?
-                WHERE id_envase = ?;
+                    data_envase     = ?,
+                    observacao      = ?
+                WHERE id_envase     = ?;
             ''',
             (quantidade, data_entr_antec, data_envase, observacao, req_id_envase))
 
@@ -1487,11 +1487,13 @@ def insert_envase():                                                            
                 INSERT INTO prog_envase (
                     cod_linha, cod_cliente, cod_item,
                     qtde_solic, data_entr_antec, data_envase,
-                    observacao, flag_concluido ) 
+                    observacao, flag_concluido 
+                )
                 VALUES (
                     ?, ?, ?,
                     ?, ?, ?,
-                    ?, false );
+                    ?, false 
+                );
             ''',
             (linha, cod_cliente, cod_item, 
              quantidade, data_entr_antec, data_envase,
@@ -1593,7 +1595,7 @@ def producao_edit():
             cursor = connection.cursor()
             cursor.execute('''
                 UPDATE prog_producao
-                SET lts_solic          = ?,
+                SET lts_solic       = ?,
                     data_entr_antec = ?,
                     data_producao   = ?,
                     observacao      = ?
@@ -1720,9 +1722,11 @@ def add_permission(id_user, id_perm):
         cursor = connection.cursor()
         cursor.execute('''
             INSERT INTO user_permissions (
-                id_user, id_perm ) 
+                id_user, id_perm 
+            ) 
             VALUES (
-                ?, ? );
+                ?, ? 
+            );
         ''', 
         (id_user, id_perm))
 
@@ -1735,7 +1739,6 @@ def add_permission(id_user, id_perm):
 @verify_auth('CDE016')
 def cadastrar_usuario():
     if request.method == 'POST':
-
         login_user     = str(request.form['login_user'])
         nome_user      = str(request.form['nome_user'])
         sobrenome_user = str(request.form['sobrenome_user'])
@@ -1746,12 +1749,16 @@ def cadastrar_usuario():
         try:
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
+                
                 cursor.execute('''
                     INSERT INTO users (
-                        login_user, password_user, nome_user,
-                        sobrenome_user, privilege_user, data_cadastro ) 
-                    VALUES (?, ?, ?,
-                            ?, ?, ? );
+                        login_user, password_user, 
+                        nome_user, sobrenome_user, 
+                        privilege_user, data_cadastro 
+                    ) VALUES (
+                        ?, ?, ?,
+                        ?, ?, ? 
+                    );
                 ''',
                 (login_user, password_user, nome_user,
                  sobrenome_user, privilege_user, data_cadastro))
@@ -1769,9 +1776,11 @@ def cadastrar_usuario():
 
                     cursor.execute('''
                         INSERT INTO user_permissions (
-                            id_user, id_perm ) 
+                            id_user, id_perm 
+                        )
                         VALUES (
-                            ?, ? );
+                            ?, ? 
+                        );
                     ''',
                     (id_user, 'CDE001'))
                     connection.commit()
@@ -1779,19 +1788,15 @@ def cadastrar_usuario():
                     id_user   = session.get('id_user')
 
                     msg = \
-                    f'''
-                    [CADASTRO]
-                    {request.remote_addr}
-                    {id_user} - {user_name} [+] {nome_user} {sobrenome_user} ({privilege_user})
-                    '''
+                    f'''[CADASTRO]\n{request.remote_addr}\n{id_user} - {user_name} [+] {nome_user} {sobrenome_user} ({privilege_user})'''
                     tlg_msg(msg)
 
         except sqlite3.IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
                 alert_type = 'CADASTRO (USUÁRIO) \n'
-                alert_msge  = 'Não foi possível criar usuário... \n'
-                alert_more = ('''MOTIVO:
-                               - Já existe um usuário com este login.''')
+                alert_msge = 'Não foi possível criar usuário... \n'
+                alert_more = ('''MOTIVO:\n- Já existe um usuário com este login.''')
+                
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type=alert_type,
@@ -1799,12 +1804,12 @@ def cadastrar_usuario():
                     alert_more=alert_more, 
                     url_return=url_for('users')
                 )
+                
             else:
-                print('Erro: ', e)
                 alert_type = 'CADASTRO (USUÁRIO) \n'
-                alert_msge  = 'Não foi possível criar usuário... \n'
-                alert_more = (f'''DESCRIÇÃO DO ERRO:
-                               - {e}. \n''')
+                alert_msge = 'Não foi possível criar usuário... \n'
+                alert_more = (f'''DESCRIÇÃO DO ERRO:\n- {e}. \n''')
+                
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type=alert_type,
@@ -1812,6 +1817,7 @@ def cadastrar_usuario():
                     alert_more=alert_more, 
                     url_return=url_for('users')
                 )
+                
         else:
             return redirect(url_for('users'))
     return render_template('pages/users/users.html')
@@ -1820,7 +1826,6 @@ def cadastrar_usuario():
 @app.route('/mov/carga/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_id(id_carga):
-    item_query = ''
     result_local, columns_local = [], []
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
@@ -1862,9 +1867,6 @@ def carga_id(id_carga):
             dsn = dsn_name
             result_local, columns_local = db_query_connect(query, dsn)
 
-            item_query = f'AND iped.ITEM = "{cod_item}"'
-
-
         #? SEARCH DE ITENS POR CARGA
         
         all_cargas = get_all_cargas()
@@ -1885,9 +1887,12 @@ def carga_id(id_carga):
 
             JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
             ON i.ITEM = iped.ITEM
+            
+            JOIN DB2ADMIN.GRUPOPED crg
+            ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
-            WHERE icrg.CODIGO_GRUPOPED = '{id_carga}' 
-            AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
+            WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
+            AND crg.DATA_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
             AND CURRENT DATE
             AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
 
@@ -1930,7 +1935,7 @@ def cargas():                                                                   
                     icrg.NRO_PEDIDO      AS NRO_PEDIDO,
                     ped.CODIGO_CLIENTE   AS COD_CLIENTE,
                     cl.FANTASIA          AS FANT_CLIENTE,
-                    iped.DT_EMISSAO      AS DT_EMISSAO,
+                    crg.DATA_EMISSAO     AS DT_EMISSAO,
                     iped.DT_ENTREGA      AS DT_ENTREGA, 
                     crg.OBSERVACAO       AS OBS_CARGA
 
@@ -1953,11 +1958,11 @@ def cargas():                                                                   
                 ON i.ITEM = iped.ITEM
 
                 WHERE icrg.QTDE_FATUR != 0
-                AND iped.DT_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
+                AND crg.DATA_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
                 AND CURRENT DATE
                 AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
 
-                ORDER BY icrg.CODIGO_GRUPOPED DESC, iped.DT_EMISSAO DESC;
+                ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
             '''
         else:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''

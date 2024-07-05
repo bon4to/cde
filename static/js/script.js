@@ -511,7 +511,6 @@ window.onload = function () {
     blockImg();
     updateFilterIndex();
     toggleContainer();
-    themeIcon();
     hideLoading();
 };
 
