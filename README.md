@@ -5,9 +5,10 @@
 			<h1>Collaborative Developed Enviroment</h1>
 			<img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
 			<h2>Documentação do Projeto</h2>
-			<p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa de desenvolvimento implementada por HUGO PIETRO e TRANS LÉGUA. Descreve-se a finalidade, funcionalidades principais, requisitos de sistema e uso básico do sistema, lançado em janeiro de 2023 e em constante crescimento técnico.</p>
+			<p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa implementada nas razões sociais HUGO PIETRO e TRANS LÉGUA. Aqui neste documento, descreve-se a finalidade, funcionalidades principais, requisitos de sistema e uso básico do sistema, teve seu primeiro release em janeiro de 2024 e segue sendo desenvolvido até o presente momento.</p>
 			<h2>Objetivo</h2>
-			<p>O projeto CDE visa fornecer uma plataforma para colaboração e desenvolvimento, oferecendo funcionalidades específicas aos usuários. Com uma abordagem centrada no usuário, busca-se melhorar a produtividade das empresas, promovendo inovação e evolução contínua da plataforma.</p><h2>Funcionalidades Principais</h2>
+			<p>Com uma abordagem centrada no usuário, busca-se melhorar a produtividade das empresas, promovendo inovação e evolução contínua da plataforma.</p>
+			<h2>Funcionalidades Principais</h2>
 			<ul>
 				<li>Endereçamento de Estoque</li>
 				<li>Movimentação e Faturamento de Estoque</li>
@@ -40,15 +41,21 @@
 			<h2>Instalação</h2>
 			<ol>
 				<li>Clone o repositório do projeto:<br>
-					<code>git clone https://github.com/bon4to/cde.git</code></li>
+					<code>git clone https://github.com/bon4to/cde.git</code>
+				</li>
 				<li>Instale as dependências:<br>
-					<code>pip install -r requirements.txt</code></li>
+					<code>pip install -r requirements.txt</code>
+				</li>
 				<li>Execute a aplicação:<br>
-					<code>python cde.py</code></li>
+					<code>python cde.py</code>
+				</li>
 				<li>Acesse a aplicação no navegador:<br>
-					<code>http://localhost:5005/</code><br>
-					ou (com instalação via setup.py):<br>
-					<code>http://cde.com:5005/</code></li>
+					<code>http://localhost:5005/</code>
+					<br>
+					ou (com instalação via setup.py):
+					<br>
+					<code>http://cde.com:5005/</code>
+				</li>
 			</ol>
 			<h2>Uso Básico</h2>
 			<ol>
