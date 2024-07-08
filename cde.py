@@ -1236,7 +1236,7 @@ def historico_search():
             'operacao': 'Operação (Descrição)',
             'quantidade': 'Quantidade',
             'cod_lote': 'Lote (Código)',
-            'id_user': 'Usuário (Nome)',
+            'user_name': 'Usuário (Nome)',
             'timestamp': 'Horário (Data/Hora)'
         }
 
