@@ -328,8 +328,8 @@ def get_all_historico():                                                        
         
         estoque = [{
             'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3],          'cod_lote'   : row[4], 'quantidade': row[5], 
-            'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
+            'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade': row[5], 
+            'operacao'  : row[6],          'user_name' : row[7],  'timestamp'  : row[8]
         } for row in cursor.fetchall()]
     return estoque
 
@@ -461,6 +461,49 @@ def get_ult_acesso():                                                           
         ult_acesso = row[1] if row else None
 
         return ult_acesso
+
+
+def get_export_promob():                                                                                        #* RETORNA TABELA DE SALDO
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT 
+                i.desc_item, 
+                i.cod_item, 
+                COALESCE(t.saldo, 0) as saldo, 
+                t.time_mov
+            FROM 
+                itens i
+            LEFT JOIN (
+                SELECT 
+                    cod_item,
+                    SUM(CASE 
+                        WHEN operacao IN ('E', 'TE') THEN quantidade
+                        WHEN operacao IN ('S', 'TS') THEN (quantidade * -1)
+                        ELSE (quantidade * -1)
+                    END) as saldo,
+                    MAX(time_mov) as time_mov,
+                    ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                FROM 
+                    historico h
+                GROUP BY 
+                    cod_item
+                HAVING 
+                    saldo != 0
+            ) t ON i.cod_item = t.cod_item
+            WHERE 
+                t.rn = 1 OR t.rn IS NULL
+            ORDER BY 
+                i.cod_item;
+        ''')
+
+        saldo_visualization = [{
+            'cod_item': row[1],
+            'deposito': 2,
+            'qtde'    : row[2]
+        } for row in cursor.fetchall()]
+
+    return saldo_visualization
 
 
 def get_saldo_view():                                                                                           #* RETORNA TABELA DE SALDO
@@ -611,11 +654,37 @@ def select_rua(letra, numero):                                                  
         return items
 
 
-def export_csv(data, filename):                                                                                 #* EXPORTA DADOS EM CSV (CONFORME FUNÇÃO NO PYTHON)
+def iterate_data_erp(data):
+    csv_data = ''
+    for item in data:
+        line = ';'.join(map(str, item.values()))
+        csv_data += f'"{line}"\n'
+    return csv_data
+
+
+def iterate_data(data):
+    csv_data = ''
+    for item in data:
+        line = ';'.join(map(str, item.values()))
+        csv_data += f'{line}\n'
+    return csv_data
+
+
+def add_headers(data):
     if data and len(data) > 0:
-        csv_data = ';'.join(data[0].keys()) + '\n'
-        for item in data:
-            csv_data += ';'.join(map(str, item.values())) + '\n'
+        headers = ';'.join(data[0].keys())
+        return f'{headers}\n'
+    return ''
+
+
+def export_csv(data, filename, include_headers=True):
+    if data and len(data) > 0:
+        csv_data = ''
+        if not include_headers:
+            csv_data += iterate_data_erp(data)
+        else:
+            csv_data += add_headers(data)
+            csv_data += iterate_data(data)
 
         csv_filename = Response(csv_data, content_type='text/csv')
         csv_filename.headers['Content-Disposition'] = f'attachment; filename={filename}.csv'
@@ -2285,6 +2354,7 @@ def estoque_enderecado():
 @app.route('/export_csv/<tipo>', methods=['GET'])
 @verify_auth('CDE018')
 def export_csv_tipo(tipo):                                                                                      #* EXPORT .csv
+    header = True
     if tipo == 'historico':
         data = get_all_historico()
         filename = 'exp_historico'
@@ -2306,12 +2376,18 @@ def export_csv_tipo(tipo):                                                      
     elif tipo == 'producao':
         data = get_producao()
         filename = 'exp_prog_producao'
+    elif tipo == 'export_promob':
+        header = False
+        data = get_export_promob()
+        filename = 'export_promob'
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
         alert_msge  = 'A tabela não tem informações suficientes para exportação. \n'
-        alert_more = ('''POSSÍVEIS SOLUÇÕES:
-                       - Verifique se a tabela possui mais de uma linha.
-                       - Contate o suporte. ''')
+        alert_more = \
+            '''POSSÍVEIS SOLUÇÕES:
+            - Verifique se a tabela possui mais de uma linha.
+            - Contate o suporte.
+            '''
         return render_template(
             'components/menus/alert.html', 
             alert_type=alert_type, 
@@ -2319,7 +2395,7 @@ def export_csv_tipo(tipo):                                                      
             alert_more=alert_more, 
             url_return=url_for('index')
         )
-    return export_csv(data, filename)
+    return export_csv(data, filename, header)
 
 
 if __name__ == '__main__':                                                                                      #! __MAIN__
