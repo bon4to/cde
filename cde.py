@@ -963,16 +963,24 @@ def api():
     if request.method == 'POST':
         query = request.form['sql_query']
         dsn   = request.form['sel_schema']
-        
-        result, columns = db_query_connect(query, dsn)
+        if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
+            result = [["Os comandos DELETE, INSERT e UPDATE; não são permitidos."]]
+            return render_template(
+                'pages/api.html', 
+                result=result,
+                query=query,
+                dsn=dsn
+            )
+        else:
+            result, columns = db_query_connect(query, dsn)
 
-        return render_template(
-            'pages/api.html', 
-            result=result,
-            columns=columns,
-            query=query,
-            dsn=dsn
-        )
+            return render_template(
+                'pages/api.html', 
+                result=result,
+                columns=columns,
+                query=query,
+                dsn=dsn
+            )
     return render_template(
         'pages/api.html'
     )
@@ -2442,7 +2450,7 @@ def export_csv_tipo(tipo):                                                      
 
 if __name__ == '__main__':                                                                                      #! __MAIN__
 
-    app.config['APP_VERSION'] = ['0.4.3', 'Julho/2024', False]
+    app.config['APP_VERSION'] = ['0.4.4', 'Julho/2024', False]
 
     # GET nome do diretório
     dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
