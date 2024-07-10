@@ -372,7 +372,21 @@ def get_permissions():                                                          
     return permissions
 
 
-def get_end_lote():                                                                                             #* RETORNA ENDEREÇAMENTO POR LOTES
+def parse_db_datetime(timestamp):                                                                               #* CONVERTE TIMESTAMP PARA FORMATO DO DATABASE
+    if not timestamp:
+        timestamp = datetime.now(timezone(timedelta(hours=-3)))
+    elif isinstance(timestamp, str):
+        timestamp = datetime.strptime(timestamp, '%Y-%m-%d')
+        timestamp = timestamp.replace(tzinfo=timezone(timedelta(hours=-3)))
+    
+    return timestamp.strftime('%Y/%m/%d %H:%M:%S')
+
+
+def get_end_lote(timestamp=False):                                                                              #* RETORNA ENDEREÇAMENTO POR LOTES
+    if timestamp:
+        timestamp = add_days_to_datetime_str(timestamp, 1)
+    timestamp = parse_db_datetime(timestamp)
+    
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -387,14 +401,15 @@ def get_end_lote():                                                             
                     ) as saldo
             FROM historico h
             JOIN itens i ON h.cod_item = i.cod_item
+            WHERE h.time_mov <= ?
             GROUP BY h.rua_numero, h.rua_letra, h.cod_item, 
                      h.lote_item
             HAVING saldo != 0
             ORDER BY h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
-        ''')
+        ''', (timestamp,))
 
         end_lote = [{
-            'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
+            'letra'     : row[1], 'numero'   : row[0], 'cod_item': row[2],
             'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[5]
         } for row in cursor.fetchall()]
 
@@ -506,7 +521,22 @@ def get_export_promob():                                                        
     return saldo_visualization
 
 
-def get_saldo_view():                                                                                           #* RETORNA TABELA DE SALDO
+def add_days_to_datetime_str(date_str, qtde_days):
+
+    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    
+    new_date_obj = date_obj + timedelta(days=qtde_days)
+    
+    new_date_str = new_date_obj.strftime('%Y-%m-%d')
+    
+    return new_date_str
+
+
+def get_saldo_view(timestamp=False):                                                                                           #* RETORNA TABELA DE SALDO
+    if timestamp:
+        timestamp = add_days_to_datetime_str(timestamp, 1)
+    timestamp = parse_db_datetime(timestamp)
+    
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -514,25 +544,26 @@ def get_saldo_view():                                                           
             FROM ( 
                 SELECT cod_item,
                 SUM(CASE 
-                    WHEN operacao IN ('E', 'TE') THEN quantidade
-                    WHEN operacao IN ('S', 'TS') THEN (quantidade * -1)
-                    ELSE (quantidade * -1)
+                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                    ELSE (quantidade * 0)
                     END
                 ) as saldo,
                 MAX(time_mov) as time_mov,
                 ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
                 FROM historico h
+                WHERE time_mov <= ?
                 GROUP BY cod_item
                 HAVING saldo != 0
             ) t
             JOIN itens i ON t.cod_item = i.cod_item
             WHERE rn = 1
             ORDER BY t.cod_item;
-        ''')
+        ''', (timestamp,))
 
         saldo_visualization = [{
-            'desc_item': row[0], 'cod_item': row[1], 
-            'saldo'    : row[2], 'ult_mov' : row[3]
+            'cod_item' : row[1], 'desc_item': row[0], 
+            'saldo'    : row[2], 'ult_mov'  : row[3]
         } for row in cursor.fetchall()]
 
     return saldo_visualization
@@ -1951,12 +1982,13 @@ def carga_id(id_carga):
         cargas_str_query = ', '.join(map(str, all_cargas))
         
         query = f'''
-            SELECT  icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
-                    icrg.NRO_PEDIDO                       AS NRO_PEDIDO,
-                    (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
-                    CAST(iped.ITEM AS VARCHAR(255))       AS COD_ITEM,
-                    i.ITEM_DESCRICAO                      AS DESC_ITEM,
-                    CAST(iped.QTDE_SOLICITADA AS INTEGER) AS QTDE_SOLIC
+            SELECT DISTINCT 
+                icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
+                icrg.NRO_PEDIDO                       AS NRO_PEDIDO,
+                (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
+                CAST(iped.ITEM AS VARCHAR(255))       AS COD_ITEM,
+                i.ITEM_DESCRICAO                      AS DESC_ITEM,
+                CAST(iped.QTDE_SOLICITADA AS INTEGER) AS QTDE_SOLIC
             FROM DB2ADMIN.ITEMPED iped
 
             JOIN DB2ADMIN.IGRUPOPE icrg
@@ -2330,24 +2362,34 @@ def buscar_linhas():
                 }
             )
 
-
-@app.route('/estoque')
+@app.route('/estoque', methods=['GET', 'POST'])
 @verify_auth('MOV004')
 def estoque():
-    saldo_visualization = get_saldo_view()
+    if request.method == 'POST':
+        date = request.form['date']
+        saldo_visualization = get_saldo_view(date)
+    else:
+        saldo_visualization = get_saldo_view()
+        date = False
     return render_template(
         'pages/estoque.html', 
-        saldo_visualization=saldo_visualization
+        saldo_visualization=saldo_visualization,
+        search_term=date
     )
     
-    
-@app.route('/estoque-enderecado')
+@app.route('/estoque-enderecado', methods=['GET', 'POST'])
 @verify_auth('MOV004')
 def estoque_enderecado():
-    end_lote = get_end_lote()
+    if request.method == 'POST':
+        date = request.form['date']
+        end_lote = get_end_lote(date)
+    else:
+        end_lote = get_end_lote()
+        date = False
     return render_template(
         'pages/estoque-enderecado.html',
-        saldo_atual=end_lote
+        saldo_atual=end_lote,
+        search_term=date
     )
 
 

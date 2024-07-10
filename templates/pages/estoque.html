@@ -17,12 +17,16 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
                 {% endblock svg %}
                 <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
+                <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
         <div style="justify-content: flex-end">
-            <div id="table-filter" style="display: none" >
+            <div id="table-filter" style="display: none">
                 <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
                 <select class="address" id="filterSelect" onchange="updateFilterIndex()">
                 {% block filter_options %}
@@ -39,7 +43,29 @@
                 {% block table %}
                     <div class="split-horizontal">
                         <p>Visualização de Estoque</p>
+                        {% if session.get('user_grant') <= 1 %}
+                            <div class="table-filter" style="display: none">
+                                <div>
+                                    <form action="/estoque" method="post">
+                                        <div class="flex-row">
+                                            <input type="date" class="address" id="date" name="date" value="{{ search_term }}">
+                                            <button class="button-mini btn-fancy" type="submit">
+                                                <img class="svg" src="{{ url_for('static', filename='svg/text-search.svg') }}" title="CARREGAR ESTOQUE NO DIA">
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
+                    {% if search_term %}
+                        <div class="split-horizontal">
+                            <h1 style="font-size: 22px">Estoque na data <span class="cor-web">{{ search_term }}</span>.</h1>
+                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                            </a>
+                        </div>
+                    {% endif %}
                     <div class="table-overflow">
                         <table id="filterTable">
                             <thead>

@@ -14,7 +14,29 @@
     {% block table %}
         <div class="split-horizontal">
             <p>Visualização de Estoque (Endereçado)</p>
+            {% if session.get('user_grant') <= 1 %}
+                <div id="table-filter" style="">
+                    <div>
+                        <form action="/estoque-enderecado" method="post">
+                            <div class="flex-row">
+                                <input type="date" class="address" id="date" name="date" value="{{ search_term }}">
+                                <button class="button-mini btn-fancy" type="submit">
+                                    <img class="svg" src="{{ url_for('static', filename='svg/text-search.svg') }}" title="CARREGAR ESTOQUE NO DIA">
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
         </div>
+        {% if search_term %}
+            <div class="split-horizontal">
+                <h1 style="font-size: 22px">Estoque na data <span class="cor-web">{{ search_term }}</span>.</h1>
+                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                </a>
+            </div>
+        {% endif %}
         <div class="table-overflow">
             <table id="filterTable">
                 <thead>
