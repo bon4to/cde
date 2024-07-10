@@ -93,11 +93,13 @@ def renew_session():                                                            
 def check_session_expiry():                                                                                     #* VERIFICA SE A SESSÃO ESTÁ EXPIRADA
     if 'last_active' in session:
         last_active     = session.get('last_active')
-        expiration_time = app.config['PERMANENT_SESSION_LIFETIME']
+        expiration_time = app.config['CDE_SESSION_LIFETIME']
         if isinstance(last_active, datetime):
             utc_now     = datetime.now(timezone.utc)
             if (utc_now - last_active) > expiration_time:
+                next_url = request.url
                 session.clear()
+                session['next_url'] = next_url
                 return redirect(url_for('login'))
     session['last_active'] = datetime.now(timezone.utc)
 
@@ -1122,7 +1124,12 @@ def login():                                                                    
                             SET ult_acesso = ?
                             WHERE id_user  = ?;
                         ''', (acesso, id_user))
-
+                    next_url = session.get('next_url')
+                    
+                    if next_url:
+                        print(f"next_url: {next_url}")
+                        return redirect(next_url)
+                    print(f"next_url: {next_url}")
                     return redirect(url_for('index'))
     else:  # if not request.method == 'POST':
         return redirect(url_for('login'))
