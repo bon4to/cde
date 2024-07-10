@@ -1,7 +1,14 @@
-from waitress import serve
-from cde import app
+import logging
 
-print('Running on http://0.0.0.0:8000')
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('waitress')
+logger.setLevel(logging.ERROR)
 
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=8000)
+    from waitress import serve
+    from cde import app
+
+    port = 5005
+    
+    print(f'* Running on http://192.168.1.20:{port}')
+    serve(app, host='0.0.0.0', port=port)

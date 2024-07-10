@@ -24,7 +24,64 @@ from math import pi, ceil
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
+app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
+
+app.config['APP_VERSION'] = ['0.4.4', 'Julho/2024', False]
+
+# GET nome do diretório
+dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
+debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
+main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
+
+# MISC
+exec_head   = \
+    f'''                                                                     
+                                                                    
+      CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+   CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
+ CC::::::::::::::C    D::::::::::::::DD      E::::::::::::::::::::E
+C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+C:::::CC                          DD:::::D                          
+C:::::C                              D:::::D                         
+C:::::C                              D:::::D   EEEEEEEEEEEEEEEEEEEE  
+C:::::C                              D:::::D   E::::::::::::::::::E  
+C:::::C                              D:::::D   EEEEEEEEEEEEEEEEEEEE  
+C:::::C                              D:::::D                         
+C:::::CC                          DD:::::D                          
+C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+ CC::::::::::::::C    D::::::::::::::DD      E::::::::::::::::::::E
+   CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
+      CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+                                                                    
+    '''
+start_head  = \
+    f'''
+* Started in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
+* CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
+* Python Version: {sys.version}
+    '''
+error_foot  = \
+    f'''
+[ERRO 002] 
+* Impossível executar, verifique se o arquivo está alocado corretamente.
+
+Pressione ENTER para sair...
+        '''
+
+if dir_os in debug_dir:         # Se o user for listado dev, modo_exec = debug
+    db_path = os.getenv('DEBUG_DB_PATH')
+    port, debug = 5100, True
+    app.config['APP_VERSION'][2] = True
+    print(start_head)
+
+elif main_exec_dir in dir_os:   # Se o diretório atende ao local para produção, modo_exec = produção.
+    db_path = os.getenv('DB_PATH')
+    port, debug = 5005, False
+    print(exec_head, start_head)
+
+else:                           # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
+    print(error_foot)
+    sys.exit(2)
 
 
 @app.before_request
@@ -71,7 +128,6 @@ def inject_page():                                                              
     if 'logged_in' in session:
         user_name = session.get('user_name')
         id_user   = session.get('id_user')
-        print(f"{id_user} - [{user_name}] | ", current_page)
     return {'current_page': current_page}
 
 
@@ -532,7 +588,7 @@ def add_days_to_datetime_str(date_str, qtde_days):
     return new_date_str
 
 
-def get_saldo_view(timestamp=False):                                                                                           #* RETORNA TABELA DE SALDO
+def get_saldo_view(timestamp=False):                                                                            #* RETORNA TABELA DE SALDO
     if timestamp:
         timestamp = add_days_to_datetime_str(timestamp, 1)
     timestamp = parse_db_datetime(timestamp)
@@ -621,10 +677,10 @@ def verify_auth(id_page):                                                       
                     user_permissions = get_user_permissions(id_user)
                     user_permissions = [item['id_perm'] for item in user_permissions]
                     if id_page in user_permissions:
-                        print('[ACESSO] PERMITIDO')
+                        print(f'[SERVIDOR] {id_page} ({inject_page()['current_page']}) - {id_user} | ACCESS GRANTED')
                         return f(*args, **kwargs)
                     else:
-                        print('[ACESSO] NEGADO')
+                        print(f'[SERVIDOR] {id_page} ({inject_page()['current_page']}) - {id_user} | ACCESS DENIED')
                         alert_type = 'SEM PERMISSÕES \n'
                         alert_msge  = 'Você não tem permissão para acessar esta página.\n'
                         alert_more = ('''SOLUÇÕES:
@@ -637,7 +693,7 @@ def verify_auth(id_page):                                                       
                             url_return=url_for('index')
                         )
                 else:
-                    print('[ACESSO] PERMITIDO')
+                    print(f'[SERVIDOR] {id_page} ({inject_page()['current_page']}) - {id_user} | ACCESS GRANTED')
                     return f(*args, **kwargs)
             else:
                 return redirect(url_for('login'))
@@ -685,7 +741,7 @@ def select_rua(letra, numero):                                                  
         return items
 
 
-def iterate_data_erp(data):
+def iterate_csv_data_erp(data):
     csv_data = ''
     for item in data:
         line = ';'.join(map(str, item.values()))
@@ -693,7 +749,7 @@ def iterate_data_erp(data):
     return csv_data
 
 
-def iterate_data(data):
+def iterate_csv_data(data):
     csv_data = ''
     for item in data:
         line = ';'.join(map(str, item.values()))
@@ -712,10 +768,10 @@ def export_csv(data, filename, include_headers=True):
     if data and len(data) > 0:
         csv_data = ''
         if not include_headers:
-            csv_data += iterate_data_erp(data)
+            csv_data += iterate_csv_data_erp(data)
         else:
             csv_data += add_headers(data)
-            csv_data += iterate_data(data)
+            csv_data += iterate_csv_data(data)
 
         csv_filename = Response(csv_data, content_type='text/csv')
         csv_filename.headers['Content-Disposition'] = f'attachment; filename={filename}.csv'
@@ -1442,7 +1498,6 @@ def get_fant_clientes():
     return jsonify(response)
 
 
-
 @app.route('/envase', methods=['GET'])
 @verify_auth('ENV006')
 def envase():
@@ -1785,7 +1840,6 @@ def insert_producao():
     return redirect(url_for('producao'))
 
 
-
 @app.route('/about')
 @verify_auth('CDE001')
 def about():
@@ -1793,6 +1847,7 @@ def about():
         'pages/about.html',
         about=True
     )
+
 
 @app.route('/users/edit', methods=['POST', 'GET'])
 @verify_auth('CDE016')
@@ -2449,62 +2504,4 @@ def export_csv_tipo(tipo):                                                      
 
 
 if __name__ == '__main__':                                                                                      #! __MAIN__
-
-    app.config['APP_VERSION'] = ['0.4.4', 'Julho/2024', False]
-
-    # GET nome do diretório
-    dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
-    debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
-    main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
-
-    # MISC
-    exec_head   = \
-        f'''                                                                     
-                                                                     
-        CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-     CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
-   CC::::::::::::::C    D::::::::::::::DD      E::::::::::::::::::::E
-  C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
- C:::::CC                          DD:::::D                          
-C:::::C                              D:::::D                         
-C:::::C                              D:::::D   EEEEEEEEEEEEEEEEEEEE  
-C:::::C                              D:::::D   E::::::::::::::::::E  
-C:::::C                              D:::::D   EEEEEEEEEEEEEEEEEEEE  
-C:::::C                              D:::::D                         
- C:::::CC                          DD:::::D                          
-  C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
-   CC::::::::::::::C    D::::::::::::::DD      E::::::::::::::::::::E
-     CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
-        CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-                                                                     
-        '''
-    start_head  = \
-        f'''
-    * Started in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
-    * CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
-    * Python Version: {sys.version}
-        '''
-    error_foot  = \
-        f'''
-    [ERRO 002] 
-    * Impossível executar, verifique se o arquivo está alocado corretamente.
-
-    Pressione ENTER para sair...
-            '''
-
-    if dir_os in debug_dir:         # Se o user for listado dev, modo_exec = debug
-        db_path = os.getenv('DEBUG_DB_PATH')
-        port, debug = 5100, True
-        app.config['APP_VERSION'][2] = True
-        print(start_head)
-
-    elif main_exec_dir in dir_os:   # Se o diretório atende ao local para produção, modo_exec = produção.
-        db_path = os.getenv('DB_PATH')
-        port, debug = 5005, False
-        print(exec_head, start_head)
-
-    else:                           # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
-        print(error_foot)
-        sys.exit(2)
-
     app.run(host='0.0.0.0', port=port, debug=debug)
