@@ -55,12 +55,15 @@ function updateFilterIndex() {
 // OCULTAR FILTRO
 function toggleFilter() {
     let filter = document.getElementById('table-filter');
+    let auxFilters = document.querySelectorAll('.table-filter');
     let input = document.getElementById('filterInput');
 
     if (filter.style.display === 'flex') {
         filter.style.display = 'none';
+        auxFilters.forEach(element => element.style.display = 'none');
     } else {
         filter.style.display = 'flex';
+        auxFilters.forEach(element => element.style.display = 'flex');
         input.focus();
     }
 }
