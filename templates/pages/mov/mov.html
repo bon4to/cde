@@ -9,6 +9,7 @@
         <div class="titles-container flex-row title-centerer">
             <h1>MOVIMENTAR<span class="id-page">{{session['id_page']}}</span></h1>
             <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
@@ -154,7 +155,7 @@
                                 </div>
                                 <div style="display: flex">
                                     <div class="endereco-container">
-                                        <label for="destino_end_letra">Endereço de Destino</label><br>
+                                        <label for="destino_end_letra">End. de Destino</label><br>
                                         <select class="address-three" id="destino_end_letra" name="destino_end_letra" onchange="toggleEndNumber()">
                                             <option value="A"    >A</option>
                                             <option value="B"    >B</option>
@@ -174,7 +175,7 @@
                                     </div>
                                     <div>
                                         <label for="destino_end_number"> </label><br>
-                                        <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="99999.9" placeholder="Número...">
+                                        <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="999" placeholder="Número...">
                                     </div>
                                 </div>
                             </div>
@@ -182,11 +183,14 @@
                                 <div style="text-align: center;">
                                     <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
                                 </div>
-                                <div>
-                                    <label for="id_carga">Número de Carga</label>
-                                    <div style="display: flex; width: 100%">
+                                <div style="display: flex;">
+                                    <div>
+                                        <label for="id_carga">Número de Carga</label><br>
                                         <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
-                                        <select type="number" id="id_carga_seq" name="id_carga_seq" step="any" min="0" max="9" class="address-three" placeholder="Sequência...">
+                                    </div>
+                                    <div>
+                                        <label for="id_carga_seq"> </label><br>
+                                        <select class="address-three" type="number" id="id_carga_seq" name="id_carga_seq" step="any">
                                             {% for index in range(0, 10) %}
                                                 <option value="{{ index }}">- {{ index }}</option>
                                             {% endfor %}

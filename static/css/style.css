@@ -1935,6 +1935,27 @@ h1.subtitle {
     margin: 4px;
 }
 
+#table-filter button {
+    margin: auto;
+}
+
+.table-filter {
+    padding: 6px;
+    margin: 8px 0;
+    border-radius: 12px;
+    justify-content: flex-end;
+    background-color: #3e5ea640;
+    border: 1px solid var(--cor-cde);
+}
+
+.table-filter input, select {
+    margin: 4px;
+}
+
+.table-filter button {
+    margin: auto;
+}
+
 .glow-cde {
     background-color: #3e5ea640;
     border: 1px solid var(--cor-cde);
