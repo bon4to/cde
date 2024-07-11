@@ -631,7 +631,7 @@ def get_saldo_view(timestamp=False):                                            
 def tlg_msg(msg):                                                                                               #* MENSAGEM DO TELEGRAM
     if not session.get('user_grant') == 1:
         if debug:
-            print('[Telegram] não pôde ser enviada em modo debug')
+            print('[ERRO] A mensagem não pôde ser enviada em modo debug')
         else:
             bot_token = os.getenv('TLG_BOT_TOKEN')
             chat_id   = os.getenv('TLG_CHAT_ID')
@@ -1393,6 +1393,7 @@ def moving():
     if is_end_completo:                                                                                         # MOVIMENTA ENDEREÇO COMPLETO
         items = select_rua(letra, numero)
         
+        print(f'    | ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
     else:
         cod_item   = str(request.form['cod_item'])
