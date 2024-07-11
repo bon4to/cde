@@ -420,7 +420,7 @@ div.back-modal {
 }
 
 h1 {
-    margin: 8px 4px;
+    margin: 8px 0;
     color: #2f2f2f;
     font-weight: bold;
     pointer-events: none;
@@ -896,6 +896,28 @@ header {
 
 .sidebar:hover {
     width: 150px;
+}
+
+.alert-more, .alert-message {
+    text-align: left;
+    white-space: pre-line;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.alert-more {
+    font-size: 16px;
+    color: #3f3f3f;
+}
+
+.alert-message {
+    font-size: 22px;
+    font-weight: bolder;
+    color: #000;
+}
+
+.alert-content{
+    margin-left: 10px;
 }
 
 .sidebar a {

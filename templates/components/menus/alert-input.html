@@ -6,55 +6,17 @@
 
         {% include 'shared/header/cde-header.html' %}
 
-<style>
-    .alert-container {
-        background-color: #ffffff;
-        padding: 25px;
-        border-radius: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-    }
-
-    .alert-more, .alert-message {
-        text-align: left;
-        white-space: pre-line;
-        margin-left: 0;
-        padding-left: 0;
-    }
-
-    .alert-more {
-        font-size: 16px;
-        color: #3f3f3f;
-    }
-
-    .alert-message {
-        font-size: 22px;
-        font-weight: bolder;
-        color: #000;
-    }
-
-    .alert-content{
-        margin-left: 10px;
-    }
-
-    h1 {
-        color: var(--cor-destaque);
-    }
-</style>
-<div style="display: flex;min-width: 100%; margin: 0 auto; align-items: center; justify-content: center;">
-    <div class="alert-container">
-        <div class="alert-content">
-            <h1 class="alert-type">{{ alert_type | safe }}</h1>
-            <p style="display: block" class="alert-message">Preencha o campo abaixo.</p>
-            <p style="display: block" class="alert-more">{{ alert_msge | safe }}</p>
-            <form style="display: flex;" id="form-field" method="post" action="{{ alert_more }}">
-                <label for="input"></label>
-                <input style="font-size: 14px;background-color: #efefef;" id="input" name="input" type="password" minlength="6" maxlength="30" placeholder="{{ url_return }}" required>
-                <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
-                <a href="{{ url_for('home') }}" style="margin: 0; font-size: 16px">Agora não</a>
-                <br>
-            </form>
+        <div style="display: flex;min-width: 100%; margin: 0 auto; align-items: center; justify-content: center;">
+            <div class="form-login" style="padding: 30px">
+                <h1 style="color: var(--cor-destaque)">{{ alert_type | safe }}</h1>
+                <h1 style="display: block" class="alert-message">Preencha o campo abaixo.</h1>
+                <p style="display: block" class="alert-more">{{ alert_msge | safe }}</p>
+                <form style="display: flex;" id="form-field" method="post" action="{{ alert_more }}">
+                    <label for="input"></label>
+                    <input style="font-size: 14px;" id="input" name="input" type="password" minlength="6" maxlength="30" placeholder="{{ url_return }}" required>
+                    <input class="btn-fancy" style="max-width: 300px;" type="submit" value="Registrar...">
+                    <a href="{{ url_for('home') }}" style="margin: 0; font-size: 16px">Agora não</a>
+                </form>
+            </div>
         </div>
-    </div>
-</div>
 {% include 'shared/footer.html' %}
