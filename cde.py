@@ -553,8 +553,8 @@ def get_export_promob():                                                        
                     cod_item,
                     SUM(CASE 
                         WHEN operacao IN ('E', 'TE') THEN quantidade
-                        WHEN operacao IN ('S', 'TS') THEN (quantidade * -1)
-                        ELSE (quantidade * -1)
+                        WHEN operacao IN ('S', 'TS', 'F') THEN (quantidade * -1)
+                        ELSE (quantidade * 0)
                     END) as saldo,
                     MAX(time_mov) as time_mov,
                     ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
@@ -731,8 +731,8 @@ def select_rua(letra, numero):                                                  
             SELECT cod_item, lote_item, 
             COALESCE(SUM(CASE 
                 WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                WHEN operacao = 'S' OR operacao = 'TS' THEN (quantidade * -1)
-                ELSE (quantidade * -1)
+                WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                ELSE (quantidade * 0)
             END), 0) as saldo
             FROM historico
             WHERE rua_letra = ? AND rua_numero = ?
@@ -857,8 +857,8 @@ def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):                  
         cursor.execute('''
             SELECT COALESCE(SUM(CASE 
                 WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                WHEN operacao = 'S' OR operacao = 'TS' THEN (quantidade * -1)
-                ELSE (quantidade * -1)
+                WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                ELSE (quantidade * 0)
             END), 0) as saldo
             FROM historico h
             WHERE rua_numero = ? AND rua_letra = ? AND cod_item = ? AND lote_item = ?;
@@ -2012,13 +2012,10 @@ def carga_id(id_carga):
                         i.desc_item, h.lote_item,
                         SUM(
                             CASE 
-                            WHEN operacao = 'E'
-                            OR operacao = 'TE'
+                            WHEN operacao = 'E' OR operacao = 'TE'
                             THEN quantidade 
                             
-                            WHEN operacao = 'S' 
-                            OR operacao = 'TS' 
-                            OR operacao = 'F' 
+                            WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
                             THEN (quantidade * -1)
 
                             ELSE (quantidade * 0)
