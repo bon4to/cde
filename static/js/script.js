@@ -311,7 +311,7 @@ function clearAllSeparations() {
 
 const fetchItemDescription = async (cod_item) => {
     try {
-        const response = await fetch(`/get_description_json/${cod_item}`);
+        const response = await fetch(`/get/description_json/${cod_item}`);
         if (!response.ok) {
             throw new Error('Erro ao obter descrição do item');
         }

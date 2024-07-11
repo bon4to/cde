@@ -340,7 +340,7 @@
                     if (localStorageData) {
                         resolve(JSON.parse(localStorageData));
                     } else {
-                        fetch(`/load-table-data?filename=${getStorageKey()}`)
+                        fetch(`/get/load-table-data?filename=${getStorageKey()}`)
                             .then(response => {
                                 if (!response.ok) {
                                     throw new Error('Erro ao carregar dados do servidor');

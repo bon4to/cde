@@ -10,5 +10,5 @@ if __name__ == '__main__':
 
     port = 5005
     
-    print(f'* Running on http://192.168.1.20:{port}')
+    print(f'[STATUS] Running on: http://192.168.1.20:{port}\n')
     serve(app, host='0.0.0.0', port=port)

@@ -56,17 +56,16 @@ C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
     '''
 start_head  = \
     f'''
-* Started in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
-* CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
-* Python Version: {sys.version}
-    '''
+[INFO] CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
+[INFO] Python Version: {sys.version}
+[STATUS] Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}'''
 error_foot  = \
     f'''
-[ERRO 002] 
+[ERRO] 
 * Impossível executar, verifique se o arquivo está alocado corretamente.
 
 Pressione ENTER para sair...
-        '''
+    '''
 
 if dir_os in debug_dir:         # Se o user for listado dev, modo_exec = debug
     db_path = os.getenv('DEBUG_DB_PATH')
@@ -91,13 +90,15 @@ def renew_session():                                                            
 
 @app.before_request
 def check_session_expiry():                                                                                     #* VERIFICA SE A SESSÃO ESTÁ EXPIRADA
+    if request.path.startswith(('/static', '/get', '/post')):                                                                      # IGNORA AS REQUISICOES DE ARQUIVOS ESTÁTICOS
+        return
     if 'last_active' in session:
+        next_url = request.url
         last_active     = session.get('last_active')
         expiration_time = app.config['CDE_SESSION_LIFETIME']
         if isinstance(last_active, datetime):
             utc_now     = datetime.now(timezone.utc)
             if (utc_now - last_active) > expiration_time:
-                next_url = request.url
                 session.clear()
                 session['next_url'] = next_url
                 return redirect(url_for('login'))
@@ -679,10 +680,10 @@ def verify_auth(id_page):                                                       
                     user_permissions = get_user_permissions(id_user)
                     user_permissions = [item['id_perm'] for item in user_permissions]
                     if id_page in user_permissions:
-                        print(f'[SERVIDOR] {id_page} ({inject_page()['current_page']}) - {id_user} | ACCESS GRANTED')
+                        print(f'[SERVIDOR] {id_user} - {id_page} ({inject_page()['current_page']})| ACCESS GRANTED')
                         return f(*args, **kwargs)
                     else:
-                        print(f'[SERVIDOR] {id_page} ({inject_page()['current_page']}) - {id_user} | ACCESS DENIED')
+                        print(f'[SERVIDOR] {id_user} - {id_page} ({inject_page()['current_page']}) | ACCESS DENIED')
                         alert_type = 'SEM PERMISSÕES \n'
                         alert_msge  = 'Você não tem permissão para acessar esta página.\n'
                         alert_more = ('''SOLUÇÕES:
@@ -695,7 +696,7 @@ def verify_auth(id_page):                                                       
                             url_return=url_for('index')
                         )
                 else:
-                    print(f'[SERVIDOR] {id_page} ({inject_page()['current_page']}) - {id_user} | ACCESS GRANTED')
+                    print(f'[SERVIDOR] {id_user} - {id_page} ({inject_page()['current_page']}) | ACCESS GRANTED')
                     return f(*args, **kwargs)
             else:
                 return redirect(url_for('login'))
@@ -796,7 +797,6 @@ def export_csv(data, filename, include_headers=True):
 
 def db_query_connect(query, dsn):                                                                               #* CONEXÃO E QUERY NO BANCO DE DADOS
     dsn = f"DSN={dsn}"
-    print(dsn)
     if dsn != 'DSN=SQLITE':
         uid_pwd = os.getenv('DB_USER').split(';')
         user = uid_pwd[0]
@@ -953,7 +953,7 @@ def bulk_insert_historico():
             connection.commit()
         return jsonify({'success': True})
     except Exception as e:
-        print(f'Erro ao inserir histórico: {e}')
+        print(f'[ERRO] Erro ao inserir histórico: {e}')
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
@@ -962,8 +962,6 @@ def bulk_insert_historico():
 @verify_auth('CDE001')
 def index():
     create_tables()
-
-    print(f"[SERVIDOR] USUÁRIO: {session['id_user']}")
     return redirect(url_for('home'))
 
 
@@ -1172,11 +1170,11 @@ def reset_password():
     return redirect(url_for('index'))
 
 
-@app.route('/search_item', methods=['POST'])
+@app.route('/get/item', methods=['POST'])
 @verify_auth('CDE001')
-def search_item():
+def get_item():
     input_code = re.sub(r'[^0-9;]', '', (request.form['input_code'].strip()))
-    print(f'Código fornecido: {input_code}')
+    print(f'    | Código fornecido: {input_code}')
     
     if len(input_code) == 4 or len(input_code) == 0:
         desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO', '', '', ''
@@ -1229,8 +1227,7 @@ def search_item():
                         (cod_item[0],))
 
                     row = cursor.fetchall()
-                    print('[DEBUG] DESC_ITEM: ' + row[0][0])
-
+                    
                     if row:
                         desc_item = row[0][0]
                         if 'VINHO' in desc_item:
@@ -1391,12 +1388,11 @@ def moving():
     timestamp_out   = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
     timestamp_in    = (timestamp_br + timedelta(seconds=1)).strftime('%Y/%m/%d %H:%M:%S')
 
-    print(f'OPERAÇÃO: {operacao}')
+    print(f'    | OPERAÇÃO: {operacao}')
 
     if is_end_completo:                                                                                         # MOVIMENTA ENDEREÇO COMPLETO
         items = select_rua(letra, numero)
         
-        print(f'ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
     else:
         cod_item   = str(request.form['cod_item'])
@@ -1404,7 +1400,7 @@ def moving():
         quantidade = int(request.form['quantidade'])
         items      = [(cod_item, lote_item, quantidade)]                                                        # MOVIMENTA ITEM ÚNICO
         
-        print(f'ITEM ÚNICO ({letra}.{numero}): {items}')
+        print(f'    | ITEM ÚNICO ({letra}.{numero}): {items}')
 
         saldo_item  = int(get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:                                             #? IMPOSSIBILITA ESTOQUE NEGATIVO 
@@ -1443,7 +1439,7 @@ def moving():
                         lote_item, quantidade, 'TE', 
                         timestamp_in, id_carga
                     )
-                    print(f'{letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
+                    print(f'    | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
         
     elif operacao == 'F':                                                                                       #* FATURAMENTO
         id_carga = str(request.form['id_carga']) + str(request.form['id_carga_seq'])
@@ -1457,7 +1453,7 @@ def moving():
                         lote_item, quantidade, operacao, 
                         timestamp_out, id_carga
                     )
-                    print(f'{letra}.{numero}: ', cod_item, lote_item, quantidade)
+                    print(f'    | {letra}.{numero}: ', cod_item, lote_item, quantidade)
 
     elif operacao == 'E' or operacao == 'S':                                                                    #* OPERAÇÃO PADRÃO (entrada 'E' ou saída 'S')
         insert_historico(
@@ -1465,7 +1461,7 @@ def moving():
             lote_item, quantidade, operacao, 
             timestamp_out, id_carga
         )
-        print(f'{letra}.{numero}: ', cod_item, lote_item, quantidade)
+        print(f'    | {letra}.{numero}: ', cod_item, lote_item, quantidade)
     
     else:                                                                                                       #* OPERAÇÃO INVÁLIDA
         print(f'[ERRO] {letra}.{numero}: ', cod_item, lote_item, quantidade, ': OPERAÇÃO INVÁLIDA')
@@ -1481,8 +1477,7 @@ def get_fant_clientes():
         FROM DB2ADMIN.CLIENTE;
     '''
 
-    dsn_name = 'HUGOPIET'
-    dsn = dsn_name
+    dsn = 'HUGOPIET'
     result, columns = db_query_connect(query, dsn)
 
     clientes = [{'FANTASIA': '(indefinido)'}]
@@ -2042,8 +2037,7 @@ def carga_id(id_carga):
                 ORDER BY h.lote_item DESC, h.rua_letra ASC,
                          h.rua_numero ASC, i.desc_item ASC;
             '''
-            dsn_name = 'SQLITE'
-            dsn = dsn_name
+            dsn = 'SQLITE'
             result_local, columns_local = db_query_connect(query, dsn)
 
         #? SEARCH DE ITENS POR CARGA
@@ -2081,8 +2075,7 @@ def carga_id(id_carga):
             LIMIT 100;
         '''
 
-        dsn_name = 'HUGOPIET'
-        dsn = dsn_name
+        dsn = 'HUGOPIET'
         result, columns = db_query_connect(query, dsn)
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
@@ -2147,8 +2140,7 @@ def cargas():                                                                   
         else:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
         
-        dsn_name = 'HUGOPIET'
-        dsn = dsn_name
+        dsn = 'HUGOPIET'
         result, columns = db_query_connect(query, dsn)
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
@@ -2186,7 +2178,7 @@ def carga_sep_done(id_carga):
     )
 
 
-@app.route('/get_description_json/<cod_item>', methods=['GET'])
+@app.route('/get/description_json/<cod_item>', methods=['GET'])
 def get_description(cod_item):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2204,7 +2196,7 @@ def get_description(cod_item):
     return jsonify({"description": desc_item})
 
 
-@app.route('/save-localstorage', methods=['POST'])
+@app.route('/post/save-localstorage', methods=['POST'])
 def save_localstorage():
     try:
         data = request.get_json()
@@ -2226,11 +2218,11 @@ def save_localstorage():
         return jsonify({'message': 'Dados do localStorage foram salvos com sucesso.'}), 200
 
     except Exception as e:
-        print(f'Erro ao salvar dados do localStorage: {str(e)}')
+        print(f'[ERRO] Erro ao salvar dados do localStorage: {str(e)}')
         return jsonify({'error': 'Erro interno ao salvar dados do localStorage.'}), 500
     
 
-@app.route('/load-table-data', methods=['GET'])
+@app.route('/get/load-table-data', methods=['GET'])
 def load_table_data():
     try:
         filename = request.args.get('filename')
@@ -2251,7 +2243,7 @@ def load_table_data():
         return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
     
 
-@app.route('/list-all-separations', methods=['GET'])
+@app.route('/get/list-all-separations', methods=['GET'])
 def list_all_separations():
     try:
         directory = os.path.join(app.root_path, 'report/cargas')
@@ -2377,9 +2369,9 @@ def rotulo():
     return render_template('pages/rotulo.html')
 
 
-@app.route('/buscar_linhas', methods=['POST'])
+@app.route('/get/linhas', methods=['POST'])
 @verify_auth('ENV006')
-def buscar_linhas():
+def get_linhas():
     desc_item = request.form['desc_item']
 
     def find_emb(desc_item):
@@ -2399,7 +2391,7 @@ def buscar_linhas():
         for tipo, volumes in tipos_embalagem.items():
             for volume in volumes:
                 if volume in desc_item:
-                    print(f'EMBALAGEM {tipo} {volume}')
+                    print(f'    | EMBALAGEM {tipo} {volume}')
                     return tipo, volume
 
         return '', ''
@@ -2432,6 +2424,7 @@ def buscar_linhas():
                 }
             )
 
+
 @app.route('/estoque', methods=['GET', 'POST'])
 @verify_auth('MOV004')
 def estoque():
@@ -2439,14 +2432,15 @@ def estoque():
         date = request.form['date']
         saldo_visualization = get_saldo_view(date)
     else:
-        saldo_visualization = get_saldo_view()
         date = False
+        saldo_visualization = get_saldo_view()
     return render_template(
         'pages/estoque.html', 
         saldo_visualization=saldo_visualization,
         search_term=date
     )
-    
+
+
 @app.route('/estoque-enderecado', methods=['GET', 'POST'])
 @verify_auth('MOV004')
 def estoque_enderecado():

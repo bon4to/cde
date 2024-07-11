@@ -196,7 +196,7 @@
                 if (localStorageData) {
                     reject(new Error(304));
                 } else {
-                    fetch(`/load-table-data?filename=${getStorageKey()}`)
+                    fetch(`/get/load-table-data?filename=${getStorageKey()}`)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error(404);
@@ -269,7 +269,7 @@
         }
 
         function listSeparationsFromServer() {
-            fetch('/list-all-separations')
+            fetch('/get/list-all-separations')
                 .then(response => response.json())
                 .then(files => {
                     const tableBody = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];

@@ -228,7 +228,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/buscar_linhas",
+                    url: "/get/linhas",
                     data: { desc_item: item_selec },
                     success: function(response) {
 
@@ -258,7 +258,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/search_item",
+                    url: "/get/item",
                     data: { input_code: codigo },
                     success: function(response) {
 
