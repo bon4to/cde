@@ -4,100 +4,137 @@
         <title>API | CDE</title>
         <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/theme/material-darker.min.css">
+
         {% include 'shared/header/cde-header.html' %}
     <style>
         .wrap {
             white-space: pre-wrap;
         }
+        .CodeMirror {
+            resize: none;
+            font-size: 18px;
+            text-align: left;
+            height: 280px; 
+            max-width: 1000px;
+            overflow-wrap: nowrap; 
+            min-width: 800px;
+            font-family: 'Fira Code', monospace;
+            margin: 0;
+            border: 0 solid transparent;
+        }
+        .CodeMirror-scrollbar-filler {
+            background-color: #212121
+        }
     </style>
-    <!-- TABELA -->
-    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
-    
-        <div draggable="false" class="form-login" style="padding: 20px; position: static; margin-bottom: 40px;">
-            <div class="two-split" style="grid-gap: 30px; width: 900px;">
-                <div class="log" style="width: 900px">
-                    <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Console SQL</h1>
-                    <form action="/api" method="post" onsubmit="showLoading()" id="form-field">
-                        <div style="width: 800px">
-                            <label for="sel_schema"></label>
-                            <select id="sel_schema" name="sel_schema" class="address" required>
-                                {% if dsn %}
-                                    <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
-                                {% endif %}
-                                <option>HUGOPIET</option>
-                                <option>SQLITE</option>
-                            </select>
-                            <div>
-                                <label for="sql_query"></label>
-                                <textarea 
-                                    class="address-observ"
-                                    style="
-                                        height: 180px; 
-                                        overflow-wrap: nowrap; 
-                                        width: 800px;
-                                        font-family: 'Fira Code', monospace;
-                                    "
-                                    id="sql_query" 
-                                    name="sql_query" 
-                                    placeholder="SQL Query..." 
-                                    required
-                                >{% if query %}{{ query }}{% else %}SELECT * FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM;{% endif %}</textarea>
-                            </div>
-                            <p class="alert" id="custom-alert">{% if alert_msge %}{{ alert_msge }}{% else %}{% endif %}</p>
-                            <input class="btn-fancy" type="submit" value="Consultar" id="submitform">
-                        </div>
-                    </form>
+    <div class="titles-container flex-row title-centerer">
+        <h1>
+            <a href="/home">CDE</a>
+            <span class="dash">/</span>
+            <span>DATABASE</span>
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
+        <div class="aux-buttons">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIO" alt="" onclick="window.location.href='{{ url_for('login') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
+            <hr class="vert">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="SAIR" alt="" onclick="goBack()">
+        </div>
+    </div>
+    <div class="flex-row" style="min-width: 100%;">
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
+            <form action="/api" class="form-login" style="padding: 0; border-radius: 10px; margin-bottom: 40px" method="post" onsubmit="showLoading()" id="form-field">
+                <div class="split-horizontal" style="margin: 6px; align-items: center">
+                    <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="cor-web subtitle">Console SQL</h1>
+                    <div class="flex-row" style="align-items: center; margin: 0 14px;">
+                        <select id="sel_schema" name="sel_schema" class="address" required>
+                            {% if dsn %}
+                                <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
+                            {% endif %}
+                            <option>HUGOPIET</option>
+                            <option>SQLITE</option>
+                        </select>
+                        <button class="button-mini btn-fancy" type="submit" id="submitform">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/play.svg') }}" title="EXECUTAR">
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <textarea 
+                        class="query"
+                        id="sql_query" 
+                        name="sql_query"
+                        required
+                    >{% if query %}
+{{ query }}
+                    {% else %}
+SELECT * 
+FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
+LIMIT 100;{% endif %}</textarea>
+                </div>
+            </form>
+            <div class="tables-container" style="min-width: 800px; max-width: 90%; width: -webkit-fill-available">
+                <h1 style="text-align: left; margin: 0; padding-left: 0" class="cor-web subtitle">API Results</h1>
+                {% if alert_msge %}
+                    <p class="alert" id="custom-alert">{{ alert_msge }}</p>
+                {% endif %}
+                {% if result %}
+                    {% set row_count = result|length %}
+                    <div>Total de Resultados: {{ row_count }}</div>
+                    {% if columns %}
+                    <div style="max-height: 600px; overflow: auto; max-width: 70vw;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    {% for column in columns %}
+                                        <th>{{ column }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in result %}
+                                    <tr>
+                                        {% for value in row %}
+                                            <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        {% for row in result %}
+                            <tr>
+                                {% for value in row %}
+                                    <div class="msg-error" {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</div>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                    <div class="msg-info">Nenhum resultado foi encontrado.</div>
+                {% endif %}
+                <br>
                 </div>
             </div>
         </div>
-        
-        <div class="tables-container" style="min-width: 800px; max-width: 90%; width: -webkit-fill-available">
-            <h1>API Results</h1>
-            <div style="max-height: 600px; overflow: auto;">
-            {% if result %}
-                {% set row_count = result|length %}
-                <div>Total de Resultados: {{ row_count }}</div>
-                {% if columns %}
-                    <table>
-                        <thead>
-                            <tr>
-                                {% for column in columns %}
-                                    <th>{{ column }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in result %}
-                                <tr>
-                                    {% for value in row %}
-                                        <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    {% for row in result %}
-                        <tr>
-                            {% for value in row %}
-                                <div class="msg-error" {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</div>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                {% endif %}
-            {% else %}
-                <div class="msg-info">Nenhum resultado foi encontrado.</div>
-            {% endif %}
-            <br>
-            </div>
-        </div>
     </div>
-        <script>
-            document.getElementById("form-field").addEventListener("submit", function() {
-                document.getElementById("submitform").disabled = true;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/sql/sql.min.js"></script>
+    <script>
+        var editor = CodeMirror.fromTextArea(document.getElementById('sql_query'), {
+            lineNumbers: true,
+            mode: "text/x-sql",
+            theme: "material-darker"
+        });
+    
+        document.getElementById("form-field").addEventListener("submit", function() {
+            document.getElementById("submitform").disabled = true;
 
-            });
+        });
 
-        </script>
+    </script>
 
-        {% include 'shared/footer.html' %}
+    {% include 'shared/footer.html' %}

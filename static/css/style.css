@@ -266,6 +266,10 @@ html.dark ::-webkit-scrollbar-track {
     background-color: var(--dark-background);
 }
 
+.scrollbar-filler {
+    background-color: #000;
+}
+
 ::-webkit-scrollbar {
     width: 12px;
 }
@@ -600,6 +604,23 @@ select, textarea, input {
 select:focus, textarea:focus, input:focus {
     border-bottom: 2px solid var(--cor-destaque);
     transition: border-color 0.2s ease-out;
+}
+
+textarea.query {
+    resize: none;
+    font-size: 18px;
+    text-align: left;
+    height: 280px; 
+    overflow-wrap: nowrap; 
+    min-width: 800px;
+    font-family: 'Fira Code', monospace;
+    margin: 0;
+    border: 0 solid transparent;
+}
+
+textarea.query:focus {
+    box-shadow: none;
+    border: 0 solid transparent;
 }
 
 input.check {
