@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Separação {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+    <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+
+    {% include 'shared/header/tl-header.html' %}
+    <div class="titles-container flex-row title-centerer">
+        <h1>
+            <a href="{{ url_for('mov') }}">MOV</a>
+            <span class="dash">/</span>
+            <a href="{{ url_for('cargas') }}">CARGAS</a>
+            <span class="dash">/</span>
+            <span>SEPARAÇÃO</span>
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
+        <div class="aux-buttons">
+            {% block aux_buttons %}
+                <div class="flex-row" style="margin: 8px 0">
+                    <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                    <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+                        <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </div>
+                </div>
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=id_carga) }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            {% endblock aux_buttons %}
+        </div>
+    </div>
+    <div class="flex-row" style="min-width: 100%;">
+        
+        <div class="tables-container" id="sepContainer" style="min-width: 40vw;{% if id_carga == 0 %}display: none;{% endif %}">
+                <div class="split-horizontal">
+                    <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                    <div class="cart-container">
+                        <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                        <div class="cart-dropdown hidden" id="cart-dropdown">
+                            <ul class="cart-items">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <p style="justify-content: flex-start">Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
+                <div class="hidden" id="alert-message"></div>
+                <div id="contentTable">
+                    <table id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th>Endereço</th>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th>Lote (Código)</th>
+                                <th>QTDE (Separado)</th>
+                            </tr>
+                        </thead>
+                            <!-- executa renderItems(); -->
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <div class="flex-row" style="margin: 8px 0">
+                        {% block separation_buttons %}
+                            
+                        {% endblock separation_buttons %}
+                    </div>
+                </div>
+            </div>
+        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+            <h1>Separações</h1>
+            {% block all_separation_status %}
+            
+            {% endblock all_separation_status %}
+            <div class="table-overflow" style="max-height: 400px">
+                <table id="allSeparationsTable">
+                    <thead>
+                        <tr>
+                            <th>Cargas (Separações)</th>
+                        </tr>
+                    </thead>
+                        <!-- executa listSeparationsLocalStorage(); -->
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            {% if session['user_grant'] == 1 %}
+                <div style="margin: 8px 0" class="flex-row">
+                    <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% block script %}
+        
+    {% endblock script %}
+        
+
+    {% include 'shared/footer.html' %}

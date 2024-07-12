@@ -1,110 +1,42 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <title>Separação {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
-    <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+{% extends "pages/mov/mov-carga-separacao.html" %}
 
-    {% include 'shared/header/tl-header.html' %}
-    <div class="titles-container flex-row title-centerer">
-        <h1>
-            <a href="{{ url_for('mov') }}">MOV</a>
-            <span class="dash">/</span>
-            <a href="{{ url_for('cargas', id_carga=id_carga) }}">CARGAS</a>
-            <span class="dash">/</span>
-            <span>SEPARAÇÃO</span>
-            <span class="id-page">{{session['id_page']}}</span>
-        </h1>
-        <div class="aux-buttons">
-            <div class="flex-row" style="margin: 8px 0">
-                <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
-                <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
-                    <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                </div>
-            </div>
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (PENDENTES)" alt="" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+
+{% block aux_buttons %}
+    <div class="flex-row" style="margin: 8px 0">
+        <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
+        <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+            <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
         </div>
     </div>
-    <div class="flex-row" style="min-width: 100%;">
-        <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
-            <div class="split-horizontal">
-                <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
-                <div class="cart-container">
-                    <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
-                    <div class="cart-dropdown hidden" id="cart-dropdown">
-                        <ul class="cart-items">
-                            <!-- Itens serão renderizados aqui -->
-                        </ul>
-                        <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Finalizar Separação</button>
-                    </div>
-                </div>
-            </div>
-            <p style="justify-content: flex-start">Status:<span style="color: green; margin-left: 4px">Finalizada</span></p>
-            <div class="hidden" id="alert-message"></div>
-            <div id="contentTable">
-                <table id="itemsTable">
-                    <thead>
-                        <tr>
-                            <th>Endereço</th>
-                            <th>Item (Código)</th>
-                            <th>Item (Descrição)</th>
-                            <th>Lote (Código)</th>
-                            <th>QTDE (Separado)</th>
-                        </tr>
-                    </thead>
-                        <!-- execute renderItems(); -->
-                    <tbody>
-                    </tbody>
-                </table>
-                <div class="flex-row" style="margin: 8px 0">
-                    <div class="flex-row">
-                        <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
-                        </div>
-                    </div>
-                    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="generatePDF()">
-                        <span>GERAR RELATÓRIO</span>
-                        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--
-            <div class="tables-container" id="sepSubtotalsContainer" style="max-width: 20vw;">
-                <h1>Subtotal</h1>
-                <p style="justify-content: flex-start">Separação por Item</p>
-                <table id="subtotalsTable">
-                    <thead>
-                        <tr>
-                            <th>Item (Código)</th>
-                            <th>Subtotal (QTDE)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        -->
-        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-            <h1>Separações</h1>
-            <p style="justify-content: flex-start">Status:<span style="color: green; margin-left: 4px">Finalizada</span></p>
-            <table id="allSeparationsTable">
-                <thead>
-                    <tr>
-                        <th>Concluídos (em Cache)</th>
-                    </tr>
-                </thead>
-                    <!-- execute listSeparationsLocalStorage(); -->
-                <tbody>
-                </tbody>
-            </table>
+    <hr class="vert">
+    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+    <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+    <hr class="vert">
+    <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (PENDENTES)" alt="" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
+    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+{% endblock aux_buttons %}
+
+
+{% block separation_buttons %}
+    <div class="flex-row">
+        <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
+            <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
         </div>
     </div>
+    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="generatePDF()">
+        <span>GERAR RELATÓRIO</span>
+        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
+    </div>
+{% endblock separation_buttons %}
 
+
+{% block all_separation_status %}
+    <p style="justify-content: flex-start">Status:<span style="color: green; margin-left: 4px">Finalizados</span></p>
+{% endblock all_separation_status %}
+
+
+{% block script %}
     <script>
         const nroCarga = '{{ id_carga }}';
 
@@ -215,6 +147,8 @@
 
         function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+            const statusElements = document.getElementsByClassName('separation_status');
+            
             itemsTable.innerHTML = '';
             getSeparacao().then(async sepCarga => {
         
@@ -236,8 +170,11 @@
                         console.error('Erro ao obter descrição:', error);
                         descCell.textContent = 'Erro ao obter descrição';
                     }
-        
+                    
                 }
+                Array.from(statusElements).forEach(element => {
+                    element.innerHTML = "<span style='color: green'>Finalizada</span>";
+                });
             })
             .catch(error => {
                 const alert = document.getElementById('alert-message')
@@ -257,7 +194,7 @@
                     errorMessage = `<div class="msg-error">
                                         <details>
                                             <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                            Inicie a <a style="all: unset; cursor: pointer; color: blue" href="/mov/carga">separação da carga</a> para fazer o faturamento.
+                                            Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para fazer o faturamento.
                                         </details>
                                     </div>`;
                 }
@@ -282,9 +219,16 @@
                         cell.textContent = files.error;
                     } else {
                         files.forEach(file => {
+                            const cargaNumber = file.replace('separacao-carga-', '').replace('.json', '');
                             const row = tableBody.insertRow();
                             const cell = row.insertCell(0);
-                            cell.textContent = file;
+                            cell.textContent = cargaNumber;
+
+                            row.classList.add("selectable-row");
+
+                            row.addEventListener('click', function() {
+                                window.location.href = `/mov/separacao-done/${cargaNumber}`;
+                            });
                         });
                     }
                 })
@@ -302,6 +246,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             reloadTables();
         });
+        
     </script>
-
-    {% include 'shared/footer.html' %}
+{% endblock script %}

@@ -2190,7 +2190,8 @@ def get_description(cod_item):
         resultado = cursor.fetchone()
         if resultado is not None:
             desc_item = resultado[0]
-            
+        else:
+            desc_item = 'O item não foi encontrado.'
     return jsonify({"description": desc_item})
 
 

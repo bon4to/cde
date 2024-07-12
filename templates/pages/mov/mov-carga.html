@@ -29,6 +29,8 @@
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
                     </button>
                 </form>
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
@@ -47,114 +49,109 @@
                         </div>
                     </div>
                 </div>
-                {% if result %}
-
-                    <div id="detailedTable" class="hidden">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                            <p>Lista Detalhada</p>
-                            <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
-                            </div>
+            {% if result %}
+                <div id="detailedTable" class="hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <p>Lista Detalhada</p>
+                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
                         </div>
-                        <table style="max-height: 500px; overflow-y: auto;">
-                            <thead>
-                                <tr>
-                                    <th>Pedido SEQ</th>
-                                    <th>Item (Código)</th>
-                                    <th>Item (Descrição)</th>
-                                    <th style="width: 100px;">QTDE (Solicitada)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% set items = [] %}
-                                {% set subtotals = {} %}
-                                
-                                {% for row in result %}
-                                    {% set cod_item = row[columns.index('COD_ITEM')] %}
-                                    {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
-                                    {% set subtotal = subtotals.get(cod_item, 0) + qtde_solic %}
-                                    {% set subtotals = subtotals.update({cod_item: subtotal}) or subtotals %}
-                                    {% set items = items.append(row) or items %}
-                                {% endfor %}
-                                
-                                {% for row_cod_item, subtotal in subtotals.items() %}
-                                    {% for row in items %}
-                                        {% if row[columns.index('COD_ITEM')] == row_cod_item %}
-                                            <tr class="unselectable-row">
-                                                <td class="over-row">{{ row[columns.index('NROPED_SEQ')] }}</td>
-                                                <td>{{ row[columns.index('COD_ITEM')] }}</td>
-                                                <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
-                                                <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
-                                            </tr>
-                                        {% endif %}
-                                    {% endfor %}
-                                    <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')">
-                                        <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
-                                        <td>{{ subtotal }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
                     </div>
-                    <div id="standardTable">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                            <p>Lista Subtotal</p>
-                            <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
-                            </div>
-                        </div>
-                        <table style="max-height: 500px; overflow-y: auto;">
-                            <thead>
-                                <tr>
-                                    <th>Item (Código)</th>
-                                    <th>Item (Descrição)</th>
-                                    <th style="width: 100px;">QTDE (Solicitada)</th>
-                                    <th style="width: 100px;">QTDE (Separada)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% set items = {} %}
-                                
-                                {% for row in result %}
-                                    {% set row_cod_item = row[columns.index('COD_ITEM')] %}
-                                    {% set desc_item = row[columns.index('DESC_ITEM')] %}
-                                    {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
-                                    
-                                    {% if row_cod_item in items %}
-                                        {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
-                                    {% else %}
-                                        {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': qtde_solic}}) or items %}
+                    <table style="max-height: 500px; overflow-y: auto;">
+                        <thead>
+                            <tr>
+                                <th>Pedido SEQ</th>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th style="width: 100px;">QTDE (Solicitada)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set items = [] %}
+                            {% set subtotals = {} %}
+                            
+                            {% for row in result %}
+                                {% set cod_item = row[columns.index('COD_ITEM')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                {% set subtotal = subtotals.get(cod_item, 0) + qtde_solic %}
+                                {% set subtotals = subtotals.update({cod_item: subtotal}) or subtotals %}
+                                {% set items = items.append(row) or items %}
+                            {% endfor %}
+                            
+                            {% for row_cod_item, subtotal in subtotals.items() %}
+                                {% for row in items %}
+                                    {% if row[columns.index('COD_ITEM')] == row_cod_item %}
+                                        <tr class="unselectable-row">
+                                            <td class="over-row">{{ row[columns.index('NROPED_SEQ')] }}</td>
+                                            <td>{{ row[columns.index('COD_ITEM')] }}</td>
+                                            <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
+                                            <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
+                                        </tr>
                                     {% endif %}
                                 {% endfor %}
+                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')">
+                                    <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
+                                    <td>{{ subtotal }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="standardTable">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <p>Lista Subtotal</p>
+                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
+                        </div>
+                    </div>
+                    <table style="max-height: 500px; overflow-y: auto;">
+                        <thead>
+                            <tr>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th style="width: 100px;">QTDE (Solicitada)</th>
+                                <th style="width: 100px;">QTDE (Separada)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set items = {} %}
+                            
+                            {% for row in result %}
+                                {% set row_cod_item = row[columns.index('COD_ITEM')] %}
+                                {% set desc_item = row[columns.index('DESC_ITEM')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
                                 
-                                {% for row_cod_item, item in items.items() %}
-                                    <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
-                                    data-cod-item="{{ row_cod_item }}"
-                                    onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')">
-                                        <td>{{ row_cod_item }}</td>
-                                        <td style="text-wrap: balance;">{{ item.desc }}</td>
-                                        <td>{{ item.qtde }}</td>
-                                        <td class="subtotal-cell"></td>
-                                    </tr> 
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <br>
-                {% else %}
-                    <div class="msg-success">
-                        <details>
-                            <summary>A carga selecionada já foi finalizada.</summary>
-                            Caso necessite visualizá-la, clique no botão abaixo.
-                        </details>
-                    </div>
-                    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=id_carga) }}';">
-                        <span>Visualizar</span>
-                        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/eye.svg') }}" alt="">
-                    </div>
-                {% endif %}
-            </div>
-            
+                                {% if row_cod_item in items %}
+                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
+                                {% else %}
+                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': qtde_solic}}) or items %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% for row_cod_item, item in items.items() %}
+                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
+                                data-cod-item="{{ row_cod_item }}"
+                                onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')">
+                                    <td>{{ row_cod_item }}</td>
+                                    <td style="text-wrap: balance;">{{ item.desc }}</td>
+                                    <td>{{ item.qtde }}</td>
+                                    <td class="subtotal-cell"></td>
+                                </tr> 
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+            {% else %}
+                <div class="msg-success">
+                    <details>
+                        <summary>A carga selecionada já foi finalizada.</summary>
+                        Caso necessite visualizá-la, clique no botão abaixo.
+                    </details>
+                </div>
+            {% endif %}
+        </div>
+        
         {% endif %}
         {% if 'user_grant' in session %}
             {% if id_carga %}

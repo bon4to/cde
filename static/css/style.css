@@ -1539,6 +1539,10 @@ th.calendar {
     cursor: pointer;
 }
 
+.hyperlink:hover {
+    text-decoration: underline;
+}
+
 .dropbtn:hover .svg-invert {
     filter: unset;
     fill: #fff;
