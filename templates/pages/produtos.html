@@ -12,6 +12,8 @@
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-todo.svg') }}" title="STATUS" onclick="window.location.href='{{ url_for('produtos_flag') }}';">
+                <hr class="vert">
                 <form action="{{ url_for('produtos') }}" method="post">
                     <button type="submit" style="all: unset">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE ITENS">
@@ -19,7 +21,7 @@
                 </form>
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="window.location.href='{{ url_for('home_hp') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="goBack()">
             </div>
         </div>
         <div style="justify-content: flex-end" >

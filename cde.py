@@ -26,7 +26,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-app.config['APP_VERSION'] = ['0.4.4', 'Julho/2024', False]
+app.config['APP_VERSION'] = ['0.4.5', 'Julho/2024', False]
 
 # GET nome do diretório
 dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
@@ -261,13 +261,29 @@ def get_frase():                                                                
     return frase
 
 
-def get_itens():                                                                                                #* RETORNA TODOS OS PARÂMETROS DO ITEM
+def get_all_itens():                                                                                                #* RETORNA TODOS OS PARÂMETROS DO ITEM
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
             SELECT DISTINCT *
             FROM itens i
-            ORDER BY i.desc_item;
+            ORDER BY i.cod_item;
+        ''')
+
+        itens = [{
+            'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2], 'flag_ativo': bool(row[3])
+        } for row in cursor.fetchall()]
+    return itens
+
+
+def get_active_itens():                                                                                                #* RETORNA TODOS OS PARÂMETROS DO ITEM
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT DISTINCT *
+            FROM itens i
+            WHERE i.flag_ativo = 1
+            ORDER BY i.cod_item;
         ''')
 
         itens = [{
@@ -1177,7 +1193,7 @@ def get_item():
     print(f'    | Código fornecido: {input_code}')
     
     if len(input_code) == 4 or len(input_code) == 0:
-        desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO', '', '', ''
+        desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO OU INATIVO', '', '', ''
         return jsonify(
             {
             'json_cod_item' : cod_item, 
@@ -1203,7 +1219,8 @@ def get_item():
                 cursor.execute('''
                     SELECT i.desc_item, i.cod_item
                     FROM itens i
-                    WHERE i.dun14 = ?
+                    WHERE i.dun14 = ? 
+                    AND i.flag_ativo = 1
                     ORDER BY i.cod_item;
                 ''',
                 (cod_barra,))
@@ -1221,7 +1238,8 @@ def get_item():
                         cursor.execute('''
                             SELECT i.desc_item    
                             FROM itens i
-                            WHERE i.cod_item = ?
+                            WHERE i.cod_item = ? 
+                            AND i.flag_ativo = 1
                             ORDER BY i.cod_item;
                         ''',
                         (cod_item[0],))
@@ -1235,7 +1253,7 @@ def get_item():
                         else:
                             cod_lote = ''
                 else:
-                    desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
+                    desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
 
                 return jsonify(
                     {
@@ -1260,7 +1278,8 @@ def get_item():
                 cursor.execute('''
                     SELECT i.desc_item
                     FROM itens i
-                    WHERE i.cod_item = ?;
+                    WHERE i.cod_item = ?
+                    AND i.flag_ativo = 1;
                 ''', 
                 (codigos_itens,))
 
@@ -1270,7 +1289,7 @@ def get_item():
                     if 'VINHO' in desc_item:
                         cod_lote = 'VINHOS'
                 else:
-                    desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
+                    desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
 
                 return jsonify(
                     {
@@ -1281,7 +1300,7 @@ def get_item():
                 )
 
         else:
-            desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO', '', ''
+            desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
             return jsonify(
                 {
                 'json_cod_item' : cod_item, 
@@ -2252,10 +2271,38 @@ def list_all_separations():
         return jsonify({'error': f'Erro ao listar arquivos: {str(e)}'}), 500
 
 
+def toggle_item_flag(cod_item, flag):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            UPDATE itens SET flag_ativo = ? WHERE cod_item = ?;
+        ''', (flag, cod_item))
+
+        connection.commit()
+    return
+
+
+@app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>', methods=['GET', 'POST'])
+def produtos_toggle_perm(cod_item, flag):
+    toggle_item_flag(cod_item, flag)
+    return redirect(url_for('produtos_flag'))
+
+
+@app.route('/produtos/flag', methods=['GET', 'POST'])
+@verify_auth('ITE005')
+def produtos_flag():
+    itens = get_all_itens()
+    
+    return render_template(
+        'pages/produtos-flag.html',
+        itens=itens
+    )
+
+
 @app.route('/produtos', methods=['GET', 'POST'])
 @verify_auth('ITE005')
 def produtos():
-    itens = get_itens()
+    itens = get_active_itens()
     if request.method == 'POST':
         query = '''
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
@@ -2272,27 +2319,35 @@ def produtos():
             AND NOT GTIN_14 = '';
         '''
 
-        dsn_name = 'HUGOPIET'
-        dsn      = dsn_name
+        dsn = 'HUGOPIET'
         result, columns = db_query_connect(query, dsn)
 
         if columns:
-            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+            alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
             class_alert = 'success'
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('BEGIN TRANSACTION;')
-                cursor.execute('DELETE FROM itens;')
-                cursor.executemany('''
-                    INSERT INTO itens (cod_item, desc_item, dun14)
-                    VALUES (?,?,?);
-                ''', result)
                 
+                cursor.execute('SELECT cod_item FROM itens WHERE flag_ativo = 0;')
+                inactive_items = cursor.fetchall()
+
+                cursor.execute('DELETE FROM itens;')
+
+                cursor.executemany('''
+                    INSERT INTO itens (cod_item, desc_item, dun14, flag_ativo)
+                    VALUES (?,?,?,1);
+                ''', [(item[0], item[1], item[2]) for item in result])
+
+                cursor.executemany('''
+                    UPDATE itens SET flag_ativo = 0 WHERE cod_item = ?;
+                ''', inactive_items)
+
                 connection.commit()
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        itens = get_itens()
+        itens = get_active_itens()
         return render_template(
             'pages/produtos.html', 
             itens=itens, 
@@ -2464,7 +2519,7 @@ def export_csv_tipo(tipo):                                                      
         data = get_all_historico()
         filename = 'exp_historico'
     elif tipo == 'produtos':
-        data = get_itens()
+        data = get_active_itens()
         filename = 'exp_produtos'
     elif tipo == 'saldo':
         data = get_end_lote()
