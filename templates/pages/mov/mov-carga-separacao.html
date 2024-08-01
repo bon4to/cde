@@ -36,7 +36,10 @@
         
         <div class="tables-container" id="sepContainer" style="min-width: 40vw;{% if id_carga == 0 %}display: none;{% endif %}">
                 <div class="split-horizontal">
-                    <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                    <div class="flex-column">
+                        <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                        <h1 class="subtitle">Cliente: <span class="cor-web">{{ cliente }}</span></h1>
+                    </div>
                     <div class="cart-container">
                         <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
                         <div class="cart-dropdown hidden" id="cart-dropdown">

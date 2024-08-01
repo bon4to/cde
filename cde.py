@@ -520,6 +520,37 @@ def get_end_lote_fat():                                                         
     return end_lote
 
 
+def get_cliente_with_carga(id_carga):
+    query = f'''
+        SELECT DISTINCT
+            cl.FANTASIA AS FANT_CLIENTE
+
+        FROM DB2ADMIN.ITEMPED iped
+
+        JOIN DB2ADMIN.IGRUPOPE icrg
+        ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+        AND icrg.SEQ = iped.SEQ
+
+        JOIN DB2ADMIN.PEDIDO ped
+        ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+
+        JOIN DB2ADMIN.GRUPOPED crg
+        ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+        JOIN DB2ADMIN.CLIENTE cl
+        ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+        WHERE icrg.CODIGO_GRUPOPED = {id_carga}
+    '''
+
+    dsn = 'HUGOPIET'
+    result, columns = db_query_connect(query, dsn)
+
+    if result:
+        return result[0][0]
+    return None
+
+
 def get_all_cargas():
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2061,6 +2092,7 @@ def carga_id(id_carga):
         
         all_cargas = get_all_cargas()
         cargas_str_query = ', '.join(map(str, all_cargas))
+        cliente = get_cliente_with_carga(id_carga)
         
         query = f'''
             SELECT DISTINCT 
@@ -2097,7 +2129,6 @@ def carga_id(id_carga):
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
-
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
@@ -2106,7 +2137,8 @@ def carga_id(id_carga):
             result=result, columns=columns, alert=alert,
             class_alert=class_alert, id_carga=id_carga, 
             cod_item=cod_item, qtde_solic=qtde_solic,
-            result_local=result_local, columns_local=columns_local
+            result_local=result_local, columns_local=columns_local,
+            cliente=cliente
         )
     result = []
     return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
@@ -2176,10 +2208,12 @@ def cargas():                                                                   
 def carga_sep_pend(id_carga):
     id_user = session.get('id_user')
     user_info = get_userdata(id_user)
+    cliente = get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-pend.html', 
         id_carga=id_carga, 
-        user_info=user_info
+        user_info=user_info,
+        cliente=cliente
     )
 
 
@@ -2188,10 +2222,12 @@ def carga_sep_pend(id_carga):
 def carga_sep_done(id_carga):
     id_user = session.get('id_user')
     user_info = get_userdata(id_user)
+    cliente = get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-done.html', 
         id_carga=id_carga, 
-        user_info=user_info
+        user_info=user_info,
+        cliente=cliente
     )
 
 
@@ -2512,7 +2548,7 @@ def estoque_enderecado():
 
 
 @app.route('/export_csv/<tipo>', methods=['GET'])
-@verify_auth('CDE018')
+@verify_auth('CDE017')
 def export_csv_tipo(tipo):                                                                                      #* EXPORT .csv
     header = True
     if tipo == 'historico':

@@ -209,7 +209,7 @@ function generatePDF() {
         cod_item: row[1],
         desc_item: row[2],
         lote_item: row[3],
-        qtde_solic: parseFloat(row[4])  // Ensure qtde_solic is a number
+        qtde_solic: parseFloat(row[4])
     }));
 
     const totalQtdeSolic = data.reduce((total, item) => total + item.qtde_solic, 0);
@@ -238,8 +238,12 @@ function generatePDF() {
             doc.text(`CARGA: ${nroCarga}`, 10, 34);
         }
 
+        if (typeof cliente !== 'undefined') {
+            doc.text(`CLIENTE: ${cliente}`, 10, 40);
+        }
+
         doc.setLineWidth(0.4);
-        doc.line(10, 38, 200, 38);
+        doc.line(10, 44, 200, 44);
     };
 
     const addFooter = (doc, pageNumber) => {
@@ -267,7 +271,7 @@ function generatePDF() {
             addHeader(doc);
             addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
         },
-        margin: { top: 44 }
+        margin: { top: 50 }
     });
 
     const pdfName = `${getStorageKey()}.pdf`;
