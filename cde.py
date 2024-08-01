@@ -26,7 +26,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-app.config['APP_VERSION'] = ['0.4.5', 'Julho/2024', False]
+app.config['APP_VERSION'] = ['0.4.5', 'Agosto/2024', False]
 
 # GET nome do diretório
 dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
