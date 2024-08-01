@@ -108,7 +108,7 @@ def check_session_expiry():                                                     
 @app.before_request
 def check_ip():                                                                                                 #// CHECA LISTA DE IPS (MODO DEBUG)
     client_ip = request.remote_addr
-    if not debug:
+    if not debug == True:
         blacklist = os.getenv('BLACKLIST')
         if client_ip in blacklist:
             msg = f'{client_ip} na Blacklist.'
@@ -646,7 +646,7 @@ def get_saldo_view(timestamp=False):                                            
 
 def tlg_msg(msg):                                                                                               #* MENSAGEM DO TELEGRAM
     if not session.get('user_grant') == 1:
-        if debug:
+        if debug == True:
             print('[ERRO] A mensagem não pôde ser enviada em modo debug')
         else:
             bot_token = os.getenv('TLG_BOT_TOKEN')
