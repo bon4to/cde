@@ -209,8 +209,18 @@ function generatePDF() {
         cod_item: row[1],
         desc_item: row[2],
         lote_item: row[3],
-        qtde_solic: row[4]
+        qtde_solic: parseFloat(row[4])  // Ensure qtde_solic is a number
     }));
+
+    const totalQtdeSolic = data.reduce((total, item) => total + item.qtde_solic, 0);
+
+    data.push({
+        rua_letra_endereco: '',
+        cod_item: '',
+        desc_item: '',
+        lote_item: 'TOTAL:',
+        qtde_solic: totalQtdeSolic
+    });
 
     const addHeader = (doc) => {
         doc.setLineWidth(0.4);
