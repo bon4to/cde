@@ -33,9 +33,39 @@ dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
 debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
 main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
 
+class ANSI:
+    RESET = "\u001b[0m"
+    BOLD = "\u001b[1m"
+    RED = "\u001b[31m"
+    GREEN = "\u001b[32m"
+    YELLOW = "\u001b[33m"
+    BLUE = "\u001b[34m"
+    MAGENTA = "\u001b[35m"
+    CYAN = "\u001b[36m"
+    WHITE = "\u001b[37m"
+
+
+class TAGS:
+    SERVIDOR = f'{ANSI.MAGENTA}[SERVIDOR]{ANSI.RESET}'
+    ERRO     = f'{ANSI.RED}[ERRO]{ANSI.RESET}'
+    INFO     = f'{ANSI.BLUE}[INFO]{ANSI.RESET}'
+    STATUS   = f'{ANSI.GREEN}[STATUS]{ANSI.RESET}'
+    DENIED   = f'{ANSI.RED}403{ANSI.RESET}'
+    GRANTED  = f'{ANSI.CYAN}200{ANSI.RESET}'
+
+
+def logging(tag_1, tag_2, msge):
+    timestamp = get_timestamp()
+    if not tag_2:
+        print(f'{tag_1} {msge}')
+        return
+    print(f'{tag_1} ({timestamp}) {tag_2} | {msge}')
+    return
+    
+
 # MISC
 exec_head   = \
-    f'''                                                                     
+    f'''{ANSI.BLUE}                                                                     
                                                                     
       CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
    CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
@@ -53,15 +83,15 @@ C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
    CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
       CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
                                                                     
-    '''
+    {ANSI.RESET}'''
 start_head  = \
     f'''
-[INFO] CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
-[INFO] Python Version: {sys.version}
-[STATUS] Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}'''
+{TAGS.INFO} CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
+{TAGS.INFO} Python Version: {sys.version}
+{TAGS.STATUS} Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}'''
 error_foot  = \
     f'''
-[ERRO] 
+{TAGS.ERRO} 
 * Impossível executar, verifique se o arquivo está alocado corretamente.
 
 Pressione ENTER para sair...
@@ -678,7 +708,7 @@ def get_saldo_view(timestamp=False):                                            
 def tlg_msg(msg):                                                                                               #* MENSAGEM DO TELEGRAM
     if not session.get('user_grant') == 1:
         if debug == True:
-            print('[ERRO] A mensagem não pôde ser enviada em modo debug')
+            print(f'{[TAGS.ERRO]}A mensagem não pôde ser enviada em modo debug')
         else:
             bot_token = os.getenv('TLG_BOT_TOKEN')
             chat_id   = os.getenv('TLG_CHAT_ID')
@@ -727,10 +757,10 @@ def verify_auth(id_page):                                                       
                     user_permissions = get_user_permissions(id_user)
                     user_permissions = [item['id_perm'] for item in user_permissions]
                     if id_page in user_permissions:
-                        print(f'[SERVIDOR] {id_user} - {id_page} ({inject_page()['current_page']})| ACCESS GRANTED')
+                        logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                         return f(*args, **kwargs)
                     else:
-                        print(f'[SERVIDOR] {id_user} - {id_page} ({inject_page()['current_page']}) | ACCESS DENIED')
+                        logging(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                         alert_type = 'SEM PERMISSÕES \n'
                         alert_msge  = 'Você não tem permissão para acessar esta página.\n'
                         alert_more = ('''SOLUÇÕES:
@@ -743,12 +773,16 @@ def verify_auth(id_page):                                                       
                             url_return=url_for('index')
                         )
                 else:
-                    print(f'[SERVIDOR] {id_user} - {id_page} ({inject_page()['current_page']}) | ACCESS GRANTED')
+                    logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                     return f(*args, **kwargs)
             else:
                 return redirect(url_for('login'))
         return decorador
     return decorator
+
+
+def get_timestamp():                                                                                            #* RETORNA TIMESTAMP
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
 def get_userdata(id_user):                                                                                      #* RETORNA DADOS DO USUÁRIO
