@@ -52,6 +52,18 @@
                         </div>
                     </div>
                 </div>
+                {% if result and 'OBS_CARGA' in columns %}
+                    {% set obs_carga = result[0][columns.index('OBS_CARGA')]|trim %}
+                    {% if obs_carga and obs_carga | length > 0 %}
+                        <div class="msg-info">
+                            <details>
+                                <summary>A carga possui uma observação!</summary>
+                                <span id="obs_carga">{{ obs_carga }}</span>
+                            </details>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
             {% if result %}
                 <div id="detailedTable" class="hidden">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">

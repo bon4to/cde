@@ -550,6 +550,37 @@ def get_end_lote_fat():                                                         
     return end_lote
 
 
+def get_obs_with_carga(id_carga):
+    query = f'''
+        SELECT DISTINCT
+            crg.OBSERVACAO AS OBS_CARGA
+
+        FROM DB2ADMIN.ITEMPED iped
+
+        JOIN DB2ADMIN.IGRUPOPE icrg
+        ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+        AND icrg.SEQ = iped.SEQ
+
+        JOIN DB2ADMIN.PEDIDO ped
+        ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+
+        JOIN DB2ADMIN.GRUPOPED crg
+        ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+        JOIN DB2ADMIN.CLIENTE cl
+        ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+        WHERE icrg.CODIGO_GRUPOPED = {id_carga}
+    '''
+
+    dsn = 'HUGOPIET'
+    result, columns = db_query_connect(query, dsn)
+
+    if result:
+        return result[0][0]
+    return None
+
+
 def get_cliente_with_carga(id_carga):
     query = f'''
         SELECT DISTINCT
@@ -2135,7 +2166,9 @@ def carga_id(id_carga):
                 (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
                 CAST(iped.ITEM AS VARCHAR(255))       AS COD_ITEM,
                 i.ITEM_DESCRICAO                      AS DESC_ITEM,
-                CAST(iped.QTDE_SOLICITADA AS INTEGER) AS QTDE_SOLIC
+                CAST(iped.QTDE_SOLICITADA AS INTEGER) AS QTDE_SOLIC,
+                crg.OBSERVACAO                        AS OBS_CARGA
+                
             FROM DB2ADMIN.ITEMPED iped
 
             JOIN DB2ADMIN.IGRUPOPE icrg
@@ -2240,28 +2273,32 @@ def cargas():                                                                   
 @app.route('/mov/separacao-pend/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep_pend(id_carga):
-    id_user = session.get('id_user')
+    id_user   = session.get('id_user')
     user_info = get_userdata(id_user)
-    cliente = get_cliente_with_carga(id_carga)
+    obs_carga = get_obs_with_carga(id_carga)
+    cliente   = get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-pend.html', 
         id_carga=id_carga, 
         user_info=user_info,
-        cliente=cliente
+        cliente=cliente,
+        obs_carga=obs_carga
     )
 
 
 @app.route('/mov/separacao-done/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep_done(id_carga):
-    id_user = session.get('id_user')
+    id_user   = session.get('id_user')
     user_info = get_userdata(id_user)
-    cliente = get_cliente_with_carga(id_carga)
+    obs_carga = get_obs_with_carga(id_carga)
+    cliente   = get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-done.html', 
         id_carga=id_carga, 
         user_info=user_info,
-        cliente=cliente
+        cliente=cliente,
+        obs_carga=obs_carga
     )
 
 

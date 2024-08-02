@@ -48,6 +48,17 @@
                         </div>
                     </div>
                 </div>
+                {% if obs_carga %}
+                    {% set obs_carga = obs_carga|trim %}
+                    {% if obs_carga and obs_carga | length > 0 %}
+                        <div class="msg-info">
+                            <details>
+                                <summary>A carga possui uma observação!</summary>
+                                <span id="obs_carga">{{ obs_carga }}</span>
+                            </details>
+                        </div>
+                    {% endif %}
+                {% endif %}
                 <p style="justify-content: flex-start">Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
                 <div class="hidden" id="alert-message"></div>
                 <div id="contentTable">

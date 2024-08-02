@@ -274,9 +274,29 @@ function generatePDF() {
         margin: { top: 50 }
     });
 
+    doc.autoTable({
+        didDrawPage: (data) => {
+            addHeader(doc);
+            addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
+        },
+        margin: { top: 50 }
+    });
+    
+    if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
+        const finalY = doc.lastAutoTable.finalY;
+        const yOffset = finalY + 10;
+        doc.setFontSize(10);
+        doc.setFont("times", "bold");
+        doc.text("OBSERVACÃO: ", 10, yOffset);
+        
+        doc.setFont("times", "normal");
+        doc.text(obs_carga, 10 + doc.getTextWidth("OBSERVACÃO:") + 5, yOffset);
+    }
+
     const pdfName = `${getStorageKey()}.pdf`;
     doc.save(pdfName);
 }
+
 
 
 function renderSubtotals() {
