@@ -48,7 +48,7 @@
                             <ul class="cart-items">
                                 <!-- Itens serão renderizados aqui -->
                             </ul>
-                            <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Finalizar Separação</button>
+                            <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,6 @@
                         </div>
                     {% endif %}
                 {% endif %}
-
             {% if result %}
                 <div id="detailedTable" class="hidden">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
@@ -86,11 +85,11 @@
                             {% set subtotals = {} %}
                             
                             {% for row in result %}
-                                {% set cod_item = row[columns.index('COD_ITEM')] %}
+                                {% set cod_item   = row[columns.index('COD_ITEM')] %}
                                 {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
-                                {% set subtotal = subtotals.get(cod_item, 0) + qtde_solic %}
-                                {% set subtotals = subtotals.update({cod_item: subtotal}) or subtotals %}
-                                {% set items = items.append(row) or items %}
+                                {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
+                                {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
+                                {% set items      = items.append(row) or items %}
                             {% endfor %}
                             
                             {% for row_cod_item, subtotal in subtotals.items() %}
@@ -104,7 +103,10 @@
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
-                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')">
+                                <tr 
+                                    class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}"
+                                    onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')"
+                                >
                                     <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
                                     <td>{{ subtotal }}</td>
                                 </tr>
@@ -144,9 +146,11 @@
                             {% endfor %}
                             
                             {% for row_cod_item, item in items.items() %}
-                                <tr class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
-                                data-cod-item="{{ row_cod_item }}"
-                                onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')">
+                                <tr 
+                                    class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
+                                    data-cod-item="{{ row_cod_item }}"
+                                    onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')"
+                                >
                                     <td>{{ row_cod_item }}</td>
                                     <td style="text-wrap: balance;">{{ item.desc }}</td>
                                     <td>{{ item.qtde }}</td>
@@ -229,8 +233,8 @@
                     <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="LIMPAR">
                         <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                     </a>
-                    <a class="button-mini btn-fancy" style="margin: 0" onclick="goBack()" title="VOLTAR">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" ">
+                    <a class="button-mini btn-fancy" style="margin: 0;" onclick="goBack()" title="VOLTAR">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}">
                     </a>
                 </div>
             {% else %}
