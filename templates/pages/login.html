@@ -60,7 +60,7 @@
                                     </div>
                                     <h3>{{ session.get('user_name', 'Faça seu Login!') }}</h3>
                                     <h4 style="margin: 0; text-align: center">{{ 'Administrador' if session.get('user_grant') <= 2 else 'Usuário Padrão' }}</h4>
-                                    <p class="link" style="cursor: pointer;" onclick="window.location.href='/in-dev'">EDITAR</p>
+                                    <p class="link" style="cursor: pointer;" onclick="window.location.href='/change-password'">EDITAR SENHA</p>
                                 </div>
                                 <div class="form-login-input">
                                     <div class="flex-row" style="display: flex;width: 100%;">

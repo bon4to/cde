@@ -1210,6 +1210,55 @@ def api():
 def pagina_login():
     return render_template('pages/login.html')
 
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    if request.method == 'GET':
+        alert_type = 'SENHA ATUAL'
+        alert_msge = 'Primeiramente, informe sua senha.'
+        alert_more = '/change-password'
+        url_return = ''
+        return render_template(
+            'components/menus/alert-input.html', 
+            alert_type=alert_type,
+            alert_msge=alert_msge,
+            alert_more=alert_more,
+            url_return=url_return
+        )
+    else:
+        user_id = session.get('id_user')
+        password = request.form['input']
+        if user_id and password_check(user_id, password):
+            alert_type = 'REDEFINIR (SENHA)'
+            alert_msge = 'A senha deve ter no mínimo 6 caracteres.'
+            alert_more = '/users/reset-password'
+            url_return = ''
+            return render_template(
+                'components/menus/alert-input.html', 
+                alert_type=alert_type,
+                alert_msge=alert_msge,
+                alert_more=alert_more,
+                url_return=url_return
+            )
+        else:
+            return redirect(url_for('change_password'))
+
+
+def password_check(id_user, password):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT password_user
+            FROM users
+            WHERE id_user = ?;
+        ''', (id_user,))
+
+        row = cursor.fetchone()
+        
+        if row:
+            db_password = row[0]
+            return check_key(db_password, password)
+        return False
+
 
 @app.route('/login', methods=['POST'])                                                                          #* ROTA DE SESSÃO LOGIN
 def login():                                                                                                    # TODO: função auxiliar
