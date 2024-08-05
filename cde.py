@@ -34,15 +34,15 @@ debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
 main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
 
 class ANSI:
-    RESET = "\u001b[0m"
-    BOLD = "\u001b[1m"
-    RED = "\u001b[31m"
-    GREEN = "\u001b[32m"
-    YELLOW = "\u001b[33m"
-    BLUE = "\u001b[34m"
-    MAGENTA = "\u001b[35m"
-    CYAN = "\u001b[36m"
-    WHITE = "\u001b[37m"
+    RESET = ""
+    BOLD = ""
+    RED = ""
+    GREEN = ""
+    YELLOW = ""
+    BLUE = ""
+    MAGENTA = ""
+    CYAN = ""
+    WHITE = ""
 
 
 class TAGS:
@@ -120,7 +120,7 @@ def renew_session():                                                            
 
 @app.before_request
 def check_session_expiry():                                                                                     #* VERIFICA SE A SESSÃO ESTÁ EXPIRADA
-    if request.path.startswith(('/static', '/get', '/post')):                                                                      # IGNORA AS REQUISICOES DE ARQUIVOS ESTÁTICOS
+    if request.path.startswith(('/static', '/get', '/post')):                                                   # IGNORA AS REQUISICOES DE ARQUIVOS ESTÁTICOS
         return
     if 'last_active' in session:
         next_url = request.url
@@ -291,7 +291,60 @@ def get_frase():                                                                
     return frase
 
 
-def get_all_itens():                                                                                                #* RETORNA TODOS OS PARÂMETROS DO ITEM
+
+def get_preset_itens(index):                                                                                    #* BUSCA ITENS DE PRESETS
+    try:
+        with open(f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
+            itens = file.read().strip().split(', ')
+    except:
+        itens = []
+    return itens
+
+
+def get_saldo_preset(index, timestamp=False):
+    itens = get_preset_itens(index)
+    
+    if not itens:
+        return []
+
+    placeholders = ','.join(['?'] * len(itens))
+    query = f'''
+        SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo
+        FROM itens i
+        LEFT JOIN (
+            SELECT cod_item,
+            SUM(CASE 
+                WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade
+                WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                ELSE (quantidade * 0)
+                END
+            ) as saldo,
+            MAX(time_mov) as time_mov,
+            ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+            FROM historico h
+            WHERE time_mov <= ?
+            GROUP BY cod_item
+        ) t ON i.cod_item = t.cod_item
+        WHERE i.cod_item IN ({placeholders})
+        ORDER BY i.cod_item;
+    '''
+
+    if timestamp:
+        timestamp = add_days_to_datetime_str(timestamp, 1)
+    timestamp = parse_db_datetime(timestamp)
+
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, (timestamp, *itens))
+        saldo_visualization = [{
+            'cod_item' : row[1], 'desc_item': row[0], 
+            'saldo'    : row[2]
+        } for row in cursor.fetchall()]
+
+    return saldo_visualization
+
+
+def get_all_itens():                                                                                            #* RETORNA TODOS OS PARÂMETROS DO ITEM
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -306,7 +359,7 @@ def get_all_itens():                                                            
     return itens
 
 
-def get_active_itens():                                                                                                #* RETORNA TODOS OS PARÂMETROS DO ITEM
+def get_active_itens():                                                                                         #* RETORNA TODOS OS PARÂMETROS DO ITEM
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -707,8 +760,9 @@ def get_saldo_view(timestamp=False):                                            
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT i.desc_item, i.cod_item, t.saldo, t.time_mov
-            FROM ( 
+            SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo, COALESCE(t.time_mov, "") as time_mov
+            FROM itens i
+            LEFT JOIN (
                 SELECT cod_item,
                 SUM(CASE 
                     WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
@@ -721,11 +775,9 @@ def get_saldo_view(timestamp=False):                                            
                 FROM historico h
                 WHERE time_mov <= ?
                 GROUP BY cod_item
-                HAVING saldo != 0
-            ) t
-            JOIN itens i ON t.cod_item = i.cod_item
-            WHERE rn = 1
-            ORDER BY t.cod_item;
+            ) t ON i.cod_item = t.cod_item
+            WHERE t.rn = 1 OR t.rn IS NULL
+            ORDER BY t.time_mov DESC;
         ''', (timestamp,))
 
         saldo_visualization = [{
@@ -1237,9 +1289,7 @@ def login():                                                                    
                     next_url = session.get('next_url')
                     
                     if next_url:
-                        print(f"next_url: {next_url}")
                         return redirect(next_url)
-                    print(f"next_url: {next_url}")
                     return redirect(url_for('index'))
     else:  # if not request.method == 'POST':
         return redirect(url_for('login'))
@@ -2618,6 +2668,21 @@ def estoque_enderecado():
     )
 
 
+@app.route('/estoque-presets', methods=['GET', 'POST'])
+@verify_auth('MOV004')
+def estoque_preset():
+    preset_id = request.form.get('preset_id', 1)
+    if request.method == 'POST':
+        saldo_preset = get_saldo_preset(preset_id, False)
+    else:
+        saldo_preset = get_saldo_preset(preset_id)
+    return render_template(
+        'pages/estoque-preset.html',
+        saldo_atual=saldo_preset,
+        search_term=preset_id
+    )
+
+
 @app.route('/export_csv/<tipo>', methods=['GET'])
 @verify_auth('CDE017')
 def export_csv_tipo(tipo):                                                                                      #* EXPORT .csv
@@ -2643,6 +2708,9 @@ def export_csv_tipo(tipo):                                                      
     elif tipo == 'producao':
         data = get_producao()
         filename = 'exp_prog_producao'
+    elif tipo == 'saldo_preset':
+        data = get_saldo_preset(1)
+        filename = 'get_saldo_preset'    
     elif tipo == 'export_promob':
         header = False
         data = get_export_promob()

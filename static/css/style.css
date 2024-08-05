@@ -601,6 +601,17 @@ select, textarea, input {
     font-family: "Inter", sans-serif;
 }
 
+input.mini, select.mini {
+    width: 72px;
+    height: 28px;
+    padding: 0 5px;
+}
+
+button.mini {
+    height: 28px;
+    width: 28px;
+}
+
 select:focus, textarea:focus, input:focus {
     border-bottom: 2px solid var(--cor-destaque);
     transition: border-color 0.2s ease-out;

@@ -15,6 +15,7 @@
             <div class="aux-buttons">
                 {% block svg %}
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
                 {% endblock svg %}
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
