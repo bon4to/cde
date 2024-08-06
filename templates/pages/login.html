@@ -15,10 +15,12 @@
                 <h1>
                     <a href="{{ url_for('home') }}">CDE</a>
                     <span class="dash">/</span>
-                    <span>USUARIOS</span>
-                    <span class="id-page">{{session['id_page']}}</span>
+                    <span>CONTA</span>
+                    <span class="id-page">CDE003</span>
                 </h1>
                 <div class="aux-buttons">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
+                    <hr class="vert">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
                 </div>
             </div>

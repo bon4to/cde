@@ -440,7 +440,7 @@ def get_historico(page=1, per_page=10):                                         
         cursor = connection.cursor()
 
         cursor.execute('SELECT COUNT(*) FROM historico;')
-        row_count = cursor.fetchone()[0]
+        row_count = cursor.fetchone()[0] # número total de linhas
 
         cursor.execute('''
             SELECT  
@@ -1210,13 +1210,14 @@ def api():
 def pagina_login():
     return render_template('pages/login.html')
 
+
 @app.route('/change-password', methods=['GET', 'POST'])
 def change_password():
     if request.method == 'GET':
-        alert_type = 'SENHA ATUAL'
+        alert_type = 'QUAL A SENHA ATUAL?'
         alert_msge = 'Primeiramente, informe sua senha.'
         alert_more = '/change-password'
-        url_return = ''
+        url_return = 'Informe sua senha atual...'
         return render_template(
             'components/menus/alert-input.html', 
             alert_type=alert_type,
@@ -1231,7 +1232,7 @@ def change_password():
             alert_type = 'REDEFINIR (SENHA)'
             alert_msge = 'A senha deve ter no mínimo 6 caracteres.'
             alert_more = '/users/reset-password'
-            url_return = ''
+            url_return = 'Digite sua nova senha...'
             return render_template(
                 'components/menus/alert-input.html', 
                 alert_type=alert_type,

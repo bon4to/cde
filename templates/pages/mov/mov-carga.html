@@ -289,7 +289,11 @@
                                                 <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
                                                 <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
                                                 <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
-                                                <td>{{ row[columns.index('OBS_CARGA')] }}</td>
+                                                <td>
+                                                    {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
+                                                        <img class="svg-gray table-more" title="{{ row[columns.index('OBS_CARGA')] }}" style="height: 15px; width: 15px; padding: 2px" src="{{ url_for('static', filename='svg/info.svg') }}" alt="">
+                                                    {% endif %}
+                                                </td>
                                             </tr>
                                         {% endif %}
                                     {% endfor %}
