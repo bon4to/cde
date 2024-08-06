@@ -155,10 +155,16 @@ html.dark td.over-row {
 }
 
 html.dark .selectable-row.sub-total td {
-    color: var(--dark-text);
+    color: var(--dark-text);    
 }
 
-html.dark  .selectable-row.sub-total:hover td {
+html.dark .sub-total td {
+    color: var(--dark-text);
+    background-color: #313131;
+    border-bottom: 4px solid var(--cor-destaque);
+}
+
+html.dark .selectable-row.sub-total:hover td {
     opacity: 1;
     border-bottom: 4px solid #fff;
 }
@@ -1812,6 +1818,13 @@ div.msg-info {
 }
 
 .selectable-row.sub-total td {
+    color: rgb(27, 26, 26);
+    transition: 0.1s ease-in-out all;
+    background-color: rgba(52, 49, 50, 0.1);
+    border-bottom: 4px solid var(--cor-destaque);
+}
+
+.sub-total td {
     color: rgb(27, 26, 26);
     transition: 0.1s ease-in-out all;
     background-color: rgba(52, 49, 50, 0.1);

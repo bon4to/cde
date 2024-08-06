@@ -218,8 +218,8 @@ function generatePDF() {
         rua_letra_endereco: '',
         cod_item: '',
         desc_item: '',
-        lote_item: 'TOTAL:',
-        qtde_solic: totalQtdeSolic
+        lote_item: 'Total:',
+        qtde_solic: totalQtdeSolic / 2
     });
 
     const addHeader = (doc) => {
