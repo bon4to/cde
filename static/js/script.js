@@ -247,19 +247,25 @@ function generatePDF() {
         doc.line(10, 44, 200, 44);
     };
 
-    const drawFooter = (pageCount) => {
-        doc.setLineWidth(0.4);
-        doc.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
+    const drawFooter = () => {
+        const totalPages = doc.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
 
-        doc.setFontSize(10);
-        if (typeof userName === 'string') {
-            doc.text(userName, 10, pageHeight - 10, { align: 'left' });
-        }
+            doc.setLineWidth(0.4);
+            doc.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
 
-        doc.text(`${pageCount} / ${pageCount}`, doc.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
+            doc.setFontSize(10);
+            if (typeof userName === 'string') {
+                doc.text(userName, 10, pageHeight - 10, { align: 'left' });
+            }
 
-        if (typeof currentDateTime === 'string') {
-            doc.text(currentDateTime, doc.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
+            doc.text(`${pageNumber} / ${totalPages}`, doc.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
+
+            if (typeof currentDateTime === 'string') {
+                doc.text(currentDateTime, doc.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
+            }
         }
     };
 
@@ -313,7 +319,6 @@ function generatePDF() {
 
             // Verificar se há espaço suficiente na página
             if (startY + cellHeight + marginBottom > pageHeight) {
-                drawFooter(doc.internal.getNumberOfPages());
                 doc.addPage();
                 drawHeader();
                 startY = 50;
