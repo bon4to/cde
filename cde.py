@@ -2370,6 +2370,61 @@ def cargas():                                                                   
     return render_template('pages/mov/mov-carga.html', result=result)
 
 
+@app.route('/api/qtde_solic', methods=['GET'])
+def get_qtde_solic():
+    id_carga = request.args.get('id_carga', type=int)
+    cod_item = request.args.get('cod_item', type=str)
+    
+    query = f'''
+        SELECT
+            SUM(CAST(iped.QTDE_SOLICITADA AS INTEGER)) AS QTDE_SOLIC
+        FROM DB2ADMIN.ITEMPED iped
+
+        JOIN DB2ADMIN.IGRUPOPE icrg
+        ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+        AND icrg.SEQ = iped.SEQ
+
+        WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
+        AND iped.ITEM = '{cod_item}'
+    '''
+    try:
+        dsn = 'HUGOPIET'
+        result, columns = db_query_connect(query, dsn)
+        if result:
+            qtde_solic = result[0][0]
+        else:
+            qtde_solic = 0
+        return jsonify({'qtde_solic': qtde_solic})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/itens_carga', methods=['GET'])
+def get_itens_carga():
+    id_carga = request.args.get('id_carga', type=int)
+    
+    query = f'''
+        SELECT DISTINCT iped.ITEM
+        FROM DB2ADMIN.ITEMPED iped
+
+        JOIN DB2ADMIN.IGRUPOPE icrg
+        ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+        AND icrg.SEQ = iped.SEQ
+
+        WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
+    '''
+    try:
+        dsn = 'HUGOPIET'
+        result, columns = db_query_connect(query, dsn)
+        if result:
+            itens = result[0]
+        else:
+            itens = 'Erro: Nenhum item encontrado.'
+        return jsonify({'itens': itens})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/mov/separacao-pend/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep_pend(id_carga):
@@ -2473,7 +2528,8 @@ def list_all_separations():
     try:
         directory = os.path.join(app.root_path, 'report/cargas')
         files = [f for f in os.listdir(directory) if f.endswith('.json')]
-        return jsonify(files), 200
+        files_sorted = sorted(files, reverse=True)
+        return jsonify(files_sorted), 200
     except Exception as e:
         return jsonify({'error': f'Erro ao listar arquivos: {str(e)}'}), 500
 

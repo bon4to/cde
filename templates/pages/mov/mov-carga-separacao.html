@@ -62,20 +62,22 @@
                 <p style="justify-content: flex-start">Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
                 <div class="hidden" id="alert-message"></div>
                 <div id="contentTable">
-                    <table id="itemsTable">
-                        <thead>
-                            <tr>
-                                <th>Endereço</th>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th>Lote (Código)</th>
-                                <th>QTDE (Separado)</th>
-                            </tr>
-                        </thead>
-                            <!-- executa renderItems(); -->
-                        <tbody>
-                        </tbody>
-                    </table>
+                    <div class="table-overflow" style="max-height: 400px">
+                        <table id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>Endereço</th>
+                                    <th>Item (Código)</th>
+                                    <th>Item (Descrição)</th>
+                                    <th>Lote (Código)</th>
+                                    <th>QTDE (Separado)</th>
+                                </tr>
+                            </thead>
+                                <!-- executa renderItems(); -->
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="flex-row" style="margin: 8px 0">
                         {% block separation_buttons %}
                             
@@ -88,7 +90,7 @@
             {% block all_separation_status %}
             
             {% endblock all_separation_status %}
-            <div class="table-overflow" style="max-height: 400px">
+            <div class="table-overflow" style="max-height: 500px">
                 <table id="allSeparationsTable">
                     <thead>
                         <tr>

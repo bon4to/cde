@@ -40,7 +40,7 @@
 
 
 {% block all_separation_status %}
-    <p style="justify-content: flex-start">Status:<span style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
+    <p style="justify-content: flex-start">Status:<span style="color: var(--cor-tl); margin-left: 4px">Pendentes</span></p>
 {% endblock all_separation_status %}
 
 
@@ -56,9 +56,11 @@
             renderCartSubtotals();
         }
 
+
         function getStorageKey() {
             return `separacao-carga-${nroCarga}`;
         }
+
         
         function redirectToCarga() {
             const cargaInput = document.getElementById('cargaInput').value;
@@ -67,6 +69,7 @@
                 window.location.href = url;
             }
         }
+
 
         function renderCartSubtotals() {
             const cartItemsContainer = document.querySelector('.cart-items');
@@ -124,10 +127,12 @@
                 console.error('Erro ao obter separação:', error);
             });
         }
+
         
         function updateItemCount(itemCount) {
             document.querySelector('.item-count').textContent = itemCount;
         }
+
 
         function getSeparacao() {
             return new Promise((resolve, reject) => {
@@ -152,6 +157,7 @@
             });
         }
 
+
         function removeItem(index) {
             const confirmation = confirm('Você tem certeza que deseja remover este item?');
             if (confirmation) {
@@ -162,6 +168,7 @@
             }
         }
 
+
         function clearItems() {
             const confirmation = confirm(`Você tem certeza que deseja limpar a separacao de ${nroCarga}?`);
             if (confirmation) {
@@ -170,6 +177,7 @@
             }
         }
 
+
         function updateQuantity(index, newQuantity) {
             let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
             sepCarga[index].qtde_sep = newQuantity;
@@ -177,50 +185,91 @@
             renderItems();
         }
 
-        function renderItems() {
+
+        async function fetchQtdeSolic(id_carga, cod_item) {
+            try {
+                const response = await fetch(`/api/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
+                const data = await response.json();
+                return data.qtde_solic;
+            } catch (error) {
+                console.error('Erro ao obter qtde_solic:', error);
+                return null;
+            }
+        }
+        
+
+        async function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             const statusElements = document.getElementsByClassName('separation_status');
             itemsTable.innerHTML = '';
-            getSeparacao().then(async sepCarga => {
+            try {
+                const sepCarga = await getSeparacao();
         
-                for (let index = 0; index < sepCarga.length; index++) {
-                    const item = sepCarga[index];
-                    const row = itemsTable.insertRow();
-                    
-                    row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
-                    row.insertCell(1).textContent = item.cod_item;
-                    const descCell = row.insertCell(2);
-                    row.insertCell(3).textContent = item.lote_item;
-                    row.insertCell(4).textContent = item.qtde_sep;
-                    
-                    try {
-                        const descricao = await fetchItemDescription(item.cod_item);
-                        descCell.style.textWrap = "balance";
-                        descCell.textContent = descricao;
-                    } catch (error) {
-                        console.error('Erro ao obter descrição:', error);
-                        descCell.textContent = 'Erro ao obter descrição';
+                const groupedItems = sepCarga.reduce((acc, item) => {
+                    if (!acc[item.cod_item]) {
+                        acc[item.cod_item] = [];
                     }
+                    acc[item.cod_item].push(item);
+                    return acc;
+                }, {});
         
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.classList.add('action-buttons');
+                for (const [cod_item, items] of Object.entries(groupedItems)) {
+                    let subtotal = 0;
         
-                    const removeBtn = document.createElement('div');
-                    removeBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">';
-                    removeBtn.title = `REMOVER DE ${item.cod_item}`;
-                    removeBtn.onclick = () => removeItem(index);
-                    actionsDiv.appendChild(removeBtn);
+                    items.forEach(async (item, index) => {
+                        const row = itemsTable.insertRow();
+                        row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
+                        row.insertCell(1).textContent = item.cod_item;
         
-                    row.appendChild(actionsDiv);
+                        const descCell = row.insertCell(2);
+                        row.insertCell(3).textContent = item.lote_item;
+                        row.insertCell(4).textContent = item.qtde_sep;
+        
+                        subtotal += item.qtde_sep;
+        
+                        try {
+                            const descricao = await fetchItemDescription(item.cod_item);
+                            descCell.style.textWrap = "balance";
+                            descCell.textContent = descricao;
+                        } catch (error) {
+                            console.error('Erro ao obter descrição:', error);
+                            descCell.textContent = 'Erro ao obter descrição';
+                        }
+        
+                        const actionsDiv = document.createElement('div');
+                        actionsDiv.classList.add('action-buttons');
+        
+                        const removeBtn = document.createElement('div');
+                        removeBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">';
+                        removeBtn.title = `REMOVER DE ${item.cod_item}`;
+                        removeBtn.onclick = () => removeItem(index);
+                        actionsDiv.appendChild(removeBtn);
+        
+                        row.appendChild(actionsDiv);
+                    });
+                    const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
+                    const subtotalRow = itemsTable.insertRow();
+
+                    subtotalRow.insertCell(0);
+                    subtotalRow.insertCell(1);
+                    const cell0 = subtotalRow.insertCell(2);
+
+                    cell0.textContent = cod_item;
+                    cell0.style.textAlign = 'right';
+
+                    const cell1 = subtotalRow.insertCell(3);
+
+                    cell1.textContent = 'Subtotal:';
+                    subtotalRow.insertCell(4).innerHTML = '<span class="cor-web">' + subtotal + '</span> / ' + qtde_solic;
+
+                    subtotalRow.classList.add('sub-total');
                 }
-                
-            })
-            .catch(error => {
+            } catch (error) {
                 const alert = document.getElementById('alert-message')
                 const content = document.getElementById('contentTable')
-
-                var errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`
-
+        
+                let errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`
+        
                 if (error.message == 304) {
                     errorMessage = `<div class="msg-success">
                                         <details>
@@ -231,8 +280,7 @@
                     Array.from(statusElements).forEach(element => {
                         element.innerHTML = "<span style='color: green'>Finalizada</span>";
                     });
-                }
-                else if (error.message == 404) {
+                } else if (error.message == 404) {
                     errorMessage = `<div class="msg-error">
                                         <details>
                                             <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
@@ -240,13 +288,14 @@
                                         </details>
                                     </div>`;
                 }
-
+        
                 alert.innerHTML = errorMessage;
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
-            });
+            }
         }
 
+        
         function bulkInsertHistorico() {
             const confirmation = confirm(`[CARGA: ${nroCarga}] Você tem certeza que deseja finalizar a separação?`);
             if (confirmation) {
@@ -289,21 +338,28 @@
         function listSeparationsLocalStorage() {
             const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
             allSeparationsTable.innerHTML = '';
-        
+            const keys = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key.startsWith('separacao-carga-')) {
-                    const cargaNumber = key.replace('separacao-carga-', '');
-                    const row = allSeparationsTable.insertRow();
-                    row.insertCell(0).textContent = cargaNumber;
-                    row.classList.add("selectable-row");
-
-                    row.addEventListener('click', function() {
-                        window.location.href = `/mov/separacao-pend/${cargaNumber}`;
-                    });
+                    keys.push(key);
                 }
             }
+
+            keys.sort((a, b) => b.localeCompare(a));
+        
+            keys.forEach(key => {
+                const cargaNumber = key.replace('separacao-carga-', '');
+                const row = allSeparationsTable.insertRow();
+                row.insertCell(0).textContent = cargaNumber;
+                row.classList.add("selectable-row");
+        
+                row.addEventListener('click', function() {
+                    window.location.href = `/mov/separacao-pend/${cargaNumber}`;
+                });
+            });
         }
+        
 
         function sendToServer(data, filename) {
             const payload = {

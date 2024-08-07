@@ -196,36 +196,37 @@ function generatePDF() {
         tableData.push(rowData);
     });
 
-    const columns = [
-        { title: "Endereço", dataKey: "rua_letra_endereco" },
-        { title: "Item (Código)", dataKey: "cod_item" },
-        { title: "Item (Descrição)", dataKey: "desc_item" },
-        { title: "Lote (Código)", dataKey: "lote_item" },
-        { title: "QTDE (Solicitada)", dataKey: "qtde_solic" }
-    ];
+    const columns = ["Endereço", "Item (Código)", "Item (Descrição)", "Lote (Código)", "Qtde (Sep.)"];
 
     const data = tableData.map(row => ({
         rua_letra_endereco: row[0],
         cod_item: row[1],
         desc_item: row[2],
         lote_item: row[3],
-        qtde_solic: parseFloat(row[4])
+        qtde_solic: row[4]
     }));
 
-    const totalQtdeSolic = data.reduce((total, item) => total + item.qtde_solic, 0);
+    const filteredData = data.filter(item => !item.lote_item.startsWith('Subtotal:'));
+
+    const totalQtdeSolic = filteredData.reduce((total, item) => total + parseFloat(item.qtde_solic), 0);
 
     data.push({
         rua_letra_endereco: '',
         cod_item: '',
         desc_item: '',
         lote_item: 'Total:',
-        qtde_solic: totalQtdeSolic / 2
+        qtde_solic: totalQtdeSolic
     });
 
-    const addHeader = (doc) => {
-        doc.setLineWidth(0.4);
-        doc.line(10, 14, 200, 14);
+    const pageHeight = doc.internal.pageSize.height;
+    const marginBottom = 20;
+    const cellPadding = 4;
+    const cellHeight = 10;
+    const startX = 10;
+    const colWidths = [25, 30, 80, 30, 25];
+    let startY = 50;
 
+    const drawHeader = () => {
         doc.setFont("times", "bold");
         doc.setFontSize(16);
         doc.text("Relatório de Cargas", 10, 22);
@@ -233,7 +234,7 @@ function generatePDF() {
         doc.setFont("times", "normal");
         doc.setFontSize(12);
         doc.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
-        
+
         if (typeof nroCarga !== 'undefined') {
             doc.text(`CARGA: ${nroCarga}`, 10, 34);
         }
@@ -246,51 +247,94 @@ function generatePDF() {
         doc.line(10, 44, 200, 44);
     };
 
-    const addFooter = (doc, pageNumber) => {
-        const pageCount = doc.internal.getNumberOfPages();
-        doc.setFontSize(10);
+    const drawFooter = (pageCount) => {
+        doc.setLineWidth(0.4);
+        doc.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
 
+        doc.setFontSize(10);
         if (typeof userName === 'string') {
-            doc.text(userName, 10, doc.internal.pageSize.height - 10, { align: 'left' });
+            doc.text(userName, 10, pageHeight - 10, { align: 'left' });
         }
 
-        doc.text(`${pageNumber} / ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+        doc.text(`${pageCount} / ${pageCount}`, doc.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
 
         if (typeof currentDateTime === 'string') {
-            doc.text(currentDateTime, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 10, { align: 'right' });
+            doc.text(currentDateTime, doc.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
         }
-
-        doc.setLineWidth(0.4);
-        doc.line(10, doc.internal.pageSize.height - 20, 200, doc.internal.pageSize.height - 20);
     };
 
-    doc.autoTable({
-        head: [columns.map(col => col.title)],
-        body: data.map(item => columns.map(col => item[col.dataKey])),
-        didDrawPage: (data) => {
-            addHeader(doc);
-            addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
-        },
-        margin: { top: 50 }
-    });
+    const drawTable = (data) => {
+        // Desenhando cabeçalho da tabela
+        doc.setFontSize(10);
+        doc.setLineWidth(0.1);
+        doc.setFont("times", "bold");
+        columns.forEach((col, i) => {
+            doc.rect(startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), startY, colWidths[i], cellHeight);
+            doc.text(col, startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
+        });
 
-    doc.autoTable({
-        didDrawPage: (data) => {
-            addHeader(doc);
-            addFooter(doc, doc.internal.getCurrentPageInfo().pageNumber);
-        },
-        margin: { top: 50 }
-    });
-    
+        // Desenhando linhas da tabela
+        startY += cellHeight;
+        doc.setFont("times", "normal");
+        data.forEach((item, index) => {
+            const row = [
+                item.rua_letra_endereco,
+                item.cod_item,
+                item.desc_item,
+                item.lote_item,
+                item.qtde_solic.toString()
+            ];
+
+            const isSubtotal = item.lote_item && item.lote_item.startsWith('Subtotal:');
+            const isTotal = item.lote_item === 'Total:';
+            
+            row.forEach((cell, i) => {
+                if (isSubtotal) {
+                    doc.setFillColor(220, 220, 220);
+                    doc.setFont("times", "bold");
+                } else if (isTotal) {
+                    doc.setFillColor(192, 192, 192);
+                    doc.setFont("times", "bold");
+                } else {
+                    doc.setFillColor(255, 255, 255);
+                    doc.setFont("times", "normal");
+                }
+
+                const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+                const y = startY;
+
+                doc.rect(x, y, colWidths[i], cellHeight, 'F');
+
+                const text = doc.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
+                doc.text(text, x + cellPadding, y + cellPadding);
+            });
+
+            startY += cellHeight;
+
+            // Verificar se há espaço suficiente na página
+            if (startY + cellHeight + marginBottom > pageHeight) {
+                drawFooter(doc.internal.getNumberOfPages());
+                doc.addPage();
+                drawHeader();
+                startY = 50;
+                doc.setFontSize(10);
+                doc.setLineWidth(0.1);
+            }
+        });
+    };
+
+    drawHeader();
+    drawTable(data);
+    drawFooter(doc.internal.getNumberOfPages());
+
     if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
-        const finalY = doc.lastAutoTable.finalY;
-        const yOffset = finalY + 10;
+        const finalY = startY + 10;
         doc.setFontSize(10);
         doc.setFont("times", "bold");
-        doc.text("OBSERVACÃO: ", 10, yOffset);
+        doc.text("OBSERVACÃO: ", 10, finalY);
         
         doc.setFont("times", "normal");
-        doc.text(obs_carga, 10 + doc.getTextWidth("OBSERVACÃO:") + 5, yOffset);
+        doc.text(obs_carga, 10 + doc.getTextWidth("OBSERVACÃO:") + 5, finalY);
     }
 
     const pdfName = `${getStorageKey()}.pdf`;
