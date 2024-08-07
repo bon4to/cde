@@ -230,11 +230,8 @@
         {% if 'user_grant' in session %}
             {% if id_carga %}
                 <div style="display: flex; flex-direction: column; gap: 6px">
-                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="LIMPAR">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                    </a>
-                    <a class="button-mini btn-fancy" style="margin: 0;" onclick="goBack()" title="VOLTAR">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}">
+                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                     </a>
                 </div>
             {% else %}

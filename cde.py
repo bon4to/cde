@@ -844,10 +844,9 @@ def verify_auth(id_page):                                                       
                         return f(*args, **kwargs)
                     else:
                         logging(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
-                        alert_type = 'SEM PERMISSÕES \n'
-                        alert_msge  = 'Você não tem permissão para acessar esta página.\n'
-                        alert_more = ('''SOLUÇÕES:
-                                       - Solicite ao seu supervisor um novo nível de acesso.''')
+                        alert_type = 'SEM PERMISSÕES'
+                        alert_msge = 'Você não tem permissão para acessar esta página.'
+                        alert_more = '''SOLUÇÕES:\n- Solicite ao seu supervisor um novo nível de acesso.'''
                         return render_template(
                             'components/menus/alert.html', 
                             alert_type=alert_type,
@@ -946,7 +945,7 @@ def export_csv(data, filename, include_headers=True):
         return csv_filename
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
-        alert_msge  = 'A tabela não tem informações o suficiente para exportação. \n'
+        alert_msge = 'A tabela não tem informações o suficiente para exportação. \n'
         alert_more = ('''POSSÍVEIS SOLUÇÕES:
                        - Verifique se a tabela possui mais de uma linha.
                        - Contate o suporte. ''')
@@ -1316,8 +1315,8 @@ def login():                                                                    
                 acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 input_pwd = "12345"
                 if check_key(user_pwd, input_pwd):
-                    alert_type = 'REDEFINIR (SENHA) \n'
-                    alert_msge  = 'Você deve definir sua senha no seu primeiro acesso.'
+                    alert_type = 'REDEFINIR (SENHA)'
+                    alert_msge = 'Você deve definir sua senha no seu primeiro acesso.'
                     alert_more = '/users/reset-password'
                     url_return = 'Digite sua nova senha...'
 
@@ -1620,8 +1619,8 @@ def moving():
 
         saldo_item  = int(get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:                                             #? IMPOSSIBILITA ESTOQUE NEGATIVO 
-            alert_type = 'OPERAÇÃO CANCELADA \n'
-            alert_msge  = 'O saldo do item selecionado é INSUFICIENTE. \n'
+            alert_type = 'OPERAÇÃO CANCELADA'
+            alert_msge = 'O saldo do item selecionado é INSUFICIENTE.'
             alert_more = ('''POSSÍVEIS SOLUÇÕES:
                             - Verifique se está movimentando o item correspondente.
                             - Verifique a quantidade de movimentação.
@@ -1643,13 +1642,13 @@ def moving():
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-    #? SAÍDA DO ENDEREÇO DE ORIGEM
+                    #? SAÍDA DO ENDEREÇO DE ORIGEM
                     insert_historico(
                         numero, letra, cod_item, 
                         lote_item, quantidade, 'TS', 
                         timestamp_out, id_carga
                     )
-    #? ENTRADA NO ENDEREÇO DE DESTINO
+                    #? ENTRADA NO ENDEREÇO DE DESTINO
                     insert_historico(
                         destino_number, destino_letter, cod_item, 
                         lote_item, quantidade, 'TE', 
@@ -2183,9 +2182,9 @@ def cadastrar_usuario():
 
         except sqlite3.IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
-                alert_type = 'CADASTRO (USUÁRIO) \n'
-                alert_msge = 'Não foi possível criar usuário... \n'
-                alert_more = ('''MOTIVO:\n- Já existe um usuário com este login.''')
+                alert_type = 'CADASTRO (USUÁRIO)'
+                alert_msge = 'Não foi possível criar usuário...'
+                alert_more = 'MOTIVO:\n- Já existe um usuário com este login.'
                 
                 return render_template(
                     'components/menus/alert.html', 
@@ -2196,9 +2195,9 @@ def cadastrar_usuario():
                 )
                 
             else:
-                alert_type = 'CADASTRO (USUÁRIO) \n'
-                alert_msge = 'Não foi possível criar usuário... \n'
-                alert_more = (f'''DESCRIÇÃO DO ERRO:\n- {e}. \n''')
+                alert_type = 'CADASTRO (USUÁRIO)'
+                alert_msge = 'Não foi possível criar usuário...'
+                alert_more = f'DESCRIÇÃO DO ERRO:\n- {e}.'
                 
                 return render_template(
                     'components/menus/alert.html', 
@@ -2282,8 +2281,6 @@ def carga_id(id_carga):
             ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
             WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
-            AND crg.DATA_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
-            AND CURRENT DATE
             AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
 
             ORDER BY COD_ITEM
@@ -2823,12 +2820,8 @@ def export_csv_tipo(tipo):                                                      
         filename = 'export_promob'
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
-        alert_msge  = 'A tabela não tem informações suficientes para exportação. \n'
-        alert_more = \
-            '''POSSÍVEIS SOLUÇÕES:
-            - Verifique se a tabela possui mais de uma linha.
-            - Contate o suporte.
-            '''
+        alert_msge = 'A tabela não tem informações suficientes para exportação. \n'
+        alert_more = 'POSSÍVEIS SOLUÇÕES:\n- Verifique se a tabela possui mais de uma linha.\n- Contate o suporte.'
         return render_template(
             'components/menus/alert.html', 
             alert_type=alert_type, 
