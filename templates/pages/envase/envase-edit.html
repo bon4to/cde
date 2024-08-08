@@ -192,7 +192,7 @@
                 }
                 function confirmConcluir(codEnvase, checkbox) {
                     if (confirm("Você tem certeza que deseja desfazer a conclusão desta programação?")) {
-                        window.location.href = "/envase/nao-concl/" + codEnvase;
+                        window.location.href = "/envase/pending/" + codEnvase;
 
                     } else {
                         checkbox.checked = true;

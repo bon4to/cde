@@ -144,7 +144,7 @@
                 }
                 function confirmConcluir(codProducao, checkbox) {
                     if (confirm("Você tem certeza que deseja desfazer a conclusão desta programação?")) {
-                        window.location.href = "/processamento/nao-concl/" + codProducao;
+                        window.location.href = "/processamento/pending/" + codProducao;
 
                     } else {
                         checkbox.checked = true;

@@ -65,25 +65,31 @@ def logging(tag_1, tag_2, msge):
 
 # MISC
 exec_head   = \
-    f'''{ANSI.BLUE}                                                                     
+    f'''
+     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.
+`._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'
+
                                                                     
-      CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-   CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
- CC::::::::::::::C    D::::::::::::::DD      E::::::::::::::::::::E
-C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
-C:::::CC                          DD:::::D                          
-C:::::C                              D:::::D                         
-C:::::C                              D:::::D   EEEEEEEEEEEEEEEEEEEE  
-C:::::C                              D:::::D   E::::::::::::::::::E  
-C:::::C                              D:::::D   EEEEEEEEEEEEEEEEEEEE  
-C:::::C                              D:::::D                         
-C:::::CC                          DD:::::D                          
-C::::::CCCCCCCCCCC    DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
- CC::::::::::::::C    D::::::::::::::DD      E::::::::::::::::::::E
-   CCC:::::::::::C    D:::::::::::DDD        E::::::::::::::::::::E
-      CCCCCCCCCCCC    DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-                                                                    
-    {ANSI.RESET}'''
+        CCCCCCCCCCCC   DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+     CCC:::::::::::C   D:::::::::::DDD        E::::::::::::::::::::E
+   CC::::::::::::::C   D::::::::::::::DD      E::::::::::::::::::::E
+  C::::::CCCCCCCCCCC   DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+ C:::::CC                         DD:::::D                          
+C:::::C                             D:::::D                         
+C:::::C                             D:::::D   EEEEEEEEEEEEEEEEEEEE  
+C:::::C                             D:::::D   E::::::::::::::::::E  
+C:::::C                             D:::::D   EEEEEEEEEEEEEEEEEEEE  
+C:::::C                             D:::::D                         
+ C:::::CC                         DD:::::D                          
+  C::::::CCCCCCCCCCC   DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+   CC::::::::::::::C   D::::::::::::::DD      E::::::::::::::::::::E
+     CCC:::::::::::C   D:::::::::::DDD        E::::::::::::::::::::E
+        CCCCCCCCCCCC   DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+
+
+     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.
+`._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'
+    '''
 start_head  = \
     f'''
 {TAGS.INFO} CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
@@ -291,7 +297,6 @@ def get_frase():                                                                
     return frase
 
 
-
 def get_preset_itens(index):                                                                                    #* BUSCA ITENS DE PRESETS
     try:
         with open(f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
@@ -496,8 +501,10 @@ def get_users():                                                                
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT u.nome_user, u.sobrenome_user, ap.desc_priv,
-                   u.ult_acesso, u.id_user
+            SELECT 
+                u.nome_user || ' ' || u.sobrenome_user, 
+                ap.desc_priv,
+                u.ult_acesso, u.id_user
             FROM users u
                        
             JOIN aux_privilege ap 
@@ -507,8 +514,8 @@ def get_users():                                                                
         ''')
 
         users_list = [{
-            'user_name'  : f'{row[0]} {row[1]}', 'user_grant': row[2], 
-            'ult_acesso' : row[3],               'cod_user'  : row[4],
+            'user_name' : row[0], 'user_grant': row[1], 
+            'ult_acesso': row[2], 'cod_user'  : row[3],
         } for row in cursor.fetchall()]
 
     return users_list
@@ -1088,36 +1095,32 @@ def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, t
         connection.commit()
 
 
-@app.route('/bulk_insert_historico', methods=['POST'])
-def bulk_insert_historico():
-    sep_carga = request.json
-    timestamp_br = datetime.now(timezone(timedelta(hours=-3)))
-    timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
-    
-    try:
-        for item in sep_carga:
-            haveItem = get_saldo_item(item['rua_numero'], item['rua_letra'], item['cod_item'], item['lote_item'])
-            if haveItem < item['qtde_sep']:
-                return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
+def password_check(id_user, password):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT password_user
+            FROM users
+            WHERE id_user = ?;
+        ''', (id_user,))
+
+        row = cursor.fetchone()
         
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            for item in sep_carga:
-                insert_historico(
-                    numero=item['rua_numero'],
-                    letra=item['rua_letra'],
-                    cod_item=item['cod_item'],
-                    lote_item=item['lote_item'],
-                    quantidade=item['qtde_sep'],
-                    operacao='F',
-                    timestamp_out=timestamp_out,
-                    id_carga=str(item['nrocarga']) + '0'
-                )
-            connection.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        print(f'[ERRO] Erro ao inserir histórico: {e}')
-        return jsonify({'success': False, 'error': str(e)}), 500
+        if row:
+            db_password = row[0]
+            return check_key(db_password, password)
+        return False
+
+
+def toggle_item_flag(cod_item, flag):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            UPDATE itens SET flag_ativo = ? WHERE cod_item = ?;
+        ''', (flag, cod_item))
+
+        connection.commit()
+    return
 
 
 #! ROTAS DE ACESSO | URL
@@ -1241,23 +1244,6 @@ def change_password():
             )
         else:
             return redirect(url_for('change_password'))
-
-
-def password_check(id_user, password):
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT password_user
-            FROM users
-            WHERE id_user = ?;
-        ''', (id_user,))
-
-        row = cursor.fetchone()
-        
-        if row:
-            db_password = row[0]
-            return check_key(db_password, password)
-        return False
 
 
 @app.route('/login', methods=['POST'])                                                                          #* ROTA DE SESSÃO LOGIN
@@ -1389,6 +1375,7 @@ def get_item():
     
     if len(input_code) == 4 or len(input_code) == 0:
         desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO OU INATIVO', '', '', ''
+        print(f'    | {desc_item}')
         return jsonify(
             {
             'json_cod_item' : cod_item, 
@@ -1449,7 +1436,7 @@ def get_item():
                             cod_lote = ''
                 else:
                     desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-
+                    print(f'    | {desc_item}')
                 return jsonify(
                     {
                     'json_cod_item': cod_item,
@@ -1485,7 +1472,7 @@ def get_item():
                         cod_lote = 'VINHOS'
                 else:
                     desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-
+                    print(f'    | {desc_item}')
                 return jsonify(
                     {
                     'json_cod_item' : cod_item, 
@@ -1496,6 +1483,7 @@ def get_item():
 
         else:
             desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
+            print(f'    | {desc_item}')
             return jsonify(
                 {
                 'json_cod_item' : cod_item, 
@@ -1684,6 +1672,38 @@ def moving():
     return redirect(url_for('mov'))
 
 
+@app.route('/mov/moving/bulk', methods=['POST'])
+def moving_bulk():
+    sep_carga = request.json
+    timestamp_br = datetime.now(timezone(timedelta(hours=-3)))
+    timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
+    
+    try:
+        for item in sep_carga:
+            haveItem = get_saldo_item(item['rua_numero'], item['rua_letra'], item['cod_item'], item['lote_item'])
+            if haveItem < item['qtde_sep']:
+                return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
+        
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            for item in sep_carga:
+                insert_historico(
+                    numero=item['rua_numero'],
+                    letra=item['rua_letra'],
+                    cod_item=item['cod_item'],
+                    lote_item=item['lote_item'],
+                    quantidade=item['qtde_sep'],
+                    operacao='F',
+                    timestamp_out=timestamp_out,
+                    id_carga=str(item['nrocarga']) + '0'
+                )
+            connection.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f'[ERRO] Erro ao inserir histórico: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/get/clientes', methods=['GET'])
 @verify_auth('CDE001')
 def get_fant_clientes():
@@ -1740,7 +1760,7 @@ def calendar_envase():
 
 @app.route('/envase/delete/<id_envase>')
 @verify_auth('ENV007')
-def delete_item(id_envase):
+def delete_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -1753,9 +1773,9 @@ def delete_item(id_envase):
     return redirect(url_for('envase'))
 
 
-@app.route('/envase/concl/<id_envase>')
+@app.route('/envase/done/<id_envase>')
 @verify_auth('ENV006')
-def conclude_item(id_envase):
+def conclude_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -1768,9 +1788,9 @@ def conclude_item(id_envase):
     return redirect(url_for('envase'))
 
 
-@app.route('/envase/nao-concl/<id_envase>')
+@app.route('/envase/pending/<id_envase>')
 @verify_auth('ENV007')
-def not_conclude_item(id_envase):
+def set_pending_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -1785,7 +1805,7 @@ def not_conclude_item(id_envase):
 
 @app.route('/envase/edit', methods=['GET', 'POST'])
 @verify_auth('ENV007')
-def envase_edit():                                                                                              # TODO: criar função auxiliar
+def edit_envase():                                                                                              # TODO: criar função auxiliar
     if request.method == 'POST':
 
         req_id_envase   = request.form['id_envase']
@@ -1926,7 +1946,7 @@ def delete_producao(id_producao):
     return redirect(url_for('producao'))
 
 
-@app.route('/processamento/concl/<id_producao>')
+@app.route('/processamento/done/<id_producao>')
 @verify_auth('PRC010')
 def conclude_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
@@ -1941,9 +1961,9 @@ def conclude_producao(id_producao):
     return redirect(url_for('producao'))
 
 
-@app.route('/processamento/nao-concl/<id_producao>')
+@app.route('/processamento/pending/<id_producao>')
 @verify_auth('PRC011')
-def not_conclude_producao(id_producao):
+def set_pending_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -1958,7 +1978,7 @@ def not_conclude_producao(id_producao):
 
 @app.route('/processamento/edit', methods=['GET', 'POST'])
 @verify_auth('PRC011')
-def producao_edit():
+def edit_producao():
     create_tables()
     id_user = session.get('id_user')
     user_permissions = get_user_permissions(id_user)
@@ -2529,17 +2549,6 @@ def list_all_separations():
         return jsonify(files_sorted), 200
     except Exception as e:
         return jsonify({'error': f'Erro ao listar arquivos: {str(e)}'}), 500
-
-
-def toggle_item_flag(cod_item, flag):
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            UPDATE itens SET flag_ativo = ? WHERE cod_item = ?;
-        ''', (flag, cod_item))
-
-        connection.commit()
-    return
 
 
 @app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>', methods=['GET', 'POST'])

@@ -48,28 +48,28 @@ function toggleFields() {
 
 
 function handleCheckChange() {
-    const checkbox = document.getElementById('is_end_completo');
-    const quantField = document.getElementById('quantField');
+    const busca        = document.getElementById('formBuscarItens');
+    const checkbox     = document.getElementById('is_end_completo');
     const produtoField = document.getElementById('produtoField');
-    const busca = document.getElementById('formBuscarItens');
-    const quantidade = document.getElementById('quantidade');
-    const cod_lote = document.getElementById('lote_item');
-    const cod_item = document.getElementById('cod_item');
+    const quantField   = document.getElementById('quantField');
+    const quantidade   = document.getElementById('quantidade');
+    const cod_lote     = document.getElementById('lote_item');
+    const cod_item     = document.getElementById('cod_item');
     
     if (checkbox.checked) {
         produtoField.style.display = 'none';
-        busca.style.display = 'none';
-        quantField.style.display = 'none';
-        quantidade.required = false;
-        cod_lote.required = false;
-        cod_item.required = false;
+        busca.style.display        = 'none';
+        quantField.style.display   = 'none';
+        quantidade.required        = false;
+        cod_lote.required          = false;
+        cod_item.required          = false;
     } else {
         produtoField.style.display = 'block';
-        busca.style.display = 'block';
-        quantField.style.display = 'block';
-        quantidade.required = true;
-        cod_lote.required = true;
-        cod_item.required = true;
+        busca.style.display        = 'block';
+        quantField.style.display   = 'block';
+        quantidade.required        = true;
+        cod_lote.required          = true;
+        cod_item.required          = true;
     }
 }
 
@@ -139,34 +139,38 @@ $(document).ready(function () {
     });
 });
 
+
 function alterarCor() {
     var elemento = document.getElementById("elemento");
-    var estilo = getComputedStyle(elemento);
+    var estilo   = getComputedStyle(elemento);
   
     var corAtual = estilo.getPropertyValue("--cor-destaque");
   
-    var novaCor = "#2688ea";
+    var novaCor  = "#2688ea";
     document.documentElement.style.setProperty("--cor-destaque", novaCor);
 }
 
+
 function verifyCaptcha() {
-    const captcha = 'CONFIRMAR';
-    const userInput = prompt(`Por favor, digite '${captcha}' para confirmar a remoção:`);
+    const captcha    = 'CONFIRMAR';
+    const userInput  = prompt(`Por favor, digite '${captcha}' para confirmar a remoção:`);
     return userInput === captcha;
 }
+
 
 function maximizeText(text) {
     if (text.value != '') {
         var popupOverlay = document.createElement('div');
-        popupOverlay.className = 'popup-overlay';
-
         var popupContent = document.createElement('div');
+        var closeButton  = document.createElement('button');
+
+        popupOverlay.className = 'popup-overlay';
         popupContent.className = 'popup-content';
         popupContent.innerHTML = '<p>' + text.value + '</p>';
 
-        var closeButton = document.createElement('button');
-        closeButton.innerText = '×';
-        closeButton.className = 'btn-fancy button-mini';
+        closeButton.innerText  = '×';
+        closeButton.className  = 'btn-fancy button-mini';
+
         closeButton.addEventListener('click', function() {
             document.body.removeChild(popupOverlay);
         });
@@ -177,13 +181,14 @@ function maximizeText(text) {
     }
 }
 
+
 function generatePDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const report    = new jsPDF();
 
     const userInfoElement = document.getElementById('userInfo').innerText;
-    const userName = userInfoElement;
     const currentDateTime = new Date().toLocaleString();
+    const userName        = userInfoElement;
 
     const tableData = [];
     const rows = document.querySelectorAll("#itemsTable tbody tr");
@@ -199,11 +204,11 @@ function generatePDF() {
     const columns = ["Endereço", "Item (Código)", "Item (Descrição)", "Lote (Código)", "Qtde (Sep.)"];
 
     const data = tableData.map(row => ({
-        rua_letra_endereco: row[0],
-        cod_item: row[1],
-        desc_item: row[2],
-        lote_item: row[3],
-        qtde_solic: row[4]
+        rua_letra_end : row[0],
+        cod_item      : row[1],
+        desc_item     : row[2],
+        lote_item     : row[3],
+        qtde_solic    : row[4]
     }));
 
     const filteredData = data.filter(item => !item.lote_item.startsWith('Subtotal:'));
@@ -211,80 +216,80 @@ function generatePDF() {
     const totalQtdeSolic = filteredData.reduce((total, item) => total + parseFloat(item.qtde_solic), 0);
 
     data.push({
-        rua_letra_endereco: '',
-        cod_item: '',
-        desc_item: '',
-        lote_item: 'Total:',
-        qtde_solic: totalQtdeSolic
+        rua_letra_end : '',
+        cod_item      : '',
+        desc_item     : '',
+        lote_item     : 'Total:',
+        qtde_solic    : totalQtdeSolic
     });
 
-    const pageHeight = doc.internal.pageSize.height;
+    const pageHeight   = report.internal.pageSize.height;
     const marginBottom = 20;
-    const cellPadding = 4;
-    const cellHeight = 10;
-    const startX = 10;
-    const colWidths = [25, 30, 80, 30, 25];
-    let startY = 50;
+    const cellPadding  = 4;
+    const cellHeight   = 10;
+    const startX       = 10;
+    const colWidths    = [25, 30, 80, 30, 25];
+    let startY         = 50;
 
     const drawHeader = () => {
-        doc.setFont("times", "bold");
-        doc.setFontSize(16);
-        doc.text("Relatório de Cargas", 10, 22);
+        report.setFont("times", "bold");
+        report.setFontSize(16);
+        report.text("Relatório de Cargas", 10, 22);
 
-        doc.setFont("times", "normal");
-        doc.setFontSize(12);
-        doc.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
+        report.setFont("times", "normal");
+        report.setFontSize(12);
+        report.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
 
         if (typeof nroCarga !== 'undefined') {
-            doc.text(`CARGA: ${nroCarga}`, 10, 34);
+            report.text(`CARGA: ${nroCarga}`, 10, 34);
         }
 
         if (typeof cliente !== 'undefined') {
-            doc.text(`CLIENTE: ${cliente}`, 10, 40);
+            report.text(`CLIENTE: ${cliente}`, 10, 40);
         }
 
-        doc.setLineWidth(0.4);
-        doc.line(10, 44, 200, 44);
+        report.setLineWidth(0.4);
+        report.line(10, 44, 200, 44);
     };
 
     const drawFooter = () => {
-        const totalPages = doc.getNumberOfPages();
+        const totalPages = report.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
-            doc.setPage(i);
-            const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+            report.setPage(i);
+            const pageNumber = report.internal.getCurrentPageInfo().pageNumber;
 
-            doc.setLineWidth(0.4);
-            doc.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
+            report.setLineWidth(0.4);
+            report.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
 
-            doc.setFontSize(10);
+            report.setFontSize(10);
             if (typeof userName === 'string') {
-                doc.text(userName, 10, pageHeight - 10, { align: 'left' });
+                report.text(userName, 10, pageHeight - 10, { align: 'left' });
             }
 
-            doc.text(`${pageNumber} / ${totalPages}`, doc.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
+            report.text(`${pageNumber} / ${totalPages}`, report.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
 
             if (typeof currentDateTime === 'string') {
-                doc.text(currentDateTime, doc.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
+                report.text(currentDateTime, report.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
             }
         }
     };
 
     const drawTable = (data) => {
         // Desenhando cabeçalho da tabela
-        doc.setFontSize(10);
-        doc.setLineWidth(0.1);
-        doc.setFont("times", "bold");
+        report.setFontSize(10);
+        report.setLineWidth(0.1);
+        report.setFont("times", "bold");
         columns.forEach((col, i) => {
-            doc.rect(startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), startY, colWidths[i], cellHeight);
-            doc.text(col, startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
+            report.rect(startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), startY, colWidths[i], cellHeight);
+            report.text(col, startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
         });
 
         // Desenhando linhas da tabela
         startY += cellHeight;
-        doc.setFont("times", "normal");
+        report.setFont("times", "normal");
         data.forEach((item, index) => {
             const row = [
-                item.rua_letra_endereco,
+                item.rua_letra_end,
                 item.cod_item,
                 item.desc_item,
                 item.lote_item,
@@ -296,56 +301,55 @@ function generatePDF() {
             
             row.forEach((cell, i) => {
                 if (isSubtotal) {
-                    doc.setFillColor(220, 220, 220);
-                    doc.setFont("times", "bold");
+                    report.setFillColor(220, 220, 220);
+                    report.setFont("times", "bold");
                 } else if (isTotal) {
-                    doc.setFillColor(192, 192, 192);
-                    doc.setFont("times", "bold");
+                    report.setFillColor(192, 192, 192);
+                    report.setFont("times", "bold");
                 } else {
-                    doc.setFillColor(255, 255, 255);
-                    doc.setFont("times", "normal");
+                    report.setFillColor(255, 255, 255);
+                    report.setFont("times", "normal");
                 }
 
                 const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
                 const y = startY;
 
-                doc.rect(x, y, colWidths[i], cellHeight, 'F');
+                report.rect(x, y, colWidths[i], cellHeight, 'F');
 
-                const text = doc.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
-                doc.text(text, x + cellPadding, y + cellPadding);
+                const text = report.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
+                report.text(text, x + cellPadding, y + cellPadding);
             });
 
             startY += cellHeight;
 
             // Verificar se há espaço suficiente na página
             if (startY + cellHeight + marginBottom > pageHeight) {
-                doc.addPage();
+                report.addPage();
                 drawHeader();
                 startY = 50;
-                doc.setFontSize(10);
-                doc.setLineWidth(0.1);
+                report.setFontSize(10);
+                report.setLineWidth(0.1);
             }
         });
     };
 
     drawHeader();
     drawTable(data);
-    drawFooter(doc.internal.getNumberOfPages());
+    drawFooter(report.internal.getNumberOfPages());
 
     if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
         const finalY = startY + 10;
-        doc.setFontSize(10);
-        doc.setFont("times", "bold");
-        doc.text("OBSERVACÃO: ", 10, finalY);
+        report.setFontSize(10);
+        report.setFont("times", "bold");
+        report.text("OBSERVACÃO: ", 10, finalY);
         
-        doc.setFont("times", "normal");
-        doc.text(obs_carga, 10 + doc.getTextWidth("OBSERVACÃO:") + 5, finalY);
+        report.setFont("times", "normal");
+        report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
     }
 
     const pdfName = `${getStorageKey()}.pdf`;
-    doc.save(pdfName);
+    report.save(pdfName);
 }
-
 
 
 function renderSubtotals() {
@@ -374,6 +378,7 @@ function renderSubtotals() {
     });
 }
 
+
 function clearAllSeparations() {
     const confirmation = confirm('Você tem certeza que deseja limpar TODAS as separações? Esta ação não pode ser desfeita.');
     if (confirmation) {
@@ -392,6 +397,7 @@ function clearAllSeparations() {
     }
 }
 
+
 const fetchItemDescription = async (cod_item) => {
     try {
         const response = await fetch(`/get/description_json/${cod_item}`);
@@ -406,37 +412,11 @@ const fetchItemDescription = async (cod_item) => {
     }
 };
 
-/*
-// HEADER POP-UP
-window.addEventListener('scroll', function () {
-    // ENCONTRA A POSIÇÃO Y = VERTICAL
-    var scrollPosition = window.scrollY || document.documentElement.scrollTop;
-
-    if (scrollPosition > 50) {
-        // CALCULA O VALOR CONFORME O SCROLL (10 COMO MINIMO)
-        var blurValue = Math.min(scrollPosition / 10, 10);
-        // APLICA
-        document.querySelector('header.main-header').classList.add('scrolled');
-        document.querySelector('div.user-button').classList.add('scrolled');
-        document.querySelector('p.user-name').classList.add('scrolled');
-        document.querySelector('div.user-name').classList.add('scrolled');
-        document.querySelector('div.user-logger').classList.add('scrolled');
-
-    } else {
-        document.querySelector('header.main-header').classList.remove('scrolled');
-        document.querySelector('div.user-button').classList.remove('scrolled');
-        document.querySelector('p.user-name').classList.remove('scrolled');
-        document.querySelector('div.user-name').classList.remove('scrolled');
-        document.querySelector('div.user-logger').classList.remove('scrolled');
-    }
-});
- */
-
 
 // CHECKBOX DOWNLOAD
-function toggleCheckbox(placebo, checkbox) {
-    var checkbox = document.getElementById(checkbox);
-    var imgCheckbox = document.getElementById(placebo);
+function toggleCheckbox(checkboxImg, checkboxInput) {
+    var checkbox    = document.getElementById(checkboxInput);
+    var imgCheckbox = document.getElementById(checkboxImg);
 
     checkbox.checked = !checkbox.checked;
 
@@ -462,11 +442,18 @@ function toggleEdit() {
 
 // FUNÇÃO PARA CAPS
 function capitalizeText() {
-
+    // para inputs
     let inputsTexto = document.querySelectorAll('input[type="text"]');
     inputsTexto.forEach(function (input) {
         input.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+        });
+    });
 
+    // para textareas
+    let textAreas = document.querySelectorAll('textarea');
+    textAreas.forEach(function (textarea) {
+        textarea.addEventListener('input', function () {
             this.value = this.value.toUpperCase();
         });
     });
@@ -535,6 +522,7 @@ function togglePopUp() {
     }
 }
 
+
 function toggleCart() {
     const cartDropdown = document.getElementById('cart-dropdown');
     const itemsCountElement = document.querySelector('.item-count');
@@ -546,8 +534,9 @@ function toggleCart() {
         if (!cartDropdown.classList.contains('hidden')) {
             renderCartSubtotals();
         }
-    }    
+    }
 }
+
 
 function toggleTheme() {
     const root = document.documentElement;
@@ -584,6 +573,7 @@ function toggleTheme() {
     }
 }
 
+
 window.addEventListener("load", function() {
     hideLoading();
 });
@@ -596,6 +586,7 @@ window.onload = function () {
     toggleContainer();
     hideLoading();
 };
+
 
 window.onscroll = function() {
     scrollFunction();

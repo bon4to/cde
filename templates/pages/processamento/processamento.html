@@ -285,7 +285,7 @@
 
             function confirmConcluir(codProducao, checkbox) {
                 if (confirm("Você tem certeza que deseja concluir esta programação?")) {
-                    window.location.href = "/processamento/concl/" + codProducao;
+                    window.location.href = "/processamento/done/" + codProducao;
                 } else {
                     checkbox.checked = false;
                 }
