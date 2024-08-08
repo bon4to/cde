@@ -4,7 +4,7 @@
 {% block aux_buttons %}
     <div class="flex-row" style="margin: 8px 0">
         <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
-        <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+        <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga('done')" title="RECARREGAR REGISTROS" >
             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
         </div>
     </div>
@@ -38,96 +38,14 @@
 
 {% block script %}
     <script>
-        const nroCarga = '{{ id_carga }}';
-        const cliente = '{{ cliente }}';
-        const obs_carga = '{{ obs_carga }}';
 
-        var itemCount = 0;
+        const nroCarga    = '{{ id_carga }}';
+        const fantCliente = '{{ fant_cliente }}';
+        const obs_carga   = '{{ obs_carga }}';
 
-        if (nroCarga != '') {
-            renderCartSubtotals();
-        }
-
-        function getStorageKey() {
-            return `separacao-carga-${nroCarga}`;
-        }
-
-        
-        function renderCartSubtotals() {
-            const cartItemsContainer = document.querySelector('.cart-items');
-            cartItemsContainer.innerHTML = '';
-        
-            getSeparacao().then(sepCarga => {
-                let subtotals = {};
-        
-                sepCarga.forEach(item => {
-                    if (subtotals[item.cod_item]) {
-                        subtotals[item.cod_item] += item.qtde_sep;
-                    } else {
-                        subtotals[item.cod_item] = item.qtde_sep;
-                    }
-                });
-        
-                const sortedEntries = Object.entries(subtotals).sort((a, b) => {
-                    const codA = a[0].toUpperCase();
-                    const codB = b[0].toUpperCase();
-        
-                    if (codA < codB) {
-                        return -1;
-                    }
-                    if (codA > codB) {
-                        return 1;
-                    }
-                    return 0;
-                });
-        
-                let itemCount = 0;
-        
-                sortedEntries.forEach(([cod_item, subtotal]) => {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('cart-item');
-                    listItem.innerHTML = `
-                        <span class="item-name">${cod_item} |</span>
-                        <span class="item-quantity cor-web">${subtotal}</span>
-                    `;
-                    cartItemsContainer.appendChild(listItem);
-                    itemCount += 1;
-        
-                    const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
-                    if (row) {
-                        let subtotalCell = row.querySelector('.subtotal-cell');
-                        if (!subtotalCell) {
-                            subtotalCell = document.createElement('td');
-                            subtotalCell.classList.add('subtotal-cell');
-                            row.appendChild(subtotalCell);
-                        }
-                        subtotalCell.textContent = subtotal;
-                    }
-                });
-                updateItemCount(itemCount);
-            }).catch(error => {
-                console.error('Erro ao obter separação:', error);
-            });
-        }
-        
-        function updateItemCount(itemCount) {
-            document.querySelector('.item-count').textContent = itemCount;
-        }
-
-
-        function redirectToCarga() {
-            const cargaInput = document.getElementById('cargaInput').value;
-            if (cargaInput > 0) {
-                const url = `/mov/separacao-done/${cargaInput}`;
-                window.location.href = url;
-            }
-        }
-
-        
         function getSeparacao() {
             return new Promise((resolve, reject) => {
                 const localStorageData = localStorage.getItem(getStorageKey());
-        
                 if (localStorageData) {
                     reject(new Error(304));
                 } else {
@@ -146,18 +64,6 @@
                         });
                 }
             });
-        }
-
-
-        async function fetchQtdeSolic(id_carga, cod_item) {
-            try {
-                const response = await fetch(`/api/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
-                const data = await response.json();
-                return data.qtde_solic;
-            } catch (error) {
-                console.error('Erro ao obter qtde_solic:', error);
-                return null;
-            }
         }
 
         
@@ -181,6 +87,8 @@
                     let subtotal = 0;
         
                     items.forEach(async (item, index) => {
+                        getSeparadorName(item.user_id);
+
                         const row = itemsTable.insertRow();
                         row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
                         row.insertCell(1).textContent = item.cod_item;
@@ -236,12 +144,11 @@
                     Array.from(statusElements).forEach(element => {
                         element.innerHTML = "<span style='color: var(--cor-destaque)'>Pendente</span>";
                     });
-                }
-                else if (error.message == 404) {
+                } else if (error.message == 404) {
                     errorMessage = `<div class="msg-error">
                                         <details>
                                             <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                            Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para fazer o faturamento.
+                                            Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
                                         </details>
                                     </div>`;
                 }
@@ -250,39 +157,6 @@
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
             }
-        }
-
-
-        function listSeparationsFromServer() {
-            fetch('/get/list-all-separations')
-                .then(response => response.json())
-                .then(files => {
-                    const tableBody = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
-                    tableBody.innerHTML = '';
-
-                    if (files.error) {
-                        const row = tableBody.insertRow();
-                        const cell = row.insertCell(0);
-                        cell.colSpan = 1;
-                        cell.textContent = files.error;
-                    } else {
-                        files.forEach(file => {
-                            const cargaNumber = file.replace('separacao-carga-', '').replace('.json', '');
-                            const row = tableBody.insertRow();
-                            const cell = row.insertCell(0);
-                            cell.textContent = cargaNumber;
-
-                            row.classList.add("selectable-row");
-
-                            row.addEventListener('click', function() {
-                                window.location.href = `/mov/separacao-done/${cargaNumber}`;
-                            });
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar dados do servidor:', error);
-                });
         }
 
 

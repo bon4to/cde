@@ -4,7 +4,7 @@
 {% block aux_buttons %}
     <div class="flex-row" style="margin: 8px 0">
         <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
-        <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+        <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga('pend')" title="RECARREGAR REGISTROS" >
             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
         </div>
     </div>
@@ -46,93 +46,10 @@
 
 {% block script %}
     <script>
-        const nroCarga = '{{ id_carga }}';
-        const cliente = '{{ cliente }}';
-        const obs_carga = '{{ obs_carga }}';
 
-        var itemCount = 0;
-
-        if (nroCarga != '') {
-            renderCartSubtotals();
-        }
-
-
-        function getStorageKey() {
-            return `separacao-carga-${nroCarga}`;
-        }
-
-        
-        function redirectToCarga() {
-            const cargaInput = document.getElementById('cargaInput').value;
-            if (cargaInput > 0) {
-                const url = `/mov/separacao-pend/${cargaInput}`;
-                window.location.href = url;
-            }
-        }
-
-
-        function renderCartSubtotals() {
-            const cartItemsContainer = document.querySelector('.cart-items');
-            cartItemsContainer.innerHTML = '';
-        
-            getSeparacao().then(sepCarga => {
-                let subtotals = {};
-        
-                sepCarga.forEach(item => {
-                    if (subtotals[item.cod_item]) {
-                        subtotals[item.cod_item] += item.qtde_sep;
-                    } else {
-                        subtotals[item.cod_item] = item.qtde_sep;
-                    }
-                });
-        
-                const sortedEntries = Object.entries(subtotals).sort((a, b) => {
-                    const codA = a[0].toUpperCase();
-                    const codB = b[0].toUpperCase();
-        
-                    if (codA < codB) {
-                        return -1;
-                    }
-                    if (codA > codB) {
-                        return 1;
-                    }
-                    return 0;
-                });
-        
-                let itemCount = 0;
-        
-                sortedEntries.forEach(([cod_item, subtotal]) => {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('cart-item');
-                    listItem.innerHTML = `
-                        <span class="item-name">${cod_item} |</span>
-                        <span class="item-quantity cor-web">${subtotal}</span>
-                    `;
-                    cartItemsContainer.appendChild(listItem);
-                    itemCount += 1;
-        
-                    const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
-                    if (row) {
-                        let subtotalCell = row.querySelector('.subtotal-cell');
-                        if (!subtotalCell) {
-                            subtotalCell = document.createElement('td');
-                            subtotalCell.classList.add('subtotal-cell');
-                            row.appendChild(subtotalCell);
-                        }
-                        subtotalCell.textContent = subtotal;
-                    }
-                });
-                updateItemCount(itemCount);
-            }).catch(error => {
-                console.error('Erro ao obter separação:', error);
-            });
-        }
-
-        
-        function updateItemCount(itemCount) {
-            document.querySelector('.item-count').textContent = itemCount;
-        }
-
+        const nroCarga    = '{{ id_carga }}';
+        const fantCliente = '{{ fant_cliente }}';
+        const obs_carga   = '{{ obs_carga }}';
 
         function getSeparacao() {
             return new Promise((resolve, reject) => {
@@ -157,54 +74,14 @@
             });
         }
 
-
-        function removeItem(index) {
-            const confirmation = confirm('Você tem certeza que deseja remover este item?');
-            if (confirmation) {
-                let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-                sepCarga.splice(index, 1);
-                localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
-                renderItems();
-            }
-        }
-
-
-        function clearItems() {
-            const confirmation = confirm(`Você tem certeza que deseja limpar a separacao de ${nroCarga}?`);
-            if (confirmation) {
-                localStorage.removeItem(getStorageKey());
-                renderItems();
-            }
-        }
-
-
-        function updateQuantity(index, newQuantity) {
-            let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-            sepCarga[index].qtde_sep = newQuantity;
-            localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
-            renderItems();
-        }
-
-
-        async function fetchQtdeSolic(id_carga, cod_item) {
-            try {
-                const response = await fetch(`/api/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
-                const data = await response.json();
-                return data.qtde_solic;
-            } catch (error) {
-                console.error('Erro ao obter qtde_solic:', error);
-                return null;
-            }
-        }
         
-
         async function renderItems() {
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             const statusElements = document.getElementsByClassName('separation_status');
             itemsTable.innerHTML = '';
             try {
                 const sepCarga = await getSeparacao();
-        
+
                 const groupedItems = sepCarga.reduce((acc, item) => {
                     if (!acc[item.cod_item]) {
                         acc[item.cod_item] = [];
@@ -212,21 +89,23 @@
                     acc[item.cod_item].push(item);
                     return acc;
                 }, {});
-        
+
                 for (const [cod_item, items] of Object.entries(groupedItems)) {
                     let subtotal = 0;
-        
+
                     items.forEach(async (item, index) => {
+                        getSeparadorName(item.user_id);
+
                         const row = itemsTable.insertRow();
                         row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
                         row.insertCell(1).textContent = item.cod_item;
-        
+
                         const descCell = row.insertCell(2);
                         row.insertCell(3).textContent = item.lote_item;
                         row.insertCell(4).textContent = item.qtde_sep;
-        
+
                         subtotal += item.qtde_sep;
-        
+
                         try {
                             const descricao = await fetchItemDescription(item.cod_item);
                             descCell.style.textWrap = "balance";
@@ -235,16 +114,16 @@
                             console.error('Erro ao obter descrição:', error);
                             descCell.textContent = 'Erro ao obter descrição';
                         }
-        
+
                         const actionsDiv = document.createElement('div');
                         actionsDiv.classList.add('action-buttons');
-        
+
                         const removeBtn = document.createElement('div');
-                        removeBtn.innerHTML = '<img class="svg-gray" style="height: 16px; width: 16px; padding: 4px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">';
+                        removeBtn.innerHTML = "<img class='svg-gray' style='height: 16px; width: 16px; padding: 4px;' src='{{ url_for('static', filename='svg/trash.svg') }}' alt=''>";
                         removeBtn.title = `REMOVER DE ${item.cod_item}`;
                         removeBtn.onclick = () => removeItem(index);
                         actionsDiv.appendChild(removeBtn);
-        
+
                         row.appendChild(actionsDiv);
                     });
                     const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
@@ -267,14 +146,14 @@
             } catch (error) {
                 const alert = document.getElementById('alert-message')
                 const content = document.getElementById('contentTable')
-        
+
                 let errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`
-        
+
                 if (error.message == 304) {
                     errorMessage = `<div class="msg-success">
                                         <details>
                                             <summary>A carga selecionada já foi finalizada.</summary>
-                                            Caso necessite visualizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}"> acima.
+                                            Para visualizá-la, filtre por 'finalizados' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}"> acima.
                                         </details>
                                     </div>`;
                     Array.from(statusElements).forEach(element => {
@@ -284,104 +163,17 @@
                     errorMessage = `<div class="msg-error">
                                         <details>
                                             <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                            Inicie a <a style="all: unset; cursor: pointer; color: blue" href="/mov/carga">separação da carga</a> para fazer o faturamento.
+                                            Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
                                         </details>
                                     </div>`;
                 }
-        
+
                 alert.innerHTML = errorMessage;
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
             }
         }
 
-        
-        function bulkInsertHistorico() {
-            const confirmation = confirm(`[CARGA: ${nroCarga}] Você tem certeza que deseja finalizar a separação?`);
-            if (confirmation) {
-                const storageKey = getStorageKey();
-                const sepCarga = JSON.parse(localStorage.getItem(storageKey)) || [];
-                
-                if (sepCarga.length === 0) {
-                    alert('Não há dados para enviar.');
-                    return;
-                }
-            
-                fetch('/mov/moving/bulk', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(sepCarga),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Movimentação em massa realizada com sucesso.');
-                        getSeparacao().then(separacao => {
-                            sendToServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
-                        })
-                        localStorage.removeItem(storageKey);    // limpa a separacao atual do localStorage
-                    } else {
-                        alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
-                    }
-                    reloadTables();                             // atualiza tabelas no front-end
-                    updateItemCount(0);
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert(`Erro ao realizar movimentação em massa: ${error.message}`);
-                });
-            }
-        }
-
-        function listSeparationsLocalStorage() {
-            const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
-            allSeparationsTable.innerHTML = '';
-            const keys = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('separacao-carga-')) {
-                    keys.push(key);
-                }
-            }
-
-            keys.sort((a, b) => b.localeCompare(a));
-        
-            keys.forEach(key => {
-                const cargaNumber = key.replace('separacao-carga-', '');
-                const row = allSeparationsTable.insertRow();
-                row.insertCell(0).textContent = cargaNumber;
-                row.classList.add("selectable-row");
-        
-                row.addEventListener('click', function() {
-                    window.location.href = `/mov/separacao-pend/${cargaNumber}`;
-                });
-            });
-        }
-        
-
-        function sendToServer(data, filename) {
-            const payload = {
-                data: data,
-                filename: filename
-            };
-        
-            fetch('/post/save-localstorage', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Dados enviados com sucesso:', result);
-            })
-            .catch(error => {
-                console.error('Erro ao enviar dados para o servidor:', error);
-            });
-        }
 
         function reloadTables() {
             listSeparationsLocalStorage();
@@ -389,8 +181,10 @@
             renderCartSubtotals();
         }
 
+
         document.addEventListener('DOMContentLoaded', () => {
             reloadTables();
-        });        
+        });
+        
     </script>
 {% endblock script %}

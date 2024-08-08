@@ -36,9 +36,9 @@
         
         <div class="tables-container" id="sepContainer" style="min-width: 40vw;{% if id_carga == 0 %}display: none;{% endif %}">
                 <div class="split-horizontal">
-                    <div class="flex-column">
+                    <div class="flex-column" style="gap: 0">
                         <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
-                        <h1 class="subtitle">Cliente: <span class="cor-web">{{ cliente }}</span></h1>
+                        <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                     </div>
                     <div class="cart-container">
                         <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
@@ -59,7 +59,14 @@
                         </div>
                     {% endif %}
                 {% endif %}
-                <p style="justify-content: flex-start">Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span></p>
+                <div class="split-horizontal">
+                    <p style="justify-content: flex-start">
+                        Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span>
+                    </p>
+                    <p style="justify-content: flex-start">
+                        Separador: <span id="separador-info" style="color: var(--cor-tl); margin-left: 4px">carregando...</span>
+                    </p>
+                </div>
                 <div class="hidden" id="alert-message"></div>
                 <div id="contentTable">
                     <div class="table-overflow" style="max-height: 400px">
@@ -112,9 +119,11 @@
         </div>
     </div>
 
+    
     {% block script %}
-        
+    
     {% endblock script %}
+    <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
         
 
     {% include 'shared/footer.html' %}

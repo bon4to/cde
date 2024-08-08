@@ -1551,6 +1551,10 @@ th.calendar {
     color: var(--cor-destaque);
 }
 
+a.hyperlink {
+    margin: 0;
+}
+
 .dropbtn:hover .hyperlink {
     text-decoration: underline;
     cursor: pointer;

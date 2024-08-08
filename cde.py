@@ -672,6 +672,24 @@ def get_cliente_with_carga(id_carga):
     return None
 
 
+def get_username(id_user):
+    query = f'''
+        SELECT DISTINCT
+            u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
+
+        FROM users u
+
+        WHERE u.id_user = {id_user};
+    '''
+
+    dsn = 'SQLITE'
+    result, columns = db_query_connect(query, dsn)
+
+    if result:
+        return result[0][0]
+    return None
+
+
 def get_all_cargas():
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2276,7 +2294,7 @@ def carga_id(id_carga):
         
         all_cargas = get_all_cargas()
         cargas_str_query = ', '.join(map(str, all_cargas))
-        cliente = get_cliente_with_carga(id_carga)
+        fant_cliente = get_cliente_with_carga(id_carga)
         
         query = f'''
             SELECT DISTINCT 
@@ -2322,7 +2340,7 @@ def carga_id(id_carga):
             class_alert=class_alert, id_carga=id_carga, 
             cod_item=cod_item, qtde_solic=qtde_solic,
             result_local=result_local, columns_local=columns_local,
-            cliente=cliente
+            fant_cliente=fant_cliente
         )
     result = []
     return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
@@ -2448,12 +2466,12 @@ def carga_sep_pend(id_carga):
     id_user   = session.get('id_user')
     user_info = get_userdata(id_user)
     obs_carga = get_obs_with_carga(id_carga)
-    cliente   = get_cliente_with_carga(id_carga)
+    fant_cliente   = get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-pend.html', 
         id_carga=id_carga, 
         user_info=user_info,
-        cliente=cliente,
+        fant_cliente=fant_cliente,
         obs_carga=obs_carga
     )
 
@@ -2461,15 +2479,15 @@ def carga_sep_pend(id_carga):
 @app.route('/mov/separacao-done/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep_done(id_carga):
-    id_user   = session.get('id_user')
-    user_info = get_userdata(id_user)
-    obs_carga = get_obs_with_carga(id_carga)
-    cliente   = get_cliente_with_carga(id_carga)
+    id_user      = session.get('id_user')
+    user_info    = get_userdata(id_user)
+    obs_carga    = get_obs_with_carga(id_carga)
+    fant_cliente = get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-done.html', 
         id_carga=id_carga, 
         user_info=user_info,
-        cliente=cliente,
+        fant_cliente=fant_cliente,
         obs_carga=obs_carga
     )
 
@@ -2491,6 +2509,12 @@ def get_description(cod_item):
         else:
             desc_item = 'O item não foi encontrado.'
     return jsonify({"description": desc_item})
+
+
+@app.route('/get/username/<id_user>', methods=['GET'])
+def get_username_route(id_user):
+    username = get_username(id_user)
+    return jsonify({"username": username})
 
 
 @app.route('/post/save-localstorage', methods=['POST'])
