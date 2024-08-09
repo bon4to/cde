@@ -67,15 +67,13 @@ async function getSeparadorName(user_id) {
     separador.innerText = username;
 }
 
-function generatePDF() {
+function genCargaReport() {
     const { jsPDF } = window.jspdf;
+
     const report    = new jsPDF();
-
-    const userName = document.getElementById('separador-info').innerText;
-    const currentDateTime = new Date().toLocaleString();
-
     const tableData = [];
-    const rows = document.querySelectorAll("#itemsTable tbody tr");
+    const rows      = document.querySelectorAll("#itemsTable tbody tr");
+    const userName  = document.getElementById('separador-info').innerText;
 
     rows.forEach(row => {
         const rowData = [];
@@ -96,7 +94,6 @@ function generatePDF() {
     }));
 
     const filteredData = data.filter(item => !item.lote_item.startsWith('Subtotal:'));
-
     const totalQtdeSolic = filteredData.reduce((total, item) => total + parseFloat(item.qtde_solic), 0);
 
     data.push({
@@ -107,13 +104,14 @@ function generatePDF() {
         qtde_solic    : totalQtdeSolic
     });
 
-    const pageHeight   = report.internal.pageSize.height;
-    const marginBottom = 20;
-    const cellPadding  = 4;
-    const cellHeight   = 10;
-    const startX       = 10;
-    const colWidths    = [25, 30, 80, 30, 25];
     let startY         = 50;
+    var cellHeight     = 10;
+    const cellPadding  = 4;
+
+    const startX       = 10;
+    const marginBottom = 20;
+    const colWidths    = [25, 30, 80, 30, 25];
+    const pageHeight   = report.internal.pageSize.height;
 
     const drawHeader = () => {
         report.setFont("times", "bold");
@@ -137,7 +135,9 @@ function generatePDF() {
     };
 
     const drawFooter = () => {
-        const totalPages = report.getNumberOfPages();
+        const currentDateTime = new Date().toLocaleString();
+        const totalPages      = report.getNumberOfPages();
+
         for (let i = 1; i <= totalPages; i++) {
             report.setPage(i);
             const pageNumber = report.internal.getCurrentPageInfo().pageNumber;
@@ -164,14 +164,17 @@ function generatePDF() {
         report.setLineWidth(0.1);
         report.setFont("times", "bold");
         columns.forEach((col, i) => {
-            report.rect(startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), startY, colWidths[i], cellHeight);
-            report.text(col, startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
+            const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+            report.rect(x, startY, colWidths[i], cellHeight);
+            report.text(col, x + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
         });
 
-        // Desenhando linhas da tabela
+        // Ajustando a posição Y após o cabeçalho
         startY += cellHeight;
         report.setFont("times", "normal");
-        data.forEach((item, index) => {
+
+        // Desenhando linhas da tabela
+        data.forEach((item) => {
             const row = [
                 item.rua_letra_end,
                 item.cod_item,
@@ -179,11 +182,23 @@ function generatePDF() {
                 item.lote_item,
                 item.qtde_solic.toString()
             ];
-
+    
             const isSubtotal = item.lote_item && item.lote_item.startsWith('Subtotal:');
             const isTotal = item.lote_item === 'Total:';
+    
+            // Calcular a altura da célula com base no número de linhas necessárias para a descrição
+            const descLines = report.splitTextToSize(item.desc_item, colWidths[2] - 2 * cellPadding);
+            const cellLines = Math.max(descLines.length, 1);
+            var currentCellHeight = cellHeight; // Ajusta a altura da célula
             
+            if (cellLines > 2) {
+                currentCellHeight = 14;
+            }
+
             row.forEach((cell, i) => {
+                const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+                const y = startY;
+    
                 if (isSubtotal) {
                     report.setFillColor(220, 220, 220);
                     report.setFont("times", "bold");
@@ -194,18 +209,16 @@ function generatePDF() {
                     report.setFillColor(255, 255, 255);
                     report.setFont("times", "normal");
                 }
-
-                const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-                const y = startY;
-
-                report.rect(x, y, colWidths[i], cellHeight, 'F');
-
+    
+                report.rect(x, y, colWidths[i], currentCellHeight, 'F');
+    
                 const text = report.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
                 report.text(text, x + cellPadding, y + cellPadding);
             });
-
-            startY += cellHeight;
-
+    
+            // Avançar a posição Y de acordo com a altura calculada
+            startY += currentCellHeight;
+    
             // Verificar se há espaço suficiente na página
             if (startY + cellHeight + marginBottom > pageHeight) {
                 report.addPage();

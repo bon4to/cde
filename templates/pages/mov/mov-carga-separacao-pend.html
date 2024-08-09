@@ -27,12 +27,12 @@
             <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
         </div>
         {% if session['user_grant'] == 1 %}
-        <div class="button-mini btn-fancy" onclick="generatePDF()" title="GERAR PDF" >
+        <div class="button-mini btn-fancy" onclick="genCargaReport()" title="GERAR PDF" >
             <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
         </div>
         {% endif %}
     </div>
-    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="bulkInsertHistorico()">
+    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="concludeSeparacao()">
         <span>FINALIZAR</span>
         <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check-big.svg') }}" alt="">
     </div>
@@ -113,6 +113,21 @@
                         } catch (error) {
                             console.error('Erro ao obter descrição:', error);
                             descCell.textContent = 'Erro ao obter descrição';
+                        }
+                        
+                        try {
+                            const response = await fetch('/api/itens_carga?id_carga=' + nroCarga, {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+                            const result = await response.json();
+                            itens_carga = result.itens;
+                            console.log('itens_carga:', itens_carga);
+                        } catch (error) {
+                            console.error('Erro ao obter itens_carga:', error);
+                            return;
                         }
 
                         const actionsDiv = document.createElement('div');

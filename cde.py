@@ -1692,8 +1692,8 @@ def moving():
 
 @app.route('/mov/moving/bulk', methods=['POST'])
 def moving_bulk():
-    sep_carga = request.json
-    timestamp_br = datetime.now(timezone(timedelta(hours=-3)))
+    sep_carga     = request.json
+    timestamp_br  = datetime.now(timezone(timedelta(hours=-3)))
     timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
     
     try:
