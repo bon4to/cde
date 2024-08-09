@@ -388,33 +388,6 @@ function renderCartSubtotals() {
 }
 
 
-async function fetchQtdeSolic(id_carga, cod_item) {
-    try {
-        const response = await fetch(`/api/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
-        const data = await response.json();
-        return data.qtde_solic;
-    } catch (error) {
-        console.error('Erro ao obter qtde_solic:', error);
-        return null;
-    }
-}
-
-
-const fetchItemDescription = async (cod_item) => {
-    try {
-        const response = await fetch(`/get/description_json/${cod_item}`);
-        if (!response.ok) {
-            throw new Error('Erro ao obter descrição do item');
-        }
-        const data = await response.json();
-        return data.description; // Retorna a descrição obtida
-    } catch (error) {
-        console.error('Erro:', error);
-        return ''; // Retorna uma string vazia ou outro valor de erro
-    }
-};
-
-
 function removeItem(index) {
     const confirmation = confirm('Você tem certeza que deseja remover este item?');
     if (confirmation) {
@@ -435,7 +408,7 @@ function clearItems() {
 }
 
 
-function sendToServer(data, filename) {
+function saveIntoServer(data, filename) {
     const payload = {
         data: data,
         filename: filename
@@ -458,11 +431,78 @@ function sendToServer(data, filename) {
 }
 
 
+async function fetchQtdeSolic(id_carga, cod_item) {
+    try {
+        const response = await fetch(`/api/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
+        const data = await response.json();
+        return data.qtde_solic;
+    } catch (error) {
+        console.error('Erro ao obter qtde_solic:', error);
+        return null;
+    }
+}
 
 
+async function concludeSeparacao() {
+    const sepCarga = await getSeparacao();
+    
+    let itens_carga = [];
 
-function bulkInsertHistorico() {
-    const confirmation = confirm(`[CARGA: ${nroCarga}] Você tem certeza que deseja finalizar a separação?`);
+    try {
+        const response = await fetch('/api/itens_carga?id_carga=' + nroCarga, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const result = await response.json();
+        itens_carga = result.itens;
+        console.log('itens_carga:', itens_carga);
+    } catch (error) {
+        console.error('Erro ao obter itens_carga:', error);
+        return;
+    }
+
+    const groupedItems = sepCarga.reduce((acc, item) => {
+        if (!acc[item.cod_item]) {
+            acc[item.cod_item] = [];
+        }
+        acc[item.cod_item].push(item);
+        return acc;
+    }, {});
+    
+    var nonAvailableItems = [];
+
+    for (const cod_item of itens_carga) {
+        let subtotal = 0;
+
+        if (groupedItems[cod_item]) {
+            for (const item of groupedItems[cod_item]) {
+                subtotal += item.qtde_sep;  // Soma as quantidades separadas para este item
+            }
+        }
+
+        const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);  // Recupera a quantidade solicitada para este item específico
+
+        if (qtde_solic !== subtotal) {  // Verifica se a quantidade solicitada é igual à quantidade separada
+            console.error('Item:', cod_item, 'qtde_solic:', qtde_solic, 'subtotal:', subtotal);
+            alert(`ALERTA:\n${cod_item} | ${subtotal} / ${qtde_solic}\n(quantidade insuficiente)`);
+            nonAvailableItems.push(cod_item);
+        } else {
+            console.log('Item:', cod_item, 'qtde_solic:', qtde_solic, 'subtotal:', subtotal);
+        }
+    }
+    
+    if (nonAvailableItems.length > 0) {
+        const confirmation = confirm(`ALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.\nDeseja continuar com a separação?`);
+        if (confirmation) {
+            const hasPendingItems = true;
+        } else {
+            return;
+        }
+    }
+
+    const confirmation = confirm(`[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?`);
     if (confirmation) {
         const storageKey = getStorageKey();
         const sepCarga = JSON.parse(localStorage.getItem(storageKey)) || [];
@@ -484,13 +524,13 @@ function bulkInsertHistorico() {
             if (data.success) {
                 alert('Movimentação em massa realizada com sucesso.');
                 getSeparacao().then(separacao => {
-                    sendToServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
+                    saveIntoServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
                 })
-                localStorage.removeItem(storageKey);    // limpa a separacao atual do localStorage
+                localStorage.removeItem(storageKey);      // limpa a separacao atual do localStorage
             } else {
                 alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
             }
-            reloadTables();                             // atualiza tabelas no front-end
+            reloadTables();                               // atualiza tabelas no front-end
             updateItemCount(0);
         })
         .catch(error => {
@@ -500,4 +540,18 @@ function bulkInsertHistorico() {
     }
 }
 
+
+const fetchItemDescription = async (cod_item) => {
+    try {
+        const response = await fetch(`/get/description_json/${cod_item}`);
+        if (!response.ok) {
+            throw new Error('Erro ao obter descrição do item');
+        }
+        const data = await response.json();
+        return data.description; // Retorna a descrição obtida
+    } catch (error) {
+        console.error('Erro:', error);
+        return ''; // Retorna uma string vazia ou outro valor de erro
+    }
+};
 

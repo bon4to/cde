@@ -2452,7 +2452,7 @@ def get_itens_carga():
         dsn = 'HUGOPIET'
         result, columns = db_query_connect(query, dsn)
         if result:
-            itens = result[0]
+            itens = [row[0] for row in result]
         else:
             itens = 'Erro: Nenhum item encontrado.'
         return jsonify({'itens': itens})
