@@ -1,11 +1,13 @@
 // lb-cargas.js
 
+let headerMainLogo;
 
 var itemCount = 0;
 
 if (nroCarga != '') {
     renderCartSubtotals();
 }
+
 
 function getStorageKey() {
     return `separacao-carga-${nroCarga}`;
@@ -67,9 +69,9 @@ async function getSeparadorName(user_id) {
     separador.innerText = username;
 }
 
+
 function genCargaReport() {
     const { jsPDF } = window.jspdf;
-
     const report    = new jsPDF();
     const tableData = [];
     const rows      = document.querySelectorAll("#itemsTable tbody tr");
@@ -104,7 +106,7 @@ function genCargaReport() {
         qtde_solic    : totalQtdeSolic
     });
 
-    let startY         = 50;
+    let startY         = 48;
     var cellHeight     = 10;
     const cellPadding  = 4;
 
@@ -114,6 +116,8 @@ function genCargaReport() {
     const pageHeight   = report.internal.pageSize.height;
 
     const drawHeader = () => {
+        report.addImage(headerMainLogo, 'PNG', 164, 20, 35, 8);
+
         report.setFont("times", "bold");
         report.setFontSize(16);
         report.text("Relatório de Cargas", 10, 22);
@@ -122,16 +126,23 @@ function genCargaReport() {
         report.setFontSize(12);
         report.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
 
-        if (typeof nroCarga !== 'undefined') {
-            report.text(`CARGA: ${nroCarga}`, 10, 34);
-        }
+        report.setDrawColor(192, 192, 192);
+        report.setLineWidth(0.2);
+        report.line(10, 32, 200, 32);
+        report.setDrawColor(0, 0, 0);
+
+        report.setFontSize(10);
 
         if (typeof fantCliente !== 'undefined') {
-            report.text(`CLIENTE: ${fantCliente}`, 10, 40);
+            report.setFont("times", "bold");
+            report.text(`CLIENTE: ${fantCliente}`, 10, 38);
         }
-
-        report.setLineWidth(0.4);
-        report.line(10, 44, 200, 44);
+        
+        if (typeof nroCarga !== 'undefined') {
+            report.setFont("times", "normal");
+            report.text(`CARGA: ${nroCarga}`, 10, 42);
+        }
+        report.setDrawColor(192, 192, 192);
     };
 
     const drawFooter = () => {
@@ -142,8 +153,10 @@ function genCargaReport() {
             report.setPage(i);
             const pageNumber = report.internal.getCurrentPageInfo().pageNumber;
 
-            report.setLineWidth(0.4);
+            report.setDrawColor(192, 192, 192);
+            report.setLineWidth(0.2);
             report.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
+            report.setDrawColor(0, 0, 0);
 
             report.setFontSize(10);
             if (typeof userName === 'string') {
@@ -165,9 +178,13 @@ function genCargaReport() {
         report.setFont("times", "bold");
         columns.forEach((col, i) => {
             const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-            report.rect(x, startY, colWidths[i], cellHeight);
+            report.setFillColor(62, 94, 166);
+            report.setTextColor(255, 255, 255);
+            report.rect(x, startY, colWidths[i], cellHeight, 'F');
             report.text(col, x + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
         });
+        report.setTextColor(20, 20, 20);
+        report.setDrawColor(220, 220, 220);
 
         // Ajustando a posição Y após o cabeçalho
         startY += cellHeight;
@@ -182,15 +199,14 @@ function genCargaReport() {
                 item.lote_item,
                 item.qtde_solic.toString()
             ];
-    
+
             const isSubtotal = item.lote_item && item.lote_item.startsWith('Subtotal:');
-            const isTotal = item.lote_item === 'Total:';
-    
-            // Calcular a altura da célula com base no número de linhas necessárias para a descrição
+            const isTotal    = item.lote_item === 'Total:';
+
             const descLines = report.splitTextToSize(item.desc_item, colWidths[2] - 2 * cellPadding);
             const cellLines = Math.max(descLines.length, 1);
-            var currentCellHeight = cellHeight; // Ajusta a altura da célula
-            
+            var currentCellHeight = cellHeight;
+
             if (cellLines > 2) {
                 currentCellHeight = 14;
             }
@@ -198,28 +214,28 @@ function genCargaReport() {
             row.forEach((cell, i) => {
                 const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
                 const y = startY;
-    
+
                 if (isSubtotal) {
-                    report.setFillColor(220, 220, 220);
+                    report.setFillColor(220, 220, 220); 
                     report.setFont("times", "bold");
                 } else if (isTotal) {
-                    report.setFillColor(192, 192, 192);
+                    report.setFillColor(192, 192, 192); 
+                    report.setDrawColor(192, 192, 192); 
                     report.setFont("times", "bold");
                 } else {
-                    report.setFillColor(255, 255, 255);
+                    report.setFillColor(255, 255, 255); 
                     report.setFont("times", "normal");
                 }
-    
+
                 report.rect(x, y, colWidths[i], currentCellHeight, 'F');
-    
                 const text = report.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
                 report.text(text, x + cellPadding, y + cellPadding);
+                report.setFillColor(50, 50, 50);
+                report.rect(x, y, colWidths[i], currentCellHeight, 'S');
             });
-    
-            // Avançar a posição Y de acordo com a altura calculada
+
             startY += currentCellHeight;
-    
-            // Verificar se há espaço suficiente na página
+
             if (startY + cellHeight + marginBottom > pageHeight) {
                 report.addPage();
                 drawHeader();
@@ -230,22 +246,37 @@ function genCargaReport() {
         });
     };
 
-    drawHeader();
-    drawTable(data);
-    drawFooter(report.internal.getNumberOfPages());
+    loadBase64('/static/b64/cde-logo-b.txt', function(base64String) {
+        headerMainLogo = base64String; // Atribuir ao escopo global
+        drawHeader();
+        drawTable(data);
+        drawFooter(report.internal.getNumberOfPages());
 
-    if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
-        const finalY = startY + 10;
-        report.setFontSize(10);
-        report.setFont("times", "bold");
-        report.text("OBSERVACÃO: ", 10, finalY);
-        
-        report.setFont("times", "normal");
-        report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
-    }
+        if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
+            const finalY = startY + 10;
+            report.setFontSize(10);
+            report.setFont("times", "bold");
+            report.text("OBSERVACÃO: ", 10, finalY);
 
-    const pdfName = `${getStorageKey()}.pdf`;
-    report.save(pdfName);
+            report.setFont("times", "normal");
+            report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
+        }
+
+        const pdfName = `${getStorageKey()}.pdf`;
+        report.save(pdfName);
+    });
+}
+
+
+function loadBase64(filePath, callback) {
+    fetch(filePath)
+        .then(response => response.text())
+        .then(base64String => {
+            callback(base64String);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar o arquivo Base64:', error);
+        });
 }
 
 
