@@ -34,23 +34,30 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
-        <div class="flex-row" style="min-width: 100%;">
+        <div class="flex-row" style="min-width: 100%; justify-content: space-between;">
             {% if id_carga %}
             <div class="tables-container" style="max-width: 55%; min-width: 55%;">
-                <div class="split-horizontal">
-                    <div class="flex-column">
+                <div class="flex-column">
+                    <div class="split-horizontal">
                         <h1 style="margin-bottom: 8px">Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
-                        <h1 class="subtitle">Cliente: <span class="cor-web">{{ cliente }}</span></h1>
-                    </div>
-                    <div class="cart-container">
-                        <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
-                        <div class="cart-dropdown hidden" id="cart-dropdown">
-                            <ul class="cart-items">
-                                <!-- Itens serão renderizados aqui -->
-                            </ul>
-                            <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
+                        <div class="flex-row" style="gap: 30px">
+                            <div class="cart-container" style="display: none">
+                                <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                                <div class="cart-dropdown hidden" id="cart-dropdown">
+                                    <ul class="cart-items">
+                                        <!-- Itens serão renderizados aqui -->
+                                    </ul>
+                                    <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 6px">
+                                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                </a>
+                            </div>
                         </div>
                     </div>
+                    <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                 </div>
                 {% if result and 'OBS_CARGA' in columns %}
                     {% set obs_carga = result[0][columns.index('OBS_CARGA')]|trim %}
@@ -228,14 +235,8 @@
         </form>
 
         {% if 'user_grant' in session %}
-            {% if id_carga %}
-                <div style="display: flex; flex-direction: column; gap: 6px">
-                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                    </a>
-                </div>
-            {% else %}
-                <div class="mobile-container" style=" max-width: 70%; margin: auto;">
+            {% if not id_carga %}
+                <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
                     {% if alert %}
                         {% if class_alert == 'error' %}
                             <div class="msg-error">
@@ -258,6 +259,7 @@
                             <details>
                                 <summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
                                 A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                                <br>
                             </details>
                         </div>
                         
@@ -298,9 +300,36 @@
                             </table>
                         {% endif %}
                     </div>
-                    <br>    
+                    <br>
                 </div>
-            {% endif %}
+                {% endif %}
+                {% if not cod_item %}
+                <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+                    <h1>Separações</h1>
+                    {% block all_separation_status %}
+                    
+                    {% endblock all_separation_status %}
+                        <div class="table-overflow" style="max-height: 500px">
+                            <table id="allSeparationsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Cargas (Separações)</th>
+                                    </tr>
+                                </thead>
+                                    <!-- executa listCargasLocalStorage(); -->
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if session['user_grant'] == 1 %}
+                        <div style="margin: 8px 0" class="flex-row">
+                            <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
         {% endif %}
         <div id="quantityPopup" class="dialog-overlay hidden">
             <div class="dialog-box">
@@ -328,7 +357,7 @@
         </div>
     </div>
             
-        <script>   
+        <script>
             const nroCarga = '{{ id_carga }}';
 
             var codItem = '{{ cod_item }}';
@@ -346,11 +375,7 @@
                     window.location.href = url;
                 }
             }
-
-            function getStorageKey() {
-                return `separacao-carga-${nroCarga}`;
-            }
-            
+     
             function getSeparacao() {
                 return new Promise((resolve, reject) => {
                     const localStorageData = localStorage.getItem(getStorageKey());
@@ -398,6 +423,8 @@
                         window.location.href = '/mov/carga/' + idCarga;
                     });
                 });
+
+                listSeparationsLocalStorage('carga');
             });
 
             function sendCodItem(cod_item, carga_id, qtde_solic) {
@@ -520,10 +547,6 @@
                 });
             }
             
-            function updateItemCount(itemCount) {
-                document.querySelector('.item-count').textContent = itemCount;
-            }
-            
             function getQtdeItemLS(storageKey, cod_item) {
                 const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
                 const quantidade = storage.reduce((acc, item) => {
@@ -583,5 +606,7 @@
             }
 
         </script>
+
+        <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
 
         {% include 'shared/footer.html' %}

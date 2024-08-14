@@ -28,7 +28,7 @@ function redirectToCarga(status) {
 }
 
 
-function listSeparationsLocalStorage() {
+function listSeparationsLocalStorage(route) {
     const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
     allSeparationsTable.innerHTML = '';
     const keys = [];
@@ -48,7 +48,7 @@ function listSeparationsLocalStorage() {
         row.classList.add("selectable-row");
 
         row.addEventListener('click', function() {
-            window.location.href = `/mov/separacao-pend/${cargaNumber}`;
+            window.location.href = `/mov/${route}/${cargaNumber}`;
         });
     });
 }
@@ -322,7 +322,7 @@ function renderSubtotals() {
 }
 
 
-function listSeparationsFromServer() {
+function listSeparationsFromServer(route) {
     fetch('/get/list-all-separations')
         .then(response => response.json())
         .then(files => {
@@ -344,7 +344,7 @@ function listSeparationsFromServer() {
                     row.classList.add("selectable-row");
 
                     row.addEventListener('click', function() {
-                        window.location.href = `/mov/separacao-done/${cargaNumber}`;
+                        window.location.href = `/mov/${route}/${cargaNumber}`;
                     });
                 });
             }
