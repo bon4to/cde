@@ -604,7 +604,7 @@ def get_end_lote_fat():                                                         
         end_lote = [{
             'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
             'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[6],
-            'id_carga': float(row[5]) / 10
+            'id_carga': row[5]
         } for row in cursor.fetchall()]
 
     return end_lote
@@ -698,13 +698,12 @@ def get_all_cargas():
             FROM historico
             ORDER BY id_carga DESC;
         ''')
-
-        all_cargas = [
-            int(str(row[0])[:-1]) 
-            for row in cursor.fetchall() 
-            if row[0] is not None and len(str(row[0])) > 1
-        ]
-    return all_cargas
+        row = cursor.fetchall()
+        
+        if row:
+            return [row[0] for row in row]
+        else:
+            return []
 
 
 def get_ult_acesso():                                                                                           #* RETORNA ULTIMO ACESSO DO USUÁRIO
@@ -1603,7 +1602,6 @@ def moving():
     letra           = str(request.form['end_letra'])
     operacao        = str(request.form['operacao'])
     is_end_completo = bool(request.form.get('is_end_completo'))
-    id_carga        = 0
 
     timestamp_br    = datetime.now(timezone(timedelta(hours=-3)))
     timestamp_out   = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
@@ -1664,7 +1662,7 @@ def moving():
                     print(f'    | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
         
     elif operacao == 'F':                                                                                       #* FATURAMENTO
-        id_carga = str(request.form['id_carga']) + str(request.form['id_carga_seq'])
+        id_carga = str(request.form['id_carga'])
 
         if items:
             for item in items:
@@ -2291,12 +2289,15 @@ def carga_id(id_carga):
             dsn = 'SQLITE'
             result_local, columns_local = db_query_connect(query, dsn)
 
+        fant_cliente = get_cliente_with_carga(id_carga)
+        all_cargas = get_all_cargas()
+        
         #? SEARCH DE ITENS POR CARGA
         
-        all_cargas = get_all_cargas()
-        cargas_str_query = ', '.join(map(str, all_cargas))
-        fant_cliente = get_cliente_with_carga(id_carga)
+        cargas_except_query = ', '.join(map(str, all_cargas))
+        cargas_include_query = get_carga_pendente()
         
+
         query = f'''
             SELECT DISTINCT 
                 icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
@@ -2320,7 +2321,7 @@ def carga_id(id_carga):
             ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
             WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
-            AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
+            AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
 
             ORDER BY COD_ITEM
 
@@ -2353,7 +2354,7 @@ def cargas():                                                                   
     if request.method == 'POST':
         all_cargas = get_all_cargas()
         if all_cargas:
-            cargas_str_query = ', '.join(map(str, all_cargas))
+            cargas_except_query = ', '.join(map(str, all_cargas))
             query = f'''
                 SELECT DISTINCT 
                     icrg.CODIGO_GRUPOPED AS NRO_CARGA,
@@ -2385,7 +2386,7 @@ def cargas():                                                                   
                 WHERE icrg.QTDE_FATUR != 0
                 AND crg.DATA_EMISSAO BETWEEN (CURRENT DATE - 7 DAYS)
                 AND CURRENT DATE
-                AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_str_query})
+                AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
 
                 ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
             '''
