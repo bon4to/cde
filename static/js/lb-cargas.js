@@ -537,16 +537,58 @@ async function concludeSeparacao() {
         }
     }
     
+    let hasPendingItems;
+
     if (nonAvailableItems.length > 0) {
-        const confirmation = confirm(`ALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.\nDeseja continuar com a separação?`);
+        const confirmation = confirm(`[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?\nALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`);
         if (confirmation) {
-            const hasPendingItems = true;
+            hasPendingItems = true;
+            
+            for (const cod_item of nonAvailableItems) {
+                // Verifica se groupedItems[cod_item] está definido
+                let subtotal = 0;
+                if (groupedItems[cod_item]) {
+                    subtotal = groupedItems[cod_item].reduce((acc, item) => acc + item.qtde_sep, 0);
+                }
+    
+                const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
+                
+                try {
+                    // Enviar dados para o servidor
+                    const response = await fetch('/api/insert_carga_pendente', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id_carga: nroCarga,
+                            cod_item: cod_item,
+                            qtde_atual: subtotal,
+                            qtde_solic: qtde_solic
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (!result.success) {
+                        console.error(`Erro ao inserir ${cod_item} como pendente para a carga.`, result.error);
+                    }
+                } catch (error) {
+                    console.error(`Erro ao enviar carga pendente para o servidor para o item ${cod_item}:`, error);
+                }
+            }
         } else {
             return;
         }
     }
 
-    const confirmation = confirm(`[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?`);
+    let confirmation;
+
+    if (!hasPendingItems) {
+        confirmation = confirm(`[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?`);
+    } else {
+        confirmation = true;
+    }
+
     if (confirmation) {
         const storageKey = getStorageKey();
         const sepCarga = JSON.parse(localStorage.getItem(storageKey)) || [];

@@ -237,6 +237,18 @@ def create_tables():                                                            
                 estado_cliente   VARCHAR(2)
             );
         ''')
+        
+# TABELA DE CARGAS PENDENTES
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS carga_pendente (
+                id_log           INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_carga         INTEGER(6),
+                cod_item         VARCHAR(6),
+                qtde_atual       INTEGER(20),
+                qtde_solic       INTEGER(20),
+                flag_pendente    BOOLEAN DEFAULT TRUE
+            );
+        ''')
 
 # TABELA DE USUÁRIOS
         cursor.execute('''
@@ -286,6 +298,154 @@ def create_tables():                                                            
         ''')                                                                                                    #TODO! mudar id_perm: integer para varchar(6)
 
         connection.commit()
+
+
+@app.route('/mov/carga-pendente', methods=['GET'])
+def carga_pendente():
+    carga_pendente = get_carga_pendente()
+    carga_list = listed_carga_pendente()
+    return render_template(
+        'pages/mov/mov-carga-pendente.html',
+        carga_pendente=carga_pendente,
+        carga_list=carga_list
+    )
+
+
+@app.route('/mov/carga-pendente/<int:id_carga>', methods=['GET'])
+def carga_pendente_id(id_carga):
+    carga_pendente = get_carga_pendente(id_carga)
+    carga_list = listed_carga_pendente()
+    return render_template(
+        'pages/mov/mov-carga-pendente.html',
+        carga_pendente=carga_pendente,
+        carga_list=carga_list
+    )
+
+
+@app.route('/api/insert_carga_pendente', methods=['POST'])
+def api_insert_carga_pendente():
+    data = request.get_json()
+    id_carga = data.get('id_carga')
+    cod_item = data.get('cod_item')
+    qtde_atual = data.get('qtde_atual')
+    qtde_solic = data.get('qtde_solic')
+    
+    try:
+        insert_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic)
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(success=False, error=str(e))
+
+
+def insert_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):                                          #* INSERE REGISTRO NA TABELA DE CARGAS PENDENTES
+
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            INSERT INTO carga_pendente (
+                id_carga, cod_item,
+                qtde_atual, qtde_solic
+            ) VALUES (
+                ?, ?,
+                ?, ?
+            );
+            ''',
+            (id_carga, cod_item, qtde_atual, qtde_solic)
+        )
+        
+        connection.commit()
+
+
+def update_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):                                          #* ALTERA REGISTRO NA TABELA DE CARGAS PENDENTES
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT qtde_atual
+            FROM carga_pendente 
+            WHERE 
+                id_carga = ? AND 
+                cod_item = ?;
+            ''',
+            (id_carga, cod_item)
+        )
+        row = cursor.fetchone()
+        if not row:
+            return 'Erro: Registro para alteracão não encontrado.'
+        else:
+            qtde_atual += row[0]
+        
+            print(f'[{id_carga}] qtde atual: {qtde_atual}')
+            
+            flag_pendente = 'TRUE'
+            if qtde_solic == qtde_atual:
+                flag_pendente = 'FALSE'
+            elif qtde_solic < qtde_atual:
+                return 'Erro: Quantidade solicitada menor que a separada.'
+            
+            cursor.execute('''
+                UPDATE carga_pendente 
+                SET 
+                    qtde_atual = ?,
+                    flag_pendente = ?
+                WHERE 
+                    id_carga = ? AND 
+                    cod_item = ?;
+                ''',
+                (qtde_atual, flag_pendente, id_carga, cod_item)
+            )
+            
+            connection.commit()
+
+
+def get_carga_pendente(id_carga=False):                                                                         #* BUSCA CARGAS PENDENTES
+    where_clause = 'WHERE flag_pendente = TRUE'
+    
+    if id_carga:
+        where_clause += f' AND id_carga = ?'
+        params = (id_carga,)
+    else:
+        params = ()
+
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute(f'''
+            SELECT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
+            FROM carga_pendente c
+            JOIN itens i
+            ON c.cod_item = i.cod_item
+            {where_clause};
+        ''', params)
+        rows = cursor.fetchall()
+        return rows
+
+
+def listed_carga_pendente():                                                                                    #* LISTA CARGAS PENDENTES
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT DISTINCT id_carga
+            FROM carga_pendente c
+            
+            WHERE flag_pendente = TRUE;
+        ''')
+        rows = cursor.fetchall()
+        return rows
+
+
+def select_carga_from_historico(id_carga):                                                                      #* BUSCA CARGAS DO HISTÓRICO
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            SELECT i.cod_item, desc_item, quantidade
+            FROM historico h
+            
+            JOIN itens i
+            ON h.cod_item = i.cod_item
+            
+            WHERE id_carga = ?;
+        ''', (id_carga,))
+        rows = cursor.fetchall()
+        return rows
 
 
 def get_frase():                                                                                                #* BUSCA FRASE MOTIVACIONAL PARA /INDEX

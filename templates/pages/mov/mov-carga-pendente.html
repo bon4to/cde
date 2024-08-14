@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Pendentes {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+        <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+
+        {% include 'shared/header/tl-header.html' %}
+        <div class="titles-container flex-row title-centerer">
+            <h1>
+                <a href="{{ url_for('mov') }}">MOV</a>
+                <span class="dash">/</span>
+                <a href="{{ url_for('cargas') }}">CARGAS</a>
+                <span class="dash">/</span>
+                <span>PENDENTES</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <div class="flex-row" style="margin: 8px 0">
+                    <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                    <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+                        <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </div>
+                </div>
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                <hr class="vert">
+                <form action="{{ url_for('cargas') }}" method="post">
+                    <button type="submit" style="all: unset">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
+                    </button>
+                </form>
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            </div>
+        </div>
+        <div class="flex-row" style="min-width: 100%; justify-content: space-between;">
+            {% if id_carga %}
+            <div class="tables-container" style="max-width: 55%; min-width: 55%;">
+                <div class="flex-column">
+                    <div class="split-horizontal">
+                        <h1 style="margin-bottom: 8px">Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                        <div class="flex-row" style="gap: 30px">
+                            <div class="cart-container" style="display: none">
+                                <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                                <div class="cart-dropdown hidden" id="cart-dropdown">
+                                    <ul class="cart-items">
+                                        <!-- Itens serão renderizados aqui -->
+                                    </ul>
+                                    <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 6px">
+                                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
+                </div>
+                {% if result and 'OBS_CARGA' in columns %}
+                    {% set obs_carga = result[0][columns.index('OBS_CARGA')]|trim %}
+                    {% if obs_carga and obs_carga | length > 0 %}
+                        <div class="msg-info">
+                            <details>
+                                <summary>A carga possui uma observação!</summary>
+                                <span id="obs_carga">{{ obs_carga }}</span>
+                            </details>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% if result %}
+                <div id="detailedTable" class="hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <p>Lista Detalhada</p>
+                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
+                        </div>
+                    </div>
+                    <table style="max-height: 500px; overflow-y: auto;">
+                        <thead>
+                            <tr>
+                                <th>Pedido SEQ</th>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th style="width: 100px;">QTDE (Solicitada)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set items = [] %}
+                            {% set subtotals = {} %}
+                            
+                            {% for row in result %}
+                                {% set cod_item   = row[columns.index('COD_ITEM')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
+                                {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
+                                {% set items      = items.append(row) or items %}
+                            {% endfor %}
+                            
+                            {% for row_cod_item, subtotal in subtotals.items() %}
+                                {% for row in items %}
+                                    {% if row[columns.index('COD_ITEM')] == row_cod_item %}
+                                        <tr class="unselectable-row">
+                                            <td class="over-row">{{ row[columns.index('NROPED_SEQ')] }}</td>
+                                            <td>{{ row[columns.index('COD_ITEM')] }}</td>
+                                            <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
+                                            <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                <tr 
+                                    class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}"
+                                    onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')"
+                                >
+                                    <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
+                                    <td>{{ subtotal }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="standardTable">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <p>Lista Subtotal</p>
+                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
+                        </div>
+                    </div>
+                    <table style="max-height: 500px; overflow-y: auto;">
+                        <thead>
+                            <tr>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th style="width: 100px;">QTDE (Solicitada)</th>
+                                <th style="width: 100px;">QTDE (Separada)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set items = {} %}
+                            
+                            {% for row in result %}
+                                {% set row_cod_item = row[columns.index('COD_ITEM')] %}
+                                {% set desc_item = row[columns.index('DESC_ITEM')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                
+                                {% if row_cod_item in items %}
+                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
+                                {% else %}
+                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': qtde_solic}}) or items %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% for row_cod_item, item in items.items() %}
+                                <tr 
+                                    class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
+                                    data-cod-item="{{ row_cod_item }}"
+                                    onclick="sendCodItem('{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')"
+                                >
+                                    <td>{{ row_cod_item }}</td>
+                                    <td style="text-wrap: balance;">{{ item.desc }}</td>
+                                    <td>{{ item.qtde }}</td>
+                                    <td class="subtotal-cell"></td>
+                                </tr> 
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+            {% else %}
+                <div class="msg-success">
+                    <details>
+                        <summary>A carga selecionada já foi finalizada.</summary>
+                        Caso necessite visualizá-la, clique no botão abaixo.
+                    </details>
+                </div>
+            {% endif %}
+        </div>
+        
+        {% endif %}
+        {% if 'user_grant' in session %}
+            {% if id_carga %}
+                {% if cod_item %}
+                    <div class="tables-container glow-tl">
+                        <span style="display:space-between: width: 100%;">
+                            <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
+                        </span>
+                        {% if result %}
+                            <table>
+                                {% if not result_local %}
+                                    <div class="msg-error">
+                                        <details>
+                                            <summary>Não há saldo disponível para este item!</summary>
+                                            Atualmente, não existe saldo suficiente para suprir esta carga.
+                                        </details>
+                                    </div>
+                                {% else %}
+                                    <thead>
+                                        <tr>
+                                            <th>Endereço</th>
+                                            <th>Item (Código)</th>
+                                            <th>Lote (Código)</th>
+                                            <th>QTDE (Efetiva)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in result_local %}
+                                            <tr class="selectable-row" onclick="pushItemIntoSeparacao(
+                                                '{{ row[columns_local.index('saldo')] }}', '{{ request.args.get('qtde_solic') }}',
+                                                '{{ row[columns_local.index('rua_letra')] }}', '{{ row[columns_local.index('rua_numero')] }}',
+                                                '{{ row[columns_local.index('lote_item')] }}'
+                                            )">
+                                                <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
+                                                <td>{{ row[columns_local.index('cod_item')] }}</td>
+                                                <td>{{ row[columns_local.index('lote_item')] }}</td>
+                                                <td {% if qtde_solic|int < row[columns_local.index('saldo')] %} style="color: green"{% else %} style="color: red"{% endif %}>{{ row[columns_local.index('saldo')] }}</td>    
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <div id="inputContainer" class="hidden"></div>
+                                {% endif %}
+                            </table>
+                        {% endif %}
+                        <br>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        
+        <form class="hidden" id="cod_item_form" method="GET" action="">
+            <input type="hidden" id="cod_item_input" name="cod_item">
+            <input type="hidden" id="carga_id_input" name="carga_id">
+            <input type="hidden" id="qtde_item_input" name="qtde_solic">
+        </form>
+
+        {% if 'user_grant' in session %}
+            {% if not id_carga %}
+                <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
+                    {% if alert %}
+                        {% if class_alert == 'error' %}
+                            <div class="msg-error">
+                                <details>
+                                    <summary>A lista não pôde ser carregada!</summary>
+                                    {{ alert | safe }}
+                                </details>
+                            </div>
+                        {% elif class_alert == 'success' %}
+                            <div class="msg-success">
+                                <details>
+                                    <summary>A lista foi carregada com sucesso!</summary>
+                                    {{ alert | safe }}
+                                </details>
+                            </div>
+                            <h1 class="subtitle">Selecione uma carga:</h1>
+                        {% endif %}
+                    {% else %}
+                        <div class="msg-info">
+                            <details>
+                                <summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
+                                A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                                <br>
+                            </details>
+                        </div>
+                        
+                    {% endif %}
+                    <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Carga (Código)</th>
+                                    <th>Item (Código)</th>
+                                    <th>Item (Descrição)</th>
+                                    <th>Quantidade (Separada)</th>
+                                    <th>Quantidade (Solicitada)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in carga_pendente %}
+                                    <tr class="selectable-row js_query_selector" data-id="{{ row[0] }}">
+                                        <td>{{ row[0] }}</td>
+                                        <td>{{ row[1] }}</td>
+                                        <td>{{ row[2] }}</td>
+                                        <td>{{ row[3] }}</td>
+                                        <td>{{ row[4] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <br>
+                </div>
+                {% endif %}
+                {% if not cod_item %}
+                <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+                    <h1>Cargas</h1>
+                    {% block all_separation_status %}
+                    
+                    {% endblock all_separation_status %}
+                        <div class="table-overflow" style="max-height: 500px">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Cargas (Pendentes)</th>
+                                    </tr>
+                                </thead>
+                                    {% for row in carga_list %}
+                                        <tr class="selectable-row js_query_selector" data-id="{{ row[0] }}">
+                                            <td>{{ row[0] }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if session['user_grant'] == 1 %}
+                        <div style="margin: 8px 0" class="flex-row">
+                            <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+        {% endif %}
+        <div id="quantityPopup" class="dialog-overlay hidden">
+            <div class="dialog-box">
+                <h1 style="margin-top: 8px; margin-bottom: 14px;">Separar <span class="cor-web">{{ cod_item }}</span>:</h1>
+                <h1 class="sub-label">Separados:</h1>
+                <div class="flex-column">
+                    <h3 id="popupMessage"></h3>
+                    <p class="cor-web" style="font-weight: bold" id="popupFaltante"></p>
+                </div>
+                <h1 class="sub-label">Adicionar:</h1>
+                <div class="flex-column">
+                    <h3 class="cor-web" style="display: flex; justify-content: center;">
+                        <div style="border-bottom: 2px solid var(--cor-destaque); width: max-content;">
+                            <span>+</span>
+                            <input value="0" style="all: unset; width: 70px;" type="number" style="width: 40px;" id="quantityInput" min="1">
+                            <a id="maxBtn">MAX</a>
+                        </div>
+                    </h3>
+                    <p id="popupObs"></p>
+                </div>
+                <br>
+                <button class="btn-fancy" id="submitBtn" required>Confirmar</button>
+                <a class="aux-button" onclick="hidePopUp()">Cancelar</a>
+            </div>
+        </div>
+    </div>
+            
+        <script>
+            const nroCarga = '{{ id_carga }}';
+
+            var codItem = '{{ cod_item }}';
+            var userID  = '{{ session['id_user'] }}';
+            var itemCount = 0;
+            
+            if (nroCarga != '') {
+                renderCartSubtotals();
+            }
+
+            function redirectToCarga() {
+                const cargaInput = document.getElementById('cargaInput').value;
+                if (cargaInput > 0) {
+                    const url = `/mov/carga/${cargaInput}`;
+                    window.location.href = url;
+                }
+            }
+     
+            function getSeparacao() {
+                return new Promise((resolve, reject) => {
+                    const localStorageData = localStorage.getItem(getStorageKey());
+                    if (localStorageData) {
+                        resolve(JSON.parse(localStorageData));
+                    } else {
+                        fetch(`/get/load-table-data?filename=${getStorageKey()}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Erro ao carregar dados do servidor');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                reject(new Error('A carga selecionada já foi finalizada.'));
+                            })
+                            .catch(error => {
+                                reject(new Error('Nenhuma carga pendente ou iniciada neste código.'));
+                            });
+                    }
+                });
+            }
+
+            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
+                let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+                let user_id = userID
+                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep, user_id };
+                sepCarga.push(item);
+                localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+            }
+
+            function toggleTableSubtotal() {
+                const detailedTable = document.getElementById('detailedTable');
+                const standardTable = document.getElementById('standardTable');
+    
+                detailedTable.classList.toggle('hidden');
+                standardTable.classList.toggle('hidden');
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var rows = document.querySelectorAll('.js_query_selector');
+                rows.forEach(function(row) {
+                    row.addEventListener('click', function() {
+                        var idCarga = this.getAttribute('data-id');
+                        window.location.href = '/mov/carga/' + idCarga;
+                    });
+                });
+
+                listSeparationsLocalStorage('carga');
+            });
+
+            function sendCodItem(cod_item, carga_id, qtde_solic) {
+                document.getElementById('cod_item_input').value = cod_item;
+                document.getElementById('carga_id_input').value = carga_id;
+                document.getElementById('qtde_item_input').value = qtde_solic;
+                var form = document.getElementById('cod_item_form');
+                form.action = '/mov/carga/' + carga_id;
+                form.submit();
+            }
+
+            function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
+                const popup = document.getElementById('quantityPopup');
+                const obsv = document.getElementById('popupObs');
+                const info = document.getElementById('popupFaltante');
+                const msge = document.getElementById('popupMessage');
+                const input = document.getElementById('quantityInput');
+                const submitBtn = document.getElementById('submitBtn');
+                const maxBtn = document.getElementById('maxBtn');
+            
+                var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
+                var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
+
+                input.value = 0
+
+                msge.textContent = `${qtde_separada} / ${qtde_solic}`;
+                obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
+                info.textContent = `(${qtde_faltante} faltante)`;
+
+                maxEstoque = maxEstoque - this_qtde_separada
+                input.max = Math.min(qtde_faltante, maxEstoque);
+
+                maxBtn.onclick = function() {
+                    input.value = input.max;
+                };
+                
+                if (qtde_faltante <= 0) {
+                    alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
+                } else {
+                    popup.classList.remove('hidden');
+
+                    submitBtn.onclick = function() {
+                        const value = parseInt(input.value);
+                        if (value > 0 && value <= input.max) {
+                            popup.classList.add('hidden');
+                            onSubmit(value);
+                        } else {
+                            alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
+                        }
+                    };
+                }
+            }
+
+            function hidePopUp() {
+                const popup = document.getElementById('quantityPopup');
+                popup.classList.add('hidden');
+            }
+
+            function renderCartSubtotals() {
+                const cartItemsContainer = document.querySelector('.cart-items');
+                cartItemsContainer.innerHTML = '';
+            
+                getSeparacao().then(sepCarga => {
+                    let subtotals = {};
+            
+                    sepCarga.forEach(item => {
+                        if (subtotals[item.cod_item]) {
+                            subtotals[item.cod_item] += item.qtde_sep;
+                        } else {
+                            subtotals[item.cod_item] = item.qtde_sep;
+                        }
+                    });
+            
+                    const sortedEntries = Object.entries(subtotals).sort((a, b) => {
+                        const codA = a[0].toUpperCase();
+                        const codB = b[0].toUpperCase();
+            
+                        if (codA < codB) {
+                            return -1;
+                        }
+                        if (codA > codB) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+            
+                    let itemCount = 0;
+            
+                    sortedEntries.forEach(([cod_item, subtotal]) => {
+                        const listItem = document.createElement('li');
+                        listItem.classList.add('cart-item');
+                        listItem.innerHTML = `
+                            <span class="item-name">${cod_item} |</span>
+                            <span class="item-quantity cor-web">${subtotal}</span>
+                        `;
+                        cartItemsContainer.appendChild(listItem);
+                        itemCount += 1;
+            
+                        const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
+                        if (row) {
+                            let subtotalCell = row.querySelector('.subtotal-cell');
+                            if (!subtotalCell) {
+                                subtotalCell = document.createElement('td');
+                                subtotalCell.classList.add('subtotal-cell');
+                                row.appendChild(subtotalCell);
+                            }
+                            subtotalCell.textContent = subtotal;
+                        }
+                    });
+                    updateItemCount(itemCount);
+                }).catch(error => {
+                    console.error('Erro ao obter separação:', error);
+            
+                    const alert = document.getElementById('alert-message')
+                    const content = document.getElementById('contentTable')
+            
+                    alert.textContent = error.message;
+                    alert.classList.toggle('hidden');
+                    content.classList.add('hidden');
+                });
+            }
+            
+            function getQtdeItemLS(storageKey, cod_item) {
+                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
+                const quantidade = storage.reduce((acc, item) => {
+                    if (item.cod_item === cod_item) {
+                        return acc + item.qtde_sep;
+                    }
+                    return acc;
+                }, 0);
+                return quantidade;
+            }
+
+            async function getAndCompareItems() {
+                try {
+                    const sepCarga = await getSeparacao();
+                    const storageKey = getStorageKey();
+            
+                    itemsList = [];
+            
+                    for (const item of sepCarga) {
+                        const { cod_item, qtde_solic } = item;
+                        const qtde_sep = getQtdeItemLS(storageKey, cod_item);
+            
+                        itemsList.push({ cod_item, qtde_solic, qtde_sep });
+                    }
+            
+                    console.log('Lista de Itens:', itemsList);
+            
+                } catch (error) {
+                    console.error('Erro ao obter separação:', error);
+                }
+            }
+
+            function getQtdeItemEnderecoLS(storageKey, cod_item, nroCarga, lote_item, rua_letra, rua_numero) {
+                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
+                const quantidade = storage.reduce((acc, item) => {
+                    if (
+                      item.cod_item === cod_item && 
+                      item.rua_letra === rua_letra && 
+                      item.rua_numero === rua_numero && 
+                      item.lote_item === lote_item 
+                    ) {
+                        return acc + item.qtde_sep;
+                    }
+                    return acc;
+                }, 0);
+                return quantidade;
+            }
+
+            function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lote_item) {
+                var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroCarga, lote_item, rua_letra, rua_numero);
+                showQuantityPopup(qtdeSolic, maxEstoque, this_qtde_separada, function(value) {
+                    showLoading();
+                    addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value);
+                    renderCartSubtotals();
+                    hideLoading();
+                });
+            }
+
+        </script>
+
+        <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
+
+        {% include 'shared/footer.html' %}
