@@ -1149,9 +1149,9 @@ def index():
     return redirect(url_for('home'))
 
 
-@app.route('/debug')
+@app.route('/debug-page')
 @verify_auth('DEV000')
-def debug():
+def debug_page():
     return render_template('pages/debug-page.html')
 
 
@@ -1324,6 +1324,17 @@ def login():                                                                    
                     alert_more = '/users/reset-password'
                     url_return = 'Digite sua nova senha...'
 
+                    with sqlite3.connect(db_path) as connection:
+                        acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        cursor = connection.cursor()
+                        cursor.execute('''
+                            UPDATE users
+                            SET ult_acesso = ?
+                            WHERE id_user  = ?;
+                        ''',
+                        (acesso, id_user))
+                        connection.commit()
+                    
                     return render_template(
                         'components/menus/alert-input.html', 
                         alert_type=alert_type,
@@ -1332,13 +1343,14 @@ def login():                                                                    
                         url_return=url_return
                     )
                 else:  # if ult_acesso:
-                    with connection:
-                        cursor = connection.cursor()
-                        cursor.execute('''
-                            UPDATE users
-                            SET ult_acesso = ?
-                            WHERE id_user  = ?;
-                        ''', (acesso, id_user))
+                    if not debug == True:
+                        with connection:
+                            cursor = connection.cursor()
+                            cursor.execute('''
+                                UPDATE users
+                                SET ult_acesso = ?
+                                WHERE id_user  = ?;
+                            ''', (acesso, id_user))
                     next_url = session.get('next_url')
                     
                     if next_url:
@@ -1369,17 +1381,6 @@ def reset_password():
             WHERE id_user     = ?;
         ''',
         (password_user, id_user))
-        connection.commit()
-
-    with sqlite3.connect(db_path) as connection:
-        acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        cursor = connection.cursor()
-        cursor.execute('''
-            UPDATE users
-            SET ult_acesso = ?
-            WHERE id_user  = ?;
-        ''',
-        (acesso, id_user))
         connection.commit()
 
     return redirect(url_for('index'))
