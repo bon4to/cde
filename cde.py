@@ -466,7 +466,7 @@ def get_preset_itens(index):                                                    
     return itens
 
 
-def get_saldo_preset(index, timestamp=False):
+def get_saldo_preset(index, timestamp=False):                                                                   #* BUSCA SALDO COM UM FILTRO (PRESET)
     itens = get_preset_itens(index)
     
     if not itens:
@@ -540,7 +540,7 @@ def get_active_itens():                                                         
     return itens
 
 
-def get_desc_itens():                                                                                           #// RETORNA APENAS DESCRIÇÃO DO ITEM
+def get_desc_itens():                                                                                           #// RETORNA APENAS DESCRIÇÃO DO ITEM (DESCONTINUADO)
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -770,7 +770,7 @@ def get_end_lote_fat():                                                         
     return end_lote
 
 
-def get_obs_with_carga(id_carga):
+def get_obs_with_carga(id_carga):                                                                               #* RETORNA OBSERVACOES COM O ID DE CARGA
     query = f'''
         SELECT DISTINCT
             crg.OBSERVACAO AS OBS_CARGA
@@ -801,7 +801,7 @@ def get_obs_with_carga(id_carga):
     return None
 
 
-def get_cliente_with_carga(id_carga):
+def get_cliente_with_carga(id_carga):                                                                           #* RETORNA CLIENTE COM O ID DE CARGA
     query = f'''
         SELECT DISTINCT
             cl.FANTASIA AS FANT_CLIENTE
@@ -832,7 +832,7 @@ def get_cliente_with_carga(id_carga):
     return None
 
 
-def get_username(id_user):
+def get_username(id_user):                                                                                      #* RETORNA NOME DO USUÁRIO
     query = f'''
         SELECT DISTINCT
             u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
@@ -850,7 +850,7 @@ def get_username(id_user):
     return None
 
 
-def get_all_cargas():
+def get_all_cargas():                                                                                           #* RETORNA TODOS OS IDS DE CARGAS FATURADAS
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -925,7 +925,7 @@ def get_export_promob():                                                        
     return saldo_visualization
 
 
-def add_days_to_datetime_str(date_str, qtde_days):
+def add_days_to_datetime_str(date_str, qtde_days):                                                              #* ADICIONA DIAS À DATA INFORMADA
 
     date_obj = datetime.strptime(date_str, '%Y-%m-%d')
     
@@ -1091,7 +1091,7 @@ def select_rua(letra, numero):                                                  
         return items
 
 
-def iterate_csv_data_erp(data):
+def iterate_csv_data_erp(data):                                                                                 #* CSV PARA INTEGRAÇÃO ERP
     csv_data = ''
     for item in data:
         line = ';'.join(map(str, item.values()))
@@ -1099,7 +1099,7 @@ def iterate_csv_data_erp(data):
     return csv_data
 
 
-def iterate_csv_data(data):
+def iterate_csv_data(data):                                                                                     #* CORPO CSV PADRAO
     csv_data = ''
     for item in data:
         line = ';'.join(map(str, item.values()))
@@ -1107,14 +1107,14 @@ def iterate_csv_data(data):
     return csv_data
 
 
-def add_headers(data):
+def add_headers(data):                                                                                          #* ADICIONA CABECALHO PARA CSV
     if data and len(data) > 0:
         headers = ';'.join(data[0].keys())
         return f'{headers}\n'
     return ''
 
 
-def export_csv(data, filename, include_headers=True):
+def export_csv(data, filename, include_headers=True):                                                           #* CONSTRUTOR DE CSV
     if data and len(data) > 0:
         csv_data = ''
         if not include_headers:
@@ -1198,7 +1198,7 @@ def check_key(hashed_pwd, pwd):                                                 
     return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
-def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):                                                          #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
+def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):                                                  #* RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -1272,7 +1272,7 @@ def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, t
         connection.commit()
 
 
-def password_check(id_user, password):
+def password_check(id_user, password):                                                                          #* VERIFICA SENHA NO BANCO DE HASH
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -1289,7 +1289,7 @@ def password_check(id_user, password):
         return False
 
 
-def toggle_item_flag(cod_item, flag):
+def toggle_item_flag(cod_item, flag):                                                                           #* ALTERA STATUS (ATIVO/INATIVO) DO ITEM
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
