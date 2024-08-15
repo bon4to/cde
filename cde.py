@@ -862,8 +862,7 @@ def get_all_cargas():                                                           
         
         if row:
             return [row[0] for row in row]
-        else:
-            return []
+        return []
 
 
 def get_ult_acesso():                                                                                           #* RETORNA ULTIMO ACESSO DO USUÁRIO
@@ -1762,6 +1761,7 @@ def moving():
     letra           = str(request.form['end_letra'])
     operacao        = str(request.form['operacao'])
     is_end_completo = bool(request.form.get('is_end_completo'))
+    id_carga        = 0
 
     timestamp_br    = datetime.now(timezone(timedelta(hours=-3)))
     timestamp_out   = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
