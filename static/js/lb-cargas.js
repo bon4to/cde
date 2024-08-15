@@ -19,10 +19,10 @@ function updateItemCount(itemCount) {
 }
 
 
-function redirectToCarga(status) {
+function redirectToCarga(route) {
     const cargaInput = document.getElementById('cargaInput').value;
     if (cargaInput > 0) {
-        const url = `/mov/separacao-${status}/${cargaInput}`;
+        const url = `/mov/${route}/${cargaInput}`;
         window.location.href = url;
     }
 }
@@ -608,7 +608,7 @@ async function concludeSeparacao() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Movimentação em massa realizada com sucesso.');
+                alert('Separação da carga realizada com sucesso.');
                 getSeparacao().then(separacao => {
                     saveIntoServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
                 })

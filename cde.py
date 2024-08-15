@@ -318,7 +318,8 @@ def carga_pendente_id(id_carga):
     return render_template(
         'pages/mov/mov-carga-pendente.html',
         carga_pendente=carga_pendente,
-        carga_list=carga_list
+        carga_list=carga_list,
+        id_carga=id_carga
     )
 
 
@@ -429,7 +430,16 @@ def listed_carga_pendente():                                                    
             WHERE flag_pendente = TRUE;
         ''')
         rows = cursor.fetchall()
-        return rows
+        return [row[0] for row in rows]
+
+
+def get_cargas_finalizadas():                                                                                   #* BUSCA CARGAS FINALIZADAS
+    all_cargas = get_all_cargas()
+    cargas_pendentes = listed_carga_pendente()
+    
+    cargas_finalizadas = [carga for carga in all_cargas if carga not in cargas_pendentes]
+    
+    return cargas_finalizadas
 
 
 def select_carga_from_historico(id_carga):                                                                      #* BUSCA CARGAS DO HISTÓRICO
@@ -1872,7 +1882,7 @@ def moving_bulk():
                     quantidade=item['qtde_sep'],
                     operacao='F',
                     timestamp_out=timestamp_out,
-                    id_carga=str(item['nrocarga']) + '0'
+                    id_carga=item['nrocarga']
                 )
             connection.commit()
         return jsonify({'success': True})
@@ -2450,7 +2460,7 @@ def carga_id(id_carga):
             result_local, columns_local = db_query_connect(query, dsn)
 
         fant_cliente = get_cliente_with_carga(id_carga)
-        all_cargas = get_all_cargas()
+        all_cargas = get_cargas_finalizadas()
         
         #? SEARCH DE ITENS POR CARGA
         
@@ -2512,7 +2522,7 @@ def carga_id(id_carga):
 @verify_auth('MOV006')
 def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
     if request.method == 'POST':
-        all_cargas = get_all_cargas()
+        all_cargas = get_cargas_finalizadas()
         if all_cargas:
             cargas_except_query = ', '.join(map(str, all_cargas))
             query = f'''
