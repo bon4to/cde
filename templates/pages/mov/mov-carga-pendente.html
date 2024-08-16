@@ -22,9 +22,15 @@
                     </div>
                 </div>
                 <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="PENDENTES" alt="" onclick="window.location.href='{{ url_for('carga_pendente') }}';">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
+                <a class="aux-button {% if request.endpoint == 'carga_pendente' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="PENDENTES" alt="" onclick="window.location.href='{{ url_for('carga_pendente') }}';">
+                </a>
+                <a class="aux-button {% if request.endpoint == 'faturado' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
+                </a>
+                <a class="aux-button {% if request.endpoint == 'cargas' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
+                </a>
                 <hr class="vert">
                 <form action="{{ url_for('cargas') }}" method="post">
                     <button type="submit" style="all: unset">
@@ -46,50 +52,101 @@
 
 
             {% if 'user_grant' in session %}
-            
-            <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
-                
-                <div class="split-horizontal">
-                    {% if not id_carga %}
-                    <h1 style="margin-bottom: 8px">Todas as Cargas</h1>
-                    {% else %}
-                    <h1 style="margin-bottom: 8px">Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
-                    <div style="display: flex; flex-direction: column; gap: 6px">
-                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('carga_pendente') }}';" title="FECHAR">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                        </a>
+                <div class="tables-container" style="max-width: 55%; min-width: 55%;">
+                    <div class="flex-column">
+                        {% if id_carga %}
+                            <div class="split-horizontal">
+                                <h1 style="margin-bottom: 8px">Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                                <div style="display: flex; flex-direction: column; gap: 6px">
+                                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('carga_pendente') }}';" title="FECHAR">
+                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                    </a>
+                                </div>
+                            </div>
+                            <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
+                        {% else %}
+                            <h1 style="margin-bottom: 8px">Todas as Cargas</h1>
+                            <h1 class="subtitle"><span class="cor-web">{{ carga_pendente | count }} produto(s)</span> no total</h1>
+                        {% endif %}
                     </div>
-                    {% endif %}
-                </div>
-                <h1 class="subtitle" style="margin-bottom: 8px">Itens de cargas pendentes:</h1>
-                <div style="max-height: 540px; overflow-y: auto; width: 100%;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Carga (Código)</th>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th>Quantidade (Separada)</th>
-                                <th>Quantidade (Solicitada)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in carga_pendente %}
-                                <tr class="selectable-row js_query_selector" data-id="{{ row[0] }}">
-                                    <td>{{ row[0] }}</td>
-                                    <td>{{ row[1] }}</td>
-                                    <td>{{ row[2] }}</td>
-                                    <td>{{ row[3] }}</td>
-                                    <td>{{ row[4] }}</td>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <p>Itens de cargas pendentes</p>
+                    </div>
+                    <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    {% if not id_carga %}
+                                        <th>Carga (Código)</th>
+                                    {% endif %}
+                                    <th>Item (Código)</th>
+                                    <th>Item (Descrição)</th>
+                                    <th style="width: 100px;">QTDE (Solicitada)</th>
+                                    <th style="width: 100px;">QTDE (Separada)</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for row in carga_pendente %}
+                                    <tr class="selectable-row sub-total {% if row[1] == cod_item %}active{% endif %}"
+                                        onclick="sendCodItem('carga-pendente', '{{ row[1] }}', '{{ row[0] }}', '{{ row[4] }}')"
+                                    >
+                                        {% if not id_carga %}
+                                            <td>{{ row[0] }}</td>
+                                        {% endif %}
+                                        <td>{{ row[1] }}</td>
+                                        <td style="text-wrap: balance;">{{ row[2] }}</td>
+                                        <td>{{ row[4] }}</td>
+                                        <td class="subtotal-cell">{{ row[3] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <br>
                 </div>
-                <br>
-            </div>
             {% endif %}
-            {% if not cod_item %}
+            {% if cod_item %}
+                <div class="tables-container glow-tl">
+                    <span style="display:space-between: width: 100%;">
+                        <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
+                    </span>
+                        <table>
+                            {% if not result_local %}
+                                <div class="msg-error">
+                                    <details>
+                                        <summary>Não há saldo disponível para este item!</summary>
+                                        Atualmente, não existe saldo suficiente para suprir esta carga.
+                                    </details>
+                                </div>
+                            {% else %}
+                                <thead>
+                                    <tr>
+                                        <th>Endereço</th>
+                                        <th>Item (Código)</th>
+                                        <th>Lote (Código)</th>
+                                        <th>QTDE (Efetiva)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in result_local %}
+                                        <tr class="selectable-row" onclick="pushItemIntoSeparacao(
+                                            '{{ row[columns_local.index('saldo')] }}', '{{ request.args.get('qtde_solic') }}',
+                                            '{{ row[columns_local.index('rua_letra')] }}', '{{ row[columns_local.index('rua_numero')] }}',
+                                            '{{ row[columns_local.index('lote_item')] }}'
+                                        )">
+                                            <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
+                                            <td>{{ row[columns_local.index('cod_item')] }}</td>
+                                            <td>{{ row[columns_local.index('lote_item')] }}</td>
+                                            <td {% if qtde_solic|int < row[columns_local.index('saldo')] %} style="color: green"{% else %} style="color: red"{% endif %}>{{ row[columns_local.index('saldo')] }}</td>    
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <div id="inputContainer" class="hidden"></div>
+                            {% endif %}
+                        </table>
+                    <br>
+                </div>
+            {% else %}
             <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
                 <h1>Cargas</h1>
                 {% block all_separation_status %}
@@ -117,6 +174,12 @@
                 </div>
         {% endif %}
 
+        <form class="hidden" id="cod_item_form" method="GET" action="">
+            <input type="hidden" id="cod_item_input" name="cod_item">
+            <input type="hidden" id="carga_id_input" name="carga_id">
+            <input type="hidden" id="qtde_item_input" name="qtde_solic">
+        </form>
+
         <div id="quantityPopup" class="dialog-overlay hidden">
             <div class="dialog-box">
                 <h1 style="margin-top: 8px; margin-bottom: 14px;">Separar <span class="cor-web">{{ cod_item }}</span>:</h1>
@@ -138,7 +201,7 @@
                 </div>
                 <br>
                 <button class="btn-fancy" id="submitBtn" required>Confirmar</button>
-                <a class="aux-button" onclick="hidePopUp()">Cancelar</a>
+                <a class="aux-link" onclick="hidePopUp()">Cancelar</a>
             </div>
         </div>
     </div>
@@ -218,7 +281,7 @@
                 document.getElementById('carga_id_input').value = carga_id;
                 document.getElementById('qtde_item_input').value = qtde_solic;
                 var form = document.getElementById('cod_item_form');
-                form.action = '/mov/carga/' + carga_id;
+                form.action = '/mov/carga-pendente/' + carga_id;
                 form.submit();
             }
 

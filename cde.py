@@ -314,12 +314,25 @@ def carga_pendente():
 @app.route('/mov/carga-pendente/<int:id_carga>', methods=['GET'])
 def carga_pendente_id(id_carga):
     carga_pendente = get_carga_pendente(id_carga)
+    fant_cliente = get_cliente_with_carga(id_carga)
     carga_list = listed_carga_pendente()
+    
+    cod_item = request.args.get('cod_item', '')
+    qtde_solic = request.args.get('qtde_solic', '')
+    
+    if cod_item:
+        result_local, columns_local = estoque_endereco_with_item(cod_item)
+    
     return render_template(
         'pages/mov/mov-carga-pendente.html',
         carga_pendente=carga_pendente,
         carga_list=carga_list,
-        id_carga=id_carga
+        id_carga=id_carga,
+        fant_cliente=fant_cliente,
+        cod_item=cod_item,
+        qtde_solic=qtde_solic,
+        result_local=result_local,
+        columns_local=columns_local
     )
 
 
@@ -465,6 +478,15 @@ def get_frase():                                                                
         if not frase:
             frase = 'Seja a mudança que você deseja ver no mundo.'
     return frase
+
+
+def get_preset_cargas(index):                                                                                   #* BUSCA CARGAS FINALIZADAS DE PRESETS
+    try:
+        with open(f'report/cargas_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
+            cargas = file.read().strip().split(', ')
+    except:
+        cargas = []
+    return cargas
 
 
 def get_preset_itens(index):                                                                                    #* BUSCA ITENS DE PRESETS
@@ -860,7 +882,11 @@ def get_username(id_user):                                                      
     return None
 
 
-def get_all_cargas():                                                                                           #* RETORNA TODOS OS IDS DE CARGAS FATURADAS
+def get_all_cargas():                                                                                            
+    """Retorna todos os IDs de cargas faturadas, incluindo as de presets, sem duplicatas."""
+    # Busca as cargas que foram faturadas pré-implementação do CDE
+    cargas_preset = get_preset_cargas(1)
+    
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -868,11 +894,23 @@ def get_all_cargas():                                                           
             FROM historico
             ORDER BY id_carga DESC;
         ''')
-        row = cursor.fetchall()
+        rows = cursor.fetchall()
         
-        if row:
-            return [row[0] for row in row]
-        return []
+        # Converte os resultados da consulta em uma lista de inteiros
+        cargas_db = [row[0] for row in rows] if rows else []
+
+    # Combina as cargas do banco de dados com as do preset
+    combined_cargas = cargas_db + cargas_preset
+    
+    # Remove duplicatas mantendo a ordem
+    seen = set()
+    all_cargas = []
+    for carga in combined_cargas:
+        if carga not in seen:
+            all_cargas.append(carga)
+            seen.add(carga)
+    return all_cargas
+
 
 
 def get_ult_acesso():                                                                                           #* RETORNA ULTIMO ACESSO DO USUÁRIO
@@ -2782,15 +2820,19 @@ def produtos():
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
             FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
             WHERE (
-                UNIDADE_DESCRICAO = 'CX' OR 
-                UNIDADE_DESCRICAO = 'UN' OR 
-                UNIDADE_DESCRICAO = 'FD'
+                (
+                    UNIDADE_DESCRICAO = 'CX' OR 
+                    UNIDADE_DESCRICAO = 'UN' OR 
+                    UNIDADE_DESCRICAO = 'FD'
+                ) AND (
+                    GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
+                    GRUPO_DESCRICAO = 'REVENDA')
+                AND 
+                    NOT GTIN_14 = ''
             )
-            AND (
-                GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
-                GRUPO_DESCRICAO = 'REVENDA'
-            )
-            AND NOT GTIN_14 = '';
+            OR 
+                -- copos cadastrados por extensão
+                i.ITEM IN ('EM.3577', 'EM.1074');
         '''
 
         dsn = 'HUGOPIET'
@@ -2996,6 +3038,21 @@ def estoque_preset():
     return render_template(
         'pages/estoque-preset.html',
         saldo_atual=saldo_preset,
+        search_term=preset_id
+    )
+
+
+@app.route('/cargas-presets', methods=['GET', 'POST'])
+@verify_auth('MOV006')
+def cargas_preset():
+    preset_id = request.form.get('preset_id', 1)
+    if request.method == 'POST':
+        cargas_preset = get_saldo_preset(preset_id, False)
+    else:
+        cargas_preset = get_saldo_preset(preset_id)
+    return render_template(
+        'pages/estoque-preset.html',
+        saldo_atual=cargas_preset,
         search_term=preset_id
     )
 
