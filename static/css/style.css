@@ -748,7 +748,7 @@ a:hover {
     color: rgba(58, 119, 232, 0.8);
 }
 
-a.aux-button {
+a.aux-link {
     width: 100%;
     margin: 0 auto;
     font-size: 16px;
@@ -1088,6 +1088,12 @@ button.bit-button {
     border-radius: 20%;
     transition: 0.2s ease all;
     filter: invert(30%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+a.aux-button.active {
+    background-color: var(--cor-destaque);
+    border-radius: 20%;
+    pointer-events: none;
 }
 
 .svg-gray:hover, .svg-gray:focus {

@@ -2,15 +2,6 @@
 
 const suplementstat_flt = ("Suplemento: [lb-filter v1.2]: ")
 
-// console.log(suplementstat_flt + "Iniciando...")
-try {
-    let filterIndex = document.getElementById('filterSelect').value;
-} catch (error) {
-    console.info('Página não contém filtros:', error);
-}
-// console.log(suplementstat_flt + "Iniciado com sucesso. Pronto para ser utilizado")
-
-
 //FILTRO DE TABELA
 function filterTable() {
     let input, table, select, filter, tbody, tr, td, i, txtValue;
@@ -47,7 +38,7 @@ function updateFilterIndex() {
         // console.log(suplementstat_flt + "Filtrado por novo Parâmetro.")
         filterTable(filterIndex);
     } catch (error) {
-        console.info('Página não contém filtros:', error);
+        console.info('[INFO] lb-filter: A rota não contém filtros.');
     }
 }
 

@@ -18,7 +18,7 @@
             {% block aux_buttons %}
                 <div class="flex-row" style="margin: 8px 0">
                     <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
-                    <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga()" title="RECARREGAR REGISTROS" >
+                    <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga('separacao-pend')" title="RECARREGAR REGISTROS" >
                         <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
                     </div>
                 </div>

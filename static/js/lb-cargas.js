@@ -641,3 +641,13 @@ const fetchItemDescription = async (cod_item) => {
     }
 };
 
+
+function sendCodItem(route, cod_item, carga_id, qtde_solic) {
+    document.getElementById('cod_item_input').value = cod_item;
+    document.getElementById('carga_id_input').value = carga_id;
+    document.getElementById('qtde_item_input').value = qtde_solic;
+    var form = document.getElementById('cod_item_form');
+    form.action = `/mov/${route}/${carga_id}`;
+    form.submit();
+}
+

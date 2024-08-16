@@ -26,7 +26,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-app.config['APP_VERSION'] = ['0.4.5', 'Agosto/2024', False]
+app.config['APP_VERSION'] = ['0.4.6', 'Agosto/2024', False]
 
 # GET nome do diretório
 dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
@@ -295,7 +295,7 @@ def create_tables():                                                            
                 id_perm          VARCHAR(6) PRIMARY KEY,
                 desc_perm        VARCHAR(30)
             );
-        ''')                                                                                                    #TODO! mudar id_perm: integer para varchar(6)
+        ''')
 
         connection.commit()
 
@@ -2419,6 +2419,46 @@ def cadastrar_usuario():
     return render_template('pages/users/users.html')
 
 
+def estoque_endereco_with_item(cod_item):
+    if cod_item:
+        query = f'''
+            SELECT  
+                h.rua_numero, h.rua_letra, i.cod_item, 
+                i.desc_item, h.lote_item,
+                SUM(
+                    CASE 
+                    WHEN operacao = 'E' OR operacao = 'TE'
+                    THEN quantidade 
+                    
+                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
+                    THEN (quantidade * -1)
+
+                    ELSE (quantidade * 0)
+                    END
+                ) as saldo
+            FROM historico h
+
+            JOIN itens i 
+            ON h.cod_item = i.cod_item
+
+            WHERE i.cod_item = "{str(cod_item)}"
+            
+            GROUP BY  
+                h.rua_numero, h.rua_letra, 
+                h.cod_item, h.lote_item
+            HAVING saldo != 0
+
+            ORDER BY 
+                h.lote_item ASC, h.rua_letra ASC,
+                h.rua_numero ASC, i.desc_item ASC;
+        '''
+        dsn = 'SQLITE'
+        result_local, columns_local = db_query_connect(query, dsn)
+        return result_local, columns_local
+    else:
+        return [], []
+    
+
 @app.route('/mov/carga/<int:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_id(id_carga):
@@ -2428,36 +2468,7 @@ def carga_id(id_carga):
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            query = f'''
-                SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
-                        i.desc_item, h.lote_item,
-                        SUM(
-                            CASE 
-                            WHEN operacao = 'E' OR operacao = 'TE'
-                            THEN quantidade 
-                            
-                            WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
-                            THEN (quantidade * -1)
-
-                            ELSE (quantidade * 0)
-                            END
-                        ) as saldo
-                FROM historico h
-
-                JOIN itens i 
-                ON h.cod_item = i.cod_item
-
-                WHERE i.cod_item = "{str(cod_item)}"
-                
-                GROUP BY  h.rua_numero, h.rua_letra, 
-                          h.cod_item, h.lote_item
-                HAVING saldo != 0
-
-                ORDER BY h.lote_item DESC, h.rua_letra ASC,
-                         h.rua_numero ASC, i.desc_item ASC;
-            '''
-            dsn = 'SQLITE'
-            result_local, columns_local = db_query_connect(query, dsn)
+            result_local, columns_local = estoque_endereco_with_item(cod_item)
 
         fant_cliente = get_cliente_with_carga(id_carga)
         all_cargas = get_cargas_finalizadas()
@@ -2465,8 +2476,6 @@ def carga_id(id_carga):
         #? SEARCH DE ITENS POR CARGA
         
         cargas_except_query = ', '.join(map(str, all_cargas))
-        cargas_include_query = get_carga_pendente()
-        
 
         query = f'''
             SELECT DISTINCT 
@@ -2520,7 +2529,7 @@ def carga_id(id_carga):
 
 @app.route('/mov/carga', methods=['GET', 'POST'])
 @verify_auth('MOV006')
-def cargas():                                                                                       #TODO: BOTÃO PARA TRAZER CARGAS
+def cargas():
     if request.method == 'POST':
         all_cargas = get_cargas_finalizadas()
         if all_cargas:
@@ -2539,7 +2548,7 @@ def cargas():                                                                   
 
                 JOIN DB2ADMIN.IGRUPOPE icrg
                 ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
-                AND icrg.SEQ = iped.SEQ                                                             -- #TODO: VALIDAR ESTE CRITÉRIO DO JOIN
+                AND icrg.SEQ = iped.SEQ
 
                 JOIN DB2ADMIN.PEDIDO ped
                 ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO

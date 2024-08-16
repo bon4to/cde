@@ -428,15 +428,6 @@
                 listSeparationsLocalStorage('carga');
             });
 
-            function sendCodItem(cod_item, carga_id, qtde_solic) {
-                document.getElementById('cod_item_input').value = cod_item;
-                document.getElementById('carga_id_input').value = carga_id;
-                document.getElementById('qtde_item_input').value = qtde_solic;
-                var form = document.getElementById('cod_item_form');
-                form.action = '/mov/carga/' + carga_id;
-                form.submit();
-            }
-
             function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
                 const popup = document.getElementById('quantityPopup');
                 const obsv = document.getElementById('popupObs');
