@@ -98,17 +98,11 @@
                                             </div>
                                         </div>
                                         {% if 'user_grant' in session %}
-                                            {% if session['user_grant'] <= 2 %}
-                                                <div id="enderecoCompletoContainer">
-                                                    <p style="justify-content: left">Movimentação/Faturamento completo de Endereço.</p>
-                                                    <input type="checkbox" class="check" id="is_end_completo" name="is_end_completo" onchange="handleCheckChange()"><br>
-                                                    <label>(Exemplo 1: TODOS os itens em A.1 vão para o endereço A.2)<br>(Exemplo 2: TODOS os itens em A.1 são faturados)</label>
-                                                </div>
-                                            {% else %}
-                                                <div>
-                                                    <p style="justify-content: left">Você não possui permissões para isto.</p>
-                                                </div>
-                                            {% endif %}
+                                            <div id="enderecoCompletoContainer">
+                                                <p style="justify-content: left">Movimentação/Faturamento completo de Endereço.</p>
+                                                <input type="checkbox" class="check" id="is_end_completo" name="is_end_completo" onchange="handleCheckChange()"><br>
+                                                <label>(Exemplo 1: TODOS os itens em A.1 vão para o endereço A.2)<br>(Exemplo 2: TODOS os itens em A.1 são faturados)</label>
+                                            </div>
                                         {% endif %}
                                         <br>
                                     </div>
