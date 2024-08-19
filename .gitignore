@@ -1,6 +1,10 @@
-dbg_translegua.db
 cde_database.db
 translegua.db
+translegua_.db
+translegua__.db
+dbg_translegua.db
+dbg_translegua_.db
+dbg_translegua__.db
 __pycache__
 .history
 .vscode
