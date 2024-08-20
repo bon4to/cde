@@ -574,32 +574,6 @@
                 }
             }
 
-            function getQtdeItemEnderecoLS(storageKey, cod_item, nroCarga, lote_item, rua_letra, rua_numero) {
-                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
-                const quantidade = storage.reduce((acc, item) => {
-                    if (
-                      item.cod_item === cod_item && 
-                      item.rua_letra === rua_letra && 
-                      item.rua_numero === rua_numero && 
-                      item.lote_item === lote_item 
-                    ) {
-                        return acc + item.qtde_sep;
-                    }
-                    return acc;
-                }, 0);
-                return quantidade;
-            }
-
-            function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lote_item) {
-                var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroCarga, lote_item, rua_letra, rua_numero);
-                showQuantityPopup(qtdeSolic, maxEstoque, this_qtde_separada, function(value) {
-                    showLoading();
-                    addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value);
-                    renderCartSubtotals();
-                    hideLoading();
-                });
-            }
-
         </script>
 
         <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
