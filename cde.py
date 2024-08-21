@@ -302,18 +302,20 @@ def create_tables():                                                            
 
 @app.route('/mov/carga-pendente', methods=['GET'])
 def carga_pendente():
-    carga_pendente = get_carga_pendente()
+    result, columns = get_carga_pendente()
     carga_list = listed_carga_pendente()
+    
     return render_template(
         'pages/mov/mov-carga-pendente.html',
-        carga_pendente=carga_pendente,
+        carga_pendente=result,
+        columns=columns,
         carga_list=carga_list
     )
 
 
 @app.route('/mov/carga-pendente/<int:id_carga>', methods=['GET'])
 def carga_pendente_id(id_carga):
-    carga_pendente = get_carga_pendente(id_carga)
+    result, columns = get_carga_pendente(id_carga)
     fant_cliente = get_cliente_with_carga(id_carga)
     carga_list = listed_carga_pendente()
     
@@ -325,7 +327,8 @@ def carga_pendente_id(id_carga):
     
     return render_template(
         'pages/mov/mov-carga-pendente.html',
-        carga_pendente=carga_pendente,
+        carga_pendente=result,
+        columns=columns,
         carga_list=carga_list,
         id_carga=id_carga,
         fant_cliente=fant_cliente,
@@ -412,25 +415,25 @@ def update_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):          
 
 
 def get_carga_pendente(id_carga=False):                                                                         #* BUSCA CARGAS PENDENTES
+    # id_carga = False // retorna todos os itens das cargas pendentes
+    # id_carga = <int> // retorna todos os itens de uma carga pendente
     where_clause = 'WHERE flag_pendente = TRUE'
     
     if id_carga:
-        where_clause += f' AND id_carga = ?'
-        params = (id_carga,)
-    else:
-        params = ()
+        where_clause += f' AND id_carga = {id_carga}'
 
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute(f'''
-            SELECT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
-            FROM carga_pendente c
-            JOIN itens i
-            ON c.cod_item = i.cod_item
-            {where_clause};
-        ''', params)
-        rows = cursor.fetchall()
-        return rows
+    query = f'''
+        SELECT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
+        FROM carga_pendente c
+        JOIN itens i
+        ON c.cod_item = i.cod_item
+        {where_clause};
+    '''
+    
+    dsn = 'SQLITE'
+    result, columns = db_query_connect(query, dsn)
+    
+    return result, columns 
 
 
 def listed_carga_pendente():                                                                                    #* LISTA CARGAS PENDENTES
