@@ -118,7 +118,8 @@ html.dark hr {
 
 html.dark div.msg-info,
 html.dark div.msg-error,
-html.dark div.msg-success {
+html.dark div.msg-success,
+html.dark div.msg-alert {
     color: var(--dark-text);
 }
 
@@ -1739,6 +1740,14 @@ div.msg-info {
     color: rgb(0, 51, 128);
     border: 1px solid rgba(0, 68, 255, 0.6);
     background-color: rgba(128, 180, 240, 0.5);
+}
+
+div.msg-alert {
+    margin: 8px;
+    padding: 12px;
+    color: rgb(128, 126, 0);
+    border: 1px solid rgba(251, 255, 0, 0.6);
+    background-color: rgba(238, 240, 128, 0.5);
 }
 
 .msg-svg {
