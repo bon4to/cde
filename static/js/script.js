@@ -280,6 +280,23 @@ function goBack() {
 }
 
 
+function reloadPage() {
+    location.reload();
+}
+
+
+function getQtdeItemLS(storageKey, cod_item) {
+    const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
+    const quantidade = storage.reduce((acc, item) => {
+        if (item.cod_item === cod_item) {
+            return acc + item.qtde_sep;
+        }
+        return acc;
+    }, 0);
+    return quantidade;
+}
+
+
 function togglePopUp() {
     let popUp = document.getElementById('popup-field');
 

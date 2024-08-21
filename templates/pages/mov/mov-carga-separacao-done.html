@@ -177,11 +177,12 @@
                         subtotalRow.classList.add('sub-total');
                     }
                 }
-            } catch (error) {
-                const alert = document.getElementById('alert-message')
-                const content = document.getElementById('contentTable')
 
-                let errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`
+            } catch (error) {
+                const alert = document.getElementById('alert-message');
+                const content = document.getElementById('contentTable');
+
+                let errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`;
 
                 if (error.message == 304) {
                     errorMessage = `<div class="msg-info">

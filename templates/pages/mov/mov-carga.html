@@ -66,6 +66,7 @@
                     </div>
                     <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                 </div>
+                <div class="hidden" id="alert-message"></div>
                 {% if result and 'OBS_CARGA' in columns %}
                     {% set obs_carga = result[0][columns.index('OBS_CARGA')]|trim %}
                     {% if obs_carga and obs_carga | length > 0 %}
@@ -327,8 +328,8 @@
                                     <th>Cargas (Separações)</th>
                                 </tr>
                             </thead>
-                                <!-- executa listCargasLocalStorage(); -->
                             <tbody>
+                                <!-- executa listCargasLocalStorage(); -->
                             </tbody>
                         </table>
                     </div>
@@ -367,215 +368,104 @@
             </div>
         </div>
     </div>
-            
-        <script>
-            const nroCarga = '{{ id_carga }}';
+    <script>
+        const nroCarga = '{{ id_carga }}';
 
-            var codItem = '{{ cod_item }}';
-            var userID  = '{{ session['id_user'] }}';
-            var itemCount = 0;
-            
-            if (nroCarga != '') {
-                renderCartSubtotals();
-            }
-            
-     
-            function getSeparacao() {
-                return new Promise((resolve, reject) => {
-                    const localStorageData = localStorage.getItem(getStorageKey());
-                    if (localStorageData) {
-                        resolve(JSON.parse(localStorageData));
-                    } else {
-                        fetch(`/get/load-table-data?filename=${getStorageKey()}`)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('Erro ao carregar dados do servidor');
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                reject(new Error('A carga selecionada já foi finalizada.'));
-                            })
-                            .catch(error => {
-                                reject(new Error('Nenhuma carga pendente ou iniciada neste código.'));
-                            });
-                    }
-                });
-            }
+        var codItem = '{{ cod_item }}';
+        var userID  = '{{ session['id_user'] }}';
+        var itemCount = 0;
 
-            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
-                let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-                let user_id = userID
-                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep, user_id };
-                sepCarga.push(item);
-                localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
-            }
-
-            function toggleTableSubtotal() {
-                const detailedTable = document.getElementById('detailedTable');
-                const standardTable = document.getElementById('standardTable');
-    
-                detailedTable.classList.toggle('hidden');
-                standardTable.classList.toggle('hidden');
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                var rows = document.querySelectorAll('.js_query_selector');
-                rows.forEach(function(row) {
-                    row.addEventListener('click', function() {
-                        var idCarga = this.getAttribute('data-id');
-                        window.location.href = '/mov/carga/' + idCarga;
-                    });
-                });
-
-                listSeparationsLocalStorage('carga');
-            });
-
-            function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
-                const popup = document.getElementById('quantityPopup');
-                const obsv = document.getElementById('popupObs');
-                const info = document.getElementById('popupFaltante');
-                const msge = document.getElementById('popupMessage');
-                const input = document.getElementById('quantityInput');
-                const submitBtn = document.getElementById('submitBtn');
-                const maxBtn = document.getElementById('maxBtn');
-            
-                var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
-                var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
-
-                input.value = 0
-
-                msge.textContent = `${qtde_separada} / ${qtde_solic}`;
-                obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
-                info.textContent = `(${qtde_faltante} faltante)`;
-
-                maxEstoque = maxEstoque - this_qtde_separada
-                input.max = Math.min(qtde_faltante, maxEstoque);
-
-                maxBtn.onclick = function() {
-                    input.value = input.max;
-                };
-                
-                if (qtde_faltante <= 0) {
-                    alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
+        
+        function getSeparacao() {
+            return new Promise((resolve, reject) => {
+                const localStorageData = localStorage.getItem(getStorageKey());
+                if (localStorageData) {
+                    resolve(JSON.parse(localStorageData));
                 } else {
-                    popup.classList.remove('hidden');
+                    fetch(`/get/load-table-data?filename=${getStorageKey()}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro ao carregar dados do servidor');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        
+                        reject(new Error('A carga selecionada já foi finalizada.'));
+                        checkPendingItems()
+                        .then(bool => {
+                            if(bool == true) {
+                                errorMessage = `<div class="msg-alert">
+                                                    <details>
+                                                        <summary>A separação selecionada foi finalizada com itens pendentes!</summary>
+                                                        Se deseja continuá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
+                                                    </details>
+                                                </div>`
+                                const alert = document.getElementById('alert-message');
+                                const standardTable = document.getElementById('standardTable');
+                                const detailedTable = document.getElementById('detailedTable');
 
-                    submitBtn.onclick = function() {
-                        const value = parseInt(input.value);
-                        if (value > 0 && value <= input.max) {
-                            popup.classList.add('hidden');
-                            onSubmit(value);
-                        } else {
-                            alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
-                        }
-                    };
-                }
-            }
-
-            function hidePopUp() {
-                const popup = document.getElementById('quantityPopup');
-                popup.classList.add('hidden');
-            }
-
-            function renderCartSubtotals() {
-                const cartItemsContainer = document.querySelector('.cart-items');
-                cartItemsContainer.innerHTML = '';
-            
-                getSeparacao().then(sepCarga => {
-                    let subtotals = {};
-            
-                    sepCarga.forEach(item => {
-                        if (subtotals[item.cod_item]) {
-                            subtotals[item.cod_item] += item.qtde_sep;
-                        } else {
-                            subtotals[item.cod_item] = item.qtde_sep;
-                        }
-                    });
-            
-                    const sortedEntries = Object.entries(subtotals).sort((a, b) => {
-                        const codA = a[0].toUpperCase();
-                        const codB = b[0].toUpperCase();
-            
-                        if (codA < codB) {
-                            return -1;
-                        }
-                        if (codA > codB) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-            
-                    let itemCount = 0;
-            
-                    sortedEntries.forEach(([cod_item, subtotal]) => {
-                        const listItem = document.createElement('li');
-                        listItem.classList.add('cart-item');
-                        listItem.innerHTML = `
-                            <span class="item-name">${cod_item} |</span>
-                            <span class="item-quantity cor-web">${subtotal}</span>
-                        `;
-                        cartItemsContainer.appendChild(listItem);
-                        itemCount += 1;
-            
-                        const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
-                        if (row) {
-                            let subtotalCell = row.querySelector('.subtotal-cell');
-                            if (!subtotalCell) {
-                                subtotalCell = document.createElement('td');
-                                subtotalCell.classList.add('subtotal-cell');
-                                row.appendChild(subtotalCell);
+                                alert.innerHTML = errorMessage;
+                                alert.classList.toggle('hidden');
+                                standardTable.classList.add('hidden');
+                                detailedTable.classList.add('hidden');
                             }
-                            subtotalCell.textContent = subtotal;
-                        }
+                        })
+                    })
+                    .catch(error => {
+                        reject(new Error('Nenhuma carga pendente ou iniciada neste código.'));
                     });
-                    updateItemCount(itemCount);
-                }).catch(error => {
-                    console.error('Erro ao obter separação:', error);
-            
-                    const alert = document.getElementById('alert-message')
-                    const content = document.getElementById('contentTable')
-            
-                    alert.textContent = error.message;
-                    alert.classList.toggle('hidden');
-                    content.classList.add('hidden');
-                });
-            }
-            
-            function getQtdeItemLS(storageKey, cod_item) {
-                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
-                const quantidade = storage.reduce((acc, item) => {
-                    if (item.cod_item === cod_item) {
-                        return acc + item.qtde_sep;
-                    }
-                    return acc;
-                }, 0);
-                return quantidade;
-            }
-
-            async function getAndCompareItems() {
-                try {
-                    const sepCarga = await getSeparacao();
-                    const storageKey = getStorageKey();
-            
-                    itemsList = [];
-            
-                    for (const item of sepCarga) {
-                        const { cod_item, qtde_solic } = item;
-                        const qtde_sep = getQtdeItemLS(storageKey, cod_item);
-            
-                        itemsList.push({ cod_item, qtde_solic, qtde_sep });
-                    }
-            
-                    console.log('Lista de Itens:', itemsList);
-            
-                } catch (error) {
-                    console.error('Erro ao obter separação:', error);
                 }
+            });
+        }
+        
+
+        function toggleTableSubtotal() {
+            const detailedTable = document.getElementById('detailedTable');
+            const standardTable = document.getElementById('standardTable');
+
+            detailedTable.classList.toggle('hidden');
+            standardTable.classList.toggle('hidden');
+        }
+
+
+        async function getAndCompareItems() {
+            try {
+                const sepCarga = await getSeparacao();
+                const storageKey = getStorageKey();
+        
+                itemsList = [];
+        
+                for (const item of sepCarga) {
+                    const { cod_item, qtde_solic } = item;
+                    const qtde_sep = getQtdeItemLS(storageKey, cod_item);
+        
+                    itemsList.push({ cod_item, qtde_solic, qtde_sep });
+                }
+        
+                console.log('Lista de Itens:', itemsList);
+        
+            } catch (error) {
+                console.error('Erro ao obter separação:', error);
             }
+        }
+        
 
-        </script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var rows = document.querySelectorAll('.js_query_selector');
+            rows.forEach(function(row) {
+                row.addEventListener('click', function() {
+                    var idCarga = this.getAttribute('data-id');
+                    window.location.href = '/mov/carga/' + idCarga;
+                });
+            });
+            if (!codItem) {
+                listSeparationsLocalStorage('carga');
+            }
+        });
 
-        <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
+    </script>
 
-        {% include 'shared/footer.html' %}
+    <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
+
+    {% include 'shared/footer.html' %}

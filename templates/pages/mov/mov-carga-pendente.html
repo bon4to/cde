@@ -82,7 +82,9 @@
                                     <th>Item (Código)</th>
                                     <th>Item (Descrição)</th>
                                     <th style="width: 100px;">QTDE (Solicitada)</th>
-                                    <th style="width: 100px;">QTDE (Separada)</th>
+                                    {% if id_carga %}
+                                        <th style="width: 100px;">QTDE (Separada)</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
