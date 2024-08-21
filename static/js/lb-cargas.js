@@ -425,9 +425,11 @@ function renderCartSubtotals() {
                 subtotalCell.textContent = subtotal;
             }
         });
+        
         updateItemCount(itemCount);
     }).catch(error => {
         console.error('Erro ao obter separação:', error);
+        
     });
 }
 
@@ -502,6 +504,14 @@ function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lot
 }
 
 
+}
+    const popup = document.getElementById('quantityPopup');
+    var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
+    var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
+    input.value = 0
+
+    maxBtn.onclick = function() {
+        input.value = input.max;
 async function fetchQtdeSolic(id_carga, cod_item) {
     try {
         const response = await fetch(`/api/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
