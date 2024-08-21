@@ -504,14 +504,65 @@ function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lot
 }
 
 
+function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
+    let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+    let user_id = userID
+    let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep, user_id };
+    sepCarga.push(item);
+    localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
 }
+
+
+function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
     const popup = document.getElementById('quantityPopup');
+    const obsv = document.getElementById('popupObs');
+    const info = document.getElementById('popupFaltante');
+    const msge = document.getElementById('popupMessage');
+    const input = document.getElementById('quantityInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const maxBtn = document.getElementById('maxBtn');
+
     var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
     var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
+
     input.value = 0
+
+    msge.textContent = `${qtde_separada} / ${qtde_solic}`;
+    obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
+    info.textContent = `(${qtde_faltante} faltante)`;
+
+    maxEstoque = maxEstoque - this_qtde_separada
+    input.max = Math.min(qtde_faltante, maxEstoque);
 
     maxBtn.onclick = function() {
         input.value = input.max;
+    };
+    
+    if (qtde_faltante <= 0) {
+        alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
+    } else {
+        popup.classList.remove('hidden');
+
+        submitBtn.onclick = function() {
+            const value = parseInt(input.value);
+            if (value > 0 && value <= input.max) {
+                popup.classList.add('hidden');
+                onSubmit(value);
+                renderCartSubtotals();
+            } else {
+                alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
+            }
+        };
+    }
+}
+
+
+function hidePopUp() {
+    const popup = document.getElementById('quantityPopup');
+    popup.classList.add('hidden');
+}
+
+
 async function fetchQtdeSolic(id_carga, cod_item) {
     try {
         const response = await fetch(`/api/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
@@ -526,7 +577,15 @@ async function fetchQtdeSolic(id_carga, cod_item) {
 
 async function concludeSeparacao() {
     const sepCarga = await getSeparacao();
-    
+    const finalizarBtn = document.getElementById('finalizarBtn');
+
+    // checar se ha itens pendentes, se houver, abortar o processamento 
+    // (caso esta carga exista no historico)
+    await checkPendingItems(); 
+
+    finalizarBtn.onclick = '';
+    finalizarBtn.innerHTML = '<span class="loader-inline"></span>';
+
     let itens_carga = [];
 
     try {
@@ -577,7 +636,9 @@ async function concludeSeparacao() {
     let hasPendingItems;
 
     if (nonAvailableItems.length > 0) {
-        const confirmation = confirm(`[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?\nALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`);
+        const confirmation = confirm(
+            `[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?\nALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`
+        );
         if (confirmation) {
             hasPendingItems = true;
             
@@ -614,6 +675,7 @@ async function concludeSeparacao() {
                 }
             }
         } else {
+            reloadPage();
             return;
         }
     }
@@ -631,7 +693,8 @@ async function concludeSeparacao() {
         const sepCarga = JSON.parse(localStorage.getItem(storageKey)) || [];
         
         if (sepCarga.length === 0) {
-            alert('Não há dados para enviar.');
+            alert('ALERTA:\nNão há itens separados para finalizar.\nA operação foi cancelada.');
+            reloadPage();
             return;
         }
     
@@ -645,7 +708,7 @@ async function concludeSeparacao() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Separação da carga realizada com sucesso.');
+                alert('INFO:\nSeparação da carga realizada com sucesso.');
                 getSeparacao().then(separacao => {
                     saveIntoServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
                 })
