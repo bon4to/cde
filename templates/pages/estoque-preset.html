@@ -2,7 +2,7 @@
 
     {% block svg %}
         <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
-        <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin-off.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+        <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin-off.svg') }}" title="ESTOQUE (NÃO-ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
     {% endblock svg %}
 
     {% block filter_options %}

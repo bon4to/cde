@@ -11,7 +11,9 @@
             <span class="dash">/</span>
             <a href="{{ url_for('cargas') }}">CARGAS</a>
             <span class="dash">/</span>
-            <span>SEPARAÇÃO</span>
+            {% block sep_status %}
+                <span>SEPARAÇÃO</span>
+            {% endblock sep_status %}
             <span class="id-page">{{session['id_page']}}</span>
         </h1>
         <div class="aux-buttons">

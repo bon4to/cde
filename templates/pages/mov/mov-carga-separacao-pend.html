@@ -1,6 +1,11 @@
 {% extends "pages/mov/mov-carga-separacao.html" %}
 
 
+{% block sep_status %}
+    <span>SEPARAÇÃO <span style="font-size: 16px">(PENDENTE)</span></span>
+{% endblock sep_status %}
+
+
 {% block aux_buttons %}
     <form onsubmit="cargaFormRedirect('separacao-pend'); return false;">
         <div class="flex-row" style="margin: 8px 0">
@@ -107,7 +112,6 @@
         
                     const result = await response.json();
                     itens_carga = result.itens;
-                    console.log('itens_carga:', itens_carga);
                 } catch (error) {
                     console.error('Erro ao obter itens_carga:', error);
                     return;
