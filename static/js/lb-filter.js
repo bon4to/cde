@@ -38,7 +38,7 @@ function updateFilterIndex() {
         // console.log(suplementstat_flt + "Filtrado por novo Parâmetro.")
         filterTable(filterIndex);
     } catch (error) {
-        console.info('[INFO] lb-filter: A rota não contém filtros.');
+        // console.info('[INFO] lb-filter: A rota não contém filtros.');
     }
 }
 
