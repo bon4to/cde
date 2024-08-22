@@ -11,7 +11,7 @@
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
-                <img class="svg-gray hidden-button" src="{{ url_for('static', filename='svg/book-open-check.svg') }}" alt="" title="PROGRAMAÇÃO (CONCLUÍDOS)" onclick="window.location.href='{{ url_for('producao_edit') }}';">
+                <img class="svg-gray hidden-button" src="{{ url_for('static', filename='svg/book-open-check.svg') }}" alt="" title="PROGRAMAÇÃO (CONCLUÍDOS)" onclick="window.location.href='{{ url_for('edit_producao') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" title="CALENDÁRIO DE PROCESSAMENTO" onclick="window.location.href='{{ url_for('calendar_producao') }}';">
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="Mostrar/Ocultar Formulário" alt="" onclick="toggleContainer()">
