@@ -11,16 +11,18 @@
                 <span class="dash">/</span>
                 <a href="{{ url_for('cargas') }}">CARGAS</a>
                 <span class="dash">/</span>
-                <span>PENDENTES</span>
+                <span>INCOMPLETAS</span>
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
-                <div class="flex-row" style="margin: 8px 0">
-                    <input class="address-three" style="margin: 0; height: unset" type="number" id="cargaInput" min="1" placeholder="Carga...">
-                    <div class="button-mini btn-fancy" style="height: 26px; width: 26px;" onclick="redirectToCarga('separacao-pend')" title="RECARREGAR REGISTROS" >
-                        <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                <form onsubmit="cargaFormRedirect('carga/incompleta'); return false;">
+                    <div class="flex-row" style="margin: 8px 0">
+                        <input class="address-three" style="margin: 0; height: 14px" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                        <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
+                            <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                        </button>
                     </div>
-                </div>
+                </form>
                 <hr class="vert">
                 <a class="aux-button {% if request.endpoint == 'carga_pendente' or request.endpoint == 'carga_pendente_id' %}active{% endif %}">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="PENDENTES" alt="" onclick="window.location.href='{{ url_for('carga_pendente') }}';">
@@ -58,6 +60,15 @@
                             <div class="split-horizontal">
                                 <h1 style="margin-bottom: 8px">Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
                                 <div style="display: flex; flex-direction: column; gap: 6px">
+                                    <div class="cart-container" style="display: none">
+                                        <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                                        <div class="cart-dropdown hidden" id="cart-dropdown">
+                                            <ul class="cart-items">
+                                                <!-- Itens serão renderizados aqui -->
+                                            </ul>
+                                            <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
+                                        </div>
+                                    </div>
                                     <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('carga_pendente') }}';" title="FECHAR">
                                         <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                                     </a>
@@ -66,7 +77,7 @@
                             <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                         {% else %}
                             <h1 style="margin-bottom: 8px">Todas as Cargas</h1>
-                            <h1 class="subtitle"><span class="cor-web">{{ carga_pendente | count }} produto(s)</span> no total</h1>
+                            <h1 class="subtitle">Há <span class="cor-web">{{ carga_pendente | count }} produto(s)</span> pendente(s)</h1>
                         {% endif %}
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
@@ -88,24 +99,61 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for row in carga_pendente %}
-                                    <tr class="selectable-row sub-total {% if row[1] == cod_item %}active{% endif %}"
-                                        onclick="sendCodItem('carga-pendente', '{{ row[1] }}', '{{ row[0] }}', '{{ row[4] }}')"
-                                    >
-                                        {% if not id_carga %}
-                                            <td>{{ row[0] }}</td>
+                                <tbody>
+                                    {% set items = {} %}
+                                    
+                                    {% for row in carga_pendente %}
+                                        {% set row_cod_item = row[1] %}
+                                        {% set priv_id_carga = row[0] %}
+                                        {% set priv_desc_item = row[2] %}
+                                        {% set priv_qtde_solic = row[4] %}
+                                        
+                                        {% if row_cod_item in items %}
+                                            {% set items = 
+                                                items.update({ row_cod_item: {
+                                                    'priv_id_carga': priv_id_carga,
+                                                    'desc': priv_desc_item,
+                                                    'qtde': items[row_cod_item]['qtde'] + priv_qtde_solic
+                                                }}) 
+                                                or items 
+                                            %}
+                                        {% else %}
+                                            {% set items = 
+                                                items.update({ row_cod_item: {
+                                                    'priv_id_carga': priv_id_carga,
+                                                    'desc': priv_desc_item,
+                                                    'qtde': priv_qtde_solic
+                                                }}) 
+                                                or items 
+                                            %}
                                         {% endif %}
-                                        <td>{{ row[1] }}</td>
-                                        <td style="text-wrap: balance;">{{ row[2] }}</td>
-                                        <td>{{ row[4] }}</td>
-                                        <td class="subtotal-cell">{{ row[3] }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                    {% endfor %}
+                                    
+                                    {% for row_cod_item, item in items.items() %}
+                                        <tr 
+                                            class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
+                                            data-cod-item="{{ row_cod_item }}"
+                                            onclick="sendCodItem('carga/incompleta', '{{ row_cod_item }}', '{{ item.priv_id_carga }}', '{{ item.qtde }}')"
+                                        >
+                                            {% if not id_carga %}
+                                                <td>{{ item.priv_id_carga }}</td>
+                                            {% endif %}
+                                            <td>{{ row_cod_item }}</td>
+                                            <td style="text-wrap: balance;">{{ item.desc }}</td>
+                                            <td>{{ item.qtde }}</td>
+                                            {% if id_carga %}
+                                                <td class="subtotal-cell"></td>
+                                            {% endif %}
+                                        </tr> 
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <br>
+                        {% if id_carga %}
+                        <div class="btn-fancy" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar</div>
+                        {% endif %}
                     </div>
-                    <br>
-                </div>
             {% endif %}
             {% if cod_item %}
                 <div class="tables-container glow-tl">
@@ -165,7 +213,7 @@
                                 </tr>
                             </thead>
                                 {% for row in carga_list %}
-                                    <tr class="selectable-row" onclick="window.location.href='/mov/carga-pendente/{{ row }}'">
+                                    <tr class="selectable-row" onclick="window.location.href='/mov/carga/incompleta/{{ row }}'">
                                         <td>{{ row }}</td>
                                     </tr>
                                 {% endfor %}
@@ -214,19 +262,12 @@
             var codItem = '{{ cod_item }}';
             var userID  = '{{ session['id_user'] }}';
             var itemCount = 0;
-            
+
             if (nroCarga != '') {
                 renderCartSubtotals();
             }
-
-            function redirectToCarga('separacao-pend') {
-                const cargaInput = document.getElementById('cargaInput').value;
-                if (cargaInput > 0) {
-                    const url = `/mov/carga/${cargaInput}`;
-                    window.location.href = url;
-                }
-            }
      
+            
             function getSeparacao() {
                 return new Promise((resolve, reject) => {
                     const localStorageData = localStorage.getItem(getStorageKey());
@@ -250,13 +291,6 @@
                 });
             }
 
-            function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
-                let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-                let user_id = userID
-                let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep, user_id };
-                sepCarga.push(item);
-                localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
-            }
 
             function toggleTableSubtotal() {
                 const detailedTable = document.getElementById('detailedTable');
@@ -266,148 +300,6 @@
                 standardTable.classList.toggle('hidden');
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                var rows = document.querySelectorAll('.js_query_selector');
-                rows.forEach(function(row) {
-                    row.addEventListener('click', function() {
-                        var idCarga = this.getAttribute('data-id');
-                        window.location.href = '/mov/carga/' + idCarga;
-                    });
-                });
-
-                listSeparationsLocalStorage('carga');
-            });
-
-            function sendCodItem(cod_item, carga_id, qtde_solic) {
-                document.getElementById('cod_item_input').value = cod_item;
-                document.getElementById('carga_id_input').value = carga_id;
-                document.getElementById('qtde_item_input').value = qtde_solic;
-                var form = document.getElementById('cod_item_form');
-                form.action = '/mov/carga-pendente/' + carga_id;
-                form.submit();
-            }
-
-            function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
-                const popup = document.getElementById('quantityPopup');
-                const obsv = document.getElementById('popupObs');
-                const info = document.getElementById('popupFaltante');
-                const msge = document.getElementById('popupMessage');
-                const input = document.getElementById('quantityInput');
-                const submitBtn = document.getElementById('submitBtn');
-                const maxBtn = document.getElementById('maxBtn');
-            
-                var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
-                var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
-
-                input.value = 0
-
-                msge.textContent = `${qtde_separada} / ${qtde_solic}`;
-                obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
-                info.textContent = `(${qtde_faltante} faltante)`;
-
-                maxEstoque = maxEstoque - this_qtde_separada
-                input.max = Math.min(qtde_faltante, maxEstoque);
-
-                maxBtn.onclick = function() {
-                    input.value = input.max;
-                };
-                
-                if (qtde_faltante <= 0) {
-                    alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
-                } else {
-                    popup.classList.remove('hidden');
-
-                    submitBtn.onclick = function() {
-                        const value = parseInt(input.value);
-                        if (value > 0 && value <= input.max) {
-                            popup.classList.add('hidden');
-                            onSubmit(value);
-                        } else {
-                            alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
-                        }
-                    };
-                }
-            }
-
-            function hidePopUp() {
-                const popup = document.getElementById('quantityPopup');
-                popup.classList.add('hidden');
-            }
-
-            function renderCartSubtotals() {
-                const cartItemsContainer = document.querySelector('.cart-items');
-                cartItemsContainer.innerHTML = '';
-            
-                getSeparacao().then(sepCarga => {
-                    let subtotals = {};
-            
-                    sepCarga.forEach(item => {
-                        if (subtotals[item.cod_item]) {
-                            subtotals[item.cod_item] += item.qtde_sep;
-                        } else {
-                            subtotals[item.cod_item] = item.qtde_sep;
-                        }
-                    });
-            
-                    const sortedEntries = Object.entries(subtotals).sort((a, b) => {
-                        const codA = a[0].toUpperCase();
-                        const codB = b[0].toUpperCase();
-            
-                        if (codA < codB) {
-                            return -1;
-                        }
-                        if (codA > codB) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-            
-                    let itemCount = 0;
-            
-                    sortedEntries.forEach(([cod_item, subtotal]) => {
-                        const listItem = document.createElement('li');
-                        listItem.classList.add('cart-item');
-                        listItem.innerHTML = `
-                            <span class="item-name">${cod_item} |</span>
-                            <span class="item-quantity cor-web">${subtotal}</span>
-                        `;
-                        cartItemsContainer.appendChild(listItem);
-                        itemCount += 1;
-            
-                        const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
-                        if (row) {
-                            let subtotalCell = row.querySelector('.subtotal-cell');
-                            if (!subtotalCell) {
-                                subtotalCell = document.createElement('td');
-                                subtotalCell.classList.add('subtotal-cell');
-                                row.appendChild(subtotalCell);
-                            }
-                            subtotalCell.textContent = subtotal;
-                        }
-                    });
-                    updateItemCount(itemCount);
-                }).catch(error => {
-                    console.error('Erro ao obter separação:', error);
-            
-                    const alert = document.getElementById('alert-message')
-                    const content = document.getElementById('contentTable')
-            
-                    alert.textContent = error.message;
-                    alert.classList.toggle('hidden');
-                    content.classList.add('hidden');
-                });
-            }
-            
-            function getQtdeItemLS(storageKey, cod_item) {
-                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
-                const quantidade = storage.reduce((acc, item) => {
-                    if (item.cod_item === cod_item) {
-                        return acc + item.qtde_sep;
-                    }
-                    return acc;
-                }, 0);
-                return quantidade;
-            }
 
             async function getAndCompareItems() {
                 try {
@@ -430,31 +322,19 @@
                 }
             }
 
-            function getQtdeItemEnderecoLS(storageKey, cod_item, nroCarga, lote_item, rua_letra, rua_numero) {
-                const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
-                const quantidade = storage.reduce((acc, item) => {
-                    if (
-                      item.cod_item === cod_item && 
-                      item.rua_letra === rua_letra && 
-                      item.rua_numero === rua_numero && 
-                      item.lote_item === lote_item 
-                    ) {
-                        return acc + item.qtde_sep;
-                    }
-                    return acc;
-                }, 0);
-                return quantidade;
-            }
 
-            function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lote_item) {
-                var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroCarga, lote_item, rua_letra, rua_numero);
-                showQuantityPopup(qtdeSolic, maxEstoque, this_qtde_separada, function(value) {
-                    showLoading();
-                    addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value);
-                    renderCartSubtotals();
-                    hideLoading();
+            document.addEventListener('DOMContentLoaded', function() {
+                var rows = document.querySelectorAll('.js_query_selector');
+                rows.forEach(function(row) {
+                    row.addEventListener('click', function() {
+                        var idCarga = this.getAttribute('data-id');
+                        window.location.href = '/mov/carga/' + idCarga;
+                    });
                 });
-            }
+                if (!codItem) {
+                    listSeparationsLocalStorage('carga/incompleta');
+                }
+            });
 
         </script>
 
