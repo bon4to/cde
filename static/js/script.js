@@ -344,6 +344,51 @@ function toggleTheme() {
 }
 
 
+function showToast(message, type = 0, duration = 3000) {
+    const toastContainer = document.getElementById('toast-container');
+    let icon;
+    let toastColor;
+
+    switch(type) {
+        case 1: // Success
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 14px; width: 14px; fill: #4CAF50;"><path d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM10.2432 16.9714L5.12034 11.8485L6.53479 10.4341L10.2432 14.1426L17.4652 6.9205L18.8797 8.33495L10.2432 16.9714Z"/></svg>`;
+            toastColor = '#4CAF50'; // Cor de sucesso
+            break;
+        case 2: // Warning
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 14px; width: 14px; fill: #FF9800;"><path d="M12 2C11.46 2 11 2.46 11 3L11 13C11 13.54 11.46 14 12 14C12.54 14 13 13.54 13 13L13 3C13 2.46 12.54 2 12 2zM11 16C11 15.46 11.46 15 12 15C12.54 15 13 15.46 13 16C13 16.54 12.54 17 12 17C11.46 17 11 16.54 11 16zM12 0C5.371 0 0 5.371 0 12C0 18.629 5.371 24 12 24C18.629 24 24 18.629 24 12C24 5.371 18.629 0 12 0z"/></svg>`;
+            toastColor = '#FF9800'; // Cor de alerta
+            break;
+        case 3: // Error
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 14px; width: 14px; fill: #F44336;"><path d="M12 0C5.371 0 0 5.371 0 12C0 18.629 5.371 24 12 24C18.629 24 24 18.629 24 12C24 5.371 18.629 0 12 0zM16.293 15.707L13.707 13.121L16.293 10.535L14.879 9.121L12.293 11.707L9.707 9.121L8.293 10.535L10.879 13.121L8.293 15.707L9.707 17.121L12.293 14.535L14.879 17.121L16.293 15.707z"/></svg>`;
+            toastColor = '#F44336'; // Cor de erro
+            break;
+        default:
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 14px; width: 14px; fill: #2196F3;"><path d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM13 17H11V9H13V17ZM13 7H11V5H13V7Z"/></svg>`;
+            toastColor = '#2196F3'; // Cor de info
+    }
+    
+    // cria o elemento do toast
+    const toast = document.createElement('div');
+    toast.className = 'toast show';
+    toast.innerHTML = `<span>${message}</span> <span style="margin-left: 10px; display: flex; align-items: center;">${icon}</span>`;
+    toast.style.borderBlockColor = toastColor;
+    
+    // adiciona o toast ao container
+    toastContainer.appendChild(toast);
+    
+    // define a duração do toast
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        
+        // remove o toast do container após o tempo especificado
+        setTimeout(() => {
+            toastContainer.removeChild(toast);
+        }, 500);
+    }, duration);
+}
+
+
 window.addEventListener("load", function() {
     hideLoading();
 });
