@@ -300,20 +300,20 @@ def create_tables():                                                            
         connection.commit()
 
 
-@app.route('/mov/carga-pendente', methods=['GET'])
+@app.route('/mov/carga/incompleta', methods=['GET'])
 def carga_pendente():
     result, columns = get_carga_pendente()
     carga_list = listed_carga_pendente()
     
     return render_template(
-        'pages/mov/mov-carga-pendente.html',
+        'pages/mov/mov-carga-incompleta.html',
         carga_pendente=result,
         columns=columns,
         carga_list=carga_list
     )
 
 
-@app.route('/mov/carga-pendente/<int:id_carga>', methods=['GET'])
+@app.route('/mov/carga/incompleta/<int:id_carga>', methods=['GET'])
 def carga_pendente_id(id_carga):
     result, columns = get_carga_pendente(id_carga)
     fant_cliente = get_cliente_with_carga(id_carga)
@@ -326,7 +326,7 @@ def carga_pendente_id(id_carga):
         result_local, columns_local = estoque_endereco_with_item(cod_item)
     
     return render_template(
-        'pages/mov/mov-carga-pendente.html',
+        'pages/mov/mov-carga-incompleta.html',
         carga_pendente=result,
         columns=columns,
         carga_list=carga_list,
