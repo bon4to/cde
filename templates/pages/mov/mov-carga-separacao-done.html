@@ -37,8 +37,7 @@
             <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
         </div>
     </div>
-    <div class="btn-fancy" style="height: 45px; margin: 0" onclick="genCargaReport()">
-        <span>GERAR RELATÓRIO</span>
+    <div id="btnGenCargaReport" class="btn-fancy featured" style="height: 45px; margin: 0; max-width: 200px;" onclick="genCargaReport()">
         <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
     </div>
 {% endblock separation_buttons %}

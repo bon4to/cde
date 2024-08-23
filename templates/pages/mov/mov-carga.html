@@ -60,9 +60,13 @@
                                 </div>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 6px">
-                                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                                </a>
+                                <form action="{{ url_for('cargas') }}" method="post">
+                                    <button type="submit" style="all: unset" onclick="showLoading()">
+                                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
+                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                        </a>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -382,7 +386,31 @@
             return new Promise((resolve, reject) => {
                 const localStorageData = localStorage.getItem(getStorageKey());
                 if (localStorageData) {
-                    resolve(JSON.parse(localStorageData));
+                    hasPendingItems().then(bool => {
+                        if(bool == true) {
+                            showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
+
+                            errorMessage = 
+                            `
+                                <div class="msg-alert">
+                                    <details>
+                                        <summary>A separação foi finalizada, mas está incompleta.</summary>
+                                        Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
+                                    </details>
+                                </div>
+                            `;
+                            const alert = document.getElementById('alert-message');
+                            const standardTable = document.getElementById('standardTable');
+                            const detailedTable = document.getElementById('detailedTable');
+
+                            alert.innerHTML = errorMessage;
+                            alert.classList.toggle('hidden');
+                            standardTable.classList.add('hidden');
+                            detailedTable.classList.add('hidden');
+                        } else {
+                            resolve(JSON.parse(localStorageData));
+                        }
+                    })
                 } else {
                     fetch(`/get/load-table-data?filename=${getStorageKey()}`)
                     .then(response => {

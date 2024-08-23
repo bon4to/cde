@@ -344,6 +344,11 @@ function toggleTheme() {
 }
 
 
+function visualDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 function showToast(message, type = 0, duration = 5000) {
     const toastContainer = document.getElementById('toast-container');
     let icon;

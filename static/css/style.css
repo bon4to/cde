@@ -223,6 +223,21 @@ html.dark .btn-fancy:hover {
     background-color: var(--cor-destaque);
 }
 
+html.dark .btn-fancy.safe:hover {
+    color: #ffffff;
+    background-color: rgb(118, 209, 44);
+}
+
+html.dark .btn-fancy.critical:hover {
+    color: #ffffff;
+    background-color: rgb(212, 58, 58);
+}
+
+html.dark .btn-fancy.featured:hover {
+    color: #ffffff;
+    background-color: rgb(32, 96, 214);
+}
+
 html.dark .btn-fancy .svg,
 html.dark .btn-fancy .svg-inv {
     filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(180deg);
@@ -724,6 +739,26 @@ img.footer:hover {
     transition: box-shadow 0.3s ease-out, scale 0.3s ease-out, background-color 0.3s, letter-spacing 0.3s, border-radius 0.2s;
 }
 
+.btn-fancy.safe:hover {
+    color: #ffffff;
+    background-color: rgb(128, 212, 58);
+    box-shadow: 0 0 6px rgb(92, 180, 19);
+}
+
+.btn-fancy.critical:hover {
+    color: #ffffff;
+    background-color: rgb(212, 58, 58);
+    box-shadow: 0 0 6px rgb(180, 19, 19);
+}
+
+.btn-fancy.featured:hover {
+    color: #ffffff;
+    background-color: rgb(25, 130, 201);
+    box-shadow: 0 0 6px rgb(19, 75, 180);
+}
+
+
+
 .limit-lenght {
     max-width: 256px;
 }
@@ -1100,6 +1135,11 @@ a.aux-button.active {
     border-radius: 20%;
     pointer-events: none;
 }
+
+a.aux-button.active .svg-gray {
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
 
 .svg-gray:hover, .svg-gray:focus {
     background-color: var(--cor-destaque);

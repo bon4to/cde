@@ -40,7 +40,7 @@
         
         <div class="tables-container" id="sepContainer" style="min-width: 40vw;{% if id_carga == 0 %}display: none;{% endif %}">
                 <div class="split-horizontal">
-                    <div class="flex-column" style="gap: 0">
+                    <div class="flex-column">
                         <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
                         <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                     </div>
@@ -89,7 +89,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="flex-row" style="margin: 8px 0">
+                    <div class="split-horizontal flex-row" style="margin: 8px 0">
                         {% block separation_buttons %}
                             
                         {% endblock separation_buttons %}

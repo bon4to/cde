@@ -22,19 +22,19 @@
             <hr class="vert">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
             <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="SAIR" alt="" onclick="goBack()">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
         </div>
     {% endblock brow %}
     
     {% block grid_buttons %}
-        <div class="item featured" onclick="window.location.href='{{ url_for('mov') }}';">
+        <div class="item featured" onclick="window.location.href='{{ url_for('cargas') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
-                    <h2 class="text-default">Movimentar</h2>
-                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV002&nbsp;•&nbsp;</span>Faça movimentações no estoque.</p>
+                    <h2 class="text-default">Cargas</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV006&nbsp;•&nbsp;</span>Faça separações de carga.</p>
                 </div>
                 <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/truck.svg') }}" alt="">
                 </a>
             </div>
         </div>
@@ -46,6 +46,17 @@
                 </div>
                 <a class="btn-fancy button-mini">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/history.svg') }}" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="item featured" onclick="window.location.href='{{ url_for('mov') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Movimentar</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV002&nbsp;•&nbsp;</span>Faça movimentações no estoque.</p>
+                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">
                 </a>
             </div>
         </div>
@@ -79,17 +90,6 @@
                 </div>
                 <a class="btn-fancy button-mini">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
-        <div class="item featured" onclick="window.location.href='{{ url_for('cargas') }}';">
-            <div class="split-horizontal algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Cargas</h2>
-                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV006&nbsp;•&nbsp;</span>Faça separações de carga.</p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/truck.svg') }}" alt="">
                 </a>
             </div>
         </div>
