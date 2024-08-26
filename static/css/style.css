@@ -2105,6 +2105,17 @@ h1.subtitle {
     border: 1px solid var(--cor-hp);
 }
 
+.inline-input {
+    margin-left: 8px; 
+    border: 0; 
+    height: auto; 
+    padding: 6px;
+}
+
+.inline-input:focus {
+    border: 0; 
+    box-shadow: none;
+}
 
 /* toast */
 .toast-container {

@@ -22,8 +22,8 @@
                     </div>
                 </form>
                 <hr class="vert">
-                <a class="aux-button {% if request.endpoint == 'carga_pendente' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="PENDENTES" alt="" onclick="window.location.href='{{ url_for('carga_pendente') }}';">
+                <a class="aux-button {% if request.endpoint == 'carga_incomp' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="INCOMPLETAS" alt="" onclick="window.location.href='{{ url_for('carga_incomp') }}';">
                 </a>
                 <a class="aux-button {% if request.endpoint == 'faturado' %}active{% endif %}">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
@@ -38,7 +38,9 @@
                     </button>
                 </form>
                 <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
+                <a class="aux-button {% if request.endpoint == 'carga_sep_pend' or request.endpoint == 'carga_sep_done' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
+                </a>
                 <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>

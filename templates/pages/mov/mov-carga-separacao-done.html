@@ -16,7 +16,7 @@
         </div>
     </form>
     <hr class="vert">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="PENDENTES" alt="" onclick="window.location.href='{{ url_for('carga_pendente') }}';">
+    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="INCOMPLETAS" alt="" onclick="window.location.href='{{ url_for('carga_incomp') }}';">
     <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
     <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
     <hr class="vert">
@@ -26,7 +26,10 @@
         </button>
     </form>
     <hr class="vert">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (PENDENTES)" alt="" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
+    <a class="aux-button {% if request.endpoint == 'carga_sep_pend' or request.endpoint == 'carga_sep_done' %}active{% endif %}">
+        <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=id_carga) }}';">
+    </a>
+    <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
     <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
 {% endblock aux_buttons %}
 

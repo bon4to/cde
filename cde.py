@@ -301,7 +301,7 @@ def create_tables():                                                            
 
 
 @app.route('/mov/carga/incompleta', methods=['GET'])
-def carga_pendente():
+def carga_incomp():
     result, columns = get_carga_pendente()
     carga_list = listed_carga_pendente()
     

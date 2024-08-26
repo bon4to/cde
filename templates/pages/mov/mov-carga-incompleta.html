@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>Incompleta {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+        <title>Carga Incompleta {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
@@ -24,8 +24,8 @@
                     </div>
                 </form>
                 <hr class="vert">
-                <a class="aux-button {% if request.endpoint == 'carga_pendente' or request.endpoint == 'carga_pendente_id' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="PENDENTES" alt="" onclick="window.location.href='{{ url_for('carga_pendente') }}';">
+                <a class="aux-button {% if request.endpoint == 'carga_incomp' or request.endpoint == 'carga_incomp_id' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="INCOMPLETAS" alt="" onclick="window.location.href='{{ url_for('carga_incomp') }}';">
                 </a>
                 <a class="aux-button {% if request.endpoint == 'faturado' %}active{% endif %}">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
@@ -40,7 +40,9 @@
                     </button>
                 </form>
                 <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
+                <a class="aux-button {% if request.endpoint == 'carga_sep_pend' or request.endpoint == 'carga_sep_done' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
+                </a>
                 <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
@@ -69,7 +71,7 @@
                                             <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
                                         </div>
                                     </div>
-                                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('carga_pendente') }}';" title="FECHAR">
+                                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('carga_incomp') }}';" title="FECHAR">
                                         <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                                     </a>
                                 </div>
@@ -77,7 +79,7 @@
                             <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                         {% else %}
                             <h1 style="margin-bottom: 8px">Todas as Cargas</h1>
-                            <h1 class="subtitle">Há <span class="cor-web">{{ carga_pendente | count }} produto(s)</span> pendente(s)</h1>
+                            <h1 class="subtitle">Há <span class="cor-web">{{ carga_incomp | count }} produto(s)</span> pendente(s)</h1>
                         {% endif %}
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
@@ -102,7 +104,7 @@
                                 <tbody>
                                     {% set items = {} %}
                                     
-                                    {% for row in carga_pendente %}
+                                    {% for row in carga_incomp %}
                                         {% set row_cod_item = row[1] %}
                                         {% set priv_id_carga = row[0] %}
                                         {% set priv_desc_item = row[2] %}
@@ -198,7 +200,7 @@
                 </div>
             {% else %}
             <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                <h1>Cargas</h1>
+                <h1 class="subtitle">Cargas Incompletas</h1>
                 {% block all_separation_status %}
                 
                 {% endblock all_separation_status %}
@@ -206,18 +208,13 @@
                         {% if id_carga %}
                             
                         {% endif %}
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Cargas (Pendentes)</th>
-                                </tr>
-                            </thead>
+                        <table style="border-top: 4px solid var(--cor-destaque)">
+                            <tbody>
                                 {% for row in carga_list %}
                                     <tr class="selectable-row" onclick="window.location.href='/mov/carga/incompleta/{{ row }}'">
                                         <td>{{ row }}</td>
                                     </tr>
                                 {% endfor %}
-                            <tbody>
                             </tbody>
                         </table>
                     </div>
