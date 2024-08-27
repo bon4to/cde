@@ -389,7 +389,7 @@ def update_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):          
         cursor = connection.cursor()
         cursor.execute('''
             SELECT qtde_atual
-            FROM carga_pendente 
+            FROM carga_incomp 
             WHERE 
                 id_carga = ? AND 
                 cod_item = ?;
@@ -405,13 +405,13 @@ def update_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):          
             print(f'[{id_carga}] qtde atual: {qtde_atual}')
             
             flag_pendente = 'TRUE'
-            if qtde_solic == qtde_atual:
+            if set_qtde == qtde_atual:
                 flag_pendente = 'FALSE'
-            elif qtde_solic < qtde_atual:
-                return 'Erro: Quantidade solicitada menor que a separada.'
+            elif set_qtde < qtde_atual:
+                return 'Erro: Quantidade menor do que a separada.'
             
             cursor.execute('''
-                UPDATE carga_pendente 
+                UPDATE carga_incomp 
                 SET 
                     qtde_atual = ?,
                     flag_pendente = ?
@@ -425,7 +425,7 @@ def update_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):          
             connection.commit()
 
 
-def get_carga_pendente(id_carga=False):                                                                         #* BUSCA CARGAS PENDENTES
+def get_carga_incomp(id_carga=False):                                                                         #* BUSCA CARGAS PENDENTES
     # id_carga = False // retorna todos os itens das cargas pendentes
     # id_carga = <int> // retorna todos os itens de uma carga pendente
     where_clause = 'WHERE flag_pendente = TRUE'
@@ -435,7 +435,7 @@ def get_carga_pendente(id_carga=False):                                         
 
     query = f'''
         SELECT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
-        FROM carga_pendente c
+        FROM carga_incomp ci
         JOIN itens i
         ON c.cod_item = i.cod_item
         {where_clause};
@@ -447,12 +447,11 @@ def get_carga_pendente(id_carga=False):                                         
     return result, columns 
 
 
-def listed_carga_pendente():                                                                                    #* LISTA CARGAS PENDENTES
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
             SELECT DISTINCT id_carga
-            FROM carga_pendente c
+            FROM carga_incomp ci
             
             WHERE flag_pendente = TRUE;
         ''')
@@ -462,7 +461,7 @@ def listed_carga_pendente():                                                    
 
 def get_cargas_finalizadas():                                                                                   #* BUSCA CARGAS FINALIZADAS
     all_cargas = get_all_cargas()
-    cargas_pendentes = listed_carga_pendente()
+    cargas_pendentes = listed_carga_incomp()
     
     cargas_finalizadas = [carga for carga in all_cargas if carga not in cargas_pendentes]
     
