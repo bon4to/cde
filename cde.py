@@ -844,17 +844,19 @@ def get_end_lote_fat():                                                         
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            SELECT  h.rua_numero, h.rua_letra, i.cod_item,
-                    i.desc_item,  h.lote_item, h.id_carga, 
-                    SUM( CASE WHEN operacao = 'F' 
-                         THEN (quantidade)
-                         ELSE (quantidade * 0)
-                         END
-                    ) as saldo
+            SELECT  
+                h.rua_numero, h.rua_letra, i.cod_item,
+                i.desc_item,  h.lote_item, h.id_carga, 
+                SUM( CASE WHEN operacao = 'F' 
+                        THEN (quantidade)
+                        ELSE (quantidade * 0)
+                        END
+                ) as saldo, h.time_mov
             FROM historico h
             JOIN itens i ON h.cod_item = i.cod_item
-            GROUP BY  h.id_carga,  h.rua_numero, h.rua_letra,
-                      h.cod_item, h.lote_item
+            GROUP BY  
+                h.id_carga,  h.rua_numero, h.rua_letra,
+                h.cod_item, h.lote_item
             HAVING saldo   != 0
             AND h.id_carga != 0
             ORDER BY h.id_carga DESC, h.cod_item;
@@ -863,7 +865,7 @@ def get_end_lote_fat():                                                         
         end_lote = [{
             'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
             'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[6],
-            'id_carga': row[5]
+            'id_carga': row[5], 'time_mov': row[7]
         } for row in cursor.fetchall()]
 
     return end_lote
