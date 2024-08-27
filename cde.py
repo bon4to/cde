@@ -313,32 +313,36 @@ def create_tables():                                                            
 
 @app.route('/mov/carga/incompleta', methods=['GET'])
 def carga_incomp():
-    result, columns = get_carga_pendente()
-    carga_list = listed_carga_pendente()
+    result, columns = get_carga_incomp()
+    carga_list = listed_carga_incomp()
     
     return render_template(
         'pages/mov/mov-carga-incompleta.html',
-        carga_pendente=result,
+        carga_incomp=result,
         columns=columns,
         carga_list=carga_list
     )
 
 
-@app.route('/mov/carga/incompleta/<int:id_carga>', methods=['GET'])
-def carga_pendente_id(id_carga):
-    result, columns = get_carga_pendente(id_carga)
+@app.route('/mov/carga/incompleta/<string:id_carga>', methods=['GET'])
+def carga_incomp_id(id_carga):
+    id_carga = id_carga.split('-')[0]
+    
+    result, columns = get_carga_incomp(id_carga)
     fant_cliente = get_cliente_with_carga(id_carga)
-    carga_list = listed_carga_pendente()
+    carga_list = listed_carga_incomp()
     
     cod_item = request.args.get('cod_item', '')
     qtde_solic = request.args.get('qtde_solic', '')
     
     if cod_item:
         result_local, columns_local = estoque_endereco_with_item(cod_item)
+    else:
+        result_local, columns_local = [], []
     
     return render_template(
         'pages/mov/mov-carga-incompleta.html',
-        carga_pendente=result,
+        carga_incomp=result,
         columns=columns,
         carga_list=carga_list,
         id_carga=id_carga,
@@ -350,8 +354,8 @@ def carga_pendente_id(id_carga):
     )
 
 
-@app.route('/api/insert_carga_pendente', methods=['POST'])
-def api_insert_carga_pendente():
+@app.route('/api/insert_carga_incomp', methods=['POST'])
+def api_insert_carga_incomp():
     data = request.get_json()
     id_carga = data.get('id_carga')
     cod_item = data.get('cod_item')
@@ -359,32 +363,83 @@ def api_insert_carga_pendente():
     qtde_solic = data.get('qtde_solic')
     
     try:
-        insert_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic)
+        print(f'[DEBUG] pre-insert: {id_carga, cod_item, qtde_atual, qtde_solic}')
+        insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic)
         return jsonify(success=True)
     except Exception as e:
         return jsonify(success=False, error=str(e))
 
 
-def insert_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):                                          #* INSERE REGISTRO NA TABELA DE CARGAS PENDENTES
+@app.route('/get/itens_carga_incomp/<string:id_carga>', methods=['GET'])
+def route_get_carga_incomp(id_carga):
+    id_carga = id_carga.split('-')[0]
+    
+    pending_items = get_carga_incomp(id_carga)[0]
+    print(pending_items)
+    return jsonify(
+        {
+            'items': pending_items
+        }
+    )
+    
 
+@app.route('/api/conclude-incomp/<string:id_carga>', methods=['POST'])
+def conclude_incomp(id_carga):
+    try:
+        conclude_carga_incomp(id_carga)
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(success=False, error=str(e))
+
+
+def get_carga_from_hist(id_carga):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
-            INSERT INTO carga_pendente (
-                id_carga, cod_item,
-                qtde_atual, qtde_solic
+            SELECT cod_item, count(*)
+            FROM historico
+            WHERE id_carga = ?;
+            ''',
+            (id_carga,)
+        )
+        result = cursor.fetchall()
+        
+        return result
+    
+
+def insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic):                                          #* INSERE REGISTRO NA TABELA DE CARGAS PENDENTES
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            INSERT INTO carga_incomp (
+                id_carga, cod_item, qtde_atual, 
+                qtde_solic, flag_pendente
             ) VALUES (
-                ?, ?,
-                ?, ?
+                ?, ?, ?, 
+                ?, TRUE
             );
             ''',
             (id_carga, cod_item, qtde_atual, qtde_solic)
         )
-        
         connection.commit()
+    return
 
 
-def update_carga_pendente(id_carga, cod_item, qtde_atual, qtde_solic):                                          #* ALTERA REGISTRO NA TABELA DE CARGAS PENDENTES
+def conclude_carga_incomp(id_carga):
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute('''
+            UPDATE carga_incomp 
+            SET flag_pendente = FALSE
+            WHERE 
+                id_carga = ?;
+            ''',
+            (id_carga,)
+        )
+    return
+        
+        
+def update_carga_incomp(id_carga, cod_item, set_qtde):                                                        #* ALTERA REGISTRO NA TABELA DE CARGAS PENDENTES
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -447,6 +502,7 @@ def get_carga_incomp(id_carga=False):                                           
     return result, columns 
 
 
+def listed_carga_incomp():                                                                                    #* LISTA CARGAS PENDENTES
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
