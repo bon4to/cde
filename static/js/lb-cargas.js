@@ -10,27 +10,42 @@ if (nroCarga != '') {
 
 
 function getStorageKey() {
+    // retorna a chave do localStorage para a separação da carga
+    // parsificada por 'nroCarga'
+    // (ex.: 'separacao-carga-123')
     return `separacao-carga-${nroCarga}`;
 }
 
 
 function updateItemCount(itemCount) {
+    // atualiza o contador de itens do 'cart'
     document.querySelector('.item-count').textContent = itemCount;
 }
 
 
 function cargaFormRedirect(routePage) {
     const cargaInput = document.getElementById('cargaInput').value;
+    // verifica se o input de carga foi preenchido
+    // caso positivo, redireciona para a rota informada
     if (cargaInput > 0) {
-        const url = `/mov/${route}/${cargaInput}`;
-        window.location.href = url;
+        redirectToCarga(routePage, cargaInput);
     }
 }
 
 
-function listSeparationsLocalStorage(route) {
+function redirectToCarga(routePage, nroCarga) {
+    // redireciona para a rota informada
+    const url = `/mov/${routePage}/${nroCarga}`;
+    window.location.href = url;
+}
+
+
+function listSeparationsLocalStorage(routePage) {
+    // limpa a tabela atual, evitando duplicações e dados desatualizados
     const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
     allSeparationsTable.innerHTML = '';
+
+    // obtem todas as chaves (de carga) armazenadas no localStorage
     const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -39,8 +54,18 @@ function listSeparationsLocalStorage(route) {
         }
     }
 
+    // ordena as chaves em ordem decrescente
     keys.sort((a, b) => b.localeCompare(a));
 
+
+    // se nenhuma separação foi iniciada, adiciona uma linha
+    if (keys.length == 0) {
+        const row = allSeparationsTable.insertRow();
+        row.insertCell(0).textContent = 'Nenhuma separação iniciada';
+    }
+
+    // remove prefixo 'separacao-carga-'
+    // percorre as chaves e adiciona as linhas na tabela
     keys.forEach(key => {
         const cargaNumber = key.replace('separacao-carga-', '');
         const row = allSeparationsTable.insertRow();
@@ -76,195 +101,212 @@ async function genCargaReport() {
     const tableData = [];
     const rows      = document.querySelectorAll("#itemsTable tbody tr");
     const userName  = document.getElementById('separador-info').innerText;
-
-    rows.forEach(row => {
-        const rowData = [];
-        row.querySelectorAll("td").forEach(cell => {
-            rowData.push(cell.innerText);
+    
+    // Seleciona o botão de finalizar separação.
+    const btnGenCargaReport = document.getElementById('btnGenCargaReport');
+    
+    // Exibe um indicador de carregamento e desativa o botão de finalizar.
+    btnGenCargaReport.onclick = '';
+    btnGenCargaReport.innerHTML = '<span class="loader-inline"></span>';
+    
+    await visualDelay(700);
+    
+    try {
+        rows.forEach(row => {
+            const rowData = [];
+            row.querySelectorAll("td").forEach(cell => {
+                rowData.push(cell.innerText);
+            });
+            tableData.push(rowData);
         });
-        tableData.push(rowData);
-    });
 
-    const columns = ["Endereço", "Item (Código)", "Item (Descrição)", "Lote (Código)", "Qtde (Sep.)"];
+        const columns = ["Endereço", "Item (Código)", "Item (Descrição)", "Lote (Código)", "Qtde (Sep.)"];
 
-    const data = tableData.map(row => ({
-        rua_letra_end : row[0],
-        cod_item      : row[1],
-        desc_item     : row[2],
-        lote_item     : row[3],
-        qtde_solic    : row[4]
-    }));
+        const data = tableData.map(row => ({
+            rua_letra_end : row[0],
+            cod_item      : row[1],
+            desc_item     : row[2],
+            lote_item     : row[3],
+            qtde_solic    : row[4]
+        }));
 
-    const filteredData = data.filter(item => !item.lote_item.startsWith('Subtotal:'));
-    const totalQtdeSolic = filteredData.reduce((total, item) => total + parseFloat(item.qtde_solic), 0);
+        const filteredData = data.filter(item => !item.lote_item.startsWith('Subtotal:'));
+        const totalQtdeSolic = filteredData.reduce((total, item) => total + parseFloat(item.qtde_solic), 0);
 
-    data.push({
-        rua_letra_end : '',
-        cod_item      : '',
-        desc_item     : '',
-        lote_item     : 'Total:',
-        qtde_solic    : totalQtdeSolic
-    });
+        data.push({
+            rua_letra_end : '',
+            cod_item      : '',
+            desc_item     : '',
+            lote_item     : 'Total:',
+            qtde_solic    : totalQtdeSolic
+        });
 
-    let startY         = 48;
-    var cellHeight     = 10;
-    const cellPadding  = 4;
+        let startY         = 48;
+        var cellHeight     = 10;
+        const cellPadding  = 4;
 
-    const startX       = 10;
-    const marginBottom = 20;
-    const colWidths    = [25, 30, 80, 30, 25];
-    const pageHeight   = report.internal.pageSize.height;
+        const startX       = 10;
+        const marginBottom = 20;
+        const colWidths    = [25, 30, 80, 30, 25];
+        const pageHeight   = report.internal.pageSize.height;
 
-    const drawHeader = () => {
-        report.addImage(headerMainLogo, 'PNG', 164, 20, 35, 8);
+        const drawHeader = () => {
+            report.addImage(headerMainLogo, 'PNG', 164, 20, 35, 8);
 
-        report.setFont("times", "bold");
-        report.setFontSize(16);
-        report.text("Relatório de Cargas", 10, 22);
-
-        report.setFont("times", "normal");
-        report.setFontSize(12);
-        report.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
-
-        report.setDrawColor(192, 192, 192);
-        report.setLineWidth(0.2);
-        report.line(10, 32, 200, 32);
-        report.setDrawColor(0, 0, 0);
-
-        report.setFontSize(10);
-
-        if (typeof fantCliente !== 'undefined') {
             report.setFont("times", "bold");
-            report.text(`CLIENTE: ${fantCliente}`, 10, 38);
-        }
-        
-        if (typeof nroCarga !== 'undefined') {
+            report.setFontSize(16);
+            report.text("Relatório de Cargas", 10, 22);
+
             report.setFont("times", "normal");
-            report.text(`CARGA: ${nroCarga}`, 10, 42);
-        }
-        report.setDrawColor(192, 192, 192);
-    };
-
-    const drawFooter = () => {
-        const currentDateTime = new Date().toLocaleString();
-        const totalPages      = report.getNumberOfPages();
-
-        for (let i = 1; i <= totalPages; i++) {
-            report.setPage(i);
-            const pageNumber = report.internal.getCurrentPageInfo().pageNumber;
+            report.setFontSize(12);
+            report.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
 
             report.setDrawColor(192, 192, 192);
             report.setLineWidth(0.2);
-            report.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
+            report.line(10, 32, 200, 32);
             report.setDrawColor(0, 0, 0);
 
             report.setFontSize(10);
-            if (typeof userName === 'string') {
-                report.text(userName, 10, pageHeight - 10, { align: 'left' });
+
+            if (typeof fantCliente !== 'undefined') {
+                report.setFont("times", "bold");
+                report.text(`CLIENTE: ${fantCliente}`, 10, 38);
             }
-
-            report.text(`${pageNumber} / ${totalPages}`, report.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
-
-            if (typeof currentDateTime === 'string') {
-                report.text(currentDateTime, report.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
+            
+            if (typeof nroCarga !== 'undefined') {
+                report.setFont("times", "normal");
+                report.text(`CARGA: ${nroCarga}`, 10, 42);
             }
-        }
-    };
+            report.setDrawColor(192, 192, 192);
+        };
 
-    const drawTable = (data) => {
-        // Desenhando cabeçalho da tabela
-        report.setFontSize(10);
-        report.setLineWidth(0.1);
-        report.setFont("times", "bold");
-        columns.forEach((col, i) => {
-            const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-            report.setFillColor(62, 94, 166);
-            report.setTextColor(255, 255, 255);
-            report.rect(x, startY, colWidths[i], cellHeight, 'F');
-            report.text(col, x + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
-        });
-        report.setTextColor(20, 20, 20);
-        report.setDrawColor(220, 220, 220);
+        const drawFooter = () => {
+            const currentDateTime = new Date().toLocaleString();
+            const totalPages      = report.getNumberOfPages();
 
-        // Ajustando a posição Y após o cabeçalho
-        startY += cellHeight;
-        report.setFont("times", "normal");
+            for (let i = 1; i <= totalPages; i++) {
+                report.setPage(i);
+                const pageNumber = report.internal.getCurrentPageInfo().pageNumber;
 
-        // Desenhando linhas da tabela
-        data.forEach((item) => {
-            const row = [
-                item.rua_letra_end,
-                item.cod_item,
-                item.desc_item,
-                item.lote_item,
-                item.qtde_solic.toString()
-            ];
+                report.setDrawColor(192, 192, 192);
+                report.setLineWidth(0.2);
+                report.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
+                report.setDrawColor(0, 0, 0);
 
-            const isSubtotal = item.lote_item && item.lote_item.startsWith('Subtotal:');
-            const isTotal    = item.lote_item === 'Total:';
-
-            const descLines = report.splitTextToSize(item.desc_item, colWidths[2] - 2 * cellPadding);
-            const cellLines = Math.max(descLines.length, 1);
-            var currentCellHeight = cellHeight;
-
-            if (cellLines > 2) {
-                currentCellHeight = 14;
-            }
-
-            row.forEach((cell, i) => {
-                const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-                const y = startY;
-
-                if (isSubtotal) {
-                    report.setFillColor(220, 220, 220); 
-                    report.setFont("times", "bold");
-                } else if (isTotal) {
-                    report.setFillColor(192, 192, 192); 
-                    report.setDrawColor(192, 192, 192); 
-                    report.setFont("times", "bold");
-                } else {
-                    report.setFillColor(255, 255, 255); 
-                    report.setFont("times", "normal");
+                report.setFontSize(10);
+                if (typeof userName === 'string') {
+                    report.text(userName, 10, pageHeight - 10, { align: 'left' });
                 }
 
-                report.rect(x, y, colWidths[i], currentCellHeight, 'F');
-                const text = report.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
-                report.text(text, x + cellPadding, y + cellPadding);
-                report.setFillColor(50, 50, 50);
-                report.rect(x, y, colWidths[i], currentCellHeight, 'S');
-            });
+                report.text(`${pageNumber} / ${totalPages}`, report.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
 
-            startY += currentCellHeight;
-
-            if (startY + cellHeight + marginBottom > pageHeight) {
-                report.addPage();
-                drawHeader();
-                startY = 50;
-                report.setFontSize(10);
-                report.setLineWidth(0.1);
+                if (typeof currentDateTime === 'string') {
+                    report.text(currentDateTime, report.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
+                }
             }
-        });
-    };
+        };
 
-    loadBase64('/static/b64/cde-logo-b.txt', function(base64String) {
-        headerMainLogo = base64String; // Atribuir ao escopo global
-        drawHeader();
-        drawTable(data);
-        drawFooter(report.internal.getNumberOfPages());
-
-        if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
-            const finalY = startY + 10;
+        const drawTable = (data) => {
+            // Desenhando cabeçalho da tabela
             report.setFontSize(10);
+            report.setLineWidth(0.1);
             report.setFont("times", "bold");
-            report.text("OBSERVACÃO: ", 10, finalY);
+            columns.forEach((col, i) => {
+                const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+                report.setFillColor(62, 94, 166);
+                report.setTextColor(255, 255, 255);
+                report.rect(x, startY, colWidths[i], cellHeight, 'F');
+                report.text(col, x + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
+            });
+            report.setTextColor(20, 20, 20);
+            report.setDrawColor(220, 220, 220);
 
+            // Ajustando a posição Y após o cabeçalho
+            startY += cellHeight;
             report.setFont("times", "normal");
-            report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
-        }
 
-        const pdfName = `${getStorageKey()}.pdf`;
-        report.save(pdfName);
-    });
+            // Desenhando linhas da tabela
+            data.forEach((item) => {
+                const row = [
+                    item.rua_letra_end,
+                    item.cod_item,
+                    item.desc_item,
+                    item.lote_item,
+                    item.qtde_solic.toString()
+                ];
+
+                const isSubtotal = item.lote_item && item.lote_item.startsWith('Subtotal:');
+                const isTotal    = item.lote_item === 'Total:';
+
+                const descLines = report.splitTextToSize(item.desc_item, colWidths[2] - 2 * cellPadding);
+                const cellLines = Math.max(descLines.length, 1);
+                var currentCellHeight = cellHeight;
+
+                if (cellLines > 2) {
+                    currentCellHeight = 14;
+                }
+
+                row.forEach((cell, i) => {
+                    const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+                    const y = startY;
+
+                    if (isSubtotal) {
+                        report.setFillColor(220, 220, 220); 
+                        report.setFont("times", "bold");
+                    } else if (isTotal) {
+                        report.setFillColor(192, 192, 192); 
+                        report.setDrawColor(192, 192, 192); 
+                        report.setFont("times", "bold");
+                    } else {
+                        report.setFillColor(255, 255, 255); 
+                        report.setFont("times", "normal");
+                    }
+
+                    report.rect(x, y, colWidths[i], currentCellHeight, 'F');
+                    const text = report.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
+                    report.text(text, x + cellPadding, y + cellPadding);
+                    report.setFillColor(50, 50, 50);
+                    report.rect(x, y, colWidths[i], currentCellHeight, 'S');
+                });
+
+                startY += currentCellHeight;
+
+                if (startY + cellHeight + marginBottom > pageHeight) {
+                    report.addPage();
+                    drawHeader();
+                    startY = 50;
+                    report.setFontSize(10);
+                    report.setLineWidth(0.1);
+                }
+            });
+        };
+
+        loadBase64('/static/b64/cde-logo-b.txt', function(base64String) {
+            headerMainLogo = base64String; // Atribuir ao escopo global
+            drawHeader();
+            drawTable(data);
+            drawFooter(report.internal.getNumberOfPages());
+
+            if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
+                const finalY = startY + 10;
+                report.setFontSize(10);
+                report.setFont("times", "bold");
+                report.text("OBSERVACÃO: ", 10, finalY);
+
+                report.setFont("times", "normal");
+                report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
+            }
+
+            const pdfName = `${getStorageKey()}.pdf`;
+            report.save(pdfName);
+            btnGenCargaReport.innerHTML = `✓`;
+            btnGenCargaReport.classList.add('disabled');
+        });
+    } catch (error) {
+        console.error('Erro ao gerar relatório:', error);
+        btnGenCargaReport.innerHTML = `✘`;
+        btnGenCargaReport.classList.add('disabled');
+    }
 }
 
 
@@ -536,17 +578,24 @@ function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit)
     maxBtn.onclick = function() {
         input.value = input.max;
     };
-    
+
+    // verifica se o input de quantidade está satisfazendo a quantidade solicitada
     if (qtde_faltante <= 0) {
         alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
     } else {
+        // mostra o popup
         popup.classList.remove('hidden');
 
         submitBtn.onclick = function() {
             const value = parseInt(input.value);
+
+            // validacao para verificar se o input foi preenchido corretamente
             if (value > 0 && value <= input.max) {
+                // oculta o popup
                 popup.classList.add('hidden');
+                // adiciona o item na separação
                 onSubmit(value);
+                // carregar totais e subtotais na tabela
                 renderCartSubtotals();
             } else {
                 alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
@@ -574,33 +623,52 @@ async function fetchQtdeSolic(id_carga, cod_item) {
 }
 
 
-async function concludeSeparacao() {
-    const sepCarga = await getSeparacao();
-    const finalizarBtn = document.getElementById('finalizarBtn');
-
-    // checar se ha itens pendentes, se houver, abortar o processamento 
-    // (caso esta carga exista no historico)
-    await checkPendingItems(); 
-
-    finalizarBtn.onclick = '';
-    finalizarBtn.innerHTML = '<span class="loader-inline"></span>';
-
-    let itens_carga = [];
-
+async function getPendingItems() {
     try {
-        const response = await fetch('/api/itens_carga?id_carga=' + nroCarga, {
+        const response = await fetch('/get/itens_carga_incomp/' + nroCarga, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
         });
         const result = await response.json();
-        itens_carga = result.itens;
-        console.log('itens_carga:', itens_carga);
+        const items = result.items;
+        const cod_items = items.map(item => item[1]);
+
+        return cod_items;
     } catch (error) {
-        console.error('Erro ao obter itens_carga:', error);
-        return;
+        console.error('Erro ao verificar se há itens pendentes na tabela carga_incomp:', error);
+        
+        return false;
     }
+}
+
+
+async function hasPendingItems() {
+    const PendingItems = await getPendingItems();
+    if (PendingItems.length > 0) { hasPendingItems = true } else { hasPendingItems = false };
+
+    return hasPendingItems;
+}
+
+
+async function hasCargaAtHistory() {
+    try {
+        const response = await fetch('/get/has_carga_at_history/' + nroCarga, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const result = await response.json();
+        const bool_result = result.bool;
+        return bool_result;
+    } catch (error) {
+        console.error('Erro ao verificar se há cargas já faturadas neste código:', error);
+        return false;
+    }
+}
+
 
 async function concludeSeparacao() {
     // Obtém os dados da separação atual.
@@ -846,10 +914,12 @@ const fetchItemDescription = async (cod_item) => {
             throw new Error('Erro ao obter descrição do item');
         }
         const data = await response.json();
-        return data.description; // Retorna a descrição obtida
+        // Retorna a descrição obtida
+        return data.description;
     } catch (error) {
         console.error('Erro:', error);
-        return ''; // Retorna uma string vazia ou outro valor de erro
+        // Retorna uma string vazia
+        return '';
     }
 };
 

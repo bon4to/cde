@@ -1,6 +1,11 @@
 {% extends "pages/mov/mov-carga-separacao.html" %}
 
 
+{% block title %}
+    <title>Separação (🟢) {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+{% endblock title %}
+
+
 {% block sep_status %}
     <span>SEPARAÇÃO <span style="font-size: 16px">(FINALIZADA)</span></span>
 {% endblock sep_status %}
@@ -47,7 +52,12 @@
 
 
 {% block all_separation_status %}
-    <p style="justify-content: flex-start">Status:<span style="color: green; margin-left: 4px">Finalizados</span></p>
+    <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
+        <select class="address-three inline-input" style="color: green;" onchange="window.location.href='/mov/separacao-pend/{{ id_carga }}'">
+            <option style="color: green;">Finalizadas</option>
+            <option style="color: var(--cor-destaque);">Pendentes</option>
+        </select>
+    </p>
 {% endblock all_separation_status %}
 
 
@@ -57,6 +67,7 @@
         const nroCarga    = '{{ id_carga }}';
         const fantCliente = '{{ fant_cliente }}';
         const obs_carga   = '{{ obs_carga }}';
+        const seq         = '{{ seq }}';
 
         function getSeparacao() {
             return new Promise((resolve, reject) => {
@@ -64,7 +75,7 @@
                 if (localStorageData) {
                     reject(new Error(304));
                 } else {
-                    fetch(`/get/load-table-data?filename=${getStorageKey()}`)
+                    fetch(`/get/load-table-data?filename=${getStorageKey()}&seq=${seq}`)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error(404);
@@ -183,7 +194,11 @@
                         subtotalRow.insertCell(4).innerHTML = '<span class="cor-web">0</span> / ' + qtde_solic;
 
                         subtotalRow.classList.add('sub-total');
+                        
                     }
+                    Array.from(statusElements).forEach(element => {
+                        element.innerHTML = "<span style='color: green'>Finalizada</span>";
+                    });
                 }
 
             } catch (error) {
@@ -193,22 +208,23 @@
                 let errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`;
 
                 if (error.message == 304) {
-                    errorMessage = `<div class="msg-info">
-                                        <details>
-                                            <summary>Há uma separação pendente neste código!</summary>
-                                            Para visualizá-la, filtre por 'pendentes' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}"> acima.
-                                        </details>
-                                    </div>`;
-                    Array.from(statusElements).forEach(element => {
-                        element.innerHTML = "<span style='color: var(--cor-destaque)'>Pendente</span>";
-                    });
+                    errorMessage = `
+                        <div class="msg-info">
+                            <details>
+                                <summary>Há uma separação pendente neste código!</summary>
+                                Para visualizá-la, filtre por 'pendentes' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}"> acima.
+                            </details>
+                        </div>
+                    `;
                 } else if (error.message == 404) {
-                    errorMessage = `<div class="msg-error">
-                                        <details>
-                                            <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                            Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
-                                        </details>
-                                    </div>`;
+                    errorMessage = `
+                        <div class="msg-error">
+                            <details>
+                                <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
+                                Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
+                            </details>
+                        </div>
+                    `;
                 }
 
                 alert.innerHTML = errorMessage;

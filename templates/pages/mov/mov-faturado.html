@@ -53,6 +53,7 @@
                     <option value=3>Item (Descrição)</option>
                     <option value=1>Endereço (Letra)</option>
                     <option value=4>Lote (Código)</option>
+                    <option value=5>Data/Hora</option>
                 </select>
             </div>
         </div>
@@ -67,6 +68,7 @@
                             <th>Item (Descrição)</th>
                             <th>Lote</th>
                             <th>QTDE (Efetiva)</th>
+                            <th>Data/Hora</th>
                         </tr>
                         {% for item in saldo_atual %}
                         <tr>
@@ -76,6 +78,7 @@
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
                             <td>{{ item['saldo'] }}</td>
+                            <td>{{ item['time_mov'] }}</td>
                         </tr>
                         {% endfor %}
                     </table>

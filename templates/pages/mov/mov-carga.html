@@ -269,7 +269,7 @@
                                     {{ alert | safe }}
                                 </details>
                             </div>
-                            <h1 class="subtitle">Selecione uma carga:</h1>
+                            <h1 class="subtitle">Selecione a <span class="cor-web">carga</span> para iniciar sua <span class="cor-web">separação</span>:</h1>
                         {% endif %}
                     {% else %}
                         <div class="msg-info">
@@ -292,7 +292,7 @@
                                         <th>Cliente (Descrição)</th>
                                         <th>Emissão (Data)</th>
                                         <th>Entrega (Data)</th>
-                                        <th>Observação</th>
+                                        <th>OBS.</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -305,9 +305,9 @@
                                                 <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
                                                 <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
                                                 <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
-                                                <td>
+                                                <td style="text-align: center">
                                                     {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
-                                                        <img class="svg-gray table-more" title="{{ row[columns.index('OBS_CARGA')] }}" style="height: 15px; width: 15px; padding: 2px" src="{{ url_for('static', filename='svg/info.svg') }}" alt="">
+                                                        <span title="{{ row[columns.index('OBS_CARGA')] }}">🔵</span>
                                                     {% endif %}
                                                 </td>
                                             </tr>
@@ -322,7 +322,7 @@
                 {% endif %}
                 {% if not cod_item %}
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                    <h1>Separações</h1>
+                    <h1 class="subtitle">Separações</h1>
                     <p style="justify-content: flex-start">
                         Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span>
                     </p>
@@ -330,24 +330,12 @@
                     
                     {% endblock all_separation_status %}
                     <div class="table-overflow" style="max-height: 500px">
-                        <table id="allSeparationsTable">
-                            <thead>
-                                <tr>
-                                    <th>Cargas (Separações)</th>
-                                </tr>
-                            </thead>
+                        <table id="allSeparationsTable"  style="border-top: 4px solid var(--cor-destaque)">
                             <tbody>
                                 <!-- executa listCargasLocalStorage(); -->
                             </tbody>
                         </table>
                     </div>
-                    {% if session['user_grant'] == 1 %}
-                    <div style="margin: 8px 0" class="flex-row">
-                        <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             {% endif %}
         {% endif %}
@@ -388,6 +376,7 @@
             return new Promise((resolve, reject) => {
                 const localStorageData = localStorage.getItem(getStorageKey());
                 if (localStorageData) {
+                    // TODO: function 'hasPendingItems' is not defined 
                     hasPendingItems().then(bool => {
                         if(bool == true) {
                             showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
@@ -422,17 +411,20 @@
                         return response.json();
                     })
                     .then(data => {
-                        
                         reject(new Error('A carga selecionada já foi finalizada.'));
-                        checkPendingItems()
-                        .then(bool => {
+                        hasPendingItems().then(bool => {
                             if(bool == true) {
-                                errorMessage = `<div class="msg-alert">
-                                                    <details>
-                                                        <summary>A separação selecionada foi finalizada com itens pendentes!</summary>
-                                                        Se deseja continuá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
-                                                    </details>
-                                                </div>`
+                                showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
+
+                                errorMessage = 
+                                `
+                                    <div class="msg-alert">
+                                        <details>
+                                            <summary>A separação foi finalizada, mas está incompleta.</summary>
+                                            Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
+                                        </details>
+                                    </div>
+                                `;
                                 const alert = document.getElementById('alert-message');
                                 const standardTable = document.getElementById('standardTable');
                                 const detailedTable = document.getElementById('detailedTable');

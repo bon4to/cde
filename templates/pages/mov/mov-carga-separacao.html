@@ -44,79 +44,73 @@
         </div>
     </div>
     <div class="flex-row" style="min-width: 100%; justify-content: flex-end;">
-        
-        <div class="tables-container" id="sepContainer" style="min-width: 40vw;{% if id_carga == 0 %}display: none;{% endif %}">
-                <div class="split-horizontal">
-                    <div class="flex-column">
-                        <h1>Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
-                        <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
-                    </div>
-                    <div class="cart-container">
-                        <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
-                        <div class="cart-dropdown hidden" id="cart-dropdown">
-                            <ul class="cart-items">
-                            </ul>
-                        </div>
-                    </div>
+        <div class="tables-container" id="sepContainer" style="min-width: 40vw;{% if id_carga == '0' %}display: none;{% endif %}">
+            <div class="split-horizontal">
+                <div class="flex-column">
+                    <h1>Número de Carga <span class="cor-web">[{{ id_carga }}{% if seq %}-{{ seq }}{% endif %}]</span></h1>
+                    <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                 </div>
-                {% if obs_carga %}
-                    {% set obs_carga = obs_carga|trim %}
-                    {% if obs_carga and obs_carga | length > 0 %}
-                        <div class="msg-info">
-                            <details>
-                                <summary>A carga possui uma observação!</summary>
-                                <span id="obs_carga">{{ obs_carga }}</span>
-                            </details>
-                        </div>
-                    {% endif %}
-                {% endif %}
-                <div class="split-horizontal">
-                    <p style="justify-content: flex-start">
-                        Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span>
-                    </p>
-                    <p style="justify-content: flex-start">
-                        Separador: <span id="separador-info" style="color: var(--cor-tl); margin-left: 4px">carregando...</span>
-                    </p>
-                </div>
-                <div class="hidden" id="alert-message"></div>
-                <div id="contentTable">
-                    <div class="table-overflow" style="max-height: 400px">
-                        <table id="itemsTable">
-                            <thead>
-                                <tr>
-                                    <th>Endereço</th>
-                                    <th>Item (Código)</th>
-                                    <th>Item (Descrição)</th>
-                                    <th>Lote (Código)</th>
-                                    <th>QTDE (Separado)</th>
-                                </tr>
-                            </thead>
-                                <!-- executa renderItems(); -->
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="split-horizontal flex-row" style="margin: 8px 0">
-                        {% block separation_buttons %}
-                            
-                        {% endblock separation_buttons %}
+                <div class="cart-container">
+                    <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                    <div class="cart-dropdown hidden" id="cart-dropdown">
+                        <ul class="cart-items">
+                        </ul>
                     </div>
                 </div>
             </div>
+            {% if obs_carga %}
+                {% set obs_carga = obs_carga|trim %}
+                {% if obs_carga and obs_carga | length > 0 %}
+                    <div class="msg-info">
+                        <details>
+                            <summary>A carga possui uma observação!</summary>
+                            <span id="obs_carga">{{ obs_carga }}</span>
+                        </details>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div class="split-horizontal">
+                <p style="justify-content: flex-start">
+                    Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span>
+                </p>
+                <p style="justify-content: flex-start">
+                    Separador: <span id="separador-info" style="color: var(--cor-tl); margin-left: 4px">carregando...</span>
+                </p>
+            </div>
+            <div class="hidden" id="alert-message"></div>
+            <div id="contentTable">
+                <div class="table-overflow" style="max-height: 400px">
+                    <table id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th>Endereço</th>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th>Lote (Código)</th>
+                                <th>QTDE (Separado)</th>
+                            </tr>
+                        </thead>
+                            <!-- executa renderItems(); -->
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="split-horizontal flex-row" style="margin: 8px 0">
+                    {% block separation_buttons %}
+                        
+                    {% endblock separation_buttons %}
+                </div>
+            </div>
+        </div>
         <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-            <h1>Separações</h1>
+            <h1 class="subtitle" style="margin: 0;">Separações</h1>
             {% block all_separation_status %}
             
             {% endblock all_separation_status %}
             <div class="table-overflow" style="max-height: 500px">
-                <table id="allSeparationsTable">
-                    <thead>
-                        <tr>
-                            <th>Cargas (Separações)</th>
-                        </tr>
-                    </thead>
-                        <!-- executa listSeparationsLocalStorage(); -->
+                <table id="allSeparationsTable" style="border-top: 4px solid var(--cor-destaque)">
                     <tbody>
+                        <!-- executa listSeparationsLocalStorage(); -->
                     </tbody>
                 </table>
             </div>

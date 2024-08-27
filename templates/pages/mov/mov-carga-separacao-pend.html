@@ -1,6 +1,11 @@
 {% extends "pages/mov/mov-carga-separacao.html" %}
 
 
+{% block title %}
+    <title>Separação (🟠) {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+{% endblock title %}
+
+
 {% block sep_status %}
     <span>SEPARAÇÃO <span style="font-size: 16px">(PENDENTE)</span></span>
 {% endblock sep_status %}
@@ -31,10 +36,10 @@
     </a>
     <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
     <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-{% endblock aux_buttons %}
+    {% endblock aux_buttons %}
 
 
-{% block separation_buttons %}
+    {% block separation_buttons %}
     <div class="flex-row">
         <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
             <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
@@ -55,7 +60,12 @@
 
 
 {% block all_separation_status %}
-    <p style="justify-content: flex-start">Status:<span style="color: var(--cor-tl); margin-left: 4px">Pendentes</span></p>
+<p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
+    <select class="address-three inline-input" style="color: var(--cor-destaque);" onchange="window.location.href='/mov/separacao-done/{{ id_carga }}'">
+        <option style="color: var(--cor-destaque);">Pendentes</option>
+        <option style="color: green;">Finalizadas</option>
+    </select>
+</p>
 {% endblock all_separation_status %}
 
 
@@ -153,17 +163,6 @@
                             console.error('Erro ao obter descrição:', error);
                             descCell.textContent = 'Erro ao obter descrição';
                         }
-
-                        const actionsDiv = document.createElement('div');
-                        actionsDiv.classList.add('action-buttons');
-
-                        const removeBtn = document.createElement('div');
-                        removeBtn.innerHTML = `<img class='svg-gray' style='height: 16px; width: 16px; padding: 4px;' src='{{ url_for('static', filename='svg/trash.svg') }}' alt=''>`;
-                        removeBtn.title = `REMOVER DE ${item.cod_item}`;
-                        removeBtn.onclick = () => removeItem(index);
-                        actionsDiv.appendChild(removeBtn);
-
-                        row.appendChild(actionsDiv);
                     }
 
                     const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
@@ -212,25 +211,47 @@
                 let errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`;
 
                 if (error.message == 304) {
-                    errorMessage = `<div class="msg-success">
-                                        <details>
-                                            <summary>A carga selecionada já foi finalizada.</summary>
-                                            Para visualizá-la, filtre por 'finalizados' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}"> acima.
-                                        </details>
-                                    </div>`;
-                    Array.from(statusElements).forEach(element => {
-                        element.innerHTML = "<span style='color: green'>Finalizada</span>";
-                    });
-                } else if (error.message == 404) {
-                    errorMessage = `<div class="msg-error">
-                                        <details>
-                                            <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                            Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
-                                        </details>
-                                    </div>`;
-                }
+                    hasPendingItems().then(bool => {
+                        if(bool == true) {
+                            showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
 
-                alert.innerHTML = errorMessage;
+                            errorMessage = `
+                                <div class="msg-alert">
+                                    <details>
+                                        <summary>A separação foi finalizada, mas está incompleta.</summary>
+                                        Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
+                                    </details>
+                                </div>
+                            `;
+                        } else {
+                            errorMessage = `
+                                <div class="msg-success">
+                                    <details>
+                                        <summary>A carga selecionada já foi finalizada.</summary>
+                                        Para visualizá-la, filtre por 'finalizados' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}"> acima.
+                                    </details>
+                                </div>
+                            `;
+                        }
+                        
+                        alert.innerHTML = errorMessage;
+                    });
+                    console.log(errorMessage)
+                    Array.from(statusElements).forEach(element => {
+                        element.innerHTML = '<span style="color: green">Finalizada</span>';
+                    });
+
+                } else if (error.message == 404) {
+                    errorMessage = `
+                        <div class="msg-error">
+                            <details>
+                                <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
+                                Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
+                            </details>
+                        </div>`
+                    ;
+                    alert.innerHTML = errorMessage;
+                }
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
             }
