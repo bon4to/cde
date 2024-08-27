@@ -231,7 +231,7 @@
                                                 <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
                                                 <td>{{ row[columns_local.index('cod_item')] }}</td>
                                                 <td>{{ row[columns_local.index('lote_item')] }}</td>
-                                                <td {% if qtde_solic|int < row[columns_local.index('saldo')] %} style="color: green"{% else %} style="color: red"{% endif %}>{{ row[columns_local.index('saldo')] }}</td>    
+                                                <td {% if qtde_solic|int <= row[columns_local.index('saldo')] %} style="color: green"{% else %} style="color: red"{% endif %}>{{ row[columns_local.index('saldo')] }}</td>    
                                             </tr>
                                         {% endfor %}
                                     </tbody>
