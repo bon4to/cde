@@ -687,10 +687,11 @@ async function concludeSeparacao() {
     
     // Obtém os itens pendentes e verifica se há itens pendentes.
     const ResultPendingItems = await getPendingItems();
-    const boolResultPendingItems = ResultPendingItems > 0;
+    const boolResultPendingItems = Array.isArray(ResultPendingItems) && ResultPendingItems.length > 0;
 
+    // Inicializa a variável que armazenará os itens da carga.
+    // Inicializa a variável que identifica se a separação é incompleta.
     let itens_carga = [];
-
     var isIncompSeparation = false;
 
     await visualDelay(200);
@@ -711,10 +712,7 @@ async function concludeSeparacao() {
         }
     }
 
-    console.log(ResultPendingItems);
-    showToast(boolResultPendingItems, 0);
     await visualDelay(700);
-
 
     if (!boolResultPendingItems) {
         // Se não houver itens pendentes, tenta obter os itens da carga da API.
