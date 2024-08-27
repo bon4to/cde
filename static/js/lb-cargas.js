@@ -19,7 +19,7 @@ function updateItemCount(itemCount) {
 }
 
 
-function redirectToCarga(route) {
+function cargaFormRedirect(routePage) {
     const cargaInput = document.getElementById('cargaInput').value;
     if (cargaInput > 0) {
         const url = `/mov/${route}/${cargaInput}`;
@@ -48,7 +48,7 @@ function listSeparationsLocalStorage(route) {
         row.classList.add("selectable-row");
 
         row.addEventListener('click', function() {
-            window.location.href = `/mov/${route}/${cargaNumber}`;
+            redirectToCarga(routePage, cargaNumber);
         });
     });
 }
@@ -70,7 +70,7 @@ async function getSeparadorName(user_id) {
 }
 
 
-function genCargaReport() {
+async function genCargaReport() {
     const { jsPDF } = window.jspdf;
     const report    = new jsPDF();
     const tableData = [];
@@ -317,7 +317,7 @@ function renderSubtotals() {
         }
     })
     .catch(error => {
-        console.error('Erro ao obter separação:', error);
+        console.log('A separação foi finalizada.', error);
     });
 }
 
@@ -428,8 +428,7 @@ function renderCartSubtotals() {
         
         updateItemCount(itemCount);
     }).catch(error => {
-        console.error('Erro ao obter separação:', error);
-        
+        console.log('A separação foi finalizada.', error);
     });
 }
 
@@ -569,7 +568,7 @@ async function fetchQtdeSolic(id_carga, cod_item) {
         const data = await response.json();
         return data.qtde_solic;
     } catch (error) {
-        console.error('Erro ao obter qtde_solic:', error);
+        console.error("Erro ao obter quantidade solicitada na rota '/api/qtde_solic?id_carga=<id_carga>&cod_item=<cod_item>':", error);
         return null;
     }
 }
@@ -653,7 +652,7 @@ async function concludeSeparacao() {
                 
                 try {
                     // Enviar dados para o servidor
-                    const response = await fetch('/api/insert_carga_pendente', {
+                    const response = await fetch('/api/insert_carga_incomp', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -668,14 +667,13 @@ async function concludeSeparacao() {
                     
                     const result = await response.json();
                     if (!result.success) {
-                        console.error(`Erro ao inserir ${cod_item} como pendente para a carga.`, result.error);
+                        console.error(`Erro ao inserir ${cod_item} para a carga incompleta.`, result.error);
                     }
                 } catch (error) {
-                    console.error(`Erro ao enviar carga pendente para o servidor para o item ${cod_item}:`, error);
+                    console.error(`Erro ao enviar item ${cod_item} da carga incompleta para o database.`, error);
                 }
             }
         } else {
-            reloadPage();
             return;
         }
     }
@@ -716,7 +714,8 @@ async function concludeSeparacao() {
             } else {
                 alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
             }
-            reloadTables();                               // atualiza tabelas no front-end
+            // atualiza tabelas no front-end
+            reloadTables();
             updateItemCount(0);
         })
         .catch(error => {

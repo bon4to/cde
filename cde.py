@@ -951,7 +951,7 @@ def get_username(id_user):                                                      
     return None
 
 
-def get_all_cargas():                                                                                            
+def get_all_cargas():                                                                                           #* BUSCA TODAS AS CARGAS 
     """Retorna todos os IDs de cargas faturadas, incluindo as de presets, sem duplicatas."""
     # Busca as cargas que foram faturadas pré-implementação do CDE
     cargas_preset = get_preset_cargas(1)
@@ -979,7 +979,6 @@ def get_all_cargas():
             all_cargas.append(carga)
             seen.add(carga)
     return all_cargas
-
 
 
 def get_ult_acesso():                                                                                           #* RETORNA ULTIMO ACESSO DO USUÁRIO
@@ -2742,7 +2741,7 @@ def get_itens_carga():
         if result:
             itens = [row[0] for row in result]
         else:
-            itens = 'Erro: Nenhum item encontrado.'
+            itens = ['Erro: Nenhum item encontrado.']
         return jsonify({'itens': itens})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
