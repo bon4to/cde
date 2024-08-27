@@ -68,11 +68,9 @@
                         id="sql_query" 
                         name="sql_query"
                         required
-                    >{% if query %}
-{{ query }}
-                    {% else %}
+                    >{% if query %}{{ query }}{% else %}
 SELECT * 
-FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
+FROM itens
 LIMIT 100;{% endif %}</textarea>
                 </div>
             </form>
