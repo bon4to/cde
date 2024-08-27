@@ -602,6 +602,73 @@ async function concludeSeparacao() {
         return;
     }
 
+async function concludeSeparacao() {
+    // Obtém os dados da separação atual.
+    const sepCarga = await getSeparacao();
+
+    // Seleciona o botão de finalizar separação.
+    const finalizarBtn = document.getElementById('finalizarBtn');
+    
+    // Exibe um indicador de carregamento e desativa o botão de finalizar.
+    showLoading();
+    finalizarBtn.onclick = '';
+    finalizarBtn.innerHTML = '<span class="loader-inline"></span>';
+
+    // Verifica se há uma carga no histórico.
+    const boolResultAtHistory = await hasCargaAtHistory();
+    
+    // Obtém os itens pendentes e verifica se há itens pendentes.
+    const ResultPendingItems = await getPendingItems();
+    const boolResultPendingItems = ResultPendingItems > 0;
+
+    let itens_carga = [];
+
+    var isIncompSeparation = false;
+
+    await visualDelay(200);
+
+    if (!boolResultAtHistory) {
+        // se não há carga no historico, continua a separação
+        showToast('A carga é válida para ser separada...', 1);
+    } else {
+        // se houver, verifica se a carga está completa antes de continuar
+        if (!boolResultPendingItems) {
+            // se não houver itens pendentes, aborta a separação
+            showToast('A carga já está completa e finalizada.', 3);
+            return;
+        } else {
+            // se houver itens pendentes, prossegue a separação
+            showToast('Continuando a separação da carga incompleta...', 0);
+            isIncompSeparation = true;
+        }
+    }
+
+    console.log(ResultPendingItems);
+    showToast(boolResultPendingItems, 0);
+    await visualDelay(700);
+
+
+    if (!boolResultPendingItems) {
+        // Se não houver itens pendentes, tenta obter os itens da carga da API.
+        try {
+            const response = await fetch('/api/itens_carga?id_carga=' + nroCarga, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const result = await response.json();
+            itens_carga = result.itens;
+        } catch (error) {
+            console.error('Erro ao obter itens_carga:', error);
+            return;
+        }
+    } else {
+        // Caso contrário, usa os itens pendentes obtidos anteriormente.
+        itens_carga = ResultPendingItems;
+    }
+
+    // Agrupa os itens separados pela carga atual com base no código do item.
     const groupedItems = sepCarga.reduce((acc, item) => {
         if (!acc[item.cod_item]) {
             acc[item.cod_item] = [];
@@ -612,34 +679,40 @@ async function concludeSeparacao() {
     
     var nonAvailableItems = [];
 
+    // Para cada item na carga, verifica se a quantidade solicitada é igual à quantidade separada.
     for (const cod_item of itens_carga) {
         let subtotal = 0;
 
         if (groupedItems[cod_item]) {
             for (const item of groupedItems[cod_item]) {
-                subtotal += item.qtde_sep;  // Soma as quantidades separadas para este item
+                // Soma as quantidades separadas para este item
+                subtotal += item.qtde_sep;
             }
         }
+        // Recupera a quantidade solicitada para este item específico
+        // ex.: fetchQtdeSolic(8967, '000123')
+        const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
 
-        const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);  // Recupera a quantidade solicitada para este item específico
-
-        if (qtde_solic !== subtotal) {  // Verifica se a quantidade solicitada é igual à quantidade separada
-            console.error('Item:', cod_item, 'qtde_solic:', qtde_solic, 'subtotal:', subtotal);
-            alert(`ALERTA:\n${cod_item} | ${subtotal} / ${qtde_solic}\n(quantidade insuficiente)`);
+        // Verifica se a quantidade solicitada é igual à quantidade separada
+        if (qtde_solic !== subtotal) {
+            showToast(`Item ${cod_item}: ( ${subtotal} / ${qtde_solic} )`, 2);
             nonAvailableItems.push(cod_item);
         } else {
-            console.log('Item:', cod_item, 'qtde_solic:', qtde_solic, 'subtotal:', subtotal);
+            showToast(`Item ${cod_item}: ( ${subtotal} / ${qtde_solic} )`, 1);
         }
+        await visualDelay(100);
     }
     
-    let hasPendingItems;
+    let saveAsPendingItems;
+    const confirmationText = `[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?\n`
 
+    // Verifica se houve itens não separados
     if (nonAvailableItems.length > 0) {
         const confirmation = confirm(
-            `[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?\nALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`
+            `${confirmationText}\nALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`
         );
         if (confirmation) {
-            hasPendingItems = true;
+            saveAsPendingItems = true;
             
             for (const cod_item of nonAvailableItems) {
                 // Verifica se groupedItems[cod_item] está definido
@@ -680,8 +753,8 @@ async function concludeSeparacao() {
 
     let confirmation;
 
-    if (!hasPendingItems) {
-        confirmation = confirm(`[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?`);
+    if (!saveAsPendingItems) {
+        confirmation = confirm(`${confirmationText}`);
     } else {
         confirmation = true;
     }
@@ -691,8 +764,8 @@ async function concludeSeparacao() {
         const sepCarga = JSON.parse(localStorage.getItem(storageKey)) || [];
         
         if (sepCarga.length === 0) {
-            alert('ALERTA:\nNão há itens separados para finalizar.\nA operação foi cancelada.');
-            reloadPage();
+            
+            showToast('Não há itens separados para finalizar.', 3);
             return;
         }
     
@@ -706,13 +779,49 @@ async function concludeSeparacao() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('INFO:\nSeparação da carga realizada com sucesso.');
-                getSeparacao().then(separacao => {
-                    saveIntoServer(separacao, storageKey) // envia json c/ dados do relatorio para o servidor
-                })
-                localStorage.removeItem(storageKey);      // limpa a separacao atual do localStorage
+                // se for uma separação incompleta, remove a pendencia da carga_incompleta
+                if (isIncompSeparation) {
+                    fetch('/api/conclude-incomp/' + nroCarga, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Pendencia da carga realizada com sucesso.', 1, 10000);
+                        } else {
+                            showToast(`Erro ao remover pendencia da carga incompleta: ${data.error}`, 3, 10000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        showToast(`Erro ao remover pendencia da carga incompleta: ${error}`, 3, 10000);
+                    });
+                }
+                try {
+                    getSeparacao().then(separacao => {
+                        // envia json com separacao para o servidor
+                        saveIntoServer(separacao, storageKey);
+                    })
+                    // limpa a separacao atual do cache (localStorage)
+                    localStorage.removeItem(storageKey);
+                } catch (error) {
+                    // feedback visual para o front-end
+                    // erro
+                    showToast(`Erro ao finalizar separação: ${error}`, 3, 10000);
+                } finally {
+                    // feedback visual para o front-end
+                    // sucesso
+                    hideLoading();
+                    showToast('Separação da carga realizada com sucesso.', 1, 10000);
+    
+                    // gera relatório da separação
+                    genCargaReport();
+                }
             } else {
-                alert(`Erro ao realizar movimentação em massa:\n${data.error}`);
+                showToast(`Erro ao finalizar separação: ${data.error}`, 3, 10000);
             }
             // atualiza tabelas no front-end
             reloadTables();
@@ -720,8 +829,12 @@ async function concludeSeparacao() {
         })
         .catch(error => {
             console.error('Erro:', error);
-            alert(`Erro ao realizar movimentação em massa: ${error.message}`);
+            
+            showToast(`Erro ao realizar movimentação em massa: ${error.message}`, 3, 10000);
         });
+    } else {
+        
+        return;
     }
 }
 

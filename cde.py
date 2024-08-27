@@ -456,8 +456,6 @@ def update_carga_incomp(id_carga, cod_item, set_qtde):                          
             return 'Erro: Registro para alteracão não encontrado.'
         else:
             qtde_atual += row[0]
-        
-            print(f'[{id_carga}] qtde atual: {qtde_atual}')
             
             flag_pendente = 'TRUE'
             if set_qtde == qtde_atual:
@@ -2565,7 +2563,7 @@ def estoque_endereco_with_item(cod_item):
         return [], []
     
 
-@app.route('/mov/carga/<int:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/carga/<string:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_id(id_carga):
     result_local, columns_local = [], []
@@ -2576,6 +2574,8 @@ def carga_id(id_carga):
         if cod_item:
             result_local, columns_local = estoque_endereco_with_item(cod_item)
 
+        id_carga = id_carga.split('-')[0]
+        
         fant_cliente = get_cliente_with_carga(id_carga)
         all_cargas = get_cargas_finalizadas()
         
@@ -2747,9 +2747,11 @@ def get_itens_carga():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mov/separacao-pend/<int:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/separacao-pend/<string:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep_pend(id_carga):
+    id_carga = id_carga.split('-')[0]
+    
     id_user   = session.get('id_user')
     user_info = get_userdata(id_user)
     obs_carga = get_obs_with_carga(id_carga)
@@ -2763,16 +2765,21 @@ def carga_sep_pend(id_carga):
     )
 
 
-@app.route('/mov/separacao-done/<int:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/separacao-done/<string:id_carga>', methods=['GET', 'POST'])
 @verify_auth('MOV006')
 def carga_sep_done(id_carga):
+    if '-' in id_carga:
+        id_carga, seq = id_carga.split('-')
+    else:
+        seq = 0
     id_user      = session.get('id_user')
     user_info    = get_userdata(id_user)
     obs_carga    = get_obs_with_carga(id_carga)
     fant_cliente = get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-done.html', 
-        id_carga=id_carga, 
+        id_carga=id_carga,
+        seq=seq, 
         user_info=user_info,
         fant_cliente=fant_cliente,
         obs_carga=obs_carga
@@ -2817,8 +2824,13 @@ def save_localstorage():
 
         if not items_data or not filename:
             return jsonify({'error': 'Dados inválidos ou ausentes.'}), 400
-        
+
+        # Verifica se o arquivo já existe e cria um nome com sufixo sequencial se necessário
         save_path = os.path.join(app.root_path, 'report/cargas', f'{filename}.json')
+        seq = 1
+        while os.path.exists(save_path):
+            save_path = os.path.join(app.root_path, 'report/cargas', f'{filename}-{seq}.json')
+            seq += 1
 
         with open(save_path, 'w') as file:
             json.dump(items_data, file)
@@ -2830,17 +2842,64 @@ def save_localstorage():
         return jsonify({'error': 'Erro interno ao salvar dados do localStorage.'}), 500
     
 
+def readJsonCargaSeq(filename, seq=False):
+    base_path = os.path.join(app.root_path, 'report/cargas')
+    seq = int(seq)
+    if not seq:
+        # Unifica todos os arquivos JSON com a mesma base de nome
+        unified_data = []
+        seq = 0
+        while True:
+            file_path = os.path.join(base_path, f'{filename}.json')
+            if seq > 0:  
+                file_path = os.path.join(base_path, f'{filename}-{seq}.json')
+            
+            if not os.path.exists(file_path):
+                break
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                unified_data.extend(data)
+            seq += 1
+        if unified_data:
+            return unified_data
+        else:
+            return None
+    else:
+        # Lê o arquivo JSON específico com a sequência fornecida
+        file_path = os.path.join(base_path, f'{filename}.json')
+        if seq > 0:  
+            file_path = os.path.join(base_path, f'{filename}-{seq}.json')
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                return json.load(file)
+        else:
+            return None
+
+
+
+@app.route('/get/has_carga_at_history/<string:id_carga>', methods=['GET'])
+def has_carga_at_history(id_carga):
+    id_carga = id_carga.split('-')[0]
+    
+    has_carga_at_history = bool(get_carga_incomp(id_carga)[0])
+    return jsonify(
+        {
+            'bool': has_carga_at_history
+        }
+    )
+
+
 @app.route('/get/load-table-data', methods=['GET'])
 def load_table_data():
     try:
         filename = request.args.get('filename')
+        seq = request.args.get('seq', False)
+        
         if not filename:
             return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
 
-        filename = os.path.join(app.root_path, 'report/cargas', f'{filename}.json')
-
-        with open(filename, 'r') as file:
-            data = json.load(file)
+        data = readJsonCargaSeq(filename, seq)
 
         return jsonify(data), 200
     
