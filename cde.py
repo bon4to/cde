@@ -26,7 +26,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-app.config['APP_VERSION'] = ['0.4.6', 'Agosto/2024', False]
+app.config['APP_VERSION'] = ['0.4.6', 'Setembro/2024', False]
 
 # GET nome do diretório
 dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
@@ -55,7 +55,7 @@ class TAGS:
 
 
 def logging(tag_1, tag_2, msge):
-    timestamp = get_timestamp()
+    timestamp = Misc.get_timestamp()
     if not tag_2:
         print(f'{tag_1} {msge}')
         return
@@ -122,18 +122,1534 @@ else:
     sys.exit(2)
 
 
+class system:
+    @staticmethod
+    def db_query_connect(query, dsn):
+        # CONEXÃO E QUERY NO BANCO DE DADOS
+        dsn = f"DSN={dsn}"
+        if dsn != 'DSN=SQLITE':
+            uid_pwd = os.getenv('DB_USER').split(';')
+            user = uid_pwd[0]
+            password = uid_pwd[1]
+            try:
+                connection = pyodbc.connect(dsn, uid=user, pwd=password)
+                cursor = connection.cursor()
+                cursor.execute(query)
+                columns = [str(column[0]) for column in cursor.description]
+                result = cursor.fetchall()
+
+                cursor.close()
+                connection.close()
+            except Exception as e:
+                result = [[f'Erro de consulta: {e}']]
+                columns = []
+        else:
+            try:
+                with sqlite3.connect(db_path) as connection:
+                    cursor = connection.cursor()
+                    cursor.execute(query)
+                    columns = [str(column[0]) for column in cursor.description]
+                    result = cursor.fetchall()
+            except Exception as e:
+                result = [[f'Erro de consulta: {e}']]
+                columns = []
+            
+        return result, columns
+
+    
+    @staticmethod
+    def create_tables() -> None:
+        # GERADOR DE TABELAS
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+
+            # TABELA DE PROGRAMAÇÃO DO ENVASE
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS prog_envase (
+                    id_envase       INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cod_linha       INTEGER(3),
+                    cod_cliente     INTEGER(10),
+                    cod_item        VARCHAR(6),
+                    qtde_solic      INTEGER(20),
+                    data_entr_antec DATETIME,
+                    data_envase     DATETIME,
+                    observacao      VARCHAR(100),
+                    flag_concluido  BOOLEAN DEFAULT FALSE
+                );
+            ''')
+
+            # TABELA DE PROGRAMAÇÃO DA PROCESSAMENTO
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS prog_producao (
+                    id_producao     INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cod_linha       INTEGER(3),
+                    liq_tipo        VARCHAR(10),
+                    liq_linha       VARCHAR(30),
+                    liq_cor         VARCHAR(30),
+                    embalagem       VARCHAR(10),
+                    lts_solic       INTEGER(20),
+                    data_entr_antec DATETIME,
+                    data_producao   DATETIME,
+                    observacao      VARCHAR(100),
+                    flag_concluido  BOOLEAN DEFAULT FALSE
+                );
+            ''')
+
+            # TABELA HISTÓRICO
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS historico (
+                    id_mov     INTEGER PRIMARY KEY AUTOINCREMENT,
+                    rua_numero INTEGER(6),
+                    rua_letra  VARCHAR(10),
+                    cod_item   VARCHAR(100),
+                    lote_item  VARCHAR(8),
+                    quantidade INTEGER,
+                    operacao   VARCHAR(15),
+                    user_name  VARCHAR(30),
+                    time_mov   DATETIME,
+                    id_carga   INTEGER(6), 
+                    id_user    INTEGER
+                );
+            ''')
+            
+            # TABELA DE CLIENTES
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS clientes (
+                    cod_cliente      INTEGER(10) PRIMARY KEY,
+                    razao_cliente    VARCHAR(100),
+                    fantasia_cliente VARCHAR(100),
+                    cidade_cliente   VARCHAR(100),
+                    estado_cliente   VARCHAR(30)
+                );
+            ''')
+            
+            # TABELA DE CARGAS PENDENTES
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS carga_incomp (
+                    id_log        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_carga      INTEGER(6),
+                    cod_item      VARCHAR(6),
+                    qtde_atual    INTEGER(20),
+                    qtde_solic    INTEGER(20),
+                    flag_pendente BOOLEAN DEFAULT TRUE
+                );
+            ''')
+
+            # TABELA DE USUÁRIOS
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id_user        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    login_user     VARCHAR(30) UNIQUE,
+                    password_user  TEXT,
+                    nome_user      VARCHAR(100),
+                    sobrenome_user VARCHAR(100),
+                    privilege_user INTEGER(2),
+                    data_cadastro  DATETIME,
+                    ult_acesso     DATETIME
+                );
+            ''')
+
+            # TABELA DE PERMISSÕES DE USUÁRIO
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS user_permissions (
+                    id_user INTEGER, 
+                    id_perm VARCHAR(6)
+                );
+            ''')
+
+            # TABELA DE ITENS
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS itens (
+                    cod_item   VARCHAR(6) PRIMARY KEY,
+                    desc_item  VARCHAR(100),
+                    dun14      INTEGER(14),
+                    flag_ativo BOOLEAN DEFAULT TRUE
+                );
+            ''')
+
+            # TABELA AUXILIAR DE PRIVILÉGIOS
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS aux_privilege (
+                    id_priv   INTEGER(2) PRIMARY KEY,
+                    desc_priv VARCHAR(30) UNIQUE
+                );
+            ''')
+
+            # TABELA AUXILIAR DE PERMISSÕES
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS aux_permissions (
+                    id_perm   VARCHAR(6) PRIMARY KEY,
+                    desc_perm VARCHAR(100)
+                );
+            ''')
+            
+            # TABELA AUXILIAR DE LINHAS
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS aux_linha (
+                    cod_linha  INTEGER(3),
+                    tipo_embal VARCHAR(10),
+                    lit_embal  VARCHAR(10)
+                );
+            ''')
+
+            connection.commit()
+        return None
+
+    
+    @staticmethod
+    def verify_auth(id_page):
+        # VERIFICA PRIVILÉGIO DE ACESSO
+        def decorator(f):
+            @wraps(f)
+            def decorador(*args, **kwargs):
+                if 'logged_in' in session:
+                    id_user = session.get('id_user')
+                    session['id_page'] = f'{id_page}'
+                    if not session.get('user_grant') <= 2:
+                        user_permissions = UserUtils.get_user_permissions(id_user)
+                        user_permissions = [item['id_perm'] for item in user_permissions]
+                        if id_page in user_permissions:
+                            logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                            return f(*args, **kwargs)
+                        else:
+                            logging(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                            alert_type = 'SEM PERMISSÕES'
+                            alert_msge = 'Você não tem permissão para acessar esta página.'
+                            alert_more = '''SOLUÇÕES:\n- Solicite ao seu supervisor um novo nível de acesso.'''
+                            return render_template(
+                                'components/menus/alert.html', 
+                                alert_type=alert_type,
+                                alert_msge=alert_msge, 
+                                alert_more=alert_more,
+                                url_return=url_for('index')
+                            )
+                    else:
+                        logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                        return f(*args, **kwargs)
+                else:
+                    return redirect(url_for('login'))
+            return decorador
+        return decorator
+
+
+class EstoqueUtils:
+    @staticmethod
+    def estoque_endereco_with_item(cod_item=False):
+        if cod_item:
+            query = f'''
+                SELECT  
+                    h.rua_numero, h.rua_letra, i.cod_item, 
+                    i.desc_item, h.lote_item,
+                    SUM(
+                        CASE 
+                        WHEN operacao = 'E' OR operacao = 'TE'
+                        THEN quantidade 
+                        
+                        WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
+                        THEN (quantidade * -1)
+
+                        ELSE (quantidade * 0)
+                        END
+                    ) as saldo
+                FROM historico h
+
+                JOIN itens i 
+                ON h.cod_item = i.cod_item
+
+                WHERE i.cod_item = "{str(cod_item)}"
+                
+                GROUP BY  
+                    h.rua_numero, h.rua_letra, 
+                    h.cod_item, h.lote_item
+                HAVING saldo != 0
+
+                ORDER BY 
+                    h.lote_item ASC, h.rua_letra ASC,
+                    h.rua_numero ASC, i.desc_item ASC;
+            '''
+            dsn = 'SQLITE'
+            result_local, columns_local = system.db_query_connect(query, dsn)
+            return result_local, columns_local
+        else:
+            return [], []
+
+
+    @staticmethod
+    def get_saldo_view(timestamp=False):
+        # RETORNA TABELA DE SALDO
+        if timestamp:
+            timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = Misc.parse_db_datetime(timestamp)
+        
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo, COALESCE(t.time_mov, "") as time_mov
+                FROM itens i
+                LEFT JOIN (
+                    SELECT cod_item,
+                    SUM(CASE 
+                        WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                        WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                        ELSE (quantidade * 0)
+                        END
+                    ) as saldo,
+                    MAX(time_mov) as time_mov,
+                    ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                    FROM historico h
+                    WHERE time_mov <= ?
+                    GROUP BY cod_item
+                ) t ON i.cod_item = t.cod_item
+                WHERE t.rn = 1 OR t.rn IS NULL
+                ORDER BY t.time_mov DESC;
+            ''', (timestamp,))
+
+            saldo_visualization = [{
+                'cod_item' : row[1], 'desc_item': row[0], 
+                'saldo'    : row[2], 'ult_mov'  : row[3]
+            } for row in cursor.fetchall()]
+
+        return saldo_visualization
+
+    
+    @staticmethod
+    def get_saldo_preset(index, timestamp=False):
+        # BUSCA SALDO COM UM FILTRO (PRESET)
+        itens = EstoqueUtils.get_preset_itens(index)
+        
+        if not itens:
+            return []
+
+        placeholders = ','.join(['?'] * len(itens))
+        query = f'''
+            SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo
+            FROM itens i
+            LEFT JOIN (
+                SELECT cod_item,
+                SUM(CASE 
+                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade
+                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                    ELSE (quantidade * 0)
+                    END
+                ) as saldo,
+                MAX(time_mov) as time_mov,
+                ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                FROM historico h
+                WHERE time_mov <= ?
+                GROUP BY cod_item
+            ) t ON i.cod_item = t.cod_item
+            WHERE i.cod_item IN ({placeholders})
+            ORDER BY i.cod_item;
+        '''
+
+        if timestamp:
+            timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = Misc.parse_db_datetime(timestamp)
+
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute(query, (timestamp, *itens))
+            saldo_visualization = [{
+                'cod_item' : row[1], 'desc_item': row[0], 
+                'saldo'    : row[2]
+            } for row in cursor.fetchall()]
+
+        return saldo_visualization
+
+    
+    @staticmethod
+    def get_preset_itens(index):
+        # BUSCA ITENS DE PRESETS
+        try:
+            with open(f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
+                itens = file.read().strip().split(', ')
+        except:
+            itens = []
+        return itens
+
+
+    @staticmethod
+    def get_end_lote(timestamp=False):
+        # RETORNA ENDEREÇAMENTO POR LOTES
+        if timestamp:
+            timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = Misc.parse_db_datetime(timestamp)
+        
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
+                        i.desc_item, h.lote_item,
+                        SUM( 
+                        CASE 
+                        WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                        WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                        ELSE (quantidade * 0)
+                        END
+                        ) as saldo
+                FROM historico h
+                JOIN itens i ON h.cod_item = i.cod_item
+                WHERE h.time_mov <= ?
+                GROUP BY h.rua_numero, h.rua_letra, h.cod_item, 
+                        h.lote_item
+                HAVING saldo != 0
+                ORDER BY h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
+            ''', (timestamp,))
+
+            end_lote = [{
+                'letra'     : row[1], 'numero'   : row[0], 'cod_item': row[2],
+                'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[5]
+            } for row in cursor.fetchall()]
+
+        return end_lote
+
+
+    @staticmethod
+    def get_end_lote_fat():
+        # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT  
+                    h.rua_numero, h.rua_letra, i.cod_item,
+                    i.desc_item,  h.lote_item, h.id_carga, 
+                    SUM( CASE WHEN operacao = 'F' 
+                            THEN (quantidade)
+                            ELSE (quantidade * 0)
+                            END
+                    ) as saldo, h.time_mov
+                FROM historico h
+                JOIN itens i ON h.cod_item = i.cod_item
+                GROUP BY  
+                    h.id_carga,  h.rua_numero, h.rua_letra,
+                    h.cod_item, h.lote_item
+                HAVING saldo   != 0
+                AND h.id_carga != 0
+                ORDER BY h.id_carga DESC, h.cod_item;
+            ''')
+
+            end_lote = [{
+                'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
+                'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[6],
+                'id_carga': row[5], 'time_mov': row[7]
+            } for row in cursor.fetchall()]
+
+        return end_lote
+
+
+    @staticmethod
+    def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
+        # RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT COALESCE(SUM(CASE 
+                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                    ELSE (quantidade * 0)
+                END), 0) as saldo
+                FROM historico h
+                WHERE rua_numero = ? AND rua_letra = ? AND cod_item = ? AND lote_item = ?;
+            ''', (rua_numero, rua_letra, cod_item, cod_lote))
+            saldo_item = cursor.fetchone()[0]
+        return saldo_item
+
+
+    @staticmethod    
+    def get_export_promob():
+        # RETORNA TABELA DE SALDO
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT 
+                    i.desc_item, 
+                    i.cod_item, 
+                    COALESCE(t.saldo, 0) as saldo, 
+                    t.time_mov
+                FROM 
+                    itens i
+                LEFT JOIN (
+                    SELECT 
+                        cod_item,
+                        SUM(CASE 
+                            WHEN operacao IN ('E', 'TE') THEN quantidade
+                            WHEN operacao IN ('S', 'TS', 'F') THEN (quantidade * -1)
+                            ELSE (quantidade * 0)
+                        END) as saldo,
+                        MAX(time_mov) as time_mov,
+                        ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                    FROM 
+                        historico h
+                    GROUP BY 
+                        cod_item
+                    HAVING 
+                        saldo != 0
+                ) t ON i.cod_item = t.cod_item
+                WHERE 
+                    t.rn = 1 OR t.rn IS NULL
+                ORDER BY 
+                    i.cod_item;
+            ''')
+
+            saldo_visualization = [{
+                'cod_item': row[1],
+                'deposito': 2,
+                'qtde'    : row[2]
+            } for row in cursor.fetchall()]
+
+        return saldo_visualization
+
+
+class CargaUtils:
+    @staticmethod
+    def get_carga_from_hist(id_carga) -> list:
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT cod_item, count(*)
+                FROM historico
+                WHERE id_carga = ?;
+                ''',
+                (id_carga,)
+            )
+            result = cursor.fetchall() 
+        return result
+
+
+    @staticmethod
+    def readJsonCargaSeq(filename, seq=False):
+        base_path = os.path.join(app.root_path, 'report/cargas')
+        seq = int(seq)
+        if not seq:
+            # Unifica todos os arquivos JSON com a mesma base de nome
+            unified_data = []
+            seq = 0
+            while True:
+                file_path = os.path.join(base_path, f'{filename}.json')
+                if seq > 0:  
+                    file_path = os.path.join(base_path, f'{filename}-{seq}.json')
+                
+                if not os.path.exists(file_path):
+                    break
+                with open(file_path, 'r') as file:
+                    data = json.load(file)
+                    unified_data.extend(data)
+                seq += 1
+            if unified_data:
+                return unified_data
+            else:
+                return None
+        else:
+            # Lê o arquivo JSON específico com a sequência fornecida
+            file_path = os.path.join(base_path, f'{filename}.json')
+            if seq > 0:  
+                file_path = os.path.join(base_path, f'{filename}-{seq}.json')
+            
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as file:
+                    return json.load(file)
+            else:
+                return None
+
+
+    @staticmethod
+    def insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic):
+        # INSERE REGISTRO NA TABELA DE CARGAS PENDENTES
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                INSERT INTO carga_incomp (
+                    id_carga, cod_item, qtde_atual, 
+                    qtde_solic, flag_pendente
+                ) VALUES (
+                    ?, ?, ?, 
+                    ?, TRUE
+                );
+                ''',
+                (id_carga, cod_item, qtde_atual, qtde_solic)
+            )
+            connection.commit()
+        return
+
+
+    @staticmethod
+    def conclude_carga_incomp(id_carga):
+        # ALTERA REGISTRO NA TABELA DE CARGAS INCOMPLETAS
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                UPDATE carga_incomp 
+                SET flag_pendente = FALSE
+                WHERE 
+                    id_carga = ?;
+                ''',
+                (id_carga,)
+            )
+        return
+            
+            
+    @staticmethod
+    def update_carga_incomp(id_carga, cod_item, set_qtde):
+        # ALTERA REGISTRO NA TABELA DE CARGAS PENDENTES
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT qtde_atual
+                FROM carga_incomp 
+                WHERE 
+                    id_carga = ? AND 
+                    cod_item = ?;
+                ''',
+                (id_carga, cod_item)
+            )
+            row = cursor.fetchone()
+            if not row:
+                return 'Erro: Registro para alteracão não encontrado.'
+            else:
+                qtde_atual += row[0]
+                
+                flag_pendente = 'TRUE'
+                if set_qtde == qtde_atual:
+                    flag_pendente = 'FALSE'
+                elif set_qtde < qtde_atual:
+                    return 'Erro: Quantidade menor do que a separada.'
+                
+                cursor.execute('''
+                    UPDATE carga_incomp 
+                    SET 
+                        qtde_atual = ?,
+                        flag_pendente = ?
+                    WHERE 
+                        id_carga = ? AND 
+                        cod_item = ?;
+                    ''',
+                    (qtde_atual, flag_pendente, id_carga, cod_item)
+                )
+                
+                connection.commit()
+
+
+    @staticmethod
+    def get_carga_incomp(id_carga=False):
+        # BUSCA CARGAS PENDENTES
+        # id_carga = False // retorna todos os itens das cargas pendentes
+        # id_carga = <int> // retorna todos os itens de uma carga pendente
+        where_clause = 'WHERE flag_pendente = TRUE'
+        
+        if id_carga:
+            where_clause += f' AND id_carga = {id_carga}'
+
+        query = f'''
+            SELECT DISTINCT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
+            FROM carga_incomp ci
+            JOIN itens i
+            ON ci.cod_item = i.cod_item
+            {where_clause};
+        '''
+        
+        dsn = 'SQLITE'
+        result, columns = system.db_query_connect(query, dsn)
+        
+        return result, columns 
+
+
+    @staticmethod
+    def listed_carga_incomp():
+        # LISTA CARGAS PENDENTES
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT DISTINCT id_carga
+                FROM carga_incomp ci
+                
+                WHERE ci.flag_pendente = TRUE;
+            ''')
+            rows = cursor.fetchall()
+            return [row[0] for row in rows]
+
+
+    @staticmethod
+    def get_cargas_finalizadas():
+        # BUSCA CARGAS FINALIZADAS
+        all_cargas = CargaUtils.get_all_cargas()
+        cargas_pendentes = CargaUtils.listed_carga_incomp()
+        
+        cargas_finalizadas = [carga for carga in all_cargas if carga not in cargas_pendentes]
+        
+        return cargas_finalizadas
+
+
+    @staticmethod
+    def select_carga_from_historico(id_carga):
+        # BUSCA CARGAS DO HISTÓRICO
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT i.cod_item, desc_item, quantidade
+                FROM historico h
+                
+                JOIN itens i
+                ON h.cod_item = i.cod_item
+                
+                WHERE id_carga = ?;
+            ''', (id_carga,))
+            rows = cursor.fetchall()
+            return rows
+
+
+    @staticmethod
+    def get_obs_with_carga(id_carga):
+        # RETORNA OBSERVACOES COM O ID DE CARGA
+        query = f'''
+            SELECT DISTINCT
+                crg.OBSERVACAO AS OBS_CARGA
+
+            FROM DB2ADMIN.ITEMPED iped
+
+            JOIN DB2ADMIN.IGRUPOPE icrg
+            ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+            AND icrg.SEQ = iped.SEQ
+
+            JOIN DB2ADMIN.PEDIDO ped
+            ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+
+            JOIN DB2ADMIN.GRUPOPED crg
+            ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+            JOIN DB2ADMIN.CLIENTE cl
+            ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+            WHERE icrg.CODIGO_GRUPOPED = {id_carga}
+        '''
+
+        dsn = 'HUGOPIET'
+        result, columns = system.db_query_connect(query, dsn)
+
+        if result:
+            return result[0][0]
+        return None
+
+
+    @staticmethod
+    def get_cliente_with_carga(id_carga):
+        # RETORNA CLIENTE COM O ID DE CARGA
+        query = f'''
+            SELECT DISTINCT
+                cl.FANTASIA AS FANT_CLIENTE
+
+            FROM DB2ADMIN.ITEMPED iped
+
+            JOIN DB2ADMIN.IGRUPOPE icrg
+            ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+            AND icrg.SEQ = iped.SEQ
+
+            JOIN DB2ADMIN.PEDIDO ped
+            ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+
+            JOIN DB2ADMIN.GRUPOPED crg
+            ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+            JOIN DB2ADMIN.CLIENTE cl
+            ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+            WHERE icrg.CODIGO_GRUPOPED = {id_carga}
+        '''
+
+        dsn = 'HUGOPIET'
+        result, columns = system.db_query_connect(query, dsn)
+
+        if result:
+            return result[0][0]
+        return None
+
+
+    @staticmethod
+    def get_all_cargas():
+        # Retorna todos os IDs de cargas faturadas,
+        # incluindo as de presets, sem duplicatas.
+        cargas_preset = CargaUtils.get_preset_cargas(1)
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT DISTINCT id_carga
+                FROM historico
+                ORDER BY id_carga DESC;
+            ''')
+            rows = cursor.fetchall()
+            
+            # Converte os resultados da consulta em uma lista de inteiros
+            cargas_db = [row[0] for row in rows] if rows else []
+
+        # Combina as cargas do banco de dados com as do preset
+        combined_cargas = cargas_db + cargas_preset
+        
+        # Remove duplicatas mantendo a ordem
+        seen = set()
+        all_cargas = []
+        for carga in combined_cargas:
+            if carga not in seen:
+                all_cargas.append(carga)
+                seen.add(carga)
+        return all_cargas
+   
+    @staticmethod
+    def get_desc_itens():
+        # RETORNA APENAS DESCRIÇÃO DO ITEM (DESCONTINUADO)
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    SELECT DISTINCT id_carga
+                    FROM historico
+                    ORDER BY id_carga DESC;
+                ''')
+                rows = cursor.fetchall()
+                
+                # Converte os resultados da consulta em uma lista de inteiros
+                cargas_db = [row[0] for row in rows] if rows else []
+
+            # Combina as cargas do banco de dados com as do preset
+            combined_cargas = cargas_db + cargas_preset
+            
+            # Remove duplicatas mantendo a ordem
+            seen = set()
+            all_cargas = []
+            for carga in combined_cargas:
+                if carga not in seen:
+                    all_cargas.append(carga)
+                    seen.add(carga)
+            return all_cargas
+
+    
+    @staticmethod
+    def get_preset_cargas(index):
+        # BUSCA CARGAS FINALIZADAS DE PRESETS
+        try:
+            with open(f'report/cargas_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
+                cargas = file.read().strip().split(', ')
+        except:
+            cargas = []
+        return cargas
+
+
+class HistoricoUtils:
+    @staticmethod
+    def select_rua(letra, numero):
+        # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT cod_item, lote_item, 
+                COALESCE(SUM(CASE 
+                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
+                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
+                    ELSE (quantidade * 0)
+                END), 0) as saldo
+                FROM historico
+                WHERE rua_letra = ? AND rua_numero = ?
+                GROUP BY cod_item, lote_item;
+            ''', (letra, numero))
+            
+            items = cursor.fetchall()
+
+            return items
+
+
+    @staticmethod
+    def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga):
+        # INSERE REGISTRO NA TABELA DE HISTÓRICO
+        user_name_mov = session['user_name']
+        id_user_mov = session['id_user']
+
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                INSERT INTO historico (
+                    rua_numero, rua_letra, cod_item,
+                    lote_item, quantidade, operacao,
+                    time_mov, id_carga, id_user)
+                VALUES (
+                    ?, ?, ?,
+                    ?, ?, ?,
+                    ?, ?, ?);                
+                ''',
+                (numero, letra, cod_item,
+                lote_item, quantidade, operacao, 
+                timestamp_out, id_carga, id_user_mov)
+            )
+            
+            connection.commit()
+
+
+    @staticmethod
+    def get_historico(page=1, per_page=10):
+        # RETORNA MOVIMENTAÇÕES
+        offset = (page - 1) * per_page
+
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+
+            cursor.execute('SELECT COUNT(*) FROM historico;')
+            row_count = cursor.fetchone()[0] # número total de linhas
+
+            cursor.execute('''
+                SELECT  
+                    h.rua_numero, h.rua_letra, h.cod_item,
+                    i.desc_item, h.lote_item, h.quantidade,
+                    h.operacao, u.id_user||' - '||u.nome_user,
+                    h.time_mov
+                FROM historico h
+                
+                JOIN itens i ON h.cod_item = i.cod_item
+                JOIN users u ON h.id_user = u.id_user
+                
+                ORDER BY h.time_mov DESC
+                
+                LIMIT ? OFFSET ?;
+            ''', (per_page, offset))
+
+            estoque = [{
+                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
+                'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade' : row[5], 
+                'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
+            } for row in cursor.fetchall()]
+        return estoque, row_count
+
+
+    @staticmethod
+    def get_all_historico():
+        # RETORNA TODAS AS MOVIMENTAÇÕES
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            
+            cursor.execute('''
+                SELECT  
+                    h.rua_numero, h.rua_letra, h.cod_item,
+                    i.desc_item, h.lote_item, h.quantidade,
+                    h.operacao, u.id_user||' - '||u.nome_user, 
+                    h.time_mov
+                FROM historico h
+                
+                JOIN itens i ON h.cod_item = i.cod_item
+                JOIN users u ON h.id_user = u.id_user
+                
+                ORDER BY h.time_mov DESC;
+            ''')
+            
+            estoque = [{
+                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
+                'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade': row[5], 
+                'operacao'  : row[6],          'user_name' : row[7],  'timestamp'  : row[8]
+            } for row in cursor.fetchall()]
+        return estoque
+
+
+class ProdutoUtils:
+    @staticmethod
+    def get_itens_from_erp():
+        query = '''
+            SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
+            FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
+            WHERE (
+                (
+                    UNIDADE_DESCRICAO = 'CX' OR 
+                    UNIDADE_DESCRICAO = 'UN' OR 
+                    UNIDADE_DESCRICAO = 'FD'
+                ) AND (
+                    GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
+                    GRUPO_DESCRICAO = 'REVENDA')
+                AND 
+                    NOT GTIN_14 = ''
+            )
+            OR 
+                -- copos cadastrados por extensão
+                i.ITEM IN ('EM.3577', 'EM.1074');
+        '''
+
+        dsn = 'HUGOPIET'
+        result, columns = system.db_query_connect(query, dsn)
+        return result, columns
+
+    
+    @staticmethod
+    def get_all_itens():
+        # RETORNA TODOS OS PARÂMETROS DO ITEM
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT DISTINCT *
+                FROM itens i
+                ORDER BY i.cod_item;
+            ''')
+
+            itens = [{
+                'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2], 'flag_ativo': bool(row[3])
+            } for row in cursor.fetchall()]
+        return itens
+
+    
+    @staticmethod
+    def get_active_itens():
+        # RETORNA TODOS OS PARÂMETROS DO ITEM
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT DISTINCT *
+                FROM itens i
+                WHERE i.flag_ativo = 1
+                ORDER BY i.cod_item;
+            ''')
+
+            itens = [{
+                'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2]
+            } for row in cursor.fetchall()]
+        return itens
+
+  
+    @staticmethod
+    def get_item_json(input_code):
+        if 'EM.' not in input_code:
+            input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
+        print(f'    | Código fornecido: {input_code}')
+        
+        if len(input_code) == 4 or len(input_code) == 0:
+            desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO OU INATIVO', '', '', ''
+            print(f'    | {desc_item}')
+            return jsonify(
+                {
+                'json_cod_item' : cod_item, 
+                'json_desc_item': desc_item, 
+                'json_cod_lote' : cod_lote, 
+                'json_cod_linha': cod_linha
+                }
+            )
+
+        else:     
+            # VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
+            if len(input_code) == 6 or len(input_code) == 7:
+                input_code = input_code + ';'
+
+            partes       = input_code.split(';')
+            cod_item     = []
+            cod_item_qnt = None
+
+            if len(partes) == 1:
+                cod_barra  = partes[0]
+
+                with sqlite3.connect(db_path) as connection:
+                    cursor = connection.cursor()
+                    cursor.execute('''
+                        SELECT i.desc_item, i.cod_item
+                        FROM itens i
+                        WHERE i.dun14 = ? 
+                        AND i.flag_ativo = 1
+                        ORDER BY i.cod_item;
+                    ''',
+                    (cod_barra,))
+
+                    rows = cursor.fetchall()
+
+                    for row in rows:
+                        codigos_itens = row[1]
+                        cod_item.append(codigos_itens)
+                        cod_item_qnt = len(cod_item)
+                    
+                    if cod_item:
+                        with sqlite3.connect(db_path) as connection:
+                            cursor = connection.cursor()
+                            cursor.execute('''
+                                SELECT i.desc_item    
+                                FROM itens i
+                                WHERE i.cod_item = ? 
+                                AND i.flag_ativo = 1
+                                ORDER BY i.cod_item;
+                            ''',
+                            (cod_item[0],))
+
+                        row = cursor.fetchall()
+                        
+                        if row:
+                            desc_item = row[0][0]
+                            if 'VINHO' in desc_item:
+                                cod_lote = 'VINHOS'
+                            else:
+                                cod_lote = ''
+                    else:
+                        desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
+                        print(f'    | {desc_item}')
+                    return jsonify(
+                        {
+                        'json_cod_item': cod_item,
+                        'json_desc_item': desc_item, 
+                        'json_cod_lote': cod_lote, 
+                        'json_cod_item_ocurr': cod_item_qnt
+                        }
+                    )
+
+            elif len(partes) == 2:
+                codigos_itens = partes[0]
+                cod_item.append(codigos_itens)
+                
+
+                if partes[1] != '':
+                    cod_lote = 'CS' + partes[1]
+                else:
+                    cod_lote = ''
+                if 'EM.' in input_code:
+                    cod_lote = 'OUTROS'
+
+                with sqlite3.connect(db_path) as connection:
+                    cursor = connection.cursor()
+                    cursor.execute('''
+                        SELECT i.desc_item
+                        FROM itens i
+                        WHERE i.cod_item = ?
+                        AND i.flag_ativo = 1;
+                    ''', 
+                    (codigos_itens,))
+
+                    resultado = cursor.fetchone()
+                    if resultado is not None:
+                        desc_item = resultado[0]
+                        if 'VINHO' in desc_item:
+                            cod_lote = 'VINHOS'
+                    else:
+                        desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
+                        print(f'    | {desc_item}')
+                    return jsonify(
+                        {
+                        'json_cod_item' : cod_item, 
+                        'json_cod_lote' : cod_lote, 
+                        'json_desc_item': desc_item
+                        }
+                    )
+
+            else:
+                desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
+                print(f'    | {desc_item}')
+                return jsonify(
+                    {
+                    'json_cod_item' : cod_item, 
+                    'json_cod_lote' : cod_lote, 
+                    'json_desc_item': desc_item
+                    }
+                )
+    
+    
+    @staticmethod
+    def get_desc_itens():
+        # RETORNA APENAS DESCRIÇÃO DO ITEM (DESCONTINUADO)
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT DISTINCT desc_item
+                FROM itens i
+                ORDER BY i.desc_item;
+            ''')
+
+            desc_item = [row[0] for row in cursor.fetchall()]
+        return desc_item
+
+
+    @staticmethod
+    def toggle_item_flag(cod_item, flag):
+        # ALTERA STATUS (ATIVO/INATIVO) DO ITEM
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                UPDATE itens SET flag_ativo = ? WHERE cod_item = ?;
+            ''', (flag, cod_item))
+
+            connection.commit()
+        return
+
+
+class UserUtils:
+    def get_permissions():
+        # RETORNA DADOS DE PERMISSÃO
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT * 
+                FROM aux_permissions
+                ORDER BY id_perm;
+            ''')
+
+            permissions = [{
+                'id_perm': row[0], 'desc_perm': row[1]
+            } for row in cursor.fetchall()]
+
+        return permissions
+    
+
+    def get_users():
+
+        # RETORNA DADOS DOS USUÁRIOS
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT 
+                    u.nome_user || ' ' || u.sobrenome_user, 
+                    ap.desc_priv,
+                    u.ult_acesso, u.id_user
+                FROM users u
+                        
+                JOIN aux_privilege ap 
+                ON u.privilege_user = ap.id_priv
+                        
+                ORDER BY u.ult_acesso DESC;
+            ''')
+
+            users_list = [{
+                'user_name' : row[0], 'user_grant': row[1], 
+                'ult_acesso': row[2], 'cod_user'  : row[3],
+            } for row in cursor.fetchall()]
+
+        return users_list
+
+
+    def get_user_permissions(user_id):
+        # RETORNA LISTA DE PERMISSÕES DO USUÁRIO
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT up.id_perm
+                FROM user_permissions up
+                WHERE id_user = ?
+                ORDER BY id_user;
+            ''',
+            (user_id,))
+
+            rows = cursor.fetchall()
+
+            if rows:
+                user_permissions = [{'id_perm': row[0]} for row in rows]
+                return user_permissions
+            else:
+                return []
+
+
+    def get_userdata(id_user):
+        # RETORNA DADOS DO USUÁRIO
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT  privilege_user, nome_user,
+                        sobrenome_user, id_user, 
+                        ult_acesso
+                FROM users
+                WHERE id_user = ?;
+            ''',
+            (id_user,))
+
+            user_data = [{
+                'privilege_user': row[0], 'nome_user' : row[1], 'sobrenome_user': row[2],
+                'id_user'       : row[3], 'ult_acesso': row[4]
+            } for row in cursor.fetchall()]
+
+            return user_data
+
+
+    def get_username(id_user):
+        # RETORNA NOME DO USUÁRIO
+        query = f'''
+            SELECT DISTINCT
+                u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
+
+            FROM users u
+
+            WHERE u.id_user = {id_user};
+        '''
+
+        dsn = 'SQLITE'
+        result, columns = system.db_query_connect(query, dsn)
+
+        if result:
+            return result[0][0]
+        return None
+
+
+    def get_ult_acesso():
+        # RETORNA ULTIMO ACESSO DO USUÁRIO
+        id_user = session.get('id_user')
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT ult_acesso
+                FROM users
+                WHERE id_user = ?;
+            ''', (id_user,))
+            row = cursor.fetchone()
+
+            ult_acesso = row[1] if row else None
+
+            return ult_acesso
+
+
+class Schedule:
+    class EnvaseUtils:
+        @staticmethod
+        def get_envase():
+            # RETORNA TABELA DE PROGRAMAÇÃO (ENVASE)
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    SELECT  p.id_envase, p.cod_linha, c.fantasia_cliente,
+                            i.cod_item, i.desc_item, p.qtde_solic,
+                            p.data_entr_antec, p.data_envase, p.observacao,
+                            p.flag_concluido
+                    FROM prog_envase p
+                    JOIN itens i ON p.cod_item = i.cod_item
+                    JOIN clientes c ON p.cod_cliente = c.cod_cliente
+                    ORDER BY p.data_envase;
+                ''')
+
+                envase_list = [{
+                    'id_envase'       : row[0], 'linha'       : row[1], 'fantasia_cliente' : row[2], 
+                    'cod_item'        : row[3], 'desc_item'   : row[4], 'quantidade'       : row[5],
+                    'data_entr_antec' : row[6], 'data_envase' : row[7], 'observacao'       : row[8],
+                    'flag_concluido'  : row[9]
+                } for row in cursor.fetchall()]
+
+            return envase_list
+
+
+    class ProcessamentoUtils:
+        @staticmethod
+        def get_producao():
+            # RETORNA TABELA DE PROGRAMAÇÃO (PROCESSAMENTO)
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    SELECT  p.id_producao, p.cod_linha, p.liq_linha,
+                            p.liq_cor, p.embalagem, p.lts_solic,
+                            p.data_entr_antec, p.data_producao, p.observacao,
+                            p.flag_concluido, p.liq_tipo
+                    FROM prog_producao p
+                    ORDER BY p.data_producao;
+                ''')
+                producao_list = [{
+                    'id_producao'     : row[0], 'linha'        : row[1], 'liq_linha' : row[2], 
+                    'liq_cor'         : row[3], 'embalagem'    : row[4], 'litros'    : row[5], 
+                    'data_entr_antec' : row[6], 'data_producao': row[7], 'observacao': row[8],
+                    'flag_concluido'  : row[9], 'liq_tipo'     : row[10]
+                } for row in cursor.fetchall()]
+                
+            return producao_list
+
+
+class Misc:
+    def get_frase():
+        # BUSCA FRASE PARA /INDEX
+        with open('static/frases.txt', 'r', encoding='utf-8') as file:
+            frases = file.readlines()
+            frase = random.choice(frases).strip()
+            if not frase:
+                frase = 'Seja a mudança que você deseja ver no mundo.'
+        return frase
+
+
+    def parse_db_datetime(timestamp):
+        # CONVERTE TIMESTAMP PARA FORMATO DO DATABASE
+        if not timestamp:
+            timestamp = datetime.now(timezone(timedelta(hours=-3)))
+        elif isinstance(timestamp, str):
+            timestamp = datetime.strptime(timestamp, '%Y-%m-%d')
+            timestamp = timestamp.replace(tzinfo=timezone(timedelta(hours=-3)))
+        
+        return timestamp.strftime('%Y/%m/%d %H:%M:%S')
+    
+    
+    def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):
+        # GERA ETIQUETA COM QRCODE
+        width, height = 400, 400
+        img  = Image.new('RGB', (width, height), color='white')
+        cod_lote = f'LOTE: {cod_lote}'
+        desc_item = f'{cod_item} - {desc_item}'
+
+        qr_image = Misc.qr_code(qr_text)
+        qr_width, qr_height = qr_image.size
+        img.paste(qr_image, ((width - qr_width) // 2, (height - qr_height) // 2))
+
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype('arialbd.ttf', 30)
+
+        lote_bbox  = draw.textbbox((0, 0), cod_lote, font=font)
+        lote_width = lote_bbox[2] - lote_bbox[0]
+        draw.text(((width - lote_width) // 2, height // 1.5), cod_lote, fill='black', font=font)
+
+        text   = desc_item
+        font   = ImageFont.truetype('arialbd.ttf', 22)
+        lines  = textwrap.wrap(text, width=30)
+        y_text = height - height // 4.6
+        for line in lines:
+            text_width, text_height = draw.textbbox((0, 0), line, font=font)[2:]
+            draw.text(((width - text_width) // 2, y_text), line, font=font, fill='black')
+            y_text += text_height
+
+        img_io = io.BytesIO()
+        img.save(img_io, format='PNG')
+        img_io.seek(0)
+
+        img_base64 = base64.b64encode(img_io.getvalue()).decode()
+        return img_base64
+
+
+    def get_timestamp():
+        # RETORNA TIMESTAMP
+        return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+    def add_days_to_datetime_str(date_str, qtde_days):
+        # ADICIONA DIAS À DATA INFORMADA
+
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        
+        new_date_obj = date_obj + timedelta(days=qtde_days)
+        
+        new_date_str = new_date_obj.strftime('%Y-%m-%d')
+        
+        return new_date_str
+
+
+    def tlg_msg(msg):
+        # MENSAGEM DO TELEGRAM
+        if not session.get('user_grant') == 1:
+            if debug == True:
+                print(f'{[TAGS.ERRO]}A mensagem não pôde ser enviada em modo debug')
+            else:
+                bot_token = os.getenv('TLG_BOT_TOKEN')
+                chat_id   = os.getenv('TLG_CHAT_ID')
+
+                url       = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+                params    = {'chat_id': chat_id, 'text': msg}
+                response  = requests.post(url, params=params)
+                return response.json()
+        else:
+            return None
+
+
+    def qr_code(qr_text):
+        # CRIA QRCODE
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=5,
+            border=5,
+        )
+        qr.add_data(qr_text)
+        qr.make(fit=True)
+        qr_image = qr.make_image(fill_color='black', back_color='white')
+
+        return qr_image
+
+
+    def hash_key(password):
+        # HASH DA SENHA
+        return pbkdf2_sha256.hash(password)
+
+
+    def parse_float(value):
+        # PARSE P/ FLOAT
+        try:
+            return float(value.replace(',', '.'))
+        except ValueError:
+            return 0
+    
+
+    def password_check(id_user, password):
+        # VERIFICA SENHA NO BANCO DE HASH
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT password_user
+                FROM users
+                WHERE id_user = ?;
+            ''', (id_user,))
+
+            row = cursor.fetchone()
+            
+            if row:
+                db_password = row[0]
+                return Misc.check_key(db_password, password)
+            return False
+
+
+    def check_key(hashed_pwd, pwd):
+        # VERIFICA SENHA NO BANCO DE HASH
+        return pbkdf2_sha256.verify(pwd, hashed_pwd)
+
+
+    class CSVUtils:
+        def iterate_csv_data_erp(data):
+            # CSV PARA INTEGRAÇÃO ERP
+            csv_data = ''
+            for item in data:
+                line = ';'.join(map(str, item.values()))
+                csv_data += f'"{line}"\n'
+            return csv_data
+
+
+        def iterate_csv_data(data):
+            # CORPO CSV PADRAO
+            csv_data = ''
+            for item in data:
+                line = ';'.join(map(str, item.values()))
+                csv_data += f'{line}\n'
+            return csv_data
+
+
+        def add_headers(data):
+            # ADICIONA CABECALHO PARA CSV
+            if data and len(data) > 0:
+                headers = ';'.join(data[0].keys())
+                return f'{headers}\n'
+            return ''
+
+
+        def export_csv(data, filename, include_headers=True):
+            # CONSTRUTOR DE CSV
+            if data and len(data) > 0:
+                csv_data = ''
+                if not include_headers:
+                    csv_data += Misc.CSVUtils.iterate_csv_data_erp(data)
+                else:
+                    csv_data += Misc.CSVUtils.add_headers(data)
+                    csv_data += Misc.CSVUtils.iterate_csv_data(data)
+
+                csv_filename = Response(csv_data, content_type='text/csv')
+                csv_filename.headers['Content-Disposition'] = f'attachment; filename={filename}.csv'
+
+                return csv_filename
+            else:
+                alert_type = 'DOWNLOAD IMPEDIDO \n'
+                alert_msge = 'A tabela não tem informações o suficiente para exportação. \n'
+                alert_more = ('''POSSÍVEIS SOLUÇÕES:
+                            - Verifique se a tabela possui mais de uma linha.
+                            - Contate o suporte. ''')
+                return render_template(
+                    'components/menus/alert.html', 
+                    alert_type=alert_type, 
+                    alert_msge=alert_msge, 
+                    alert_more=alert_more, 
+                    url_return=url_for('index')
+                )
+
+
+# métodos sem classe
+# 
 @app.before_request
-def renew_session():
+def renew_session() -> None:
     # RENOVA A SESSÃO DE USUÁRIO
     session.modified = True
+    return None
 
 
 @app.before_request
-def check_session_expiry():
+def check_session_expiry() -> None | Response:
     # VERIFICA SE A SESSÃO ESTÁ EXPIRADA
     if request.path.startswith(('/static', '/get', '/post')):
         # IGNORA AS REQUISICOES DE ARQUIVOS ESTÁTICOS
-        return
+        return None
     if 'last_active' in session:
         next_url = request.url
         last_active     = session.get('last_active')
@@ -148,14 +1664,14 @@ def check_session_expiry():
 
 
 @app.before_request
-def check_ip():
+def check_ip() -> None:
     # CHECA LISTA DE IPS (MODO DEBUG)
     client_ip = request.remote_addr
     if not debug == True:
         blacklist = os.getenv('BLACKLIST')
         if client_ip in blacklist:
             msg = f'{client_ip} na Blacklist.'
-            tlg_msg(msg)
+            Misc.tlg_msg(msg)
             abort(403)
     '''
     else:
@@ -167,11 +1683,11 @@ def check_ip():
                 tlg_msg(msg)
             abort(403)
     '''
-    return
+    return None
 
 
 @app.context_processor
-def inject_page():
+def inject_page() -> dict:
     # RETORNA URL ACESSADA PELO USER
     current_page  = request.path
     if 'logged_in' in session:
@@ -181,1358 +1697,71 @@ def inject_page():
 
 
 @app.context_processor
-def inject_version():
+def inject_version() -> dict:
     # INJETA VARIAVEL DE VERSÃO AO AMBIENTE
     return dict(app_version=app.config['APP_VERSION'])
 
 
-def create_tables():
-    # GERADOR DE TABELAS
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-
-# TABELA DE PROGRAMAÇÃO DO ENVASE
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS prog_envase (
-                id_envase       INTEGER PRIMARY KEY AUTOINCREMENT,
-                cod_linha       INTEGER(3),
-                cod_cliente     INTEGER(10),
-                cod_item        VARCHAR(6),
-                qtde_solic      INTEGER(20),
-                data_entr_antec DATETIME,
-                data_envase     DATETIME,
-                observacao      VARCHAR(100),
-                flag_concluido  BOOLEAN DEFAULT FALSE
-            );
-        ''')
-
-# TABELA DE PROGRAMAÇÃO DA PROCESSAMENTO
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS prog_producao (
-                id_producao     INTEGER PRIMARY KEY AUTOINCREMENT,
-                cod_linha       INTEGER(3),
-                liq_tipo        VARCHAR(10),
-                liq_linha       VARCHAR(30),
-                liq_cor         VARCHAR(30),
-                embalagem       VARCHAR(10),
-                lts_solic       INTEGER(20),
-                data_entr_antec DATETIME,
-                data_producao   DATETIME,
-                observacao      VARCHAR(100),
-                flag_concluido  BOOLEAN DEFAULT FALSE
-            );
-        ''')
-
-# TABELA HISTÓRICO
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS historico (
-                id_mov     INTEGER PRIMARY KEY AUTOINCREMENT,
-                rua_numero INTEGER(6),
-                rua_letra  VARCHAR(10),
-                cod_item   VARCHAR(100),
-                lote_item  VARCHAR(8),
-                quantidade INTEGER,
-                operacao   VARCHAR(15),
-                user_name  VARCHAR(30),
-                time_mov   DATETIME,
-                id_carga   INTEGER(6), 
-                id_user    INTEGER
-            );
-        ''')
-        
-# TABELA DE CLIENTES
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS clientes (
-                cod_cliente      INTEGER(10) PRIMARY KEY,
-                razao_cliente    VARCHAR(100),
-                fantasia_cliente VARCHAR(100),
-                cidade_cliente   VARCHAR(100),
-                estado_cliente   VARCHAR(30)
-            );
-        ''')
-        
-# TABELA DE CARGAS PENDENTES
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS carga_incomp (
-                id_log        INTEGER PRIMARY KEY AUTOINCREMENT,
-                id_carga      INTEGER(6),
-                cod_item      VARCHAR(6),
-                qtde_atual    INTEGER(20),
-                qtde_solic    INTEGER(20),
-                flag_pendente BOOLEAN DEFAULT TRUE
-            );
-        ''')
-
-# TABELA DE USUÁRIOS
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id_user        INTEGER PRIMARY KEY AUTOINCREMENT,
-                login_user     VARCHAR(30) UNIQUE,
-                password_user  TEXT,
-                nome_user      VARCHAR(100),
-                sobrenome_user VARCHAR(100),
-                privilege_user INTEGER(2),
-                data_cadastro  DATETIME,
-                ult_acesso     DATETIME
-            );
-        ''')
-
-# TABELA DE PERMISSÕES DE USUÁRIO
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS user_permissions (
-                id_user INTEGER, 
-                id_perm VARCHAR(6)
-            );
-        ''')
-
-# TABELA DE ITENS
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS itens (
-                cod_item   VARCHAR(6) PRIMARY KEY,
-                desc_item  VARCHAR(100),
-                dun14      INTEGER(14),
-                flag_ativo BOOLEAN DEFAULT TRUE
-            );
-        ''')
-
-# TABELA AUXILIAR DE PRIVILÉGIOS
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS aux_privilege (
-                id_priv   INTEGER(2) PRIMARY KEY,
-                desc_priv VARCHAR(30) UNIQUE
-            );
-        ''')
-
-# TABELA AUXILIAR DE PERMISSÕES
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS aux_permissions (
-                id_perm   VARCHAR(6) PRIMARY KEY,
-                desc_perm VARCHAR(100)
-            );
-        ''')
-        
-# TABELA AUXILIAR DE LINHAS
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS aux_linha (
-                cod_linha  INTEGER(3),
-                tipo_embal VARCHAR(10),
-                lit_embal  VARCHAR(10)
-            );
-        ''')
-
-        connection.commit()
-
-
-def get_carga_from_hist(id_carga):
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT cod_item, count(*)
-            FROM historico
-            WHERE id_carga = ?;
-            ''',
-            (id_carga,)
-        )
-        result = cursor.fetchall()
-        
-        return result
-
-
-def estoque_endereco_with_item(cod_item):
-    if cod_item:
-        query = f'''
-            SELECT  
-                h.rua_numero, h.rua_letra, i.cod_item, 
-                i.desc_item, h.lote_item,
-                SUM(
-                    CASE 
-                    WHEN operacao = 'E' OR operacao = 'TE'
-                    THEN quantidade 
-                    
-                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
-                    THEN (quantidade * -1)
-
-                    ELSE (quantidade * 0)
-                    END
-                ) as saldo
-            FROM historico h
-
-            JOIN itens i 
-            ON h.cod_item = i.cod_item
-
-            WHERE i.cod_item = "{str(cod_item)}"
-            
-            GROUP BY  
-                h.rua_numero, h.rua_letra, 
-                h.cod_item, h.lote_item
-            HAVING saldo != 0
-
-            ORDER BY 
-                h.lote_item ASC, h.rua_letra ASC,
-                h.rua_numero ASC, i.desc_item ASC;
-        '''
-        dsn = 'SQLITE'
-        result_local, columns_local = db_query_connect(query, dsn)
-        return result_local, columns_local
-    else:
-        return [], []
-
-
-def readJsonCargaSeq(filename, seq=False):
-    base_path = os.path.join(app.root_path, 'report/cargas')
-    seq = int(seq)
-    if not seq:
-        # Unifica todos os arquivos JSON com a mesma base de nome
-        unified_data = []
-        seq = 0
-        while True:
-            file_path = os.path.join(base_path, f'{filename}.json')
-            if seq > 0:  
-                file_path = os.path.join(base_path, f'{filename}-{seq}.json')
-            
-            if not os.path.exists(file_path):
-                break
-            with open(file_path, 'r') as file:
-                data = json.load(file)
-                unified_data.extend(data)
-            seq += 1
-        if unified_data:
-            return unified_data
-        else:
-            return None
-    else:
-        # Lê o arquivo JSON específico com a sequência fornecida
-        file_path = os.path.join(base_path, f'{filename}.json')
-        if seq > 0:  
-            file_path = os.path.join(base_path, f'{filename}-{seq}.json')
-        
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                return json.load(file)
-        else:
-            return None
-
-
-def insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic):
-    # INSERE REGISTRO NA TABELA DE CARGAS PENDENTES
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            INSERT INTO carga_incomp (
-                id_carga, cod_item, qtde_atual, 
-                qtde_solic, flag_pendente
-            ) VALUES (
-                ?, ?, ?, 
-                ?, TRUE
-            );
-            ''',
-            (id_carga, cod_item, qtde_atual, qtde_solic)
-        )
-        connection.commit()
-    return
-
-
-def conclude_carga_incomp(id_carga):
-    # ALTERA REGISTRO NA TABELA DE CARGAS INCOMPLETAS
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            UPDATE carga_incomp 
-            SET flag_pendente = FALSE
-            WHERE 
-                id_carga = ?;
-            ''',
-            (id_carga,)
-        )
-    return
-        
-        
-def update_carga_incomp(id_carga, cod_item, set_qtde):
-    # ALTERA REGISTRO NA TABELA DE CARGAS PENDENTES
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT qtde_atual
-            FROM carga_incomp 
-            WHERE 
-                id_carga = ? AND 
-                cod_item = ?;
-            ''',
-            (id_carga, cod_item)
-        )
-        row = cursor.fetchone()
-        if not row:
-            return 'Erro: Registro para alteracão não encontrado.'
-        else:
-            qtde_atual += row[0]
-            
-            flag_pendente = 'TRUE'
-            if set_qtde == qtde_atual:
-                flag_pendente = 'FALSE'
-            elif set_qtde < qtde_atual:
-                return 'Erro: Quantidade menor do que a separada.'
-            
-            cursor.execute('''
-                UPDATE carga_incomp 
-                SET 
-                    qtde_atual = ?,
-                    flag_pendente = ?
-                WHERE 
-                    id_carga = ? AND 
-                    cod_item = ?;
-                ''',
-                (qtde_atual, flag_pendente, id_carga, cod_item)
-            )
-            
-            connection.commit()
-
-
-def get_carga_incomp(id_carga=False):
-    # BUSCA CARGAS PENDENTES
-    # id_carga = False // retorna todos os itens das cargas pendentes
-    # id_carga = <int> // retorna todos os itens de uma carga pendente
-    where_clause = 'WHERE flag_pendente = TRUE'
-    
-    if id_carga:
-        where_clause += f' AND id_carga = {id_carga}'
-
-    query = f'''
-        SELECT DISTINCT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
-        FROM carga_incomp ci
-        JOIN itens i
-        ON ci.cod_item = i.cod_item
-        {where_clause};
-    '''
-    
-    dsn = 'SQLITE'
-    result, columns = db_query_connect(query, dsn)
-    
-    return result, columns 
-
-
-def listed_carga_incomp():
-    # LISTA CARGAS PENDENTES
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT DISTINCT id_carga
-            FROM carga_incomp ci
-            
-            WHERE ci.flag_pendente = TRUE;
-        ''')
-        rows = cursor.fetchall()
-        return [row[0] for row in rows]
-
-
-def get_cargas_finalizadas():
-    # BUSCA CARGAS FINALIZADAS
-    all_cargas = get_all_cargas()
-    cargas_pendentes = listed_carga_incomp()
-    
-    cargas_finalizadas = [carga for carga in all_cargas if carga not in cargas_pendentes]
-    
-    return cargas_finalizadas
-
-
-def select_carga_from_historico(id_carga):
-    # BUSCA CARGAS DO HISTÓRICO
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT i.cod_item, desc_item, quantidade
-            FROM historico h
-            
-            JOIN itens i
-            ON h.cod_item = i.cod_item
-            
-            WHERE id_carga = ?;
-        ''', (id_carga,))
-        rows = cursor.fetchall()
-        return rows
-
-
-def get_frase():
-
-    # BUSCA FRASE MOTIVACIONAL PARA /INDEX
-    with open('static/frases.txt', 'r', encoding='utf-8') as file:
-        frases = file.readlines()
-        frase = random.choice(frases).strip()
-        if not frase:
-            frase = 'Seja a mudança que você deseja ver no mundo.'
-    return frase
-
-
-def get_preset_cargas(index):
-    # BUSCA CARGAS FINALIZADAS DE PRESETS
-    try:
-        with open(f'report/cargas_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
-            cargas = file.read().strip().split(', ')
-    except:
-        cargas = []
-    return cargas
-
-
-def get_preset_itens(index):
-    # BUSCA ITENS DE PRESETS
-    try:
-        with open(f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
-            itens = file.read().strip().split(', ')
-    except:
-        itens = []
-    return itens
-
-
-def get_saldo_preset(index, timestamp=False):
-    # BUSCA SALDO COM UM FILTRO (PRESET)
-    itens = get_preset_itens(index)
-    
-    if not itens:
-        return []
-
-    placeholders = ','.join(['?'] * len(itens))
-    query = f'''
-        SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo
-        FROM itens i
-        LEFT JOIN (
-            SELECT cod_item,
-            SUM(CASE 
-                WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade
-                WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                ELSE (quantidade * 0)
-                END
-            ) as saldo,
-            MAX(time_mov) as time_mov,
-            ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
-            FROM historico h
-            WHERE time_mov <= ?
-            GROUP BY cod_item
-        ) t ON i.cod_item = t.cod_item
-        WHERE i.cod_item IN ({placeholders})
-        ORDER BY i.cod_item;
-    '''
-
-    if timestamp:
-        timestamp = add_days_to_datetime_str(timestamp, 1)
-    timestamp = parse_db_datetime(timestamp)
-
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute(query, (timestamp, *itens))
-        saldo_visualization = [{
-            'cod_item' : row[1], 'desc_item': row[0], 
-            'saldo'    : row[2]
-        } for row in cursor.fetchall()]
-
-    return saldo_visualization
-
-
-def get_all_itens():
-    # RETORNA TODOS OS PARÂMETROS DO ITEM
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT DISTINCT *
-            FROM itens i
-            ORDER BY i.cod_item;
-        ''')
-
-        itens = [{
-            'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2], 'flag_ativo': bool(row[3])
-        } for row in cursor.fetchall()]
-    return itens
-
-
-def get_active_itens():
-    # RETORNA TODOS OS PARÂMETROS DO ITEM
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT DISTINCT *
-            FROM itens i
-            WHERE i.flag_ativo = 1
-            ORDER BY i.cod_item;
-        ''')
-
-        itens = [{
-            'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2]
-        } for row in cursor.fetchall()]
-    return itens
-
-
-def get_desc_itens():
-    # RETORNA APENAS DESCRIÇÃO DO ITEM (DESCONTINUADO)
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT DISTINCT desc_item
-            FROM itens i
-            ORDER BY i.desc_item;
-        ''')
-
-        desc_item = [row[0] for row in cursor.fetchall()]
-    return desc_item
-
-
-def get_producao():
-    # RETORNA TABELA DE PROGRAMAÇÃO (PROCESSAMENTO)
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT  p.id_producao, p.cod_linha, p.liq_linha,
-                    p.liq_cor, p.embalagem, p.lts_solic,
-                    p.data_entr_antec, p.data_producao, p.observacao,
-                    p.flag_concluido, p.liq_tipo
-            FROM prog_producao p
-            ORDER BY p.data_producao;
-        ''')
-        producao_list = [{
-            'id_producao'     : row[0], 'linha'        : row[1], 'liq_linha' : row[2], 
-            'liq_cor'         : row[3], 'embalagem'    : row[4], 'litros'    : row[5], 
-            'data_entr_antec' : row[6], 'data_producao': row[7], 'observacao': row[8],
-            'flag_concluido'  : row[9], 'liq_tipo'     : row[10]
-        } for row in cursor.fetchall()]
-        
-    return producao_list
-
-
-def get_envase():
-    # RETORNA TABELA DE PROGRAMAÇÃO (ENVASE)
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT  p.id_envase, p.cod_linha, c.fantasia_cliente,
-                    i.cod_item, i.desc_item, p.qtde_solic,
-                    p.data_entr_antec, p.data_envase, p.observacao,
-                    p.flag_concluido
-            FROM prog_envase p
-            JOIN itens i ON p.cod_item = i.cod_item
-            JOIN clientes c ON p.cod_cliente = c.cod_cliente
-            ORDER BY p.data_envase;
-        ''')
-
-        envase_list = [{
-            'id_envase'       : row[0], 'linha'       : row[1], 'fantasia_cliente' : row[2], 
-            'cod_item'        : row[3], 'desc_item'   : row[4], 'quantidade'       : row[5],
-            'data_entr_antec' : row[6], 'data_envase' : row[7], 'observacao'       : row[8],
-            'flag_concluido'  : row[9]
-        } for row in cursor.fetchall()]
-
-    return envase_list
-
-
-def get_historico(page=1, per_page=10):
-    # RETORNA MOVIMENTAÇÕES
-    offset = (page - 1) * per_page
-
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-
-        cursor.execute('SELECT COUNT(*) FROM historico;')
-        row_count = cursor.fetchone()[0] # número total de linhas
-
-        cursor.execute('''
-            SELECT  
-                h.rua_numero, h.rua_letra, h.cod_item,
-                i.desc_item, h.lote_item, h.quantidade,
-                h.operacao, u.id_user||' - '||u.nome_user,
-                h.time_mov
-            FROM historico h
-            
-            JOIN itens i ON h.cod_item = i.cod_item
-            JOIN users u ON h.id_user = u.id_user
-            
-            ORDER BY h.time_mov DESC
-            
-            LIMIT ? OFFSET ?;
-        ''', (per_page, offset))
-
-        estoque = [{
-            'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade' : row[5], 
-            'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
-        } for row in cursor.fetchall()]
-    return estoque, row_count
-
-
-def get_all_historico():
-    # RETORNA TODAS AS MOVIMENTAÇÕES
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        
-        cursor.execute('''
-            SELECT  
-                h.rua_numero, h.rua_letra, h.cod_item,
-                i.desc_item, h.lote_item, h.quantidade,
-                h.operacao, u.id_user||' - '||u.nome_user, 
-                h.time_mov
-            FROM historico h
-            
-            JOIN itens i ON h.cod_item = i.cod_item
-            JOIN users u ON h.id_user = u.id_user
-            
-            ORDER BY h.time_mov DESC;
-        ''')
-        
-        estoque = [{
-            'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-            'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade': row[5], 
-            'operacao'  : row[6],          'user_name' : row[7],  'timestamp'  : row[8]
-        } for row in cursor.fetchall()]
-    return estoque
-
-
-def get_users():
-
-    # RETORNA DADOS DOS USUÁRIOS
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT 
-                u.nome_user || ' ' || u.sobrenome_user, 
-                ap.desc_priv,
-                u.ult_acesso, u.id_user
-            FROM users u
-                       
-            JOIN aux_privilege ap 
-            ON u.privilege_user = ap.id_priv
-                       
-            ORDER BY u.ult_acesso DESC;
-        ''')
-
-        users_list = [{
-            'user_name' : row[0], 'user_grant': row[1], 
-            'ult_acesso': row[2], 'cod_user'  : row[3],
-        } for row in cursor.fetchall()]
-
-    return users_list
-
-
-def get_permissions():
-    # RETORNA DADOS DE PERMISSÃO
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT * 
-            FROM aux_permissions
-            ORDER BY id_perm;
-        ''')
-
-        permissions = [{
-            'id_perm': row[0], 'desc_perm': row[1]
-        } for row in cursor.fetchall()]
-
-    return permissions
-
-
-def parse_db_datetime(timestamp):
-    # CONVERTE TIMESTAMP PARA FORMATO DO DATABASE
-    if not timestamp:
-        timestamp = datetime.now(timezone(timedelta(hours=-3)))
-    elif isinstance(timestamp, str):
-        timestamp = datetime.strptime(timestamp, '%Y-%m-%d')
-        timestamp = timestamp.replace(tzinfo=timezone(timedelta(hours=-3)))
-    
-    return timestamp.strftime('%Y/%m/%d %H:%M:%S')
-
-
-def get_end_lote(timestamp=False):
-    # RETORNA ENDEREÇAMENTO POR LOTES
-    if timestamp:
-        timestamp = add_days_to_datetime_str(timestamp, 1)
-    timestamp = parse_db_datetime(timestamp)
-    
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
-                    i.desc_item, h.lote_item,
-                    SUM( 
-                       CASE 
-                       WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                       WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                       ELSE (quantidade * 0)
-                       END
-                    ) as saldo
-            FROM historico h
-            JOIN itens i ON h.cod_item = i.cod_item
-            WHERE h.time_mov <= ?
-            GROUP BY h.rua_numero, h.rua_letra, h.cod_item, 
-                     h.lote_item
-            HAVING saldo != 0
-            ORDER BY h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
-        ''', (timestamp,))
-
-        end_lote = [{
-            'letra'     : row[1], 'numero'   : row[0], 'cod_item': row[2],
-            'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[5]
-        } for row in cursor.fetchall()]
-
-    return end_lote
-
-
-def get_end_lote_fat():
-    # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT  
-                h.rua_numero, h.rua_letra, i.cod_item,
-                i.desc_item,  h.lote_item, h.id_carga, 
-                SUM( CASE WHEN operacao = 'F' 
-                        THEN (quantidade)
-                        ELSE (quantidade * 0)
-                        END
-                ) as saldo, h.time_mov
-            FROM historico h
-            JOIN itens i ON h.cod_item = i.cod_item
-            GROUP BY  
-                h.id_carga,  h.rua_numero, h.rua_letra,
-                h.cod_item, h.lote_item
-            HAVING saldo   != 0
-            AND h.id_carga != 0
-            ORDER BY h.id_carga DESC, h.cod_item;
-        ''')
-
-        end_lote = [{
-            'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
-            'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[6],
-            'id_carga': row[5], 'time_mov': row[7]
-        } for row in cursor.fetchall()]
-
-    return end_lote
-
-
-def get_obs_with_carga(id_carga):
-    # RETORNA OBSERVACOES COM O ID DE CARGA
-    query = f'''
-        SELECT DISTINCT
-            crg.OBSERVACAO AS OBS_CARGA
-
-        FROM DB2ADMIN.ITEMPED iped
-
-        JOIN DB2ADMIN.IGRUPOPE icrg
-        ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
-        AND icrg.SEQ = iped.SEQ
-
-        JOIN DB2ADMIN.PEDIDO ped
-        ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
-
-        JOIN DB2ADMIN.GRUPOPED crg
-        ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
-
-        JOIN DB2ADMIN.CLIENTE cl
-        ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-
-        WHERE icrg.CODIGO_GRUPOPED = {id_carga}
-    '''
-
-    dsn = 'HUGOPIET'
-    result, columns = db_query_connect(query, dsn)
-
-    if result:
-        return result[0][0]
-    return None
-
-
-def get_cliente_with_carga(id_carga):
-    # RETORNA CLIENTE COM O ID DE CARGA
-    query = f'''
-        SELECT DISTINCT
-            cl.FANTASIA AS FANT_CLIENTE
-
-        FROM DB2ADMIN.ITEMPED iped
-
-        JOIN DB2ADMIN.IGRUPOPE icrg
-        ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
-        AND icrg.SEQ = iped.SEQ
-
-        JOIN DB2ADMIN.PEDIDO ped
-        ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
-
-        JOIN DB2ADMIN.GRUPOPED crg
-        ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
-
-        JOIN DB2ADMIN.CLIENTE cl
-        ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-
-        WHERE icrg.CODIGO_GRUPOPED = {id_carga}
-    '''
-
-    dsn = 'HUGOPIET'
-    result, columns = db_query_connect(query, dsn)
-
-    if result:
-        return result[0][0]
-    return None
-
-
-def get_username(id_user):
-    # RETORNA NOME DO USUÁRIO
-    query = f'''
-        SELECT DISTINCT
-            u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
-
-        FROM users u
-
-        WHERE u.id_user = {id_user};
-    '''
-
-    dsn = 'SQLITE'
-    result, columns = db_query_connect(query, dsn)
-
-    if result:
-        return result[0][0]
-    return None
-
-
-def get_all_cargas():
-    # BUSCA TODAS AS CARGAS 
-    """Retorna todos os IDs de cargas faturadas, incluindo as de presets, sem duplicatas."""
-    # Busca as cargas que foram faturadas pré-implementação do CDE
-    cargas_preset = get_preset_cargas(1)
-    
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT DISTINCT id_carga
-            FROM historico
-            ORDER BY id_carga DESC;
-        ''')
-        rows = cursor.fetchall()
-        
-        # Converte os resultados da consulta em uma lista de inteiros
-        cargas_db = [row[0] for row in rows] if rows else []
-
-    # Combina as cargas do banco de dados com as do preset
-    combined_cargas = cargas_db + cargas_preset
-    
-    # Remove duplicatas mantendo a ordem
-    seen = set()
-    all_cargas = []
-    for carga in combined_cargas:
-        if carga not in seen:
-            all_cargas.append(carga)
-            seen.add(carga)
-    return all_cargas
-
-
-def get_ult_acesso():
-    # RETORNA ULTIMO ACESSO DO USUÁRIO
-    id_user = session.get('id_user')
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT ult_acesso
-            FROM users
-            WHERE id_user = ?;
-        ''', (id_user,))
-        row = cursor.fetchone()
-
-        ult_acesso = row[1] if row else None
-
-        return ult_acesso
-
-
-def get_export_promob():
-    # RETORNA TABELA DE SALDO
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT 
-                i.desc_item, 
-                i.cod_item, 
-                COALESCE(t.saldo, 0) as saldo, 
-                t.time_mov
-            FROM 
-                itens i
-            LEFT JOIN (
-                SELECT 
-                    cod_item,
-                    SUM(CASE 
-                        WHEN operacao IN ('E', 'TE') THEN quantidade
-                        WHEN operacao IN ('S', 'TS', 'F') THEN (quantidade * -1)
-                        ELSE (quantidade * 0)
-                    END) as saldo,
-                    MAX(time_mov) as time_mov,
-                    ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
-                FROM 
-                    historico h
-                GROUP BY 
-                    cod_item
-                HAVING 
-                    saldo != 0
-            ) t ON i.cod_item = t.cod_item
-            WHERE 
-                t.rn = 1 OR t.rn IS NULL
-            ORDER BY 
-                i.cod_item;
-        ''')
-
-        saldo_visualization = [{
-            'cod_item': row[1],
-            'deposito': 2,
-            'qtde'    : row[2]
-        } for row in cursor.fetchall()]
-
-    return saldo_visualization
-
-
-def add_days_to_datetime_str(date_str, qtde_days):
-    # ADICIONA DIAS À DATA INFORMADA
-
-    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-    
-    new_date_obj = date_obj + timedelta(days=qtde_days)
-    
-    new_date_str = new_date_obj.strftime('%Y-%m-%d')
-    
-    return new_date_str
-
-
-def get_saldo_view(timestamp=False):
-    # RETORNA TABELA DE SALDO
-    if timestamp:
-        timestamp = add_days_to_datetime_str(timestamp, 1)
-    timestamp = parse_db_datetime(timestamp)
-    
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo, COALESCE(t.time_mov, "") as time_mov
-            FROM itens i
-            LEFT JOIN (
-                SELECT cod_item,
-                SUM(CASE 
-                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                    ELSE (quantidade * 0)
-                    END
-                ) as saldo,
-                MAX(time_mov) as time_mov,
-                ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
-                FROM historico h
-                WHERE time_mov <= ?
-                GROUP BY cod_item
-            ) t ON i.cod_item = t.cod_item
-            WHERE t.rn = 1 OR t.rn IS NULL
-            ORDER BY t.time_mov DESC;
-        ''', (timestamp,))
-
-        saldo_visualization = [{
-            'cod_item' : row[1], 'desc_item': row[0], 
-            'saldo'    : row[2], 'ult_mov'  : row[3]
-        } for row in cursor.fetchall()]
-
-    return saldo_visualization
-
-
-def tlg_msg(msg):
-    # MENSAGEM DO TELEGRAM
-    if not session.get('user_grant') == 1:
-        if debug == True:
-            print(f'{[TAGS.ERRO]}A mensagem não pôde ser enviada em modo debug')
-        else:
-            bot_token = os.getenv('TLG_BOT_TOKEN')
-            chat_id   = os.getenv('TLG_CHAT_ID')
-
-            url       = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-            params    = {'chat_id': chat_id, 'text': msg}
-            response  = requests.post(url, params=params)
-            return response.json()
-    else:
-        return None
-
-
-def qr_code(qr_text):
-    # CRIA QRCODE
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=5,
-        border=5,
-    )
-    qr.add_data(qr_text)
-    qr.make(fit=True)
-    qr_image = qr.make_image(fill_color='black', back_color='white')
-
-    return qr_image
-
-
-def hash_key(password):
-    # HASH DA SENHA
-    return pbkdf2_sha256.hash(password)
-
-
-def parse_float(value):
-    # PARSE P/ FLOAT
-    try:
-        return float(value.replace(',', '.'))
-    except ValueError:
-        return 0
-
-
-def verify_auth(id_page):
-    # VERIFICA PRIVILÉGIO DE ACESSO
-    def decorator(f):
-        @wraps(f)
-        def decorador(*args, **kwargs):
-            if 'logged_in' in session:
-                id_user = session.get('id_user')
-                session['id_page'] = f'{id_page}'
-                if not session.get('user_grant') <= 2:
-                    user_permissions = get_user_permissions(id_user)
-                    user_permissions = [item['id_perm'] for item in user_permissions]
-                    if id_page in user_permissions:
-                        logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
-                        return f(*args, **kwargs)
-                    else:
-                        logging(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
-                        alert_type = 'SEM PERMISSÕES'
-                        alert_msge = 'Você não tem permissão para acessar esta página.'
-                        alert_more = '''SOLUÇÕES:\n- Solicite ao seu supervisor um novo nível de acesso.'''
-                        return render_template(
-                            'components/menus/alert.html', 
-                            alert_type=alert_type,
-                            alert_msge=alert_msge, 
-                            alert_more=alert_more,
-                            url_return=url_for('index')
-                        )
-                else:
-                    logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
-                    return f(*args, **kwargs)
-            else:
-                return redirect(url_for('login'))
-        return decorador
-    return decorator
-
-
-def get_timestamp():
-    # RETORNA TIMESTAMP
-    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-
-def get_userdata(id_user):
-    # RETORNA DADOS DO USUÁRIO
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT  privilege_user, nome_user,
-                    sobrenome_user, id_user, 
-                    ult_acesso
-            FROM users
-            WHERE id_user = ?;
-        ''',
-        (id_user,))
-
-        user_data = [{
-            'privilege_user': row[0], 'nome_user' : row[1], 'sobrenome_user': row[2],
-            'id_user'       : row[3], 'ult_acesso': row[4]
-        } for row in cursor.fetchall()]
-
-        return user_data
-    
-
-def select_rua(letra, numero):
-    # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT cod_item, lote_item, 
-            COALESCE(SUM(CASE 
-                WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                ELSE (quantidade * 0)
-            END), 0) as saldo
-            FROM historico
-            WHERE rua_letra = ? AND rua_numero = ?
-            GROUP BY cod_item, lote_item;
-        ''', (letra, numero))
-        
-        items = cursor.fetchall()
-
-        return items
-
-
-def iterate_csv_data_erp(data):
-    # CSV PARA INTEGRAÇÃO ERP
-    csv_data = ''
-    for item in data:
-        line = ';'.join(map(str, item.values()))
-        csv_data += f'"{line}"\n'
-    return csv_data
-
-
-def iterate_csv_data(data):
-    # CORPO CSV PADRAO
-    csv_data = ''
-    for item in data:
-        line = ';'.join(map(str, item.values()))
-        csv_data += f'{line}\n'
-    return csv_data
-
-
-def add_headers(data):
-    # ADICIONA CABECALHO PARA CSV
-    if data and len(data) > 0:
-        headers = ';'.join(data[0].keys())
-        return f'{headers}\n'
-    return ''
-
-
-def export_csv(data, filename, include_headers=True):
-    # CONSTRUTOR DE CSV
-    if data and len(data) > 0:
-        csv_data = ''
-        if not include_headers:
-            csv_data += iterate_csv_data_erp(data)
-        else:
-            csv_data += add_headers(data)
-            csv_data += iterate_csv_data(data)
-
-        csv_filename = Response(csv_data, content_type='text/csv')
-        csv_filename.headers['Content-Disposition'] = f'attachment; filename={filename}.csv'
-
-        return csv_filename
-    else:
-        alert_type = 'DOWNLOAD IMPEDIDO \n'
-        alert_msge = 'A tabela não tem informações o suficiente para exportação. \n'
-        alert_more = ('''POSSÍVEIS SOLUÇÕES:
-                       - Verifique se a tabela possui mais de uma linha.
-                       - Contate o suporte. ''')
-        return render_template(
-            'components/menus/alert.html', 
-            alert_type=alert_type, 
-            alert_msge=alert_msge, 
-            alert_more=alert_more, 
-            url_return=url_for('index')
-        )
-
-
-def db_query_connect(query, dsn):
-    # CONEXÃO E QUERY NO BANCO DE DADOS
-    dsn = f"DSN={dsn}"
-    if dsn != 'DSN=SQLITE':
-        uid_pwd = os.getenv('DB_USER').split(';')
-        user = uid_pwd[0]
-        password = uid_pwd[1]
-        try:
-            connection = pyodbc.connect(dsn, uid=user, pwd=password)
-            cursor = connection.cursor()
-            cursor.execute(query)
-            columns = [str(column[0]) for column in cursor.description]
-            result = cursor.fetchall()
-
-            cursor.close()
-            connection.close()
-        except Exception as e:
-            result = [[f'Erro de consulta: {e}']]
-            columns = []
-    else:
-        try:
-            with sqlite3.connect(db_path) as connection:
-                cursor = connection.cursor()
-                cursor.execute(query)
-                columns = [str(column[0]) for column in cursor.description]
-                result = cursor.fetchall()
-        except Exception as e:
-            result = [[f'Erro de consulta: {e}']]
-            columns = []
-        
-    return result, columns
-
-
-def get_user_permissions(user_id):
-    # RETORNA LISTA DE PERMISSÕES DO USUÁRIO
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT up.id_perm
-            FROM user_permissions up
-            WHERE id_user = ?
-            ORDER BY id_user;
-        ''',
-        (user_id,))
-
-        rows = cursor.fetchall()
-
-        if rows:
-            user_permissions = [{'id_perm': row[0]} for row in rows]
-            return user_permissions
-        else:
-            return []
-
-
-def check_key(hashed_pwd, pwd):
-    # VERIFICA SENHA NO BANCO DE HASH
-    return pbkdf2_sha256.verify(pwd, hashed_pwd)
-
-
-def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
-    # RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT COALESCE(SUM(CASE 
-                WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                ELSE (quantidade * 0)
-            END), 0) as saldo
-            FROM historico h
-            WHERE rua_numero = ? AND rua_letra = ? AND cod_item = ? AND lote_item = ?;
-        ''', (rua_numero, rua_letra, cod_item, cod_lote))
-        saldo_item = cursor.fetchone()[0]
-    return saldo_item
-
-
-def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):
-    # GERA ETIQUETA COM QRCODE
-    width, height = 400, 400
-    img  = Image.new('RGB', (width, height), color='white')
-    cod_lote = f'LOTE: {cod_lote}'
-    desc_item = f'{cod_item} - {desc_item}'
-
-    qr_image = qr_code(qr_text)
-    qr_width, qr_height = qr_image.size
-    img.paste(qr_image, ((width - qr_width) // 2, (height - qr_height) // 2))
-
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype('arialbd.ttf', 30)
-
-    lote_bbox  = draw.textbbox((0, 0), cod_lote, font=font)
-    lote_width = lote_bbox[2] - lote_bbox[0]
-    draw.text(((width - lote_width) // 2, height // 1.5), cod_lote, fill='black', font=font)
-
-    text   = desc_item
-    font   = ImageFont.truetype('arialbd.ttf', 22)
-    lines  = textwrap.wrap(text, width=30)
-    y_text = height - height // 4.6
-    for line in lines:
-        text_width, text_height = draw.textbbox((0, 0), line, font=font)[2:]
-        draw.text(((width - text_width) // 2, y_text), line, font=font, fill='black')
-        y_text += text_height
-
-    img_io = io.BytesIO()
-    img.save(img_io, format='PNG')
-    img_io.seek(0)
-
-    img_base64 = base64.b64encode(img_io.getvalue()).decode()
-    return img_base64
-
-
-def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga):
-    # INSERE REGISTRO NA TABELA DE HISTÓRICO
-    user_name_mov = session['user_name']
-    id_user_mov = session['id_user']
-
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            INSERT INTO historico (
-                rua_numero, rua_letra, cod_item,
-                lote_item, quantidade, operacao,
-                time_mov, id_carga, id_user)
-            VALUES (
-                ?, ?, ?,
-                ?, ?, ?,
-                ?, ?, ?);                
-            ''',
-            (numero, letra, cod_item,
-            lote_item, quantidade, operacao, 
-            timestamp_out, id_carga, id_user_mov)
-        )
-        
-        connection.commit()
-
-
-def password_check(id_user, password):
-    # VERIFICA SENHA NO BANCO DE HASH
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT password_user
-            FROM users
-            WHERE id_user = ?;
-        ''', (id_user,))
-
-        row = cursor.fetchone()
-        
-        if row:
-            db_password = row[0]
-            return check_key(db_password, password)
-        return False
-
-
-def toggle_item_flag(cod_item, flag):
-    # ALTERA STATUS (ATIVO/INATIVO) DO ITEM
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            UPDATE itens SET flag_ativo = ? WHERE cod_item = ?;
-        ''', (flag, cod_item))
-
-        connection.commit()
-    return
-
 
 # ROTAS DE ACESSO | URL
+#
 @app.route('/')
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def index():
-    create_tables()
     return redirect(url_for('home'))
 
 
 @app.route('/debug-page')
-@verify_auth('DEV000')
+@system.verify_auth('DEV000')
 def debug_page():
     return render_template('pages/debug-page.html')
 
 
 @app.route('/home')
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def home():
     return render_template(
         'pages/index/cde-index.html', 
-        frase=get_frase()
+        frase=Misc.get_frase()
     )
 
 
 @app.route('/home/tl')
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def home_tl():
     return render_template(
         'pages/index/tl-index.html', 
-        frase=get_frase()
+        frase=Misc.get_frase()
     )
 
 
 @app.route('/home/hp')
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def home_hp():
     return render_template(
         'pages/index/hp-index.html', 
-        frase=get_frase()
+        frase=Misc.get_frase()
     )
 
 
 @app.route('/in-dev')
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def in_dev():
     return render_template('pages/developing.html')
 
 
 @app.route('/users')
-@verify_auth('CDE016')
+@system.verify_auth('CDE016')
 def users():
     return render_template(
         'pages/users/users.html', 
-        users=get_users()
+        users=UserUtils.get_users()
     )
 
 
 # ROTA DE DATABASE MANAGER
 @app.route('/api', methods=['GET', 'POST'])
-@verify_auth('DEV000')
+@system.verify_auth('DEV000')
 def api():
     if request.method == 'POST':
         query = request.form['sql_query']
@@ -1546,7 +1775,7 @@ def api():
                 dsn=dsn
             )
         else:
-            result, columns = db_query_connect(query, dsn)
+            result, columns = system.db_query_connect(query, dsn)
 
             return render_template(
                 'pages/api.html', 
@@ -1583,7 +1812,7 @@ def change_password():
     else:
         user_id = session.get('id_user')
         password = request.form['input']
-        if user_id and password_check(user_id, password):
+        if user_id and Misc.password_check(user_id, password):
             alert_type = 'REDEFINIR (SENHA)'
             alert_msge = 'A senha deve ter no mínimo 6 caracteres.'
             alert_more = '/users/reset-password'
@@ -1602,7 +1831,7 @@ def change_password():
 # ROTA DE SESSÃO LOGIN
 @app.route('/login', methods=['POST'])
 def login():
-    # TODO: função auxiliar
+    # TODO: método auxiliar
     if request.method == 'POST':
         if 'logged_in' in session:
             return redirect(url_for('index'))
@@ -1630,7 +1859,7 @@ def login():
                 )
             user_pwd = row[3]
 
-            if not check_key(user_pwd, input_pwd):
+            if not Misc.check_key(user_pwd, input_pwd):
                 alert_msge = 'A senha está incorreta. Tente novamente.'
                 return render_template(
                     'pages/login.html', 
@@ -1651,11 +1880,11 @@ def login():
                 session['user_grant']    = privilege_user
 
                 msg = f'''[LOG-IN]\n{id_user} - {nome_user} {sobrenome_user}\n{request.remote_addr}'''
-                tlg_msg(msg)
+                Misc.tlg_msg(msg)
 
                 acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 input_pwd = "12345"
-                if check_key(user_pwd, input_pwd):
+                if Misc.check_key(user_pwd, input_pwd):
                     alert_type = 'REDEFINIR (SENHA)'
                     alert_msge = 'Você deve definir sua senha no seu primeiro acesso.'
                     alert_more = '/users/reset-password'
@@ -1707,10 +1936,10 @@ def logout():
 
 
 @app.route('/users/reset-password', methods=['POST'])
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def reset_password():
     password      = request.form['input']
-    password_user = hash_key(password)
+    password_user = Misc.hash_key(password)
     id_user       = session.get('id_user')
 
     with sqlite3.connect(db_path) as connection:
@@ -1727,143 +1956,19 @@ def reset_password():
 
 
 @app.route('/get/item', methods=['POST'])
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def get_item():
     input_code = request.form['input_code'].strip()
-    if 'EM.' not in input_code:
-        input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
-    print(f'    | Código fornecido: {input_code}')
+    result_json = ProdutoUtils.get_item_json(input_code)
     
-    if len(input_code) == 4 or len(input_code) == 0:
-        desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO OU INATIVO', '', '', ''
-        print(f'    | {desc_item}')
-        return jsonify(
-            {
-            'json_cod_item' : cod_item, 
-            'json_desc_item': desc_item, 
-            'json_cod_lote' : cod_lote, 
-            'json_cod_linha': cod_linha
-            }
-        )
-
-    else:     
-        # VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
-        if len(input_code) == 6 or len(input_code) == 7:
-            input_code = input_code + ';'
-
-        partes       = input_code.split(';')
-        cod_item     = []
-        cod_item_qnt = None
-
-        if len(partes) == 1:
-            cod_barra  = partes[0]
-
-            with sqlite3.connect(db_path) as connection:
-                cursor = connection.cursor()
-                cursor.execute('''
-                    SELECT i.desc_item, i.cod_item
-                    FROM itens i
-                    WHERE i.dun14 = ? 
-                    AND i.flag_ativo = 1
-                    ORDER BY i.cod_item;
-                ''',
-                (cod_barra,))
-
-                rows = cursor.fetchall()
-
-                for row in rows:
-                    codigos_itens = row[1]
-                    cod_item.append(codigos_itens)
-                    cod_item_qnt = len(cod_item)
-                
-                if cod_item:
-                    with sqlite3.connect(db_path) as connection:
-                        cursor = connection.cursor()
-                        cursor.execute('''
-                            SELECT i.desc_item    
-                            FROM itens i
-                            WHERE i.cod_item = ? 
-                            AND i.flag_ativo = 1
-                            ORDER BY i.cod_item;
-                        ''',
-                        (cod_item[0],))
-
-                    row = cursor.fetchall()
-                    
-                    if row:
-                        desc_item = row[0][0]
-                        if 'VINHO' in desc_item:
-                            cod_lote = 'VINHOS'
-                        else:
-                            cod_lote = ''
-                else:
-                    desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-                    print(f'    | {desc_item}')
-                return jsonify(
-                    {
-                    'json_cod_item': cod_item,
-                    'json_desc_item': desc_item, 
-                    'json_cod_lote': cod_lote, 
-                    'json_cod_item_ocurr': cod_item_qnt
-                    }
-                )
-
-        elif len(partes) == 2:
-            codigos_itens = partes[0]
-            cod_item.append(codigos_itens)
-            
-
-            if partes[1] != '':
-                cod_lote = 'CS' + partes[1]
-            else:
-                cod_lote = ''
-            if 'EM.' in input_code:
-                cod_lote = 'OUTROS'
-
-            with sqlite3.connect(db_path) as connection:
-                cursor = connection.cursor()
-                cursor.execute('''
-                    SELECT i.desc_item
-                    FROM itens i
-                    WHERE i.cod_item = ?
-                    AND i.flag_ativo = 1;
-                ''', 
-                (codigos_itens,))
-
-                resultado = cursor.fetchone()
-                if resultado is not None:
-                    desc_item = resultado[0]
-                    if 'VINHO' in desc_item:
-                        cod_lote = 'VINHOS'
-                else:
-                    desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-                    print(f'    | {desc_item}')
-                return jsonify(
-                    {
-                    'json_cod_item' : cod_item, 
-                    'json_cod_lote' : cod_lote, 
-                    'json_desc_item': desc_item
-                    }
-                )
-
-        else:
-            desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-            print(f'    | {desc_item}')
-            return jsonify(
-                {
-                'json_cod_item' : cod_item, 
-                'json_cod_lote' : cod_lote, 
-                'json_desc_item': desc_item
-                }
-            )
+    return result_json
 
 
 # ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
 @app.route('/mov')
-@verify_auth('MOV002')
+@system.verify_auth('MOV002')
 def mov():
-    create_tables()
-    end_lote = get_end_lote()
+    end_lote = EstoqueUtils.get_end_lote()
 
     return render_template(
         'pages/mov/mov.html', 
@@ -1872,12 +1977,11 @@ def mov():
 
 
 @app.route('/mov/historico')
-@verify_auth('MOV003')
+@system.verify_auth('MOV003')
 def historico():
-    create_tables()
     page = request.args.get('page', 1, type=int)
     per_page = 20
-    estoque, row_count = get_historico(page, per_page)
+    estoque, row_count = HistoricoUtils.get_historico(page, per_page)
     total_pages = ceil(row_count / per_page)
 
     return render_template(
@@ -1889,9 +1993,8 @@ def historico():
 
 
 @app.route('/mov/historico/search', methods=['GET', 'POST'])
-@verify_auth('MOV003')
+@system.verify_auth('MOV003')
 def historico_search():
-    create_tables()
     if request.method == 'POST':
         search_term  = request.form['search_term']
         search_index = request.form['search_index']
@@ -1909,7 +2012,7 @@ def historico_search():
 
         search_row_text = option_texts.get(search_index, '')
 
-        estoque = get_all_historico()
+        estoque = HistoricoUtils.get_all_historico()
         filtered_estoque = [item for item in estoque if search_term.lower() in item[search_index].lower()]
 
         return render_template(
@@ -1932,10 +2035,9 @@ def historico_search():
 
 
 @app.route('/mov/faturado')
-@verify_auth('MOV005')
+@system.verify_auth('MOV005')
 def faturado():
-    create_tables()
-    end_lote = get_end_lote_fat()
+    end_lote = EstoqueUtils.get_end_lote_fat()
 
     return render_template(
         'pages/mov/mov-faturado.html', 
@@ -1945,7 +2047,7 @@ def faturado():
 
 # ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
 @app.route('/mov/moving', methods=['POST'])
-@verify_auth('MOV002')
+@system.verify_auth('MOV002')
 def moving():
     numero          = int(request.form['end_number'])
     letra           = str(request.form['end_letra'])
@@ -1961,7 +2063,7 @@ def moving():
 
     if is_end_completo:
         # MOVIMENTA ENDEREÇO COMPLETO
-        items = select_rua(letra, numero)
+        items = HistoricoUtils.select_rua(letra, numero)
         
         print(f'    | ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
@@ -1974,7 +2076,7 @@ def moving():
         
         print(f'    | ITEM ÚNICO ({letra}.{numero}): {items}')
 
-        saldo_item  = int(get_saldo_item(numero, letra, cod_item, lote_item))
+        saldo_item  = int(EstoqueUtils.get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:
             # IMPOSSIBILITA ESTOQUE NEGATIVO 
             alert_type = 'OPERAÇÃO CANCELADA'
@@ -2002,13 +2104,13 @@ def moving():
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
                     # SAÍDA DO ENDEREÇO DE ORIGEM
-                    insert_historico(
+                    HistoricoUtils.insert_historico(
                         numero, letra, cod_item, 
                         lote_item, quantidade, 'TS', 
                         timestamp_out, id_carga
                     )
                     # ENTRADA NO ENDEREÇO DE DESTINO
-                    insert_historico(
+                    HistoricoUtils.insert_historico(
                         destino_number, destino_letter, cod_item, 
                         lote_item, quantidade, 'TE', 
                         timestamp_in, id_carga
@@ -2023,7 +2125,7 @@ def moving():
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-                    insert_historico(
+                    HistoricoUtils.insert_historico(
                         numero, letra, cod_item, 
                         lote_item, quantidade, operacao, 
                         timestamp_out, id_carga
@@ -2032,7 +2134,7 @@ def moving():
 
     elif operacao == 'E' or operacao == 'S':
         # OPERAÇÃO PADRÃO (entrada 'E' ou saída 'S')
-        insert_historico(
+        HistoricoUtils.insert_historico(
             numero, letra, cod_item, 
             lote_item, quantidade, operacao, 
             timestamp_out, id_carga
@@ -2048,6 +2150,7 @@ def moving():
 
 
 @app.route('/mov/moving/bulk', methods=['POST'])
+@system.verify_auth('MOV006')
 def moving_bulk():
     sep_carga     = request.json
     timestamp_br  = datetime.now(timezone(timedelta(hours=-3)))
@@ -2055,14 +2158,14 @@ def moving_bulk():
     
     try:
         for item in sep_carga:
-            haveItem = get_saldo_item(item['rua_numero'], item['rua_letra'], item['cod_item'], item['lote_item'])
+            haveItem = EstoqueUtils.get_saldo_item(item['rua_numero'], item['rua_letra'], item['cod_item'], item['lote_item'])
             if haveItem < item['qtde_sep']:
                 return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
         
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             for item in sep_carga:
-                insert_historico(
+                HistoricoUtils.insert_historico(
                     numero=item['rua_numero'],
                     letra=item['rua_letra'],
                     cod_item=item['cod_item'],
@@ -2080,7 +2183,7 @@ def moving_bulk():
 
 
 @app.route('/get/clientes', methods=['GET'])
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def get_fant_clientes():
     query = '''
         SELECT FANTASIA
@@ -2088,7 +2191,7 @@ def get_fant_clientes():
     '''
 
     dsn = 'HUGOPIET'
-    result, columns = db_query_connect(query, dsn)
+    result, columns = system.db_query_connect(query, dsn)
 
     clientes = [{'FANTASIA': '(indefinido)'}]
     if result:
@@ -2111,10 +2214,10 @@ def get_fant_clientes():
 
 
 @app.route('/mov/carga/incompleta', methods=['GET'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def carga_incomp():
-    result, columns = get_carga_incomp()
-    carga_list = listed_carga_incomp()
+    result, columns = CargaUtils.get_carga_incomp()
+    carga_list = CargaUtils.listed_carga_incomp()
     
     return render_template(
         'pages/mov/mov-carga-incompleta.html',
@@ -2125,19 +2228,19 @@ def carga_incomp():
 
 
 @app.route('/mov/carga/incompleta/<string:id_carga>', methods=['GET'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def carga_incomp_id(id_carga):
     id_carga = id_carga.split('-')[0]
     
-    result, columns = get_carga_incomp(id_carga)
-    fant_cliente = get_cliente_with_carga(id_carga)
-    carga_list = listed_carga_incomp()
+    result, columns = CargaUtils.get_carga_incomp(id_carga)
+    fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
+    carga_list = CargaUtils.listed_carga_incomp()
     
     cod_item = request.args.get('cod_item', '')
     qtde_solic = request.args.get('qtde_solic', '')
     
     if cod_item:
-        result_local, columns_local = estoque_endereco_with_item(cod_item)
+        result_local, columns_local = EstoqueUtils.estoque_endereco_with_item(cod_item)
     else:
         result_local, columns_local = [], []
     
@@ -2156,7 +2259,7 @@ def carga_incomp_id(id_carga):
 
 
 @app.route('/api/insert_carga_incomp', methods=['POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def api_insert_carga_incomp():
     data = request.get_json()
     id_carga = data.get('id_carga')
@@ -2166,18 +2269,18 @@ def api_insert_carga_incomp():
     
     try:
         print(f'[DEBUG] pre-insert: {id_carga, cod_item, qtde_atual, qtde_solic}')
-        insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic)
+        CargaUtils.insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic)
         return jsonify(success=True)
     except Exception as e:
         return jsonify(success=False, error=str(e))
 
 
 @app.route('/get/itens_carga_incomp/<string:id_carga>', methods=['GET'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def route_get_carga_incomp(id_carga):
     id_carga = id_carga.split('-')[0]
     
-    pending_items = get_carga_incomp(id_carga)[0]
+    pending_items = CargaUtils.get_carga_incomp(id_carga)[0]
     print(pending_items)
     return jsonify(
         {
@@ -2187,20 +2290,19 @@ def route_get_carga_incomp(id_carga):
     
 
 @app.route('/api/conclude-incomp/<string:id_carga>', methods=['POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def conclude_incomp(id_carga):
     try:
-        conclude_carga_incomp(id_carga)
+        CargaUtils.conclude_carga_incomp(id_carga)
         return jsonify(success=True)
     except Exception as e:
         return jsonify(success=False, error=str(e))
 
 
 @app.route('/envase', methods=['GET'])
-@verify_auth('ENV006')
+@system.verify_auth('ENV006')
 def envase():
-    create_tables()
-    envase_list = get_envase()
+    envase_list = Schedule.EnvaseUtils.get_envase()
 
     return render_template(
         'pages/envase/envase.html', 
@@ -2209,10 +2311,9 @@ def envase():
 
 
 @app.route('/envase/calendar')
-@verify_auth('ENV008')
+@system.verify_auth('ENV008')
 def calendar_envase():
-    create_tables()
-    envase_list = get_envase()
+    envase_list = Schedule.EnvaseUtils.get_envase()
     return render_template(
         'pages/envase/envase-calendar.html', 
         envase=envase_list
@@ -2220,7 +2321,7 @@ def calendar_envase():
 
 
 @app.route('/envase/delete/<id_envase>')
-@verify_auth('ENV007')
+@system.verify_auth('ENV007')
 def delete_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2235,7 +2336,7 @@ def delete_envase(id_envase):
 
 
 @app.route('/envase/done/<id_envase>')
-@verify_auth('ENV006')
+@system.verify_auth('ENV006')
 def conclude_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2250,7 +2351,7 @@ def conclude_envase(id_envase):
 
 
 @app.route('/envase/pending/<id_envase>')
-@verify_auth('ENV007')
+@system.verify_auth('ENV007')
 def set_pending_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2265,7 +2366,7 @@ def set_pending_envase(id_envase):
 
 
 @app.route('/envase/edit', methods=['GET', 'POST'])
-@verify_auth('ENV007')
+@system.verify_auth('ENV007')
 def edit_envase():
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -2320,7 +2421,7 @@ def edit_envase():
 
 
 @app.route('/envase/insert', methods=['POST'])
-@verify_auth('ENV006')
+@system.verify_auth('ENV006')
 def insert_envase():
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -2367,13 +2468,12 @@ def insert_envase():
 
 
 @app.route('/processamento', methods=['GET'])
-@verify_auth('PRC010')
+@system.verify_auth('PRC010')
 def producao():
-    create_tables()
     id_user = session.get('id_user')
-    user_permissions = get_user_permissions(id_user)
+    user_permissions = UserUtils.get_user_permissions(id_user)
     user_permissions = [item['id_perm'] for item in user_permissions]
-    producao_list = get_producao()
+    producao_list = Schedule.ProcessamentoUtils.get_producao()
     
     return render_template(
         'pages/processamento/processamento.html', 
@@ -2383,10 +2483,9 @@ def producao():
 
 
 @app.route('/processamento/calendar')
-@verify_auth('PRC012')
+@system.verify_auth('PRC012')
 def calendar_producao():
-    create_tables()
-    producao_list = get_producao()
+    producao_list =  Schedule.ProcessamentoUtils.get_producao()
 
     return render_template(
         'pages/processamento/processamento-calendar.html', 
@@ -2395,7 +2494,7 @@ def calendar_producao():
 
 
 @app.route('/processamento/delete/<id_producao>')
-@verify_auth('PRC011')
+@system.verify_auth('PRC011')
 def delete_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2410,7 +2509,7 @@ def delete_producao(id_producao):
 
 
 @app.route('/processamento/done/<id_producao>')
-@verify_auth('PRC010')
+@system.verify_auth('PRC010')
 def conclude_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2425,7 +2524,7 @@ def conclude_producao(id_producao):
 
 
 @app.route('/processamento/pending/<id_producao>')
-@verify_auth('PRC011')
+@system.verify_auth('PRC011')
 def set_pending_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2440,11 +2539,10 @@ def set_pending_producao(id_producao):
 
 
 @app.route('/processamento/edit', methods=['GET', 'POST'])
-@verify_auth('PRC011')
+@system.verify_auth('PRC011')
 def edit_producao():
-    create_tables()
     id_user = session.get('id_user')
-    user_permissions = get_user_permissions(id_user)
+    user_permissions = UserUtils.get_user_permissions(id_user)
     user_permissions = [item['id_perm'] for item in user_permissions]
 
     if request.method == 'POST':
@@ -2493,7 +2591,7 @@ def edit_producao():
 
         else:
             mode = 'onlyConcluded'
-            prod_edit = get_producao()
+            prod_edit =  Schedule.ProcessamentoUtils.get_producao()
 
         return render_template(
             'pages/processamento/processamento-edit.html', 
@@ -2504,7 +2602,7 @@ def edit_producao():
 
 
 @app.route('/processamento/insert', methods=['POST'])
-@verify_auth('PRC010')
+@system.verify_auth('PRC010')
 def insert_producao():
     if request.method == 'POST':
         linha           = request.form['linha']
@@ -2541,7 +2639,7 @@ def insert_producao():
 
 
 @app.route('/about')
-@verify_auth('CDE001')
+@system.verify_auth('CDE001')
 def about():
     return render_template(
         'pages/about.html',
@@ -2550,28 +2648,26 @@ def about():
 
 
 @app.route('/users/edit', methods=['POST', 'GET'])
-@verify_auth('CDE016')
+@system.verify_auth('CDE016')
 def users_edit():
-    create_tables()
-
     req_id_user = request.args.get('id_user')
     if request.method == 'POST':
         pass
 
     else:
-        user_permissions = get_user_permissions(req_id_user)
-        permissions = get_permissions()
+        user_permissions = UserUtils.get_user_permissions(req_id_user)
+        permissions = UserUtils.get_permissions()
         return render_template(
             'pages/users/users-edit.html', 
             user_permissions=user_permissions,
             permissions=permissions, 
             req_id_user=req_id_user,
-            user_data=get_userdata(req_id_user)
+            user_data=UserUtils.get_userdata(req_id_user)
         )
 
 
 @app.route('/users/remove-perm/<int:id_user>/<string:id_perm>', methods=['GET', 'POST'])
-@verify_auth('CDE016')
+@system.verify_auth('CDE016')
 def remove_permission(id_user, id_perm):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2588,7 +2684,7 @@ def remove_permission(id_user, id_perm):
 
 
 @app.route('/users/add-perm/<int:id_user>/<string:id_perm>', methods=['GET', 'POST'])
-@verify_auth('CDE016')
+@system.verify_auth('CDE016')
 def add_permission(id_user, id_perm):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2608,7 +2704,7 @@ def add_permission(id_user, id_perm):
 
 
 @app.route('/users/inserting', methods=['POST'])
-@verify_auth('CDE016')
+@system.verify_auth('CDE016')
 def cadastrar_usuario():
     if request.method == 'POST':
         login_user     = str(request.form['login_user'])
@@ -2616,7 +2712,7 @@ def cadastrar_usuario():
         sobrenome_user = str(request.form['sobrenome_user'])
         privilege_user = int(request.form['privilege_user'])
         data_cadastro  = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        password_user  = hash_key(request.form['password_user'])
+        password_user  = Misc.hash_key(request.form['password_user'])
 
         try:
             with sqlite3.connect(db_path) as connection:
@@ -2661,7 +2757,7 @@ def cadastrar_usuario():
 
                     msg = \
                     f'''[CADASTRO]\n{request.remote_addr}\n{id_user} - {user_name} [+] {nome_user} {sobrenome_user} ({privilege_user})'''
-                    tlg_msg(msg)
+                    Misc.tlg_msg(msg)
 
         except sqlite3.IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
@@ -2696,7 +2792,7 @@ def cadastrar_usuario():
 
 
 @app.route('/mov/carga/<string:id_carga>', methods=['GET', 'POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def carga_id(id_carga):
     result_local, columns_local = [], []
     if request.method == 'GET':
@@ -2704,12 +2800,12 @@ def carga_id(id_carga):
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            result_local, columns_local = estoque_endereco_with_item(cod_item)
+            result_local, columns_local = EstoqueUtils.estoque_endereco_with_item(cod_item)
 
         id_carga = id_carga.split('-')[0]
         
-        fant_cliente = get_cliente_with_carga(id_carga)
-        all_cargas = get_cargas_finalizadas()
+        fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
+        all_cargas = CargaUtils.get_cargas_finalizadas()
         
         # SEARCH DE ITENS POR CARGA
         
@@ -2746,7 +2842,7 @@ def carga_id(id_carga):
         '''
 
         dsn = 'HUGOPIET'
-        result, columns = db_query_connect(query, dsn)
+        result, columns = system.db_query_connect(query, dsn)
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
@@ -2766,10 +2862,10 @@ def carga_id(id_carga):
         
 
 @app.route('/mov/carga', methods=['GET', 'POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def cargas():
     if request.method == 'POST':
-        all_cargas = get_cargas_finalizadas()
+        all_cargas = CargaUtils.get_cargas_finalizadas()
         if all_cargas:
             cargas_except_query = ', '.join(map(str, all_cargas))
             query = f'''
@@ -2809,7 +2905,7 @@ def cargas():
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
         
         dsn = 'HUGOPIET'
-        result, columns = db_query_connect(query, dsn)
+        result, columns = system.db_query_connect(query, dsn)
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
@@ -2823,7 +2919,7 @@ def cargas():
 
 
 @app.route('/api/qtde_solic', methods=['GET'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def get_qtde_solic():
     id_carga = request.args.get('id_carga', type=int)
     cod_item = request.args.get('cod_item', type=str)
@@ -2842,7 +2938,7 @@ def get_qtde_solic():
     '''
     try:
         dsn = 'HUGOPIET'
-        result, columns = db_query_connect(query, dsn)
+        result, columns = system.db_query_connect(query, dsn)
         if result:
             qtde_solic = result[0][0]
         else:
@@ -2853,7 +2949,7 @@ def get_qtde_solic():
 
 
 @app.route('/api/itens_carga', methods=['GET'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def get_itens_carga():
     id_carga = request.args.get('id_carga', type=int)
     
@@ -2869,7 +2965,7 @@ def get_itens_carga():
     '''
     try:
         dsn = 'HUGOPIET'
-        result, columns = db_query_connect(query, dsn)
+        result, columns = system.db_query_connect(query, dsn)
         if result:
             itens = [row[0] for row in result]
         else:
@@ -2880,14 +2976,14 @@ def get_itens_carga():
 
 
 @app.route('/mov/separacao-pend/<string:id_carga>', methods=['GET', 'POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def carga_sep_pend(id_carga):
     id_carga = id_carga.split('-')[0]
     
     id_user   = session.get('id_user')
-    user_info = get_userdata(id_user)
-    obs_carga = get_obs_with_carga(id_carga)
-    fant_cliente   = get_cliente_with_carga(id_carga)
+    user_info = UserUtils.get_userdata(id_user)
+    obs_carga = CargaUtils.get_obs_with_carga(id_carga)
+    fant_cliente   = CargaUtils.get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-pend.html', 
         id_carga=id_carga, 
@@ -2898,16 +2994,16 @@ def carga_sep_pend(id_carga):
 
 
 @app.route('/mov/separacao-done/<string:id_carga>', methods=['GET', 'POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def carga_sep_done(id_carga):
     if '-' in id_carga:
         id_carga, seq = id_carga.split('-')
     else:
         seq = 0
     id_user      = session.get('id_user')
-    user_info    = get_userdata(id_user)
-    obs_carga    = get_obs_with_carga(id_carga)
-    fant_cliente = get_cliente_with_carga(id_carga)
+    user_info    = UserUtils.get_userdata(id_user)
+    obs_carga    = CargaUtils.get_obs_with_carga(id_carga)
+    fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
     return render_template(
         'pages/mov/mov-carga-separacao-done.html', 
         id_carga=id_carga,
@@ -2939,12 +3035,12 @@ def get_description(cod_item):
 
 @app.route('/get/username/<id_user>', methods=['GET'])
 def get_username_route(id_user):
-    username = get_username(id_user)
+    username = UserUtils.get_username(id_user)
     return jsonify({"username": username})
 
 
 @app.route('/post/save-localstorage', methods=['POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def save_localstorage():
     try:
         data = request.get_json()
@@ -2979,7 +3075,7 @@ def save_localstorage():
 def has_carga_at_history(id_carga):
     id_carga = id_carga.split('-')[0]
     
-    has_carga_at_history = bool(get_carga_incomp(id_carga)[0])
+    has_carga_at_history = bool(CargaUtils.get_carga_incomp(id_carga)[0])
     return jsonify(
         {
             'bool': has_carga_at_history
@@ -2988,7 +3084,7 @@ def has_carga_at_history(id_carga):
 
 
 @app.route('/get/load-table-data', methods=['GET'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def load_table_data():
     try:
         filename = request.args.get('filename')
@@ -2997,7 +3093,7 @@ def load_table_data():
         if not filename:
             return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
 
-        data = readJsonCargaSeq(filename, seq)
+        data = CargaUtils.readJsonCargaSeq(filename, seq)
 
         return jsonify(data), 200
     
@@ -3009,7 +3105,7 @@ def load_table_data():
     
 
 @app.route('/get/list-all-separations', methods=['GET'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def list_all_separations():
     try:
         directory = os.path.join(app.root_path, 'report/cargas')
@@ -3021,16 +3117,16 @@ def list_all_separations():
 
 
 @app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>', methods=['GET', 'POST'])
-@verify_auth('ITE005')
+@system.verify_auth('ITE005')
 def produtos_toggle_perm(cod_item, flag):
-    toggle_item_flag(cod_item, flag)
+    ProdutoUtils.toggle_item_flag(cod_item, flag)
     return redirect(url_for('produtos_flag'))
 
 
 @app.route('/produtos/flag', methods=['GET', 'POST'])
-@verify_auth('ITE005')
+@system.verify_auth('ITE005')
 def produtos_flag():
-    itens = get_all_itens()
+    itens = ProdutoUtils.get_all_itens()
     
     return render_template(
         'pages/produtos-flag.html',
@@ -3039,31 +3135,11 @@ def produtos_flag():
 
 
 @app.route('/produtos', methods=['GET', 'POST'])
-@verify_auth('ITE005')
+@system.verify_auth('ITE005')
 def produtos():
-    itens = get_active_itens()
+    itens = ProdutoUtils.get_active_itens()
     if request.method == 'POST':
-        query = '''
-            SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
-            FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
-            WHERE (
-                (
-                    UNIDADE_DESCRICAO = 'CX' OR 
-                    UNIDADE_DESCRICAO = 'UN' OR 
-                    UNIDADE_DESCRICAO = 'FD'
-                ) AND (
-                    GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
-                    GRUPO_DESCRICAO = 'REVENDA')
-                AND 
-                    NOT GTIN_14 = ''
-            )
-            OR 
-                -- copos cadastrados por extensão
-                i.ITEM IN ('EM.3577', 'EM.1074');
-        '''
-
-        dsn = 'HUGOPIET'
-        result, columns = db_query_connect(query, dsn)
+        result, columns = ProdutoUtils.get_itens_from_erp()
 
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
@@ -3090,7 +3166,7 @@ def produtos():
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        itens = get_active_itens()
+        itens = ProdutoUtils.get_active_itens()
         return render_template(
             'pages/produtos.html', 
             itens=itens, 
@@ -3104,7 +3180,7 @@ def produtos():
 
 
 @app.route('/etiqueta', methods=['GET', 'POST'])
-@verify_auth('OUT014')
+@system.verify_auth('OUT014')
 def etiqueta():
     if request.method == 'POST':
         qr_text   = str(request.form['qr_text'])
@@ -3112,19 +3188,19 @@ def etiqueta():
         cod_item  = str(request.form['cod_item'])
         cod_lote  = str(request.form['lote_item'])
 
-        return generate_etiqueta(qr_text, desc_item, cod_item, cod_lote)
+        return Misc.generate_etiqueta(qr_text, desc_item, cod_item, cod_lote)
     return render_template('pages/etiqueta.html', produtos=produtos)
 
 
 @app.route('/rotulo', methods=['GET', 'POST'])
-@verify_auth('OUT015')
+@system.verify_auth('OUT015')
 def rotulo():
     if request.method == 'POST':
-        espessura_fita      = parse_float(request.form['espessura_fita'])
-        diametro_inicial    = parse_float(request.form['diametro_inicial'])
-        diametro_minimo     = parse_float(request.form['diametro_minimo'])
-        espessura_papelao   = parse_float(request.form['espessura_papelao'])
-        compr_rotulo        = parse_float(request.form['compr_rotulo'])
+        espessura_fita      = Misc.parse_float(request.form['espessura_fita'])
+        diametro_inicial    = Misc.parse_float(request.form['diametro_inicial'])
+        diametro_minimo     = Misc.parse_float(request.form['diametro_minimo'])
+        espessura_papelao   = Misc.parse_float(request.form['espessura_papelao'])
+        compr_rotulo        = Misc.parse_float(request.form['compr_rotulo'])
         comprimento_total   = 0 # INICIALIZA
         num_voltas          = 0 # INICIALIZA
 
@@ -3167,7 +3243,7 @@ def rotulo():
 
 
 @app.route('/get/linhas', methods=['POST'])
-@verify_auth('ENV006')
+@system.verify_auth('ENV006')
 def get_linhas():
     desc_item = request.form['desc_item']
 
@@ -3223,14 +3299,14 @@ def get_linhas():
 
 
 @app.route('/estoque', methods=['GET', 'POST'])
-@verify_auth('MOV004')
+@system.verify_auth('MOV004')
 def estoque():
     if request.method == 'POST':
         date = request.form['date']
-        saldo_visualization = get_saldo_view(date)
+        saldo_visualization = EstoqueUtils.get_saldo_view(date)
     else:
         date = False
-        saldo_visualization = get_saldo_view()
+        saldo_visualization = EstoqueUtils.get_saldo_view()
     return render_template(
         'pages/estoque.html', 
         saldo_visualization=saldo_visualization,
@@ -3239,13 +3315,13 @@ def estoque():
 
 
 @app.route('/estoque-enderecado', methods=['GET', 'POST'])
-@verify_auth('MOV004')
+@system.verify_auth('MOV004')
 def estoque_enderecado():
     if request.method == 'POST':
         date = request.form['date']
-        end_lote = get_end_lote(date)
+        end_lote = EstoqueUtils.get_end_lote(date)
     else:
-        end_lote = get_end_lote()
+        end_lote = EstoqueUtils.get_end_lote()
         date = False
     return render_template(
         'pages/estoque-enderecado.html',
@@ -3255,13 +3331,13 @@ def estoque_enderecado():
 
 
 @app.route('/estoque-presets', methods=['GET', 'POST'])
-@verify_auth('MOV004')
+@system.verify_auth('MOV004')
 def estoque_preset():
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
-        saldo_preset = get_saldo_preset(preset_id, False)
+        saldo_preset = EstoqueUtils.get_saldo_preset(preset_id, False)
     else:
-        saldo_preset = get_saldo_preset(preset_id)
+        saldo_preset = EstoqueUtils.get_saldo_preset(preset_id)
     return render_template(
         'pages/estoque-preset.html',
         saldo_atual=saldo_preset,
@@ -3270,13 +3346,13 @@ def estoque_preset():
 
 
 @app.route('/cargas-presets', methods=['GET', 'POST'])
-@verify_auth('MOV006')
+@system.verify_auth('MOV006')
 def cargas_preset():
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
-        cargas_preset = get_saldo_preset(preset_id, False)
+        cargas_preset = EstoqueUtils.get_saldo_preset(preset_id, False)
     else:
-        cargas_preset = get_saldo_preset(preset_id)
+        cargas_preset = EstoqueUtils.get_saldo_preset(preset_id)
     return render_template(
         'pages/estoque-preset.html',
         saldo_atual=cargas_preset,
@@ -3285,37 +3361,37 @@ def cargas_preset():
 
 
 @app.route('/export_csv/<tipo>', methods=['GET'])
-@verify_auth('CDE017')
+@system.verify_auth('CDE017')
 def export_csv_tipo(tipo):
     # EXPORT .csv
     header = True
     if tipo == 'historico':
-        data = get_all_historico()
+        data =  HistoricoUtils.get_all_historico()
         filename = 'exp_historico'
     elif tipo == 'produtos':
-        data = get_active_itens()
+        data = ProdutoUtils.get_active_itens()
         filename = 'exp_produtos'
     elif tipo == 'saldo':
-        data = get_end_lote()
+        data = EstoqueUtils.get_end_lote()
         filename = 'exp_saldo_lote'
     elif tipo == 'faturado':
-        data = get_end_lote_fat()
+        data = EstoqueUtils.get_end_lote_fat()
         filename = 'exp_faturado'
     elif tipo == 'estoque':
-        data = get_saldo_view()
+        data = EstoqueUtils.get_saldo_view()
         filename = 'exp_estoque'
     elif tipo == 'envase':
-        data = get_envase()
+        data =  Schedule.EnvaseUtils.get_envase()
         filename = 'exp_prog_envase'
     elif tipo == 'producao':
-        data = get_producao()
+        data =  Schedule.ProcessamentoUtils.get_producao()
         filename = 'exp_prog_producao'
     elif tipo == 'saldo_preset':
-        data = get_saldo_preset(1)
+        data = EstoqueUtils.get_saldo_preset(1)
         filename = 'get_saldo_preset'    
     elif tipo == 'export_promob':
         header = False
-        data = get_export_promob()
+        data = Misc.CSVUtils.get_export_promob()
         filename = 'export_promob'
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
@@ -3328,7 +3404,7 @@ def export_csv_tipo(tipo):
             alert_more=alert_more, 
             url_return=url_for('index')
         )
-    return export_csv(data, filename, header)
+    return Misc.CSVUtils.export_csv(data, filename, header)
 
 
 # __MAIN__
