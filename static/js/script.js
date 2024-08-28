@@ -348,7 +348,6 @@ function visualDelay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
 function showToast(message, type = 0, duration = 5000) {
     const toastContainer = document.getElementById('toast-container');
     let icon;
@@ -359,54 +358,78 @@ function showToast(message, type = 0, duration = 5000) {
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #4CAF50;">
                 <path d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM10.2432 16.9714L5.12034 11.8485L6.53479 10.4341L10.2432 14.1426L17.4652 6.9205L18.8797 8.33495L10.2432 16.9714Z"/>
-                </svg>`
-            ;
-            toastColor = '#4CAF50'; // Cor de sucesso
+                </svg>`;
+            toastColor = '#4CAF50';
             break;
         case 2: // Warning
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #FF9800;">
                 <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-                </svg>`
-            ;
-            toastColor = '#FF9800'; // Cor de alerta
+                </svg>`;
+            toastColor = '#FF9800';
             break;
         case 3: // Error
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #F44336;">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L16.59 17 12 12.41 7.41 17 6 15.59 10.59 11 6 6.41 7.41 5 12 9.59 16.59 5 18 6.41 13.41 11 18 15.59z"/>
-                </svg>`
-            ;
-            toastColor = '#F44336'; // Cor de erro
+                </svg>`;
+            toastColor = '#F44336';
             break;
         default:
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #2196F3;">
                 <path d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM13 17H11V9H13V17ZM13 7H11V5H13V7Z"/>
-                </svg>`
-            ;
-            toastColor = '#2196F3'; // Cor de info
+                </svg>`;
+            toastColor = '#2196F3';
     }
     
     // cria o elemento do toast
     const toast = document.createElement('div');
     toast.className = 'toast show';
-    toast.innerHTML = `<div class="split-horizontal"><span style="display: flex; align-items: center;">${message}</span> <span style="margin-left: 10px; display: flex; align-items: center;">${icon}</span></div>`;
-    toast.style.borderBlockColor = toastColor;
+    toast.style.borderBottomColor = toastColor;
     
-    // adiciona o toast ao container
+    // Cria o conteúdo do toast
+    toast.innerHTML = `
+        <div class="split-horizontal">
+            <span style="display: flex; align-items: center;">${message}</span>
+            <span style="margin-left: 10px; display: flex; align-items: center;">${icon}</span>
+            <span class="toast-close" style="margin-left: auto; cursor: pointer;">&times;</span>
+        </div>
+        <div class="toast-timer" style="background-color: ${toastColor};"></div>
+    `;
+
+    console.log("- ", message);
+
+    // Adiciona o toast ao container
     toastContainer.appendChild(toast);
-    
-    // define a duração do toast
+
+    // Configura o fechamento manual do toast
+    const closeButton = toast.querySelector('.toast-close');
+    closeButton.addEventListener('click', () => {
+        removeToast(toast);
+    });
+
+    // Configura a animação do temporizador
+    const toastTimer = toast.querySelector('.toast-timer');
+    toastTimer.style.transition = `width ${duration}ms linear`;
     setTimeout(() => {
-        toast.classList.remove('show');
-        toast.classList.add('hide');
-        
-        // remove o toast do container após o tempo especificado
-        setTimeout(() => {
-            toastContainer.removeChild(toast);
-        }, 500);
+        toastTimer.style.width = '0%';
+    }, 50); // Pequeno atraso para iniciar a animação
+    
+    // Define a duração do toast
+    setTimeout(() => {
+        removeToast(toast);
     }, duration);
+}
+
+function removeToast(toast) {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    
+    // Remove o toast do container após o tempo especificado
+    setTimeout(() => {
+        toast.remove();
+    }, 500);
 }
 
 

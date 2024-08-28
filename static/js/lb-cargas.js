@@ -819,6 +819,10 @@ async function concludeSeparacao() {
                 }
             }
         } else {
+            showToast('Operação cancelada.', 3);
+            hideLoading();
+            await visualDelay(400);
+            finalizarBtn.innerHTML = '✘';
             return;
         }
     }
@@ -864,12 +868,12 @@ async function concludeSeparacao() {
                         if (data.success) {
                             showToast('Pendencia da carga realizada com sucesso.', 1, 10000);
                         } else {
-                            showToast(`Erro ao remover pendencia da carga incompleta: ${data.error}`, 3, 10000);
+                            showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${data.error}</details>`, 3, 10000);
                         }
                     })
                     .catch(error => {
                         console.error('Erro:', error);
-                        showToast(`Erro ao remover pendencia da carga incompleta: ${error}`, 3, 10000);
+                        showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${error}</details>`, 3, 10000);
                     });
                 }
                 try {
@@ -882,7 +886,7 @@ async function concludeSeparacao() {
                 } catch (error) {
                     // feedback visual para o front-end
                     // erro
-                    showToast(`Erro ao finalizar separação: ${error}`, 3, 10000);
+                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 3, 10000);
                 } finally {
                     // feedback visual para o front-end
                     // sucesso
@@ -893,7 +897,7 @@ async function concludeSeparacao() {
                     genCargaReport();
                 }
             } else {
-                showToast(`Erro ao finalizar separação: ${data.error}`, 3, 10000);
+                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10000);
             }
             // atualiza tabelas no front-end
             reloadTables();
@@ -902,10 +906,13 @@ async function concludeSeparacao() {
         .catch(error => {
             console.error('Erro:', error);
             
-            showToast(`Erro ao realizar movimentação em massa: ${error.message}`, 3, 10000);
+            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10000);
         });
     } else {
-        
+        showToast('Operação cancelada.', 3);
+        hideLoading();
+        await visualDelay(400);
+        finalizarBtn.innerHTML = '✘';
         return;
     }
 }

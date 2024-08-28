@@ -7,14 +7,14 @@
 
 
 {% block sep_status %}
-    <span>SEPARAÇÃO <span style="font-size: 16px">(FINALIZADA)</span></span>
+    <span>SEPARAÇÃO <span style="font-size: 16px">(🟢)</span></span>
 {% endblock sep_status %}
 
 
 {% block aux_buttons %}
     <form onsubmit="cargaFormRedirect('separacao-done'); return false;">
         <div class="flex-row" style="margin: 8px 0">
-            <input class="address-three" style="margin: 0; height: 14px" type="number" id="cargaInput" min="1" placeholder="Carga...">
+            <input class="address-three" style="margin: 0; height: 14px" id="cargaInput" min="1" placeholder="Carga...">
             <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
                 <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
             </button>
@@ -53,7 +53,7 @@
 
 {% block all_separation_status %}
     <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-        <select class="address-three inline-input" style="color: green;" onchange="window.location.href='/mov/separacao-pend/{{ id_carga }}'">
+        <select class="address-three inline-input" style="color: green; font-size: 14px" onchange="window.location.href='/mov/separacao-pend/{{ id_carga }}'">
             <option style="color: green;">Finalizadas</option>
             <option style="color: var(--cor-destaque);">Pendentes</option>
         </select>
@@ -94,6 +94,7 @@
 
         
         async function renderItems() {
+            showLoading();
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             const statusElements = document.getElementsByClassName('separation_status');
             itemsTable.innerHTML = '';
@@ -136,6 +137,7 @@
                     let subtotal = 0;
 
                     for (const [index, item] of items.entries()) {
+                        await visualDelay(100);
                         await getSeparadorName(item.user_id);
 
                         const row = itemsTable.insertRow();
@@ -231,10 +233,12 @@
                 alert.classList.toggle('hidden');
                 content.classList.add('hidden');
             }
+            await visualDelay(500);
+            hideLoading();
         }
 
 
-        function reloadTables() {
+        async function reloadTables() {
             renderItems();
             renderCartSubtotals();
             listSeparationsFromServer('separacao-done');

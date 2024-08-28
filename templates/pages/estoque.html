@@ -14,17 +14,24 @@
             </h1>
             <div class="aux-buttons">
                 {% block svg %}
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
-                {% endblock svg %}
-                <hr class="vert">
-                <a class="aux-button {% if request.endpoint == 'mov' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                <a class="aux-button {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
                 </a>
                 <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/group.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
+                </a>
+                <a class="aux-button {% if request.endpoint == 'estoque_preset' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
+                </a>
+                {% endblock svg %}
+                <hr class="vert">
+                <a class="aux-button">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                </a>
+                <a class="aux-button active">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
                 </a>
-                    <a class="aux-button {% if request.endpoint == 'historico' %}active{% endif %}">
+                    <a class="aux-button">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
                 </a>
                 <hr class="vert">
@@ -32,7 +39,7 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
-        <div style="justify-content: flex-end">
+        <div id="filterBreak" style="justify-content: flex-end">
             <div id="table-filter" style="display: none">
                 <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
                 <select class="address" id="filterSelect" onchange="updateFilterIndex()">
@@ -46,10 +53,13 @@
             </div>
         </div>
         <div class="flex-row" style="min-width: 100%; justify-content: center;">
-            <div class="tables-container" style="max-width: 100vh;">
+            <div class="tables-container" style="max-width: 100vw;">
                 {% block table %}
                     <div class="split-horizontal">
-                        <p>Visualização de Estoque</p>
+                        <span>
+                            <h1 class="subtitle">Estoque</h1>
+                            <p>Visualização de Estoque (Agrupado)</p>
+                        </span>
                         {% if session.get('user_grant') <= 1 %}
                             <div class="table-filter" style="display: none">
                                 <div>

@@ -10,6 +10,8 @@
             <h1>
                 <a href="{{ url_for('mov') }}">MOV</a>
                 <span class="dash">/</span>
+                <a href="{{ url_for('cargas') }}">CARGAS</a>
+                <span class="dash">/</span>
                 <span>FATURADO</span>
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
@@ -44,7 +46,7 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
-        <div style="justify-content: flex-end">
+        <div id="filterBreak" style="justify-content: flex-end">
             <div id="table-filter" style="display: none" >
                 <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
                 <select class="address" id="filterSelect" onchange="updateFilterIndex()">
