@@ -25,10 +25,16 @@ function updateItemCount(itemCount) {
 
 function cargaFormRedirect(routePage) {
     const cargaInput = document.getElementById('cargaInput').value;
-    // verifica se o input de carga foi preenchido
-    // caso positivo, redireciona para a rota informada
-    if (cargaInput > 0) {
+
+    // Expressão regular para validar números inteiros ou com sufixos como -1, -2, etc.
+    const regex = /^-?\d+(-\d+)?$/;
+
+    // Verifica se o input de carga foi preenchido corretamente
+    if (regex.test(cargaInput)) {
         redirectToCarga(routePage, cargaInput);
+    } else {
+        // Opcional: Mostrar um alerta ou mensagem de erro ao usuário
+        alert('Por favor, insira um número válido (ex: 123 ou 123-1).');
     }
 }
 
