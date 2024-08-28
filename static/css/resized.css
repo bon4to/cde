@@ -1,4 +1,11 @@
 /* ESTILIZAÇÃO P/ TELAS MENORES*/
+
+@media screen and (max-width: 1500px) {
+    #filterBreak {
+        width: 100%;
+    }
+}
+
 @media screen and (max-width: 1300px) {
     header.main-header, .sidebar, #footer, section.banner.text-overlay, .user-name, .side-banner, .logged-header {
         display: none;
@@ -14,6 +21,12 @@
         grid-column: span 2;
     }
 
+}
+
+@media screen and (max-width: 1000px) {
+    .h1 {
+        font-size: 20px;
+    }
 }
 /*
 @media screen and (max-width: 1300px) {
