@@ -1729,7 +1729,9 @@ def reset_password():
 @app.route('/get/item', methods=['POST'])
 @verify_auth('CDE001')
 def get_item():
-    input_code = re.sub(r'[^0-9;]', '', (request.form['input_code'].strip()))
+    input_code = request.form['input_code'].strip()
+    if 'EM.' not in input_code:
+        input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
     print(f'    | Código fornecido: {input_code}')
     
     if len(input_code) == 4 or len(input_code) == 0:
@@ -1746,7 +1748,7 @@ def get_item():
 
     else:     
         # VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
-        if len(input_code) == 6:
+        if len(input_code) == 6 or len(input_code) == 7:
             input_code = input_code + ';'
 
         partes       = input_code.split(';')
@@ -1809,11 +1811,14 @@ def get_item():
         elif len(partes) == 2:
             codigos_itens = partes[0]
             cod_item.append(codigos_itens)
+            
 
             if partes[1] != '':
                 cod_lote = 'CS' + partes[1]
             else:
                 cod_lote = ''
+            if 'EM.' in input_code:
+                cod_lote = 'OUTROS'
 
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
