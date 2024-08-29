@@ -526,7 +526,7 @@ class EstoqueUtils:
                     h.cod_item, h.lote_item
                 HAVING saldo   != 0
                 AND h.id_carga != 0
-                ORDER BY h.id_carga DESC, h.cod_item;
+                ORDER BY h.time_mov DESC, h.id_carga DESC, h.cod_item ASC;
             ''')
 
             end_lote = [{

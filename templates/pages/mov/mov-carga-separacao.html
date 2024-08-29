@@ -24,7 +24,7 @@
             {% block aux_buttons %}
                 <form onsubmit="cargaFormRedirect('separacao-pend'); return false;">
                     <div class="flex-row" style="margin: 8px 0">
-                        <input class="address-three" style="margin: 0; height: 14px" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                        <input class="address-three" style="margin: 0; height: 14px" type="number" id="cargaInputBrow" min="1" placeholder="Carga...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
                             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
                         </button>
@@ -108,6 +108,14 @@
             
             {% endblock all_separation_status %}
             <div class="table-overflow" style="max-height: 500px">
+                <form onsubmit="cargaFormRedirect('separacao-pend'); return false;">
+                    <div class="flex-row" style="margin: 8px 0">
+                        <input class="address-one" style="margin: 0; height: 32px" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                        <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
+                            <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                        </button>
+                    </div>
+                </form>
                 <table id="allSeparationsTable" style="border-top: 4px solid var(--cor-destaque)">
                     <tbody>
                         <!-- executa listSeparationsLocalStorage(); -->

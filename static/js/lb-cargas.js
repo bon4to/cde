@@ -24,14 +24,22 @@ function updateItemCount(itemCount) {
 
 
 function cargaFormRedirect(routePage) {
-    const cargaInput = document.getElementById('cargaInput').value;
+    const cargaInputBrow = document.getElementById('cargaInputBrow');
+    try {
+        const cargaInput = document.getElementById('cargaInput');
+        if (cargaInput.value != '') {
+            cargaInputBrow.value = cargaInput.value;
+        }
+    } catch (error) {
+        console.error(error);
+    }
 
     // Expressão regular para validar números inteiros ou com sufixos como -1, -2, etc.
     const regex = /^-?\d+(-\d+)?$/;
 
     // Verifica se o input de carga foi preenchido corretamente
-    if (regex.test(cargaInput)) {
-        redirectToCarga(routePage, cargaInput);
+    if (regex.test(cargaInput.value)) {
+        redirectToCarga(routePage, cargaInput.value);
     } else {
         // Opcional: Mostrar um alerta ou mensagem de erro ao usuário
         alert('Por favor, insira um número válido (ex: 123 ou 123-1).');

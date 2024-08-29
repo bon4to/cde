@@ -17,7 +17,7 @@
             <div class="aux-buttons">
                 <form onsubmit="cargaFormRedirect('carga/incompleta'); return false;">
                     <div class="flex-row" style="margin: 8px 0">
-                        <input class="address-three" style="margin: 0; height: 14px" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                        <input class="address-three" style="margin: 0; height: 14px" type="number" id="cargaInputBrow" min="1" placeholder="Carga...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
                             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
                         </button>
@@ -213,13 +213,27 @@
                         {% if id_carga %}
                             
                         {% endif %}
+                        <form onsubmit="cargaFormRedirect('incompleta'); return false;">
+                            <div class="flex-row" style="margin: 8px 0">
+                                <input class="address-one" style="margin: 0; height: 32px" type="number" id="cargaInput" min="1" placeholder="Carga...">
+                                <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
+                                    <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                                </button>
+                            </div>
+                        </form>
                         <table style="border-top: 4px solid var(--cor-destaque)">
                             <tbody>
-                                {% for row in carga_list %}
-                                    <tr class="selectable-row" onclick="window.location.href='/mov/carga/incompleta/{{ row }}'">
-                                        <td>{{ row }}</td>
+                                {% if not row %}
+                                    <tr>
+                                        <td>Nenhuma carga incompleta pendente</td>
                                     </tr>
-                                {% endfor %}
+                                {% else %}
+                                    {% for row in carga_list %}
+                                        <tr class="selectable-row" onclick="window.location.href='/mov/carga/incompleta/{{ row }}'">
+                                            <td>{{ row }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
                             </tbody>
                         </table>
                     </div>
