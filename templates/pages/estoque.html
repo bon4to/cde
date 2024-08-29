@@ -60,20 +60,18 @@
                             <h1 class="subtitle">Estoque</h1>
                             <p>Visualização de Estoque (Agrupado)</p>
                         </span>
-                        {% if session.get('user_grant') <= 1 %}
-                            <div class="table-filter" style="display: none">
-                                <div>
-                                    <form action="/estoque" method="post">
-                                        <div class="flex-row">
-                                            <input type="date" class="address" id="date" name="date" value="{{ search_term }}">
-                                            <button class="button-mini btn-fancy" type="submit">
-                                                <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-search.svg') }}" title="CARREGAR ESTOQUE NO DIA">
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
+                        <div class="table-filter" style="display: none">
+                            <div>
+                                <form action="/estoque" method="post">
+                                    <div class="flex-row">
+                                        <input type="date" class="address" id="date" name="date" value="{{ search_term }}">
+                                        <button class="button-mini btn-fancy" type="submit">
+                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-search.svg') }}" title="CARREGAR ESTOQUE NO DIA">
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        {% endif %}
+                        </div>
                     </div>
                     {% if search_term %}
                         <div class="split-horizontal">

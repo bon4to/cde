@@ -25,23 +25,21 @@
                 <h1 class="subtitle">Estoque</h1>
                 <p>Visualização de Estoque (Preset)</p>
             </span>
-            {% if session.get('user_grant') <= 1 %}
-                <div class="table-filter" style="display: none;">
-                    <div>
-                        <form action="/estoque-presets" method="post">
-                            <div class="flex-row">
-                                <select class="address" id="preset_id" name="preset_id" value="{{ search_term }}">
-                                    <option value="1">FILTRO 01</option>
-                                    <option value="2">FILTRO 02</option>
-                                </select>
-                                <button class="button-mini btn-fancy" type="submit">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="CARREGAR ESTOQUE NO DIA">
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+            <div class="table-filter" style="display: none;">
+                <div>
+                    <form action="/estoque-presets" method="post">
+                        <div class="flex-row">
+                            <select class="address" id="preset_id" name="preset_id" value="{{ search_term }}">
+                                <option value="1">FILTRO 01</option>
+                                <option value="2">FILTRO 02</option>
+                            </select>
+                            <button class="button-mini btn-fancy" type="submit">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="CARREGAR ESTOQUE NO DIA">
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            {% endif %}
+            </div>
         </div>
         {% if search_term %}
             <div class="split-horizontal">
