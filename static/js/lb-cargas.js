@@ -5,7 +5,7 @@ let headerMainLogo;
 var itemCount = 0;
 
 if (nroCarga != '') {
-    renderCartSubtotals();
+    reloadItemSubtotal();
 }
 
 
@@ -470,22 +470,59 @@ function renderCartSubtotals() {
             cartItemsContainer.appendChild(listItem);
             itemCount += 1;
 
-            const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
-            if (row) {
-                let subtotalCell = row.querySelector('.subtotal-cell');
-                if (!subtotalCell) {
-                    subtotalCell = document.createElement('td');
-                    subtotalCell.classList.add('subtotal-cell');
-                    row.appendChild(subtotalCell);
-                }
-                subtotalCell.textContent = subtotal;
-            }
+            updateItemSubtotal(cod_item, subtotal)
         });
         
         updateItemCount(itemCount);
     }).catch(error => {
         console.log('A separação foi finalizada.', error);
     });
+}
+
+
+function reloadItemSubtotal() {
+    getSeparacao().then(sepCarga => {
+        let subtotals = {};
+
+        sepCarga.forEach(item => {
+            if (subtotals[item.cod_item]) {
+                subtotals[item.cod_item] += item.qtde_sep;
+            } else {
+                subtotals[item.cod_item] = item.qtde_sep;
+            }
+        });
+
+        const sortedEntries = Object.entries(subtotals).sort((a, b) => {
+            const codA = a[0].toUpperCase();
+            const codB = b[0].toUpperCase();
+
+            if (codA < codB) {
+                return -1;
+            }
+            if (codA > codB) {
+                return 1;
+            }
+            return 0;
+        });
+        
+        sortedEntries.forEach(([cod_item, subtotal]) => {
+            updateItemSubtotal(cod_item, subtotal);
+        });
+    });
+}
+
+
+function updateItemSubtotal(cod_item, subtotal) {
+    const row = document.querySelector(`tr[data-cod-item="${cod_item}"]`);
+    if (row) {
+        let subtotalCell = row.querySelector('.subtotal-cell');
+        if (!subtotalCell) {
+            subtotalCell = document.createElement('td');
+            subtotalCell.classList.add('subtotal-cell');
+            row.appendChild(subtotalCell);
+        }
+        subtotalCell.textContent = subtotal;
+    }
 }
 
 
@@ -610,7 +647,7 @@ function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit)
                 // adiciona o item na separação
                 onSubmit(value);
                 // carregar totais e subtotais na tabela
-                renderCartSubtotals();
+                reloadItemSubtotal();
             } else {
                 alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
             }

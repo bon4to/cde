@@ -388,31 +388,38 @@
                 const localStorageData = localStorage.getItem(getStorageKey());
                 if (localStorageData) {
                     // TODO: function 'hasPendingItems' is not defined 
-                    hasPendingItems().then(bool => {
-                        if(bool == true) {
-                            showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
-
-                            errorMessage = 
-                            `
-                                <div class="msg-alert">
-                                    <details>
-                                        <summary>A separação foi finalizada, mas está incompleta.</summary>
-                                        Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
-                                    </details>
-                                </div>
-                            `;
-                            const alert = document.getElementById('alert-message');
-                            const standardTable = document.getElementById('standardTable');
-                            const detailedTable = document.getElementById('detailedTable');
-
-                            alert.innerHTML = errorMessage;
-                            alert.classList.toggle('hidden');
-                            standardTable.classList.add('hidden');
-                            detailedTable.classList.add('hidden');
-                        } else {
-                            resolve(JSON.parse(localStorageData));
-                        }
-                    })
+                    console.log('pre hasPendingItems');
+                    try {
+                        const hasPendingItems = hasPendingItems();
+                        hasPendingItems().then(bool => {
+                            console.log('after hasPendingItems');
+                            if(bool == true) {
+                                showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
+    
+                                errorMessage = 
+                                `
+                                    <div class="msg-alert">
+                                        <details>
+                                            <summary>A separação foi finalizada, mas está incompleta.</summary>
+                                            Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
+                                        </details>
+                                    </div>
+                                `;
+                                const alert = document.getElementById('alert-message');
+                                const standardTable = document.getElementById('standardTable');
+                                const detailedTable = document.getElementById('detailedTable');
+    
+                                alert.innerHTML = errorMessage;
+                                alert.classList.toggle('hidden');
+                                standardTable.classList.add('hidden');
+                                detailedTable.classList.add('hidden');
+                            } else {
+                                resolve(JSON.parse(localStorageData));
+                            }
+                        })
+                    } catch(error) {
+                        resolve(JSON.parse(localStorageData));
+                    }
                 } else {
                     fetch(`/get/load-table-data?filename=${getStorageKey()}`)
                     .then(response => {

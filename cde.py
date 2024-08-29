@@ -2271,7 +2271,6 @@ def api_insert_carga_incomp():
     qtde_solic = data.get('qtde_solic')
     
     try:
-        print(f'[DEBUG] pre-insert: {id_carga, cod_item, qtde_atual, qtde_solic}')
         CargaUtils.insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic)
         return jsonify(success=True)
     except Exception as e:
@@ -2284,7 +2283,6 @@ def route_get_carga_incomp(id_carga):
     id_carga = id_carga.split('-')[0]
     
     pending_items = CargaUtils.get_carga_incomp(id_carga)[0]
-    print(pending_items)
     return jsonify(
         {
             'items': pending_items
