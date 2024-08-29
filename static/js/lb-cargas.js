@@ -678,36 +678,34 @@ async function hasCargaAtHistory() {
 
 async function concludeSeparacao() {
     // Obtém os dados da separação atual.
-    const sepCarga = await getSeparacao();
-
     // Seleciona o botão de finalizar separação.
+    const sepCarga = await getSeparacao();
     const finalizarBtn = document.getElementById('finalizarBtn');
-    
+
     // Exibe um indicador de carregamento e desativa o botão de finalizar.
     showLoading();
     finalizarBtn.onclick = '';
     finalizarBtn.innerHTML = '<span class="loader-inline"></span>';
 
     // Verifica se há uma carga no histórico.
-    const boolResultAtHistory = await hasCargaAtHistory();
-    
     // Obtém os itens pendentes e verifica se há itens pendentes.
-    const ResultPendingItems = await getPendingItems();
-    const boolResultPendingItems = Array.isArray(ResultPendingItems) && ResultPendingItems.length > 0;
-
+    const hasHistory = await hasCargaAtHistory();
+    const PendingItems = await getPendingItems();
+    const hasPendingItems = Array.isArray(PendingItems) && PendingItems.length > 0;
+    
     // Inicializa a variável que armazenará os itens da carga.
     // Inicializa a variável que identifica se a separação é incompleta.
-    let itens_carga = [];
-    var isIncompSeparation = false;
+    let itensCarga = [];
+    let isIncompSeparation = false;
 
     await visualDelay(200);
 
-    if (!boolResultAtHistory) {
+    if (!hasHistory) {
         // se não há carga no historico, continua a separação
         showToast('A carga é válida para ser separada...', 1);
     } else {
         // se houver, verifica se a carga está completa antes de continuar
-        if (!boolResultPendingItems) {
+        if (!hasPendingItems) {
             // se não houver itens pendentes, aborta a separação
             showToast('A carga já está completa e finalizada.', 3);
             return;
@@ -720,24 +718,19 @@ async function concludeSeparacao() {
 
     await visualDelay(700);
 
-    if (!boolResultPendingItems) {
+    if (!hasPendingItems) {
         // Se não houver itens pendentes, tenta obter os itens da carga da API.
         try {
-            const response = await fetch('/api/itens_carga?id_carga=' + nroCarga, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await fetch(`/api/itens_carga?id_carga=${nroCarga}`, {method: 'GET', headers: {'Content-Type': 'application/json'}});
             const result = await response.json();
-            itens_carga = result.itens;
+            itensCarga = result.itens;
         } catch (error) {
-            console.error('Erro ao obter itens_carga:', error);
+            console.error('Erro ao obter itensCarga:', error);
             return;
         }
     } else {
         // Caso contrário, usa os itens pendentes obtidos anteriormente.
-        itens_carga = ResultPendingItems;
+        itensCarga = PendingItems;
     }
 
     // Agrupa os itens separados pela carga atual com base no código do item.
@@ -752,13 +745,13 @@ async function concludeSeparacao() {
     var nonAvailableItems = [];
 
     // Para cada item na carga, verifica se a quantidade solicitada é igual à quantidade separada.
-    for (const cod_item of itens_carga) {
-        let subtotal = 0;
+    for (const cod_item of itensCarga) {
+        let subTotal = 0;
 
         if (groupedItems[cod_item]) {
             for (const item of groupedItems[cod_item]) {
                 // Soma as quantidades separadas para este item
-                subtotal += item.qtde_sep;
+                subTotal += item.qtde_sep;
             }
         }
         // Recupera a quantidade solicitada para este item específico
@@ -766,15 +759,15 @@ async function concludeSeparacao() {
         const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
 
         // Verifica se a quantidade solicitada é igual à quantidade separada
-        if (qtde_solic !== subtotal) {
-            showToast(`Item ${cod_item}: ( ${subtotal} / ${qtde_solic} )`, 2);
+        if (qtde_solic !== subTotal) {
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 2);
             nonAvailableItems.push(cod_item);
         } else {
-            showToast(`Item ${cod_item}: ( ${subtotal} / ${qtde_solic} )`, 1);
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 1);
         }
         await visualDelay(100);
     }
-    
+
     let saveAsPendingItems;
     const confirmationText = `[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?\n`
 
@@ -785,39 +778,6 @@ async function concludeSeparacao() {
         );
         if (confirmation) {
             saveAsPendingItems = true;
-            
-            for (const cod_item of nonAvailableItems) {
-                // Verifica se groupedItems[cod_item] está definido
-                let subtotal = 0;
-                if (groupedItems[cod_item]) {
-                    subtotal = groupedItems[cod_item].reduce((acc, item) => acc + item.qtde_sep, 0);
-                }
-    
-                const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
-                
-                try {
-                    // Enviar dados para o servidor
-                    const response = await fetch('/api/insert_carga_incomp', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            id_carga: nroCarga,
-                            cod_item: cod_item,
-                            qtde_atual: subtotal,
-                            qtde_solic: qtde_solic
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    if (!result.success) {
-                        console.error(`Erro ao inserir ${cod_item} para a carga incompleta.`, result.error);
-                    }
-                } catch (error) {
-                    console.error(`Erro ao enviar item ${cod_item} da carga incompleta para o database.`, error);
-                }
-            }
         } else {
             showToast('Operação cancelada.', 3);
             hideLoading();
@@ -827,13 +787,7 @@ async function concludeSeparacao() {
         }
     }
 
-    let confirmation;
-
-    if (!saveAsPendingItems) {
-        confirmation = confirm(`${confirmationText}`);
-    } else {
-        confirmation = true;
-    }
+    const confirmation = saveAsPendingItems || confirm(`${confirmationText}`);
 
     if (confirmation) {
         const storageKey = getStorageKey();
@@ -853,7 +807,7 @@ async function concludeSeparacao() {
             body: JSON.stringify(sepCarga),
         })
         .then(response => response.json())
-        .then(data => {
+        .then(async (data) => {
             if (data.success) {
                 // se for uma separação incompleta, remove a pendencia da carga_incompleta
                 if (isIncompSeparation) {
@@ -876,6 +830,38 @@ async function concludeSeparacao() {
                         showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${error}</details>`, 3, 10000);
                     });
                 }
+                
+                for (const cod_item of nonAvailableItems) {
+                    let subTotal = 0;
+                    if (groupedItems[cod_item]) {
+                        subTotal = groupedItems[cod_item].reduce((acc, item) => acc + item.qtde_sep, 0);
+                    }
+                    
+                    const qtdeSolic = await fetchQtdeSolic(nroCarga, cod_item);
+                    
+                    try {
+                        const response = await fetch('/api/insert_carga_incomp', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                id_carga: nroCarga,
+                                cod_item: cod_item,
+                                qtde_atual: subTotal,
+                                qtde_solic: qtdeSolic
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        if (!result.success) {
+                            console.error(`Erro ao inserir ${cod_item} para a carga incompleta.`, result.error);
+                        }
+                    } catch (error) {
+                        console.error(`Erro ao enviar item ${cod_item} da carga incompleta para o database.`, error);
+                    }
+                }
+
                 try {
                     getSeparacao().then(separacao => {
                         // envia json com separacao para o servidor
