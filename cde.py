@@ -124,8 +124,8 @@ else:
 
 class system:
     @staticmethod
+    # CONEXÃO E QUERY NO BANCO DE DADOS
     def db_query_connect(query, dsn):
-        # CONEXÃO E QUERY NO BANCO DE DADOS
         dsn = f"DSN={dsn}"
         if dsn != 'DSN=SQLITE':
             uid_pwd = os.getenv('DB_USER').split(';')
@@ -158,8 +158,8 @@ class system:
 
     
     @staticmethod
+    # GERADOR DE TABELAS
     def create_tables() -> None:
-        # GERADOR DE TABELAS
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
 
@@ -297,8 +297,8 @@ class system:
 
     
     @staticmethod
+    # VERIFICA PRIVILÉGIO DE ACESSO
     def verify_auth(id_page):
-        # VERIFICA PRIVILÉGIO DE ACESSO
         def decorator(f):
             @wraps(f)
             def decorador(*args, **kwargs):
@@ -334,6 +334,7 @@ class system:
 
 class EstoqueUtils:
     @staticmethod
+    # retorna saldo do item
     def estoque_endereco_with_item(cod_item=False):
         if cod_item:
             query = f'''
@@ -375,8 +376,8 @@ class EstoqueUtils:
 
 
     @staticmethod
+    # RETORNA TABELA DE SALDO
     def get_saldo_view(timestamp=False):
-        # RETORNA TABELA DE SALDO
         if timestamp:
             timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
         timestamp = Misc.parse_db_datetime(timestamp)
@@ -413,8 +414,8 @@ class EstoqueUtils:
 
     
     @staticmethod
+    # BUSCA SALDO COM UM FILTRO (PRESET)
     def get_saldo_preset(index, timestamp=False):
-        # BUSCA SALDO COM UM FILTRO (PRESET)
         itens = EstoqueUtils.get_preset_itens(index)
         
         if not itens:
@@ -458,8 +459,8 @@ class EstoqueUtils:
 
     
     @staticmethod
+    # BUSCA ITENS DE PRESETS
     def get_preset_itens(index):
-        # BUSCA ITENS DE PRESETS
         try:
             with open(f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
                 itens = file.read().strip().split(', ')
@@ -469,8 +470,8 @@ class EstoqueUtils:
 
 
     @staticmethod
+    # RETORNA ENDEREÇAMENTO POR LOTES
     def get_end_lote(timestamp=False):
-        # RETORNA ENDEREÇAMENTO POR LOTES
         if timestamp:
             timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
         timestamp = Misc.parse_db_datetime(timestamp)
@@ -505,8 +506,8 @@ class EstoqueUtils:
 
 
     @staticmethod
+    # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
     def get_end_lote_fat():
-        # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -538,8 +539,8 @@ class EstoqueUtils:
 
 
     @staticmethod
+    # RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
     def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
-        # RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -556,8 +557,8 @@ class EstoqueUtils:
 
 
     @staticmethod    
+    # RETORNA TABELA DE SALDO
     def get_export_promob():
-        # RETORNA TABELA DE SALDO
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -602,6 +603,8 @@ class EstoqueUtils:
 
 class CargaUtils:
     @staticmethod
+    # retorna a carga que já foi concluída
+    # (presente no historico)
     def get_carga_from_hist(id_carga) -> list:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -617,10 +620,13 @@ class CargaUtils:
 
 
     @staticmethod
+    # lê o arquivo json no servidor local
+    # e retorna a lista da carga
     def readJsonCargaSeq(filename, seq=False):
         base_path = os.path.join(app.root_path, 'report/cargas')
         seq = int(seq)
         if not seq:
+            # 1234.json
             # Unifica todos os arquivos JSON com a mesma base de nome
             unified_data = []
             seq = 0
@@ -640,6 +646,7 @@ class CargaUtils:
             else:
                 return None
         else:
+            # 1234-1.json
             # Lê o arquivo JSON específico com a sequência fornecida
             file_path = os.path.join(base_path, f'{filename}.json')
             if seq > 0:  
@@ -653,8 +660,8 @@ class CargaUtils:
 
 
     @staticmethod
+    # INSERE REGISTRO NA TABELA DE CARGAS PENDENTES
     def insert_carga_incomp(id_carga, cod_item, qtde_atual, qtde_solic):
-        # INSERE REGISTRO NA TABELA DE CARGAS PENDENTES
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -673,8 +680,8 @@ class CargaUtils:
 
 
     @staticmethod
+    # FINALIZA REGISTRO NA TABELA DE CARGAS INCOMPLETAS
     def conclude_carga_incomp(id_carga):
-        # ALTERA REGISTRO NA TABELA DE CARGAS INCOMPLETAS
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -689,8 +696,8 @@ class CargaUtils:
             
             
     @staticmethod
+    # ALTERA REGISTRO NA TABELA DE CARGAS INCOMPLETAS
     def update_carga_incomp(id_carga, cod_item, set_qtde):
-        # ALTERA REGISTRO NA TABELA DE CARGAS PENDENTES
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -730,10 +737,10 @@ class CargaUtils:
 
 
     @staticmethod
+    # BUSCA CARGAS INCOMPLETAS
+    # id_carga = False // retorna todos os itens das cargas incompletas
+    # id_carga = <int> // retorna todos os itens de uma carga incompletas
     def get_carga_incomp(id_carga=False):
-        # BUSCA CARGAS PENDENTES
-        # id_carga = False // retorna todos os itens das cargas pendentes
-        # id_carga = <int> // retorna todos os itens de uma carga pendente
         where_clause = 'WHERE flag_pendente = TRUE'
         
         if id_carga:
@@ -754,8 +761,8 @@ class CargaUtils:
 
 
     @staticmethod
+    # retorna todas as cargas incompletas
     def listed_carga_incomp():
-        # LISTA CARGAS PENDENTES
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -769,8 +776,8 @@ class CargaUtils:
 
 
     @staticmethod
+    # RETORNA CARGAS FINALIZADAS
     def get_cargas_finalizadas():
-        # BUSCA CARGAS FINALIZADAS
         all_cargas = CargaUtils.get_all_cargas()
         cargas_pendentes = CargaUtils.listed_carga_incomp()
         
@@ -780,8 +787,8 @@ class CargaUtils:
 
 
     @staticmethod
+    # BUSCA CARGAS DO HISTÓRICO
     def select_carga_from_historico(id_carga):
-        # BUSCA CARGAS DO HISTÓRICO
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -798,8 +805,8 @@ class CargaUtils:
 
 
     @staticmethod
+    # RETORNA OBSERVACOES COM O ID DE CARGA
     def get_obs_with_carga(id_carga):
-        # RETORNA OBSERVACOES COM O ID DE CARGA
         query = f'''
             SELECT DISTINCT
                 crg.OBSERVACAO AS OBS_CARGA
@@ -831,8 +838,8 @@ class CargaUtils:
 
 
     @staticmethod
+    # RETORNA CLIENTE COM O ID DE CARGA
     def get_cliente_with_carga(id_carga):
-        # RETORNA CLIENTE COM O ID DE CARGA
         query = f'''
             SELECT DISTINCT
                 cl.FANTASIA AS FANT_CLIENTE
@@ -864,9 +871,9 @@ class CargaUtils:
 
 
     @staticmethod
+    # Retorna todos os IDs de cargas faturadas,
+    # incluindo as cargas 'implantados', sem duplicatas.
     def get_all_cargas():
-        # Retorna todos os IDs de cargas faturadas,
-        # incluindo as de presets, sem duplicatas.
         cargas_preset = CargaUtils.get_preset_cargas(1)
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -891,38 +898,11 @@ class CargaUtils:
                 all_cargas.append(carga)
                 seen.add(carga)
         return all_cargas
-   
-    @staticmethod
-    def get_desc_itens():
-        # RETORNA APENAS DESCRIÇÃO DO ITEM (DESCONTINUADO)
-            with sqlite3.connect(db_path) as connection:
-                cursor = connection.cursor()
-                cursor.execute('''
-                    SELECT DISTINCT id_carga
-                    FROM historico
-                    ORDER BY id_carga DESC;
-                ''')
-                rows = cursor.fetchall()
-                
-                # Converte os resultados da consulta em uma lista de inteiros
-                cargas_db = [row[0] for row in rows] if rows else []
 
-            # Combina as cargas do banco de dados com as do preset
-            combined_cargas = cargas_db + cargas_preset
-            
-            # Remove duplicatas mantendo a ordem
-            seen = set()
-            all_cargas = []
-            for carga in combined_cargas:
-                if carga not in seen:
-                    all_cargas.append(carga)
-                    seen.add(carga)
-            return all_cargas
 
-    
     @staticmethod
+    # BUSCA CARGAS FINALIZADAS DE PRESETS
     def get_preset_cargas(index):
-        # BUSCA CARGAS FINALIZADAS DE PRESETS
         try:
             with open(f'report/cargas_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
                 cargas = file.read().strip().split(', ')
@@ -933,8 +913,8 @@ class CargaUtils:
 
 class HistoricoUtils:
     @staticmethod
+    # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
     def select_rua(letra, numero):
-        # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -955,8 +935,8 @@ class HistoricoUtils:
 
 
     @staticmethod
+    # INSERE REGISTRO NA TABELA DE HISTÓRICO
     def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga):
-        # INSERE REGISTRO NA TABELA DE HISTÓRICO
         user_name_mov = session['user_name']
         id_user_mov = session['id_user']
 
@@ -981,8 +961,8 @@ class HistoricoUtils:
 
 
     @staticmethod
+    # RETORNA MOVIMENTAÇÕES NO INTERVALO
     def get_historico(page=1, per_page=10):
-        # RETORNA MOVIMENTAÇÕES
         offset = (page - 1) * per_page
 
         with sqlite3.connect(db_path) as connection:
@@ -1016,8 +996,8 @@ class HistoricoUtils:
 
 
     @staticmethod
+    # RETORNA TODAS AS MOVIMENTAÇÕES
     def get_all_historico():
-        # RETORNA TODAS AS MOVIMENTAÇÕES
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             
@@ -1045,6 +1025,8 @@ class HistoricoUtils:
 
 class ProdutoUtils:
     @staticmethod
+    # retorna itens do banco de dados do ERP
+    # implementa o filtro para itens embalagem
     def get_itens_from_erp():
         query = '''
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
@@ -1071,8 +1053,8 @@ class ProdutoUtils:
 
     
     @staticmethod
+    # RETORNA TODOS OS PARÂMETROS DA TABELA ITENS
     def get_all_itens():
-        # RETORNA TODOS OS PARÂMETROS DO ITEM
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1088,8 +1070,8 @@ class ProdutoUtils:
 
     
     @staticmethod
+    # RETORNA TODOS OS PARÂMETROS DOS ITENS ATIVOS
     def get_active_itens():
-        # RETORNA TODOS OS PARÂMETROS DO ITEM
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1106,6 +1088,8 @@ class ProdutoUtils:
 
   
     @staticmethod
+    # leitor de código
+    # retorna dados do item
     def get_item_json(input_code):
         if 'EM.' not in input_code:
             input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
@@ -1189,7 +1173,6 @@ class ProdutoUtils:
                 codigos_itens = partes[0]
                 cod_item.append(codigos_itens)
                 
-
                 if partes[1] != '':
                     cod_lote = 'CS' + partes[1]
                 else:
@@ -1233,11 +1216,11 @@ class ProdutoUtils:
                     'json_desc_item': desc_item
                     }
                 )
-    
-    
+
+
     @staticmethod
+    # RETORNA APENAS DESCRIÇÃO DO ITEM (DESCONTINUADO)
     def get_desc_itens():
-        # RETORNA APENAS DESCRIÇÃO DO ITEM (DESCONTINUADO)
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1251,8 +1234,8 @@ class ProdutoUtils:
 
 
     @staticmethod
+    # ALTERA STATUS (ATIVO/INATIVO) DO ITEM
     def toggle_item_flag(cod_item, flag):
-        # ALTERA STATUS (ATIVO/INATIVO) DO ITEM
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1264,8 +1247,9 @@ class ProdutoUtils:
 
 
 class UserUtils:
+    @staticmethod
+    # RETORNA DADOS DE PERMISSÃO
     def get_permissions():
-        # RETORNA DADOS DE PERMISSÃO
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1281,9 +1265,9 @@ class UserUtils:
         return permissions
     
 
+    @staticmethod
+    # RETORNA DADOS DOS USUÁRIOS
     def get_users():
-
-        # RETORNA DADOS DOS USUÁRIOS
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1307,8 +1291,9 @@ class UserUtils:
         return users_list
 
 
+    @staticmethod
+    # RETORNA LISTA DE PERMISSÕES DO USUÁRIO
     def get_user_permissions(user_id):
-        # RETORNA LISTA DE PERMISSÕES DO USUÁRIO
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1328,8 +1313,9 @@ class UserUtils:
                 return []
 
 
+    @staticmethod
+    # RETORNA DADOS DO USUÁRIO
     def get_userdata(id_user):
-        # RETORNA DADOS DO USUÁRIO
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1349,8 +1335,9 @@ class UserUtils:
             return user_data
 
 
+    @staticmethod
+    # RETORNA NOME DO USUÁRIO
     def get_username(id_user):
-        # RETORNA NOME DO USUÁRIO
         query = f'''
             SELECT DISTINCT
                 u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
@@ -1368,8 +1355,9 @@ class UserUtils:
         return None
 
 
+    @staticmethod
+    # RETORNA ULTIMO ACESSO DO USUÁRIO
     def get_ult_acesso():
-        # RETORNA ULTIMO ACESSO DO USUÁRIO
         id_user = session.get('id_user')
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -1388,8 +1376,8 @@ class UserUtils:
 class Schedule:
     class EnvaseUtils:
         @staticmethod
+        # RETORNA TABELA DE PROGRAMAÇÃO (ENVASE)
         def get_envase():
-            # RETORNA TABELA DE PROGRAMAÇÃO (ENVASE)
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('''
@@ -1415,8 +1403,8 @@ class Schedule:
 
     class ProcessamentoUtils:
         @staticmethod
+        # RETORNA TABELA DE PROGRAMAÇÃO (PROCESSAMENTO)
         def get_producao():
-            # RETORNA TABELA DE PROGRAMAÇÃO (PROCESSAMENTO)
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('''
@@ -1438,8 +1426,9 @@ class Schedule:
 
 
 class Misc:
+    @staticmethod
+    # BUSCA FRASE PARA /INDEX
     def get_frase():
-        # BUSCA FRASE PARA /INDEX
         with open('static/frases.txt', 'r', encoding='utf-8') as file:
             frases = file.readlines()
             frase = random.choice(frases).strip()
@@ -1448,8 +1437,9 @@ class Misc:
         return frase
 
 
+    @staticmethod
+    # CONVERTE TIMESTAMP PARA FORMATO DO DATABASE
     def parse_db_datetime(timestamp):
-        # CONVERTE TIMESTAMP PARA FORMATO DO DATABASE
         if not timestamp:
             timestamp = datetime.now(timezone(timedelta(hours=-3)))
         elif isinstance(timestamp, str):
@@ -1459,8 +1449,9 @@ class Misc:
         return timestamp.strftime('%Y/%m/%d %H:%M:%S')
     
     
+    @staticmethod
+    # GERA ETIQUETA COM QRCODE
     def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):
-        # GERA ETIQUETA COM QRCODE
         width, height = 400, 400
         img  = Image.new('RGB', (width, height), color='white')
         cod_lote = f'LOTE: {cod_lote}'
@@ -1494,13 +1485,15 @@ class Misc:
         return img_base64
 
 
+    @staticmethod
+    # RETORNA TIMESTAMP
     def get_timestamp():
-        # RETORNA TIMESTAMP
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
+    @staticmethod
+    # ADICIONA DIAS À DATA INFORMADA
     def add_days_to_datetime_str(date_str, qtde_days):
-        # ADICIONA DIAS À DATA INFORMADA
 
         date_obj = datetime.strptime(date_str, '%Y-%m-%d')
         
@@ -1511,8 +1504,9 @@ class Misc:
         return new_date_str
 
 
+    @staticmethod
+    # MENSAGEM DO TELEGRAM
     def tlg_msg(msg):
-        # MENSAGEM DO TELEGRAM
         if not session.get('user_grant') == 1:
             if debug == True:
                 print(f'{[TAGS.ERRO]}A mensagem não pôde ser enviada em modo debug')
@@ -1528,8 +1522,9 @@ class Misc:
             return None
 
 
+    @staticmethod
+    # CRIA QRCODE
     def qr_code(qr_text):
-        # CRIA QRCODE
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -1543,21 +1538,24 @@ class Misc:
         return qr_image
 
 
+    @staticmethod
+    # HASH DA SENHA
     def hash_key(password):
-        # HASH DA SENHA
         return pbkdf2_sha256.hash(password)
 
 
+    @staticmethod
+    # PARSE P/ FLOAT
     def parse_float(value):
-        # PARSE P/ FLOAT
         try:
             return float(value.replace(',', '.'))
         except ValueError:
             return 0
     
 
+    @staticmethod
+    # VERIFICA SENHA NO BANCO DE HASH
     def password_check(id_user, password):
-        # VERIFICA SENHA NO BANCO DE HASH
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1574,14 +1572,16 @@ class Misc:
             return False
 
 
+    @staticmethod
+    # VERIFICA SENHA NO BANCO DE HASH
     def check_key(hashed_pwd, pwd):
-        # VERIFICA SENHA NO BANCO DE HASH
         return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
     class CSVUtils:
+        @staticmethod
+        # CSV PARA INTEGRAÇÃO ERP
         def iterate_csv_data_erp(data):
-            # CSV PARA INTEGRAÇÃO ERP
             csv_data = ''
             for item in data:
                 line = ';'.join(map(str, item.values()))
@@ -1589,8 +1589,9 @@ class Misc:
             return csv_data
 
 
+        @staticmethod
+        # CORPO CSV PADRAO
         def iterate_csv_data(data):
-            # CORPO CSV PADRAO
             csv_data = ''
             for item in data:
                 line = ';'.join(map(str, item.values()))
@@ -1598,16 +1599,18 @@ class Misc:
             return csv_data
 
 
+        @staticmethod
+        # ADICIONA CABECALHO PARA CSV
         def add_headers(data):
-            # ADICIONA CABECALHO PARA CSV
             if data and len(data) > 0:
                 headers = ';'.join(data[0].keys())
                 return f'{headers}\n'
             return ''
 
 
+        @staticmethod
+        # CONSTRUTOR DE CSV
         def export_csv(data, filename, include_headers=True):
-            # CONSTRUTOR DE CSV
             if data and len(data) > 0:
                 csv_data = ''
                 if not include_headers:
