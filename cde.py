@@ -606,6 +606,53 @@ class EstoqueUtils:
 
 class CargaUtils:
     @staticmethod
+    # retorna as cargas,
+    # exceto cargas faturadas
+    def get_cargas(all_cargas=False):
+        if all_cargas:
+            cargas_except_query = ', '.join(map(str, all_cargas))
+            query = f'''
+                SELECT DISTINCT 
+                    icrg.CODIGO_GRUPOPED AS NRO_CARGA,
+                    icrg.NRO_PEDIDO      AS NRO_PEDIDO,
+                    ped.CODIGO_CLIENTE   AS COD_CLIENTE,
+                    cl.FANTASIA          AS FANT_CLIENTE,
+                    crg.DATA_EMISSAO     AS DT_EMISSAO,
+                    iped.DT_ENTREGA      AS DT_ENTREGA, 
+                    crg.OBSERVACAO       AS OBS_CARGA
+
+                FROM DB2ADMIN.ITEMPED iped
+
+                JOIN DB2ADMIN.IGRUPOPE icrg
+                ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+                AND icrg.SEQ = iped.SEQ
+
+                JOIN DB2ADMIN.PEDIDO ped
+                ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+                
+                JOIN DB2ADMIN.GRUPOPED crg
+                ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+                JOIN DB2ADMIN.CLIENTE cl
+                ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+                JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+                ON i.ITEM = iped.ITEM
+
+                WHERE icrg.QTDE_FATUR != 0
+                AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
+
+                ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
+            '''
+        else:
+            query = '''SELECT 'SEM CARGAS' AS MSG;'''
+            
+        dsn = 'HUGOPIET'
+        result, columns = system.db_query_connect(query, dsn)
+        return result, columns
+
+    
+    @staticmethod
     # retorna a carga que já foi concluída
     # (presente no historico)
     def get_carga_from_hist(id_carga) -> list:
