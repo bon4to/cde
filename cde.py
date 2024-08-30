@@ -20,106 +20,109 @@ from functools import wraps
 from math import pi, ceil
 
 
-# PARÂMETROS
-load_dotenv()
-app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY')
-app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
+if __name__:
+    # PARÂMETROS
+    load_dotenv()
+    app = Flask(__name__)
+    app.secret_key = os.getenv('SECRET_KEY')
+    app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-app.config['APP_VERSION'] = ['0.4.6', 'Setembro/2024', False]
+    app.config['APP_VERSION'] = ['0.4.6', 'Setembro/2024', False]
 
-# GET nome do diretório
-dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
-debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
-main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
+    # GET nome do diretório
+    dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
+    debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
+    main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
 
-class ANSI:
-    RESET = ""
-    BOLD = ""
-    RED = ""
-    GREEN = ""
-    YELLOW = ""
-    BLUE = ""
-    MAGENTA = ""
-    CYAN = ""
-    WHITE = ""
-
-
-class TAGS:
-    SERVIDOR = f'{ANSI.MAGENTA}[SERVIDOR]{ANSI.RESET}'
-    ERRO     = f'{ANSI.RED}[ERRO]{ANSI.RESET}'
-    INFO     = f'{ANSI.BLUE}[INFO]{ANSI.RESET}'
-    STATUS   = f'{ANSI.GREEN}[STATUS]{ANSI.RESET}'
-    DENIED   = f'{ANSI.RED}403{ANSI.RESET}'
-    GRANTED  = f'{ANSI.CYAN}200{ANSI.RESET}'
+    class ANSI:
+        RESET = ""
+        BOLD = ""
+        RED = ""
+        GREEN = ""
+        YELLOW = ""
+        BLUE = ""
+        MAGENTA = ""
+        CYAN = ""
+        WHITE = ""
 
 
-def logging(tag_1, tag_2, msge):
-    timestamp = Misc.get_timestamp()
-    if not tag_2:
-        print(f'{tag_1} {msge}')
+    class TAGS:
+        SERVIDOR = f'{ANSI.MAGENTA}[SERVIDOR]{ANSI.RESET}'
+        ERRO     = f'{ANSI.RED}[ERRO]{ANSI.RESET}'
+        INFO     = f'{ANSI.BLUE}[INFO]{ANSI.RESET}'
+        STATUS   = f'{ANSI.GREEN}[STATUS]{ANSI.RESET}'
+        DENIED   = f'{ANSI.RED}403{ANSI.RESET}'
+        GRANTED  = f'{ANSI.CYAN}200{ANSI.RESET}'
+
+
+    def logging(tag_1, tag_2, msge):
+        timestamp = Misc.get_timestamp()
+        if not tag_2:
+            print(f'{tag_1} {msge}')
+            return
+        print(f'{tag_1} ({timestamp}) {tag_2} | {msge}')
         return
-    print(f'{tag_1} ({timestamp}) {tag_2} | {msge}')
-    return
-    
 
-# MISC
-exec_head   = \
-    f'''
-     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.
-`._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'
+
+    # STRINGS DE EXECUCAO
+    exec_head   = \
+f'''
+-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-
+  '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'
 
                                                                     
-        CCCCCCCCCCCC   DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-     CCC:::::::::::C   D:::::::::::DDD        E::::::::::::::::::::E
-   CC::::::::::::::C   D::::::::::::::DD      E::::::::::::::::::::E
-  C::::::CCCCCCCCCCC   DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
- C:::::CC                         DD:::::D                          
-C:::::C                             D:::::D                         
-C:::::C                             D:::::D   EEEEEEEEEEEEEEEEEEEE  
-C:::::C                             D:::::D   E::::::::::::::::::E  
-C:::::C                             D:::::D   EEEEEEEEEEEEEEEEEEEE  
-C:::::C                             D:::::D                         
- C:::::CC                         DD:::::D                          
-  C::::::CCCCCCCCCCC   DDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
-   CC::::::::::::::C   D::::::::::::::DD      E::::::::::::::::::::E
-     CCC:::::::::::C   D:::::::::::DDD        E::::::::::::::::::::E
-        CCCCCCCCCCCC   DDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+          CCCCCCCCCCCCC   DDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+       CCC::::::::::::C   D::::::::::::DDD        E::::::::::::::::::::E
+     CC:::::::::::::::C   D:::::::::::::::DD      E::::::::::::::::::::E
+    C::::::CCCCCCCCCCCC   DDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+   C:::::CC                           DD:::::D                          
+  C:::::C                               D:::::D                         
+  C:::::C                               D:::::D   EEEEEEEEEEEEEEEEEEEE  
+  C:::::C                               D:::::D   E::::::::::::::::::E  
+  C:::::C                               D:::::D   EEEEEEEEEEEEEEEEEEEE  
+  C:::::C                               D:::::D                         
+   C:::::CC                           DD:::::D                          
+    C::::::CCCCCCCCCCCC   DDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+     CC:::::::::::::::C   D:::::::::::::::DD      E::::::::::::::::::::E
+       CCC::::::::::::C   D::::::::::::DDD        E::::::::::::::::::::E
+          CCCCCCCCCCCCC   DDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
 
 
-     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.
-`._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'
-    '''
-start_head  = \
-    f'''
+-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-
+  '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'
+'''
+    start_head  = \
+f'''
 {TAGS.INFO} CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
 {TAGS.INFO} Python Version: {sys.version}
-{TAGS.STATUS} Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}'''
-error_foot  = \
-    f'''
+{TAGS.STATUS} Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
+'''
+    error_foot  = \
+f'''
 {TAGS.ERRO} 
 * Impossível executar, verifique se o arquivo está alocado corretamente.
 
 Pressione ENTER para sair...
-    '''
+'''
 
-if dir_os in debug_dir:
-    # Se o user for listado dev, modo_exec = debug
-    db_path = os.getenv('DEBUG_DB_PATH')
-    port, debug = 5100, True
-    app.config['APP_VERSION'][2] = True
-    print(start_head)
 
-elif main_exec_dir in dir_os:
-    # Se o diretório atende ao local para produção, modo_exec = produção.
-    db_path = os.getenv('DB_PATH')
-    port, debug = 5005, False
-    print(exec_head, start_head)
+    if dir_os in debug_dir:
+        # Se o user for listado dev, modo_exec = debug
+        db_path = os.getenv('DEBUG_DB_PATH')
+        port, debug = 5100, True
+        app.config['APP_VERSION'][2] = True
+        print(start_head)
 
-else:
-    # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
-    print(error_foot)
-    sys.exit(2)
+    elif main_exec_dir in dir_os:
+        # Se o diretório atende ao local para produção, modo_exec = produção.
+        db_path = os.getenv('DB_PATH')
+        port, debug = 5005, False
+        print(exec_head, start_head)
+
+    else:
+        # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
+        print(error_foot)
+        sys.exit(2)
 
 
 class system:
@@ -385,7 +388,7 @@ class EstoqueUtils:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo, COALESCE(t.time_mov, "") as time_mov
+                SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo, COALESCE(t.time_mov, "-") as time_mov
                 FROM itens i
                 LEFT JOIN (
                     SELECT cod_item,
@@ -2223,7 +2226,7 @@ def carga_incomp():
     carga_list = CargaUtils.listed_carga_incomp()
     
     return render_template(
-        'pages/mov/mov-carga-incompleta.html',
+        'pages/mov/mov-carga/mov-carga-incompleta.html',
         carga_incomp=result,
         columns=columns,
         carga_list=carga_list
@@ -2248,7 +2251,7 @@ def carga_incomp_id(id_carga):
         result_local, columns_local = [], []
     
     return render_template(
-        'pages/mov/mov-carga-incompleta.html',
+        'pages/mov/mov-carga/mov-carga-incompleta.html',
         carga_incomp=result,
         columns=columns,
         carga_list=carga_list,
@@ -2851,7 +2854,7 @@ def carga_id(id_carga):
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
         return render_template(
-            'pages/mov/mov-carga.html',
+            'pages/mov/mov-carga/mov-carga.html',
             result=result, columns=columns, alert=alert,
             class_alert=class_alert, id_carga=id_carga, 
             cod_item=cod_item, qtde_solic=qtde_solic,
@@ -2859,7 +2862,7 @@ def carga_id(id_carga):
             fant_cliente=fant_cliente
         )
     result = []
-    return render_template('pages/mov/mov-carga.html', result=result, columns=columns)
+    return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=columns)
         
 
 @app.route('/mov/carga', methods=['GET', 'POST'])
@@ -2914,9 +2917,9 @@ def cargas():
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert)
+        return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert)
     result = []
-    return render_template('pages/mov/mov-carga.html', result=result)
+    return render_template('pages/mov/mov-carga/mov-carga.html', result=result)
 
 
 @app.route('/api/qtde_solic', methods=['GET'])
@@ -2986,7 +2989,7 @@ def carga_sep_pend(id_carga):
     obs_carga = CargaUtils.get_obs_with_carga(id_carga)
     fant_cliente   = CargaUtils.get_cliente_with_carga(id_carga)
     return render_template(
-        'pages/mov/mov-carga-separacao-pend.html', 
+        'pages/mov/mov-carga/mov-carga-separacao-pend.html', 
         id_carga=id_carga, 
         user_info=user_info,
         fant_cliente=fant_cliente,
@@ -3006,7 +3009,7 @@ def carga_sep_done(id_carga):
     obs_carga    = CargaUtils.get_obs_with_carga(id_carga)
     fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
     return render_template(
-        'pages/mov/mov-carga-separacao-done.html', 
+        'pages/mov/mov-carga/mov-carga-separacao-done.html', 
         id_carga=id_carga,
         seq=seq, 
         user_info=user_info,

@@ -827,7 +827,7 @@ th, td {
     max-width: 300px;
     white-space: nowrap;
     text-overflow: ellipsis;
-    border: 1px solid #ddd;
+    border: 1px solid rgb(221, 221, 221);
     font-variant-numeric: tabular-nums;
 }
 
@@ -841,7 +841,7 @@ th {
 }
 
 td {
-    background-color: white;
+    background-color: rgb(243, 243, 243);
     font-family: "Roboto", sans-serif;
 }
 
