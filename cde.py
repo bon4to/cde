@@ -1252,21 +1252,97 @@ class ProdutoUtils:
 class UserUtils:
     @staticmethod
     # RETORNA DADOS DE PERMISSÃO
-    def get_permissions():
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT * 
-                FROM aux_permissions
-                ORDER BY id_perm;
-            ''')
+    def get_permissions(id_perm=False):
+        if not id_perm:
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    SELECT * 
+                    FROM aux_permissions
+                    ORDER BY id_perm;
+                ''')
 
-            permissions = [{
-                'id_perm': row[0], 'desc_perm': row[1]
-            } for row in cursor.fetchall()]
+                permissions = [{
+                    'id_perm': row[0], 'desc_perm': row[1]
+                } for row in cursor.fetchall()]
+        else:
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    SELECT * 
+                    FROM aux_permissions
+                    WHERE id_perm = ?
+                    ORDER BY id_perm;
+                ''', (id_perm,))
+
+                permissions = [{
+                    'id_perm': row[0], 'desc_perm': row[1]
+                } for row in cursor.fetchall()]
 
         return permissions
-    
+
+
+    @staticmethod
+    # INSERE PERMISSÃO
+    def insert_permissions(id_perm, desc_perm) -> bool:
+        try:
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    INSERT INTO aux_permissions (
+                        id_perm, desc_perm
+                    ) VALUES (
+                        ?, ?
+                    );
+                ''',(id_perm, desc_perm))
+                
+                connection.commit()
+                
+                return True
+        except Exception as e:
+            return False
+
+
+    @staticmethod
+    # ALTERA PERMISSÃO
+    def update_permissions(old_id_perm, id_perm, desc_perm) -> bool:
+        try:
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    UPDATE 
+                    aux_permissions 
+                    SET 
+                        id_perm = ?,
+                        desc_perm = ? 
+                    WHERE 
+                        id_perm = ?;
+                ''',(id_perm, desc_perm, old_id_perm))
+                
+                connection.commit()
+                
+                return True
+        except Exception as e:
+            return False
+
+
+    @staticmethod
+    # DELETA PERMISSÃO
+    def delete_permissions(id_perm) -> bool:
+        try:
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    DELETE FROM aux_permissions 
+                    WHERE id_perm = ?;
+                ''',(id_perm,))
+                
+                connection.commit()
+                
+                return True
+        except Exception as e:
+            return False
+
 
     @staticmethod
     # RETORNA DADOS DOS USUÁRIOS
@@ -1762,6 +1838,44 @@ def users():
     return render_template(
         'pages/users/users.html', 
         users=UserUtils.get_users()
+    )
+
+
+@app.route('/cde/permissions', methods=['GET', 'POST'])
+@system.verify_auth('CDE018')
+def permissions():
+    if request.method == 'POST':
+        id_perm_add = request.form['id_perm_add']
+        desc_perm_add = request.form['desc_perm_add']
+        
+        if id_perm_add and desc_perm_add:
+            UserUtils.insert_permissions(id_perm_add, desc_perm_add)
+    
+    permissions = UserUtils.get_permissions()
+    
+    return render_template(
+        'pages/cde-permissions.html',
+        permissions=permissions
+    )
+
+
+@app.route('/cde/permissions/<string:id_perm>', methods=['GET', 'POST'])
+@system.verify_auth('CDE018')
+def permissions_id(id_perm):
+    if request.method == 'POST':
+        input_id_perm = request.form['id_perm']
+        input_desc_perm = request.form['desc_perm']
+        
+        if input_id_perm and input_desc_perm:
+            UserUtils.update_permissions(id_perm, input_id_perm, input_desc_perm)
+
+    permissions = UserUtils.get_permissions()
+    id_perm_data = UserUtils.get_permissions(id_perm)
+    
+    return render_template(
+        'pages/cde-permissions.html',
+        permissions=permissions,
+        id_perm_data=id_perm_data
     )
 
 
@@ -2870,46 +2984,9 @@ def carga_id(id_carga):
 def cargas():
     if request.method == 'POST':
         all_cargas = CargaUtils.get_cargas_finalizadas()
-        if all_cargas:
-            cargas_except_query = ', '.join(map(str, all_cargas))
-            query = f'''
-                SELECT DISTINCT 
-                    icrg.CODIGO_GRUPOPED AS NRO_CARGA,
-                    icrg.NRO_PEDIDO      AS NRO_PEDIDO,
-                    ped.CODIGO_CLIENTE   AS COD_CLIENTE,
-                    cl.FANTASIA          AS FANT_CLIENTE,
-                    crg.DATA_EMISSAO     AS DT_EMISSAO,
-                    iped.DT_ENTREGA      AS DT_ENTREGA, 
-                    crg.OBSERVACAO       AS OBS_CARGA
-
-                FROM DB2ADMIN.ITEMPED iped
-
-                JOIN DB2ADMIN.IGRUPOPE icrg
-                ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
-                AND icrg.SEQ = iped.SEQ
-
-                JOIN DB2ADMIN.PEDIDO ped
-                ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
-                
-                JOIN DB2ADMIN.GRUPOPED crg
-                ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
-
-                JOIN DB2ADMIN.CLIENTE cl
-                ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
-
-                JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
-                ON i.ITEM = iped.ITEM
-
-                WHERE icrg.QTDE_FATUR != 0
-                AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
-
-                ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-            '''
-        else:
-            query = '''SELECT 'SEM CARGAS' AS MSG;'''
         
-        dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = CargaUtils.get_cargas(all_cargas)
+        
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
@@ -2920,6 +2997,14 @@ def cargas():
         return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert)
     result = []
     return render_template('pages/mov/mov-carga/mov-carga.html', result=result)
+
+
+@app.route('/mov/requisicao')
+@system.verify_auth('MOV007')
+def mov_request():
+    return render_template(
+        'pages/mov/mov-request/mov-request.html'
+    )
 
 
 @app.route('/api/qtde_solic', methods=['GET'])
