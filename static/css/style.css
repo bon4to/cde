@@ -14,6 +14,7 @@
     --programmed-l5: 165, 235, 255;
     --programmed-l6: 255, 165, 225;
     --programmed-l7: 255, 220, 165;
+    --background: #212121;
     --dark-background: #252525;
     --dark-element: #292929;
     --light-text: #f7f7f7;
@@ -84,12 +85,12 @@ span.id-page {
 }
 
 html.dark {
-    background-color: var(--dark-background);
+    background-color: var(--background);
 }
 
 html.dark body,
 html.dark div.container {
-    background-color: var(--dark-background);
+    background-color: var(--background);
     color: var(--dark-text);
 }
 
@@ -106,6 +107,13 @@ html.dark select {
     color: var(--dark-text);
     border-color: #1d1d1d;
     background-color: #272727;
+}
+
+html.dark select:focus,
+html.dark textarea:focus,
+html.dark input:focus {
+    border-bottom: 2px solid var(--cor-destaque);
+    transition: border-color 0.2s ease-out;
 }
 
 html.dark div.glow-tl {
@@ -623,6 +631,7 @@ select, textarea, input {
     box-sizing: border-box;
     margin: 4px 8px 14px 8px;
     border: 1px solid #dcdcdc;
+    border-bottom: 2px solid #dcdcdc;
     background-color: #efefef;
     font-family: "Inter", sans-serif;
 }
@@ -698,8 +707,7 @@ textarea.address-observ {
 
 input:focus, select:focus, textarea:focus{
     outline: none;
-    border: 1px solid var(--cor-destaque);
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0px 8px rgba(0, 0, 0, 0.3);
     border-bottom: 2px solid var(--cor-destaque);
 }
 
