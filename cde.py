@@ -125,10 +125,10 @@ Pressione ENTER para sair...
         sys.exit(2)
 
 
-class system:
+class cde:
     @staticmethod
     # CONEXÃO E QUERY NO BANCO DE DADOS
-    def db_query_connect(query, dsn):
+    def db_query(query, dsn):
         dsn = f"DSN={dsn}"
         if dsn != 'DSN=SQLITE':
             uid_pwd = os.getenv('DB_USER').split(';')
@@ -372,7 +372,7 @@ class EstoqueUtils:
                     h.rua_numero ASC, i.desc_item ASC;
             '''
             dsn = 'SQLITE'
-            result_local, columns_local = system.db_query_connect(query, dsn)
+            result_local, columns_local = cde.db_query(query, dsn)
             return result_local, columns_local
         else:
             return [], []
@@ -559,50 +559,6 @@ class EstoqueUtils:
         return saldo_item
 
 
-    @staticmethod    
-    # RETORNA TABELA DE SALDO
-    def get_export_promob():
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT 
-                    i.desc_item, 
-                    i.cod_item, 
-                    COALESCE(t.saldo, 0) as saldo, 
-                    t.time_mov
-                FROM 
-                    itens i
-                LEFT JOIN (
-                    SELECT 
-                        cod_item,
-                        SUM(CASE 
-                            WHEN operacao IN ('E', 'TE') THEN quantidade
-                            WHEN operacao IN ('S', 'TS', 'F') THEN (quantidade * -1)
-                            ELSE (quantidade * 0)
-                        END) as saldo,
-                        MAX(time_mov) as time_mov,
-                        ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
-                    FROM 
-                        historico h
-                    GROUP BY 
-                        cod_item
-                    HAVING 
-                        saldo != 0
-                ) t ON i.cod_item = t.cod_item
-                WHERE 
-                    t.rn = 1 OR t.rn IS NULL
-                ORDER BY 
-                    i.cod_item;
-            ''')
-
-            saldo_visualization = [{
-                'cod_item': row[1],
-                'deposito': 2,
-                'qtde'    : row[2]
-            } for row in cursor.fetchall()]
-
-        return saldo_visualization
-
 
 class CargaUtils:
     @staticmethod
@@ -648,7 +604,7 @@ class CargaUtils:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
             
         dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
         return result, columns
 
     
@@ -805,7 +761,7 @@ class CargaUtils:
         '''
         
         dsn = 'SQLITE'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
         
         return result, columns 
 
@@ -880,7 +836,7 @@ class CargaUtils:
         '''
 
         dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
 
         if result:
             return result[0][0]
@@ -913,7 +869,7 @@ class CargaUtils:
         '''
 
         dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
 
         if result:
             return result[0][0]
@@ -1098,7 +1054,7 @@ class ProdutoUtils:
         '''
 
         dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
         return result, columns
 
     
@@ -1474,7 +1430,7 @@ class UserUtils:
         '''
 
         dsn = 'SQLITE'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
 
         if result:
             return result[0][0]
@@ -1733,7 +1689,52 @@ class Misc:
                 return f'{headers}\n'
             return ''
 
+        
+        @staticmethod    
+        # RETORNA TABELA DE SALDO
+        def get_export_promob():
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    SELECT 
+                        i.desc_item, 
+                        i.cod_item, 
+                        COALESCE(t.saldo, 0) as saldo, 
+                        t.time_mov
+                    FROM 
+                        itens i
+                    LEFT JOIN (
+                        SELECT 
+                            cod_item,
+                            SUM(CASE 
+                                WHEN operacao IN ('E', 'TE') THEN quantidade
+                                WHEN operacao IN ('S', 'TS', 'F') THEN (quantidade * -1)
+                                ELSE (quantidade * 0)
+                            END) as saldo,
+                            MAX(time_mov) as time_mov,
+                            ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                        FROM 
+                            historico h
+                        GROUP BY 
+                            cod_item
+                        HAVING 
+                            saldo != 0
+                    ) t ON i.cod_item = t.cod_item
+                    WHERE 
+                        t.rn = 1 OR t.rn IS NULL
+                    ORDER BY 
+                        i.cod_item;
+                ''')
 
+                saldo_visualization = [{
+                    'cod_item': row[1],
+                    'deposito': 2,
+                    'qtde'    : row[2]
+                } for row in cursor.fetchall()]
+
+            return saldo_visualization
+
+        
         @staticmethod
         # CONSTRUTOR DE CSV
         def export_csv(data, filename, include_headers=True):
@@ -1835,19 +1836,19 @@ def inject_version() -> dict:
 # ROTAS DE ACESSO | URL
 #
 @app.route('/')
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def index():
     return redirect(url_for('home'))
 
 
 @app.route('/debug-page')
-@system.verify_auth('DEV000')
+@cde.verify_auth('DEV000')
 def debug_page():
     return render_template('pages/debug-page.html')
 
 
 @app.route('/home')
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def home():
     return render_template(
         'pages/index/cde-index.html', 
@@ -1856,7 +1857,7 @@ def home():
 
 
 @app.route('/home/tl')
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def home_tl():
     return render_template(
         'pages/index/tl-index.html', 
@@ -1865,7 +1866,7 @@ def home_tl():
 
 
 @app.route('/home/hp')
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def home_hp():
     return render_template(
         'pages/index/hp-index.html', 
@@ -1874,13 +1875,13 @@ def home_hp():
 
 
 @app.route('/in-dev')
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def in_dev():
     return render_template('pages/developing.html')
 
 
 @app.route('/users')
-@system.verify_auth('CDE016')
+@cde.verify_auth('CDE016')
 def users():
     return render_template(
         'pages/users/users.html', 
@@ -1889,7 +1890,7 @@ def users():
 
 
 @app.route('/cde/permissions', methods=['GET', 'POST'])
-@system.verify_auth('CDE018')
+@cde.verify_auth('CDE018')
 def permissions():
     if request.method == 'POST':
         id_perm_add = request.form['id_perm_add']
@@ -1907,7 +1908,7 @@ def permissions():
 
 
 @app.route('/cde/permissions/<string:id_perm>', methods=['GET', 'POST'])
-@system.verify_auth('CDE018')
+@cde.verify_auth('CDE018')
 def permissions_id(id_perm):
     if request.method == 'POST':
         input_id_perm = request.form['id_perm']
@@ -1928,7 +1929,7 @@ def permissions_id(id_perm):
 
 # ROTA DE DATABASE MANAGER
 @app.route('/api', methods=['GET', 'POST'])
-@system.verify_auth('DEV000')
+@cde.verify_auth('DEV000')
 def api():
     if request.method == 'POST':
         query = request.form['sql_query']
@@ -1942,7 +1943,7 @@ def api():
                 dsn=dsn
             )
         else:
-            result, columns = system.db_query_connect(query, dsn)
+            result, columns = cde.db_query(query, dsn)
 
             return render_template(
                 'pages/api.html', 
@@ -2103,7 +2104,7 @@ def logout():
 
 
 @app.route('/users/reset-password', methods=['POST'])
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def reset_password():
     password      = request.form['input']
     password_user = Misc.hash_key(password)
@@ -2123,7 +2124,7 @@ def reset_password():
 
 
 @app.route('/get/item', methods=['POST'])
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def get_item():
     input_code = request.form['input_code'].strip()
     result_json = ProdutoUtils.get_item_json(input_code)
@@ -2133,7 +2134,7 @@ def get_item():
 
 # ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
 @app.route('/mov')
-@system.verify_auth('MOV002')
+@cde.verify_auth('MOV002')
 def mov():
     end_lote = EstoqueUtils.get_end_lote()
 
@@ -2144,7 +2145,7 @@ def mov():
 
 
 @app.route('/mov/historico')
-@system.verify_auth('MOV003')
+@cde.verify_auth('MOV003')
 def historico():
     page = request.args.get('page', 1, type=int)
     per_page = 20
@@ -2160,7 +2161,7 @@ def historico():
 
 
 @app.route('/mov/historico/search', methods=['GET', 'POST'])
-@system.verify_auth('MOV003')
+@cde.verify_auth('MOV003')
 def historico_search():
     if request.method == 'POST':
         search_term  = request.form['search_term']
@@ -2202,7 +2203,7 @@ def historico_search():
 
 
 @app.route('/mov/faturado')
-@system.verify_auth('MOV005')
+@cde.verify_auth('MOV005')
 def faturado():
     end_lote = EstoqueUtils.get_end_lote_fat()
 
@@ -2214,7 +2215,7 @@ def faturado():
 
 # ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
 @app.route('/mov/moving', methods=['POST'])
-@system.verify_auth('MOV002')
+@cde.verify_auth('MOV002')
 def moving():
     numero          = int(request.form['end_number'])
     letra           = str(request.form['end_letra'])
@@ -2317,7 +2318,7 @@ def moving():
 
 
 @app.route('/mov/moving/bulk', methods=['POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def moving_bulk():
     sep_carga     = request.json
     timestamp_br  = datetime.now(timezone(timedelta(hours=-3)))
@@ -2350,7 +2351,7 @@ def moving_bulk():
 
 
 @app.route('/get/clientes', methods=['GET'])
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def get_fant_clientes():
     query = '''
         SELECT FANTASIA
@@ -2358,7 +2359,7 @@ def get_fant_clientes():
     '''
 
     dsn = 'HUGOPIET'
-    result, columns = system.db_query_connect(query, dsn)
+    result, columns = cde.db_query(query, dsn)
 
     clientes = [{'FANTASIA': '(indefinido)'}]
     if result:
@@ -2381,7 +2382,7 @@ def get_fant_clientes():
 
 
 @app.route('/mov/carga/incompleta', methods=['GET'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def carga_incomp():
     result, columns = CargaUtils.get_carga_incomp()
     carga_list = CargaUtils.listed_carga_incomp()
@@ -2395,7 +2396,7 @@ def carga_incomp():
 
 
 @app.route('/mov/carga/incompleta/<string:id_carga>', methods=['GET'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def carga_incomp_id(id_carga):
     id_carga = id_carga.split('-')[0]
     
@@ -2426,7 +2427,7 @@ def carga_incomp_id(id_carga):
 
 
 @app.route('/api/insert_carga_incomp', methods=['POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def api_insert_carga_incomp():
     data = request.get_json()
     id_carga = data.get('id_carga')
@@ -2442,7 +2443,7 @@ def api_insert_carga_incomp():
 
 
 @app.route('/get/itens_carga_incomp/<string:id_carga>', methods=['GET'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def route_get_carga_incomp(id_carga):
     id_carga = id_carga.split('-')[0]
     
@@ -2455,7 +2456,7 @@ def route_get_carga_incomp(id_carga):
     
 
 @app.route('/api/conclude-incomp/<string:id_carga>', methods=['POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def conclude_incomp(id_carga):
     try:
         CargaUtils.conclude_carga_incomp(id_carga)
@@ -2465,7 +2466,7 @@ def conclude_incomp(id_carga):
 
 
 @app.route('/envase', methods=['GET'])
-@system.verify_auth('ENV006')
+@cde.verify_auth('ENV006')
 def envase():
     envase_list = Schedule.EnvaseUtils.get_envase()
 
@@ -2476,7 +2477,7 @@ def envase():
 
 
 @app.route('/envase/calendar')
-@system.verify_auth('ENV008')
+@cde.verify_auth('ENV008')
 def calendar_envase():
     envase_list = Schedule.EnvaseUtils.get_envase()
     return render_template(
@@ -2486,7 +2487,7 @@ def calendar_envase():
 
 
 @app.route('/envase/delete/<id_envase>')
-@system.verify_auth('ENV007')
+@cde.verify_auth('ENV007')
 def delete_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2501,7 +2502,7 @@ def delete_envase(id_envase):
 
 
 @app.route('/envase/done/<id_envase>')
-@system.verify_auth('ENV006')
+@cde.verify_auth('ENV006')
 def conclude_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2516,7 +2517,7 @@ def conclude_envase(id_envase):
 
 
 @app.route('/envase/pending/<id_envase>')
-@system.verify_auth('ENV007')
+@cde.verify_auth('ENV007')
 def set_pending_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2531,7 +2532,7 @@ def set_pending_envase(id_envase):
 
 
 @app.route('/envase/edit', methods=['GET', 'POST'])
-@system.verify_auth('ENV007')
+@cde.verify_auth('ENV007')
 def edit_envase():
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -2586,7 +2587,7 @@ def edit_envase():
 
 
 @app.route('/envase/insert', methods=['POST'])
-@system.verify_auth('ENV006')
+@cde.verify_auth('ENV006')
 def insert_envase():
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -2633,7 +2634,7 @@ def insert_envase():
 
 
 @app.route('/processamento', methods=['GET'])
-@system.verify_auth('PRC010')
+@cde.verify_auth('PRC010')
 def producao():
     id_user = session.get('id_user')
     user_permissions = UserUtils.get_user_permissions(id_user)
@@ -2648,7 +2649,7 @@ def producao():
 
 
 @app.route('/processamento/calendar')
-@system.verify_auth('PRC012')
+@cde.verify_auth('PRC012')
 def calendar_producao():
     producao_list =  Schedule.ProcessamentoUtils.get_producao()
 
@@ -2659,7 +2660,7 @@ def calendar_producao():
 
 
 @app.route('/processamento/delete/<id_producao>')
-@system.verify_auth('PRC011')
+@cde.verify_auth('PRC011')
 def delete_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2674,7 +2675,7 @@ def delete_producao(id_producao):
 
 
 @app.route('/processamento/done/<id_producao>')
-@system.verify_auth('PRC010')
+@cde.verify_auth('PRC010')
 def conclude_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2689,7 +2690,7 @@ def conclude_producao(id_producao):
 
 
 @app.route('/processamento/pending/<id_producao>')
-@system.verify_auth('PRC011')
+@cde.verify_auth('PRC011')
 def set_pending_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2704,7 +2705,7 @@ def set_pending_producao(id_producao):
 
 
 @app.route('/processamento/edit', methods=['GET', 'POST'])
-@system.verify_auth('PRC011')
+@cde.verify_auth('PRC011')
 def edit_producao():
     id_user = session.get('id_user')
     user_permissions = UserUtils.get_user_permissions(id_user)
@@ -2767,7 +2768,7 @@ def edit_producao():
 
 
 @app.route('/processamento/insert', methods=['POST'])
-@system.verify_auth('PRC010')
+@cde.verify_auth('PRC010')
 def insert_producao():
     if request.method == 'POST':
         linha           = request.form['linha']
@@ -2804,7 +2805,7 @@ def insert_producao():
 
 
 @app.route('/about')
-@system.verify_auth('CDE001')
+@cde.verify_auth('CDE001')
 def about():
     return render_template(
         'pages/about.html',
@@ -2813,7 +2814,7 @@ def about():
 
 
 @app.route('/users/edit', methods=['POST', 'GET'])
-@system.verify_auth('CDE016')
+@cde.verify_auth('CDE016')
 def users_edit():
     req_id_user = request.args.get('id_user')
     if request.method == 'POST':
@@ -2832,7 +2833,7 @@ def users_edit():
 
 
 @app.route('/users/remove-perm/<int:id_user>/<string:id_perm>', methods=['GET', 'POST'])
-@system.verify_auth('CDE016')
+@cde.verify_auth('CDE016')
 def remove_permission(id_user, id_perm):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2849,7 +2850,7 @@ def remove_permission(id_user, id_perm):
 
 
 @app.route('/users/add-perm/<int:id_user>/<string:id_perm>', methods=['GET', 'POST'])
-@system.verify_auth('CDE016')
+@cde.verify_auth('CDE016')
 def add_permission(id_user, id_perm):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -2869,7 +2870,7 @@ def add_permission(id_user, id_perm):
 
 
 @app.route('/users/inserting', methods=['POST'])
-@system.verify_auth('CDE016')
+@cde.verify_auth('CDE016')
 def cadastrar_usuario():
     if request.method == 'POST':
         login_user     = str(request.form['login_user'])
@@ -2957,7 +2958,7 @@ def cadastrar_usuario():
 
 
 @app.route('/mov/carga/<string:id_carga>', methods=['GET', 'POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def carga_id(id_carga):
     result_local, columns_local = [], []
     if request.method == 'GET':
@@ -3007,7 +3008,7 @@ def carga_id(id_carga):
         '''
 
         dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
         if columns:
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
@@ -3027,7 +3028,7 @@ def carga_id(id_carga):
         
 
 @app.route('/mov/carga', methods=['GET', 'POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def cargas():
     if request.method == 'POST':
         all_cargas = CargaUtils.get_cargas_finalizadas()
@@ -3047,15 +3048,18 @@ def cargas():
 
 
 @app.route('/mov/requisicao')
-@system.verify_auth('MOV007')
+@cde.verify_auth('MOV007')
 def mov_request():
+    result, columns = MovRequestUtils.get_epp_request()
     return render_template(
-        'pages/mov/mov-request/mov-request.html'
+        'pages/mov/mov-request/mov-request.html',
+        result=result,
+        columns=columns
     )
 
 
 @app.route('/api/qtde_solic', methods=['GET'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def get_qtde_solic():
     id_carga = request.args.get('id_carga', type=int)
     cod_item = request.args.get('cod_item', type=str)
@@ -3074,7 +3078,7 @@ def get_qtde_solic():
     '''
     try:
         dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
         if result:
             qtde_solic = result[0][0]
         else:
@@ -3085,7 +3089,7 @@ def get_qtde_solic():
 
 
 @app.route('/api/itens_carga', methods=['GET'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def get_itens_carga():
     id_carga = request.args.get('id_carga', type=int)
     
@@ -3101,7 +3105,7 @@ def get_itens_carga():
     '''
     try:
         dsn = 'HUGOPIET'
-        result, columns = system.db_query_connect(query, dsn)
+        result, columns = cde.db_query(query, dsn)
         if result:
             itens = [row[0] for row in result]
         else:
@@ -3112,7 +3116,7 @@ def get_itens_carga():
 
 
 @app.route('/mov/separacao-pend/<string:id_carga>', methods=['GET', 'POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def carga_sep_pend(id_carga):
     id_carga = id_carga.split('-')[0]
     
@@ -3130,7 +3134,7 @@ def carga_sep_pend(id_carga):
 
 
 @app.route('/mov/separacao-done/<string:id_carga>', methods=['GET', 'POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def carga_sep_done(id_carga):
     if '-' in id_carga:
         id_carga, seq = id_carga.split('-')
@@ -3176,7 +3180,7 @@ def get_username_route(id_user):
 
 
 @app.route('/post/save-localstorage', methods=['POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def save_localstorage():
     try:
         data = request.get_json()
@@ -3220,7 +3224,7 @@ def has_carga_at_history(id_carga):
 
 
 @app.route('/get/load-table-data', methods=['GET'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def load_table_data():
     try:
         filename = request.args.get('filename')
@@ -3241,7 +3245,7 @@ def load_table_data():
     
 
 @app.route('/get/list-all-separations', methods=['GET'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def list_all_separations():
     try:
         directory = os.path.join(app.root_path, 'report/cargas')
@@ -3253,14 +3257,14 @@ def list_all_separations():
 
 
 @app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>', methods=['GET', 'POST'])
-@system.verify_auth('ITE005')
+@cde.verify_auth('ITE005')
 def produtos_toggle_perm(cod_item, flag):
     ProdutoUtils.toggle_item_flag(cod_item, flag)
     return redirect(url_for('produtos_flag'))
 
 
 @app.route('/produtos/flag', methods=['GET', 'POST'])
-@system.verify_auth('ITE005')
+@cde.verify_auth('ITE005')
 def produtos_flag():
     itens = ProdutoUtils.get_all_itens()
     
@@ -3271,7 +3275,7 @@ def produtos_flag():
 
 
 @app.route('/produtos', methods=['GET', 'POST'])
-@system.verify_auth('ITE005')
+@cde.verify_auth('ITE005')
 def produtos():
     itens = ProdutoUtils.get_active_itens()
     if request.method == 'POST':
@@ -3316,7 +3320,7 @@ def produtos():
 
 
 @app.route('/etiqueta', methods=['GET', 'POST'])
-@system.verify_auth('OUT014')
+@cde.verify_auth('OUT014')
 def etiqueta():
     if request.method == 'POST':
         qr_text   = str(request.form['qr_text'])
@@ -3329,7 +3333,7 @@ def etiqueta():
 
 
 @app.route('/rotulo', methods=['GET', 'POST'])
-@system.verify_auth('OUT015')
+@cde.verify_auth('OUT015')
 def rotulo():
     if request.method == 'POST':
         espessura_fita      = Misc.parse_float(request.form['espessura_fita'])
@@ -3379,7 +3383,7 @@ def rotulo():
 
 
 @app.route('/get/linhas', methods=['POST'])
-@system.verify_auth('ENV006')
+@cde.verify_auth('ENV006')
 def get_linhas():
     desc_item = request.form['desc_item']
 
@@ -3435,7 +3439,7 @@ def get_linhas():
 
 
 @app.route('/estoque', methods=['GET', 'POST'])
-@system.verify_auth('MOV004')
+@cde.verify_auth('MOV004')
 def estoque():
     if request.method == 'POST':
         date = request.form['date']
@@ -3451,7 +3455,7 @@ def estoque():
 
 
 @app.route('/estoque-enderecado', methods=['GET', 'POST'])
-@system.verify_auth('MOV004')
+@cde.verify_auth('MOV004')
 def estoque_enderecado():
     if request.method == 'POST':
         date = request.form['date']
@@ -3467,7 +3471,7 @@ def estoque_enderecado():
 
 
 @app.route('/estoque-presets', methods=['GET', 'POST'])
-@system.verify_auth('MOV004')
+@cde.verify_auth('MOV004')
 def estoque_preset():
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
@@ -3482,7 +3486,7 @@ def estoque_preset():
 
 
 @app.route('/cargas-presets', methods=['GET', 'POST'])
-@system.verify_auth('MOV006')
+@cde.verify_auth('MOV006')
 def cargas_preset():
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
@@ -3497,7 +3501,7 @@ def cargas_preset():
 
 
 @app.route('/export_csv/<tipo>', methods=['GET'])
-@system.verify_auth('CDE017')
+@cde.verify_auth('CDE017')
 def export_csv_tipo(tipo):
     # EXPORT .csv
     header = True
