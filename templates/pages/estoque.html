@@ -105,8 +105,8 @@
                     </div>
                     <div class="split-horizontal">
                         <a href="{{ url_for('export_csv_tipo', tipo='estoque') }}">Baixar tabela...</a>
-                        {% if session['user_grant'] <= 1 %}
-                            <a href="{{ url_for('export_csv_tipo', tipo='export_promob') }}">Exportar para ajuste (PROMOB)...</a>
+                        {% if session['user_grant'] <= 2 %}
+                            <a href="{{ url_for('export_csv_tipo', tipo='export_promob') }}">Exportar para PROMOB (ESM009)...</a>
                         {% endif %}
                     </div>
                 {% endblock table %}

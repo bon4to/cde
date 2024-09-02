@@ -94,7 +94,7 @@ LIMIT 100;{% endif %}</textarea>
                             </thead>
                             <tbody>
                                 {% for row in result %}
-                                    <tr>
+                                    <tr class="selectable-row" style="cursor: unset">
                                         {% for value in row %}
                                             <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
                                         {% endfor %}

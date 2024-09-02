@@ -31,7 +31,9 @@
                                     <a href="{{ url_for('estoque') }}">MOV004 | ESTOQUE</a>
                                     <a href="{{ url_for('faturado') }}">MOV005 | FATURADO</a>
                                     <a href="{{ url_for('cargas') }}">MOV006 | CARGAS</a>
-                                    <a href="{{ url_for('carga_incomp') }}">MOV006 | C. INCOMPLETA</a>
+                                    {% if 'user_grant' in session and session['user_grant'] == 1 %}
+                                        <a href="{{ url_for('mov_request') }}">MOV007 | REQUISIÇÕES</a>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="dropdown">
