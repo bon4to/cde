@@ -1895,6 +1895,17 @@ div.msg-alert {
     border-bottom: 4px solid var(--cor-destaque);
 }
 
+#recent-pages-table .selectable-row {
+    border-left: 4px solid transparent;
+    transition: all 0.1s ease-in-out;
+}
+
+#recent-pages-table .selectable-row:hover {
+    border-left: 4px solid var(--cor-destaque);
+    transition: all 0.1s ease-in-out;
+}
+
+
 .sub-total td {
     color: rgb(27, 26, 26);
     transition: 0.1s ease-in-out all;

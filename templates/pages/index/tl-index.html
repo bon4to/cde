@@ -49,11 +49,22 @@
                 </a>
             </div>
         </div>
-        <div class="item featured" onclick="window.location.href='{{ url_for('mov') }}';">
+        <div class="item featured" onclick="window.location.href='{{ url_for('mov_request') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
-                    <h2 class="text-default">Movimentar</h2>
-                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV002&nbsp;•&nbsp;</span>Faça movimentações no estoque.</p>
+                    <h2 class="text-default">Requisições</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV007&nbsp;•&nbsp;</span>Realize requisições.</p>
+                </div>
+                <a class="btn-fancy button-mini">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/hand-helping.svg') }}" alt="">
+                </a>
+            </div>
+        </div>
+        <div class="item" onclick="window.location.href='{{ url_for('mov') }}';">
+            <div class="split-horizontal algn-cntr">
+                <div style="text-align: left">
+                    <h2 class="text-default">Movim.</h2>
+                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">MOV002</span></p>
                 </div>
                 <a class="btn-fancy button-mini">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">

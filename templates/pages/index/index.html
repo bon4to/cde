@@ -26,8 +26,14 @@
             {% endblock brow %}
         </div>
         <div class="flex-row" style="min-width: 100%;">
-            <div class="forms-container menu-container flex-column" style="border-radius: 44px; min-height: unset">
-                <div class="flex-row" style="min-width: 100%;">
+            <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content;">
+                <div class="split-horizontal" style="min-width: 100%;">
+                    {% block side_banner %}  
+                        <div class="side-banner" style="background-color: var(--cor-destaque)">
+                            <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
+                        </div>
+                    {% endblock side_banner %}
+                    
                     {% if 'user_grant' in session %}
                         <div style="display: flex; flex-direction: column; justify-content: space-between">
                             {% if not about %}
@@ -56,7 +62,7 @@
                                     </p>
                                 </div>
                             {% endif %}
-                            <div class="container-grid" style="margin-bottom: 32px">
+                            <div class="container-grid" style="margin-bottom: 32px; padding: 10px 0 10px 20px">
                                 {% block grid_buttons %}
                                     <div class="item featured" onclick="window.location.href='{{ url_for('home_hp') }}';">
                                         <div class="split-horizontal algn-cntr">
@@ -128,7 +134,7 @@
                                     {% endif %}
                                 {% endblock grid_buttons %}
                             </div>
-                            <div class="split-horizontal" style="padding: 0 20px;width: auto;">
+                            <div class="split-horizontal" style="padding: 10px 0 10px 20px; width: auto;">
                                 <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
                                     <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
                                 </a>
@@ -139,12 +145,17 @@
                             </div>
                         </div>
                     {% endif %}
-
-                    {% block side_banner %}  
-                        <div class="side-banner" style="background-color: var(--cor-destaque)">
-                            <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
-                        </div>
-                    {% endblock side_banner %}
+                </div>
+            </div>
+            <div class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; ">
+                <div id="recent-pages">
+                    <h1 class="cor-web" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
+                    <hr style="margin-right: 4px; width: 20%;">
+                    <table id="recent-pages-table" style="text-align: right;">
+                        <th>
+                            <td>Não há recentes</td>
+                        </th>
+                    </table>
                 </div>
             </div>
         </div>
@@ -165,6 +176,11 @@
             }
             let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
             document.getElementById("saudacao").innerHTML = salute;
+
         </script>
 
         {% include 'shared/footer.html' %}
+
+        <script>
+            loadRecentPages();
+        </script>
