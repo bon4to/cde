@@ -30,8 +30,8 @@ if __name__:
     app.config['APP_VERSION'] = ['0.4.6', 'Setembro/2024', False]
 
     # GET nome do diretório
-    dir_os        = os.path.dirname(os.path.abspath(__file__)).upper()
-    debug_dir     = os.getenv('DEBUG_DIR').upper().split(';')
+    dir_os = os.path.dirname(os.path.abspath(__file__)).upper()
+    debug_dir = os.getenv('DEBUG_DIR').upper().split(';')
     main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
 
     class ANSI:
@@ -56,7 +56,7 @@ if __name__:
 
 
     def logging(tag_1, tag_2, msge):
-        timestamp = Misc.get_timestamp()
+        timestamp = misc.get_timestamp()
         if not tag_2:
             print(f'{tag_1} {msge}')
             return
@@ -382,8 +382,8 @@ class EstoqueUtils:
     # RETORNA TABELA DE SALDO
     def get_saldo_view(timestamp=False):
         if timestamp:
-            timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = Misc.parse_db_datetime(timestamp)
+            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = misc.parse_db_datetime(timestamp)
         
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -447,8 +447,8 @@ class EstoqueUtils:
         '''
 
         if timestamp:
-            timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = Misc.parse_db_datetime(timestamp)
+            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = misc.parse_db_datetime(timestamp)
 
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -476,8 +476,8 @@ class EstoqueUtils:
     # RETORNA ENDEREÇAMENTO POR LOTES
     def get_end_lote(timestamp=False):
         if timestamp:
-            timestamp = Misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = Misc.parse_db_datetime(timestamp)
+            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = misc.parse_db_datetime(timestamp)
         
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -557,7 +557,6 @@ class EstoqueUtils:
             ''', (rua_numero, rua_letra, cod_item, cod_lote))
             saldo_item = cursor.fetchone()[0]
         return saldo_item
-
 
 
 class CargaUtils:
@@ -942,28 +941,33 @@ class HistoricoUtils:
 
     @staticmethod
     # INSERE REGISTRO NA TABELA DE HISTÓRICO
-    def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga):
-        user_name_mov = session['user_name']
+    def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga) -> bool:
         id_user_mov = session['id_user']
-
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                INSERT INTO historico (
-                    rua_numero, rua_letra, cod_item,
-                    lote_item, quantidade, operacao,
-                    time_mov, id_carga, id_user)
-                VALUES (
-                    ?, ?, ?,
-                    ?, ?, ?,
-                    ?, ?, ?);                
-                ''',
-                (numero, letra, cod_item,
-                lote_item, quantidade, operacao, 
-                timestamp_out, id_carga, id_user_mov)
-            )
-            
-            connection.commit()
+        try:    
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute(
+                    '''
+                    INSERT INTO historico (
+                        rua_numero, rua_letra, cod_item,
+                        lote_item, quantidade, operacao,
+                        time_mov, id_carga, id_user
+                    ) VALUES (
+                        ?, ?, ?,
+                        ?, ?, ?,
+                        ?, ?, ?
+                    );                
+                    ''', 
+                    (
+                        numero, letra, cod_item,
+                        lote_item, quantidade, operacao, 
+                        timestamp_out, id_carga, id_user_mov
+                    )
+                )
+                connection.commit()
+            return True
+        except Exception as e:
+            return False
 
 
     @staticmethod
@@ -1241,7 +1245,7 @@ class ProdutoUtils:
 
     @staticmethod
     # ALTERA STATUS (ATIVO/INATIVO) DO ITEM
-    def toggle_item_flag(cod_item, flag):
+    def toggle_item_flag(cod_item, flag) -> None:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1253,6 +1257,62 @@ class ProdutoUtils:
 
 
 class UserUtils:
+    @staticmethod
+    def set_ult_acesso(id_user) -> bool:
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    UPDATE users
+                    SET ult_acesso = ?
+                    WHERE id_user = ?;
+                ''',
+                (current_time, id_user))
+                connection.commit()
+            return True
+        except Exception as e:
+            return False
+
+
+    @staticmethod
+    def get_user_key(login_user):
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT 
+                    password_user
+                FROM users
+                WHERE login_user = ?;
+            ''', (login_user,))
+
+            row = cursor.fetchone()
+
+            if row is None:
+                return ''
+            return str(row[0])
+
+
+    @staticmethod
+    def get_user_data(login_user):
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT 
+                    id_user, nome_user, 
+                    sobrenome_user, privilege_user,
+                    ult_acesso
+                FROM users
+                WHERE login_user = ?;
+            ''', (login_user,))
+
+            row = cursor.fetchone()
+
+            if row is None:
+                return row
+            return row
+
+
     @staticmethod
     # RETORNA DADOS DE PERMISSÃO
     def get_permissions(id_perm=False):
@@ -1507,10 +1567,10 @@ class Schedule:
             return producao_list
 
 
-class Misc:
+class misc:
     @staticmethod
     # BUSCA FRASE PARA /INDEX
-    def get_frase():
+    def get_frase() -> str:
         with open('static/frases.txt', 'r', encoding='utf-8') as file:
             frases = file.readlines()
             frase = random.choice(frases).strip()
@@ -1533,13 +1593,13 @@ class Misc:
     
     @staticmethod
     # GERA ETIQUETA COM QRCODE
-    def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote):
+    def generate_etiqueta(qr_text, desc_item, cod_item, cod_lote) -> str:
         width, height = 400, 400
         img  = Image.new('RGB', (width, height), color='white')
         cod_lote = f'LOTE: {cod_lote}'
         desc_item = f'{cod_item} - {desc_item}'
 
-        qr_image = Misc.qr_code(qr_text)
+        qr_image = misc.qr_code(qr_text)
         qr_width, qr_height = qr_image.size
         img.paste(qr_image, ((width - qr_width) // 2, (height - qr_height) // 2))
 
@@ -1569,13 +1629,13 @@ class Misc:
 
     @staticmethod
     # RETORNA TIMESTAMP
-    def get_timestamp():
+    def get_timestamp() -> str:
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
     @staticmethod
     # ADICIONA DIAS À DATA INFORMADA
-    def add_days_to_datetime_str(date_str, qtde_days):
+    def add_days_to_datetime_str(date_str, qtde_days) -> str:
 
         date_obj = datetime.strptime(date_str, '%Y-%m-%d')
         
@@ -1592,13 +1652,14 @@ class Misc:
         if not session.get('user_grant') == 1:
             if debug == True:
                 print(f'{[TAGS.ERRO]}A mensagem não pôde ser enviada em modo debug')
+                return None
             else:
                 bot_token = os.getenv('TLG_BOT_TOKEN')
                 chat_id   = os.getenv('TLG_CHAT_ID')
 
-                url       = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-                params    = {'chat_id': chat_id, 'text': msg}
-                response  = requests.post(url, params=params)
+                url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+                params = {'chat_id': chat_id, 'text': msg}
+                response = requests.post(url, params=params)
                 return response.json()
         else:
             return None
@@ -1622,22 +1683,22 @@ class Misc:
 
     @staticmethod
     # HASH DA SENHA
-    def hash_key(password):
+    def hash_key(password) -> str:
         return pbkdf2_sha256.hash(password)
 
 
     @staticmethod
     # PARSE P/ FLOAT
-    def parse_float(value):
+    def parse_float(value) -> float:
         try:
             return float(value.replace(',', '.'))
         except ValueError:
-            return 0
+            return 0.0
     
 
     @staticmethod
     # VERIFICA SENHA NO BANCO DE HASH
-    def password_check(id_user, password):
+    def password_check(id_user, password) -> bool:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1650,20 +1711,20 @@ class Misc:
             
             if row:
                 db_password = row[0]
-                return Misc.check_key(db_password, password)
+                return misc.check_key(db_password, password)
             return False
 
 
     @staticmethod
     # VERIFICA SENHA NO BANCO DE HASH
-    def check_key(hashed_pwd, pwd):
+    def check_key(hashed_pwd, pwd) -> bool:
         return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
     class CSVUtils:
         @staticmethod
         # CSV PARA INTEGRAÇÃO ERP
-        def iterate_csv_data_erp(data):
+        def iterate_csv_data_erp(data) -> str:
             csv_data = ''
             for item in data:
                 line = ';'.join(map(str, item.values()))
@@ -1673,7 +1734,7 @@ class Misc:
 
         @staticmethod
         # CORPO CSV PADRAO
-        def iterate_csv_data(data):
+        def iterate_csv_data(data) -> str:
             csv_data = ''
             for item in data:
                 line = ';'.join(map(str, item.values()))
@@ -1741,10 +1802,10 @@ class Misc:
             if data and len(data) > 0:
                 csv_data = ''
                 if not include_headers:
-                    csv_data += Misc.CSVUtils.iterate_csv_data_erp(data)
+                    csv_data += misc.CSVUtils.iterate_csv_data_erp(data)
                 else:
-                    csv_data += Misc.CSVUtils.add_headers(data)
-                    csv_data += Misc.CSVUtils.iterate_csv_data(data)
+                    csv_data += misc.CSVUtils.add_headers(data)
+                    csv_data += misc.CSVUtils.iterate_csv_data(data)
 
                 csv_filename = Response(csv_data, content_type='text/csv')
                 csv_filename.headers['Content-Disposition'] = f'attachment; filename={filename}.csv'
@@ -1801,7 +1862,7 @@ def check_ip() -> None:
         blacklist = os.getenv('BLACKLIST')
         if client_ip in blacklist:
             msg = f'{client_ip} na Blacklist.'
-            Misc.tlg_msg(msg)
+            misc.tlg_msg(msg)
             abort(403)
     '''
     else:
@@ -1852,7 +1913,7 @@ def debug_page():
 def home():
     return render_template(
         'pages/index/cde-index.html', 
-        frase=Misc.get_frase()
+        frase=misc.get_frase()
     )
 
 
@@ -1861,7 +1922,7 @@ def home():
 def home_tl():
     return render_template(
         'pages/index/tl-index.html', 
-        frase=Misc.get_frase()
+        frase=misc.get_frase()
     )
 
 
@@ -1870,7 +1931,7 @@ def home_tl():
 def home_hp():
     return render_template(
         'pages/index/hp-index.html', 
-        frase=Misc.get_frase()
+        frase=misc.get_frase()
     )
 
 
@@ -1980,7 +2041,7 @@ def change_password():
     else:
         user_id = session.get('id_user')
         password = request.form['input']
-        if user_id and Misc.password_check(user_id, password):
+        if user_id and misc.password_check(user_id, password):
             alert_type = 'REDEFINIR (SENHA)'
             alert_msge = 'A senha deve ter no mínimo 6 caracteres.'
             alert_more = '/users/reset-password'
@@ -2005,92 +2066,79 @@ def login():
             return redirect(url_for('index'))
     
         input_login = str(request.form['login_user'])
-        input_pwd   = str(request.form['password_user'])
+        input_pwd = str(request.form['password_user'])
 
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT privilege_user, nome_user, sobrenome_user,
-                        password_user, id_user, ult_acesso
-                FROM users
-                WHERE login_user = ?;
-            ''', (input_login,))
+        user_pwd = UserUtils.get_user_key(input_login)
 
-            row = cursor.fetchone()
-
-            if row is None:
-                # if 'logged_in' in session:
-                alert_msge = 'O usuário não foi encontrado. Tente novamente.'
-                return render_template(
-                    'pages/login.html', 
-                    alert_msge=alert_msge
-                )
-            user_pwd = row[3]
-
-            if not Misc.check_key(user_pwd, input_pwd):
-                alert_msge = 'A senha está incorreta. Tente novamente.'
-                return render_template(
-                    'pages/login.html', 
-                    alert_msge=alert_msge
-                )
+        # check if user exists
+        if not user_pwd:
+            alert_msge = 'O usuário não foi encontrado. Tente novamente.'
+            return render_template(
+                'pages/login.html', 
+                alert_msge=alert_msge
+            )
         
-            privilege_user = row[0]
-            nome_user      = row[1]
-            sobrenome_user = row[2]
-            id_user        = row[4]
+        # check if user password is correct
+        if not misc.check_key(user_pwd, input_pwd):
+            alert_msge = 'A senha está incorreta. Tente novamente.'
+            return render_template(
+                'pages/login.html', 
+                alert_msge=alert_msge
+            )
 
-            try:
-                session['user_initials'] = f'{nome_user[0]}{sobrenome_user[0]}'
-                session['user_name']     = f'{nome_user} {sobrenome_user}'
-            finally:
-                session['id_user']       = id_user
-                session['logged_in']     = True
-                session['user_grant']    = privilege_user
+        # get dados do user
+        user_data = UserUtils.get_user_data(input_login)
+        if user_data is not None:
+            user_id = user_data[0]
+            user_nome = user_data[1]
+            user_snome = user_data[2]
+            user_role = user_data[3]
 
-                msg = f'''[LOG-IN]\n{id_user} - {nome_user} {sobrenome_user}\n{request.remote_addr}'''
-                Misc.tlg_msg(msg)
+        try:
+            if user_snome == ' ':
+                session['user_name'] = f'{user_nome}'
+                session['user_initials'] = f'{user_nome[0]}{user_nome[1]}'
+            else:
+                session['user_name'] = f'{user_nome} {user_snome}'
+                session['user_initials'] = f'{user_nome[0]}{user_snome[0]}'
 
-                acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                input_pwd = "12345"
-                if Misc.check_key(user_pwd, input_pwd):
-                    alert_type = 'REDEFINIR (SENHA)'
-                    alert_msge = 'Você deve definir sua senha no seu primeiro acesso.'
-                    alert_more = '/users/reset-password'
-                    url_return = 'Digite sua nova senha...'
+        finally:
+            session['user_grant'] = user_role
+            session['id_user'] = user_id
+            session['logged_in'] = True
 
-                    with sqlite3.connect(db_path) as connection:
-                        acesso = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        cursor = connection.cursor()
-                        cursor.execute('''
-                            UPDATE users
-                            SET ult_acesso = ?
-                            WHERE id_user  = ?;
-                        ''',
-                        (acesso, id_user))
-                        connection.commit()
+            msg = f'[LOG-IN]\n{user_id} - {user_nome} {user_snome}\n{request.remote_addr}'
+            misc.tlg_msg(msg)
+
+            # verifica se a senha inserida
+            # é a senha temporária
+            input_pwd = '12345'
+
+            if misc.check_key(user_pwd, input_pwd):
+                alert_type = 'REDEFINIR (SENHA)'
+                alert_msge = 'Você deve definir sua senha no seu primeiro acesso.'
+                alert_more = '/users/reset-password'
+                url_return = 'Digite sua nova senha...'
+
+                UserUtils.set_ult_acesso(user_id)
+
+                return render_template(
+                    'components/menus/alert-input.html', 
+                    alert_type=alert_type,
+                    alert_msge=alert_msge,
+                    alert_more=alert_more,
+                    url_return=url_return
+                )
+            else:
+                # if ult_acesso:
+                if debug == False:
+                    UserUtils.set_ult_acesso(user_id)
                     
-                    return render_template(
-                        'components/menus/alert-input.html', 
-                        alert_type=alert_type,
-                        alert_msge=alert_msge,
-                        alert_more=alert_more,
-                        url_return=url_return
-                    )
-                else:
-                    # if ult_acesso:
-                    if not debug == True:
-                        with connection:
-                            cursor = connection.cursor()
-                            cursor.execute('''
-                                UPDATE users
-                                SET ult_acesso = ?
-                                WHERE id_user  = ?;
-                            ''', (acesso, id_user))
-                    next_url = session.get('next_url')
-                    
-                    if next_url:
-                        return redirect(next_url)
-                    return redirect(url_for('index'))
+                next_url = session.get('next_url')
+                if next_url:
+                    return redirect(next_url)
+                # else:
+                return redirect(url_for('index'))
     else:
         # if not request.method == 'POST':
         return redirect(url_for('login'))
@@ -2107,7 +2155,7 @@ def logout():
 @cde.verify_auth('CDE001')
 def reset_password():
     password      = request.form['input']
-    password_user = Misc.hash_key(password)
+    password_user = misc.hash_key(password)
     id_user       = session.get('id_user')
 
     with sqlite3.connect(db_path) as connection:
@@ -2878,7 +2926,7 @@ def cadastrar_usuario():
         sobrenome_user = str(request.form['sobrenome_user'])
         privilege_user = int(request.form['privilege_user'])
         data_cadastro  = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        password_user  = Misc.hash_key(request.form['password_user'])
+        password_user  = misc.hash_key(request.form['password_user'])
 
         try:
             with sqlite3.connect(db_path) as connection:
@@ -2923,7 +2971,7 @@ def cadastrar_usuario():
 
                     msg = \
                     f'''[CADASTRO]\n{request.remote_addr}\n{id_user} - {user_name} [+] {nome_user} {sobrenome_user} ({privilege_user})'''
-                    Misc.tlg_msg(msg)
+                    misc.tlg_msg(msg)
 
         except sqlite3.IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
@@ -3328,7 +3376,7 @@ def etiqueta():
         cod_item  = str(request.form['cod_item'])
         cod_lote  = str(request.form['lote_item'])
 
-        return Misc.generate_etiqueta(qr_text, desc_item, cod_item, cod_lote)
+        return misc.generate_etiqueta(qr_text, desc_item, cod_item, cod_lote)
     return render_template('pages/etiqueta.html', produtos=produtos)
 
 
@@ -3336,11 +3384,11 @@ def etiqueta():
 @cde.verify_auth('OUT015')
 def rotulo():
     if request.method == 'POST':
-        espessura_fita      = Misc.parse_float(request.form['espessura_fita'])
-        diametro_inicial    = Misc.parse_float(request.form['diametro_inicial'])
-        diametro_minimo     = Misc.parse_float(request.form['diametro_minimo'])
-        espessura_papelao   = Misc.parse_float(request.form['espessura_papelao'])
-        compr_rotulo        = Misc.parse_float(request.form['compr_rotulo'])
+        espessura_fita      = misc.parse_float(request.form['espessura_fita'])
+        diametro_inicial    = misc.parse_float(request.form['diametro_inicial'])
+        diametro_minimo     = misc.parse_float(request.form['diametro_minimo'])
+        espessura_papelao   = misc.parse_float(request.form['espessura_papelao'])
+        compr_rotulo        = misc.parse_float(request.form['compr_rotulo'])
         comprimento_total   = 0 # INICIALIZA
         num_voltas          = 0 # INICIALIZA
 
@@ -3531,7 +3579,7 @@ def export_csv_tipo(tipo):
         filename = 'get_saldo_preset'    
     elif tipo == 'export_promob':
         header = False
-        data = Misc.CSVUtils.get_export_promob()
+        data = misc.CSVUtils.get_export_promob()
         filename = 'export_promob'
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
@@ -3544,7 +3592,7 @@ def export_csv_tipo(tipo):
             alert_more=alert_more, 
             url_return=url_for('index')
         )
-    return Misc.CSVUtils.export_csv(data, filename, header)
+    return misc.CSVUtils.export_csv(data, filename, header)
 
 
 # __MAIN__
