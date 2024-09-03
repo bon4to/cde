@@ -12,28 +12,31 @@
                 function trackRecentPages(pageId, pageName) {
                     // Recupera o histórico existente ou inicia um novo array
                     let recentPages = JSON.parse(localStorage.getItem('recentPages')) || [];
-
-                    if (idPage == 'CDE001') {
-                        return
+                
+                    if (pageId === 'CDE001') {
+                        return;
+                    } else {
+                        // Remove a entrada existente com o mesmo pageId, se existir
+                        recentPages = recentPages.filter(page => page.pageId !== pageId);
+                
+                        // Adiciona o novo registro ao final do histórico
+                        recentPages.push({
+                            pageId: pageId,
+                            pageName: pageName,
+                            pageLink: window.location.href
+                        });
+                
+                        // Limita o histórico a 12 registros
+                        if (recentPages.length > 12) {
+                            recentPages.shift();
+                        }
+                
+                        // Salva o histórico atualizado no localStorage
+                        localStorage.setItem('recentPages', JSON.stringify(recentPages));
                     }
+                }                              
 
-                    // Adiciona o novo registro ao histórico
-                    recentPages.push({
-                        pageId: pageId,
-                        pageName: pageName,
-                        pageLink: window.location.href
-                    });
-
-                    // Limitar o histórico a 10 registros, por exemplo
-                    if (recentPages.length > 12) {
-                        recentPages.shift();
-                    }
-
-                    // Salva o histórico atualizado no localStorage
-                    localStorage.setItem('recentPages', JSON.stringify(recentPages));
-                }
-
-                trackRecentPages(idPage, idPage);
+                trackRecentPages(idPage, `{{ session['id_user'] }}`);
             </script>
         <div style="min-width: min-content;">
 

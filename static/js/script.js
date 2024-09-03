@@ -352,31 +352,54 @@ function visualDelay(ms) {
 function loadRecentPages() {
     // Recupera o histórico do localStorage
     let recentPages = JSON.parse(localStorage.getItem('recentPages')) || [];
-    
+    recentPages.reverse(); // Inverte a ordem para exibir os itens mais recentes primeiro
+
     // Seleciona o elemento da tabela onde os dados serão inseridos
     let table = document.getElementById('recent-pages-table');
     table.innerHTML = ''; // Limpa a tabela antes de inserir novos dados
 
-    // Itera sobre o histórico e cria as linhas da tabela
-    recentPages.forEach(page => {
-        let row = table.insertRow();
+    if (recentPages.length > 0) {
+        // Itera sobre o histórico e cria as linhas da tabela
+        recentPages.forEach(page => {
+            let row = table.insertRow(); // Cria uma nova linha para cada item
+            row.classList.add('selectable-row');
+            
+            // Insere a célula com pageId
+            let cell1 = row.insertCell(0);
+            cell1.textContent = page.pageId;
 
-        // Insere as células da tabela com pageId e pageName
-        let cell1 = row.insertCell(0);
-        cell1.textContent = page.pageId;
-        cell1.style.fontSize = '16px';
-        cell1.style.fontWeight = '500';
-
+            /*
+            let cell2 = row.insertCell(1);
+            cell2.innerHTML = page.pageName;
+            cell2.style.textAlign = 'right';
+            cell2.style.border = 'none';
+            */
+            
+            // Adiciona o evento de clique para redirecionar para a página correspondente
+            row.onclick = function() {
+                window.location.href = page.pageLink;
+            };
+        });
+    } else {
+        let row = table.insertRow(); // Cria uma linha para exibir a mensagem de "Não há recentes"
         row.classList.add('selectable-row');
-        cell1.style.border = 'none';
-        cell1.style.fontFamily = "'Chivo Mono', monospace";
+        row.style.cursor = 'default';
+
+        let cell1 = row.insertCell(0);
+        cell1.textContent = 'Não há recentes';
+    }
+}
 
 
-        // Cria o link na terceira célula
-        row.onclick = function() {
-            window.location.href = page.pageLink;
-        };
-    });
+
+function clearRecentPages() {
+    // Remove o item "recentPages" do localStorage
+    localStorage.removeItem('recentPages');
+
+    // Limpa o conteúdo da tabela
+    let table = document.getElementById('recent-pages-table');
+    table.innerHTML = '';
+    loadRecentPages();
 }
 
 
