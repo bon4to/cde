@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>API | CDE</title>
+        <title>Database | CDE</title>
         <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.css">
@@ -46,7 +46,7 @@
     </div>
     <div class="flex-row" style="min-width: 100%;">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
-            <form action="/api" class="form-login" style="padding: 0; border-radius: 10px; margin-bottom: 40px" method="post" onsubmit="showLoading()" id="form-field">
+            <form action="/database" class="form-login" style="padding: 0; border-radius: 10px; margin-bottom: 40px" method="post" onsubmit="showLoading()" id="form-field">
                 <div class="split-horizontal" style="margin: 6px; align-items: center">
                     <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="cor-web subtitle">Console SQL</h1>
                     <div class="flex-row" style="align-items: center; margin: 0 14px;">
@@ -81,7 +81,7 @@ LIMIT 100;{% endif %}</textarea>
                 {% endif %}
                 {% if result %}
                     {% set row_count = result|length %}
-                    <div>Total de Resultados: {{ row_count }}</div>
+                    <div>Total de Resultados: <span style="color: var(--cor-destaque); font-weight: bold">{{ row_count }}</span></div>
                     {% if columns %}
                     <div style="max-height: 600px; overflow: auto; max-width: 70vw;">
                         <table>
