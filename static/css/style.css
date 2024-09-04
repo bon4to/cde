@@ -116,6 +116,18 @@ html.dark input:focus {
     transition: border-color 0.2s ease-out;
 }
 
+html.dark .inline-input {
+    margin-left: 8px; 
+    border: 0; 
+    height: auto; 
+    padding: 6px;
+}
+
+html.dark .inline-input:focus {
+    border: 0; 
+    box-shadow: none;
+}
+
 html.dark div.glow-tl {
     background-color: #ea5a2640;
 }
@@ -2150,20 +2162,20 @@ h1.subtitle {
 }
 
 .toast {
+    opacity: 0;
     display: flex;
-    min-width: 320px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #333;
-    font-family: 'Trebuchet MS', sans-serif;
-    font-size: 16px;
     color: white;
-    padding: 18px 24px 0 24px;
+    font-size: 16px;
+    min-width: 320px;
     margin-top: 10px;
     border-radius: 5px;
-    opacity: 0;
+    align-items: center;
+    flex-direction: column;
+    background-color: #333;
+    padding: 18px 24px 0 24px;
+    justify-content: space-between;
     transition: opacity 0.5s ease-in-out;
+    font-family: 'Trebuchet MS', sans-serif;
 }
 
 .toast.show {

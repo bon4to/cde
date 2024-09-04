@@ -1989,7 +1989,7 @@ def permissions_id(id_perm):
 
 
 # ROTA DE DATABASE MANAGER
-@app.route('/api', methods=['GET', 'POST'])
+@app.route('/database/', methods=['GET', 'POST'])
 @cde.verify_auth('DEV000')
 def api():
     if request.method == 'POST':

@@ -214,15 +214,20 @@ function capitalizeText() {
     let inputsTexto = document.querySelectorAll('input[type="text"]');
     inputsTexto.forEach(function (input) {
         input.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
+            if (!this.classList.contains('no-uppercase')) {
+                this.value = this.value.toUpperCase();
+            }
         });
     });
 
-    // para textareas
+    // para textareas que não sejam gerenciados pelo CodeMirror
     let textAreas = document.querySelectorAll('textarea');
     textAreas.forEach(function (textarea) {
         textarea.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
+            // Ignorar textareas gerenciados pelo CodeMirror
+            if (textarea.classList.contains('uppercase')) {
+                this.value = this.value.toUpperCase();
+            }
         });
     });
 }
@@ -391,7 +396,6 @@ function loadRecentPages() {
 }
 
 
-
 function clearRecentPages() {
     // Remove o item "recentPages" do localStorage
     localStorage.removeItem('recentPages');
@@ -476,6 +480,7 @@ function showToast(message, type = 0, duration = 5000) {
         removeToast(toast);
     }, duration);
 }
+
 
 function removeToast(toast) {
     toast.classList.remove('show');
