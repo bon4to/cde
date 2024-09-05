@@ -23,12 +23,12 @@ function updateItemCount(itemCount) {
 }
 
 
-function cargaFormRedirect(routePage) {
-    const cargaInputBrow = document.getElementById('cargaInputBrow');
+function routeMovRedirect(routePage) {
+    const idInputBrow = document.getElementById('idInputBrow');
     try {
-        const cargaInput = document.getElementById('cargaInput');
-        if (cargaInput.value != '') {
-            cargaInputBrow.value = cargaInput.value;
+        const idInput = document.getElementById('idInput');
+        if (idInput.value != '') {
+            idInputBrow.value = idInput.value;
         }
     } catch (error) {
         console.error(error);
@@ -38,8 +38,8 @@ function cargaFormRedirect(routePage) {
     const regex = /^-?\d+(-\d+)?$/;
 
     // Verifica se o input de carga foi preenchido corretamente
-    if (regex.test(cargaInput.value)) {
-        redirectToCarga(routePage, cargaInput.value);
+    if (regex.test(idInput.value)) {
+        redirectToMov(routePage, idInput.value);
     } else {
         // Opcional: Mostrar um alerta ou mensagem de erro ao usuário
         alert('Por favor, insira um número válido (ex: 123 ou 123-1).');
@@ -47,7 +47,7 @@ function cargaFormRedirect(routePage) {
 }
 
 
-function redirectToCarga(routePage, nroCarga) {
+function redirectToMov(routePage, nroCarga) {
     // redireciona para a rota informada
     const url = `/mov/${routePage}/${nroCarga}`;
     window.location.href = url;
@@ -87,7 +87,7 @@ function listSeparationsLocalStorage(routePage) {
         row.classList.add("selectable-row");
 
         row.addEventListener('click', function() {
-            redirectToCarga(routePage, cargaNumber);
+            redirectToMov(routePage, cargaNumber);
         });
     });
 }
