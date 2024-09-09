@@ -1864,16 +1864,17 @@ def check_ip() -> None:
             msg = f'{client_ip} na Blacklist.'
             misc.tlg_msg(msg)
             abort(403)
-    '''
+
     else:
         current_server_ip = request.host
-        adm_ip = os.getenv('ADM_IPS').split(';')
-        if client_ip not in current_server_ip:
+        print(f'IP: {client_ip} | SERVIDOR: {current_server_ip}')
+        adm_ip = 'debug.cde.com'
+        if adm_ip not in current_server_ip:
             if client_ip not in adm_ip:
                 msg = f'{client_ip}'
-                tlg_msg(msg)
+                misc.tlg_msg(msg)
             abort(403)
-    '''
+
     return None
 
 
@@ -1908,7 +1909,7 @@ def debug_page():
     return render_template('pages/debug-page.html')
 
 
-@app.route('/home')
+@app.route('/home/')
 @cde.verify_auth('CDE001')
 def home():
     return render_template(
@@ -1917,7 +1918,7 @@ def home():
     )
 
 
-@app.route('/home/tl')
+@app.route('/home/tl/')
 @cde.verify_auth('CDE001')
 def home_tl():
     return render_template(
@@ -1926,7 +1927,7 @@ def home_tl():
     )
 
 
-@app.route('/home/hp')
+@app.route('/home/hp/')
 @cde.verify_auth('CDE001')
 def home_hp():
     return render_template(
@@ -1935,13 +1936,13 @@ def home_hp():
     )
 
 
-@app.route('/in-dev')
+@app.route('/in-dev/')
 @cde.verify_auth('CDE001')
 def in_dev():
     return render_template('pages/developing.html')
 
 
-@app.route('/users')
+@app.route('/users/')
 @cde.verify_auth('CDE016')
 def users():
     return render_template(
@@ -1950,7 +1951,7 @@ def users():
     )
 
 
-@app.route('/cde/permissions', methods=['GET', 'POST'])
+@app.route('/cde/permissions/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE018')
 def permissions():
     if request.method == 'POST':
@@ -1968,7 +1969,7 @@ def permissions():
     )
 
 
-@app.route('/cde/permissions/<string:id_perm>', methods=['GET', 'POST'])
+@app.route('/cde/permissions/<string:id_perm>/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE018')
 def permissions_id(id_perm):
     if request.method == 'POST':
@@ -2020,7 +2021,11 @@ def api():
 
 # ROTA PAGINA DE LOGIN
 @app.route('/login')
+@app.route('/login/', methods=['GET'])
 def pagina_login():
+    if session.get('logged_in'):
+        cde.verify_auth('CDE003')
+        return redirect(url_for('index'))
     return render_template('pages/login.html')
 
 
@@ -2058,7 +2063,7 @@ def change_password():
 
 
 # ROTA DE SESSÃO LOGIN
-@app.route('/login', methods=['POST'])
+@app.route('/login/', methods=['POST'])
 def login():
     # TODO: método auxiliar
     if request.method == 'POST':
@@ -2145,7 +2150,7 @@ def login():
 
 
 # ROTA DE SAÍDA DO USUÁRIO
-@app.route('/logout')
+@app.route('/logout/')
 def logout():
     session.clear()
     return redirect(url_for('login'))
@@ -3075,7 +3080,7 @@ def carga_id(id_carga):
     return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=columns)
         
 
-@app.route('/mov/carga', methods=['GET', 'POST'])
+@app.route('/mov/carga/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def cargas():
     if request.method == 'POST':
@@ -3090,12 +3095,19 @@ def cargas():
         else:
             alert = f'''{result[0][0]}'''
             class_alert = 'error'
-        return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=columns, alert=alert, class_alert=class_alert)
+        return render_template(
+            'pages/mov/mov-carga/mov-carga.html',
+            result=result, columns=columns,
+            alert=alert, class_alert=class_alert
+        )
     result = []
-    return render_template('pages/mov/mov-carga/mov-carga.html', result=result)
+    return render_template(
+        'pages/mov/mov-carga/mov-carga.html',
+        result=result
+    )
 
 
-@app.route('/mov/requisicao')
+@app.route('/mov/requisicao/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def mov_request():
     result, columns = MovRequestUtils.get_epp_request()
@@ -3311,7 +3323,7 @@ def produtos_toggle_perm(cod_item, flag):
     return redirect(url_for('produtos_flag'))
 
 
-@app.route('/produtos/flag', methods=['GET', 'POST'])
+@app.route('/produtos/status/', methods=['GET', 'POST'])
 @cde.verify_auth('ITE005')
 def produtos_flag():
     itens = ProdutoUtils.get_all_itens()
@@ -3322,7 +3334,7 @@ def produtos_flag():
     )
 
 
-@app.route('/produtos', methods=['GET', 'POST'])
+@app.route('/produtos/', methods=['GET', 'POST'])
 @cde.verify_auth('ITE005')
 def produtos():
     itens = ProdutoUtils.get_active_itens()
