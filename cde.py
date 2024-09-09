@@ -2020,46 +2020,12 @@ def api():
 
 
 # ROTA PAGINA DE LOGIN
-@app.route('/login')
 @app.route('/login/', methods=['GET'])
 def pagina_login():
     if session.get('logged_in'):
         cde.verify_auth('CDE003')
         return redirect(url_for('index'))
     return render_template('pages/login.html')
-
-
-@app.route('/change-password', methods=['GET', 'POST'])
-def change_password():
-    if request.method == 'GET':
-        alert_type = 'QUAL A SENHA ATUAL?'
-        alert_msge = 'Primeiramente, informe sua senha.'
-        alert_more = '/change-password'
-        url_return = 'Informe sua senha atual...'
-        return render_template(
-            'components/menus/alert-input.html', 
-            alert_type=alert_type,
-            alert_msge=alert_msge,
-            alert_more=alert_more,
-            url_return=url_return
-        )
-    else:
-        user_id = session.get('id_user')
-        password = request.form['input']
-        if user_id and misc.password_check(user_id, password):
-            alert_type = 'REDEFINIR (SENHA)'
-            alert_msge = 'A senha deve ter no mínimo 6 caracteres.'
-            alert_more = '/users/reset-password'
-            url_return = 'Digite sua nova senha...'
-            return render_template(
-                'components/menus/alert-input.html', 
-                alert_type=alert_type,
-                alert_msge=alert_msge,
-                alert_more=alert_more,
-                url_return=url_return
-            )
-        else:
-            return redirect(url_for('change_password'))
 
 
 # ROTA DE SESSÃO LOGIN
@@ -2154,6 +2120,40 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+
+# ROTA DE ALTERAÇÃO DE SENHA
+@app.route('/change-password/', methods=['GET', 'POST'])
+def change_password():
+    if request.method == 'GET':
+        alert_type = 'QUAL A SENHA ATUAL?'
+        alert_msge = 'Primeiramente, informe sua senha.'
+        alert_more = '/change-password'
+        url_return = 'Informe sua senha atual...'
+        return render_template(
+            'components/menus/alert-input.html', 
+            alert_type=alert_type,
+            alert_msge=alert_msge,
+            alert_more=alert_more,
+            url_return=url_return
+        )
+    else:
+        user_id = session.get('id_user')
+        password = request.form['input']
+        if user_id and misc.password_check(user_id, password):
+            alert_type = 'REDEFINIR (SENHA)'
+            alert_msge = 'A senha deve ter no mínimo 6 caracteres.'
+            alert_more = '/users/reset-password'
+            url_return = 'Digite sua nova senha...'
+            return render_template(
+                'components/menus/alert-input.html', 
+                alert_type=alert_type,
+                alert_msge=alert_msge,
+                alert_more=alert_more,
+                url_return=url_return
+            )
+        else:
+            return redirect(url_for('change_password'))
 
 
 @app.route('/users/reset-password', methods=['POST'])
