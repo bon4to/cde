@@ -26,7 +26,7 @@
             {% endblock brow %}
         </div>
         <div class="flex-row" style="min-width: 100%;">
-            <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content;">
+            <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
                 <div class="flex-row" style="min-width: 100%; gap: 30px">
                     {% block side_banner %}  
                         <div class="side-banner" style="background-color: var(--cor-destaque)">
@@ -41,7 +41,7 @@
                                     <div>
                                         <div class="salute-text">
                                             <h1 class="saudacao" id="saudacao"></h1>
-                                            <p class="phrase" id="frase-motivacional">“{{ frase }}”</p>
+                                            <p class="phrase disabled" id="frase-motivacional">“{{ frase }}”</p>
                                         </div>
                                     </div>
                                     <hr style="margin-left: 20px; width: 20%;">
@@ -147,7 +147,7 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; ">
+            <div class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; padding: 24px;">
                 <div id="recent-pages">
                     <h1 class="cor-web" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
                     <hr style="margin-right: 4px; width: 20%;">

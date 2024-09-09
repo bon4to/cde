@@ -25,80 +25,55 @@
         </div>
     </div>
     <div class="flex-row" style="min-width: 100%;">
-        <div draggable="false" class="forms-container" style="padding: 12px 30px;display: unset; max-height: 550px; min-height: unset;">
-            <div class="split-horizontal">
-                <div>
-                    <h2 style="justify-content: flex-start">Cadastrar Usuário</h2>
-                    <form action="/users/inserting" method="post">
-                        <label for="login_user">Login: <span style="color: red">*</span></label>
-                        <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
-                        <div class="split-horizontal">
-                            <label for="password_user">Senha: <span style="color: red">*</span></label><label class="cor-web" style="text-align: right;" id="password_strength"></label>
-                        </div>
-                        <input class="disabled" id="password_user" name="password_user" placeholder="Senha de usuário..." value="12345" disabled required>
-
-                        <script>
-                            const passwordInput = document.getElementById('password_user');
-                            const passwordStrength = document.getElementById('password_strength');
-
-                            function checkPasswordStrength(password) {
-                                let strength = 0;
-
-                                if (password.length >= 12){
-                                    strength = 2;
-                                }
-                                else if (password.length >= 8){
-                                    strength = 1;
-                                }
-                                else if (password.length < 8){
-                                    strength = 0;
-                                }
-                                if (strength === 0) {
-                                    passwordStrength.innerHTML = '<span style="color: red">Fraca *</span>';
-                                } else if (strength === 1) {
-                                    passwordStrength.innerHTML = '<span style="color: orange">Média **</span>';
-                                } else {
-                                    passwordStrength.innerHTML = '<span style="color: green">Forte ***</span>';
-                                }
-                            }
-
-                            passwordInput.addEventListener('input', function () {
-                                const password = this.value;
-                                checkPasswordStrength(password);
-                            });
-                        </script>
-                        <div class="split-horizontal">
-                            <div>
-                                <label for="nome_user">Nome: <span style="color: red">*</span></label><br>
-                                <input class="address" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
+        <div class="forms-container" style="padding: 12px 30px;display: unset; max-height: 550px; min-height: unset;">
+            {% if session['user_grant'] <= 2 %}
+                <div class="split-horizontal">
+                    <div>
+                        <h2 style="justify-content: flex-start">Cadastrar Usuário</h2>
+                        <form action="/users/inserting" method="post">
+                            <label for="login_user">Login: <span style="color: red">*</span></label>
+                            <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
+                            <div class="split-horizontal">
+                                <label for="password_user">Senha: <span style="color: red">*</span></label><label class="cor-web" style="text-align: right;" id="password_strength"></label>
                             </div>
-                            <div>
-                                <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label><br>
-                                <input class="address" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
+                            <input class="disabled" id="password_user" name="password_user" placeholder="Senha de usuário..." value="12345" disabled required>
+                            <div class="split-horizontal">
+                                <div>
+                                    <label for="nome_user">Nome: <span style="color: red">*</span></label><br>
+                                    <input class="address" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
+                                </div>
+                                <div>
+                                    <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label><br>
+                                    <input class="address" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
+                                </div>
                             </div>
-                        </div>
 
-                        <label for="privilege_user">Tipo de Usuário: <span style="color: red">*</span></label>
-                        <select id="privilege_user" name="privilege_user" required>
-                            {% if 'user_grant' in session %}
-                                <option value="3">Padrão</option>
-                                <option value="2">Administrador</option>
-                                {% if session['user_grant'] <= 1 %}
-                                    <option value="4">Espectador</option>
-                                    <option value="1">Desenvolvedor</option>
+                            <label for="privilege_user">Privilégios: <span style="color: red">*</span></label>
+                            <select id="privilege_user" name="privilege_user" required>
+                                {% if 'user_grant' in session %}
+                                    <option value="3">Padrão</option>
+                                    <option value="2">Administrador</option>
+                                    {% if session['user_grant'] <= 1 %}
+                                        <option value="1" style="color: red">Desenvolvedor</option>
+                                    {% endif %}
                                 {% endif %}
-                            {% endif %}
-                        </select>
-                        <p class="alert">Campos com * são obrigatórios.</p>
-                        <div style="display: flex;width: 100%;">
-                            <input class="btn-fancy" style="max-width: none;" type="submit" value="Cadastrar">
-                            
-                        </div>
-                    </form>
+                            </select>
+                            <p style="color: red">Campos com * são obrigatórios.</p>
+                            <div style="display: flex;width: 100%;">
+                                <input class="btn-fancy" style="max-width: none;" type="submit" value="Cadastrar">
+                                
+                            </div>
+                        </form>
+                    </div>
                 </div>
+            {% else %}
+            <div style="margin-top: 50%; padding: 0 80px;">
+                <p class="disabled">Seu usuário não possui privilégios para esta ação.</p>
             </div>
+            {% endif %}
         </div>
         <div draggable="false" class="tables-container" style="width: 600px">
+            <h1>Usuários do Sistema</h1>
             <div class="split-horizontal">
                 <div style="width: 100%;">
                     <div class="table-overflow" style="max-height: 620px;">
@@ -120,7 +95,6 @@
                             {% endfor %}
                         </table>
                     </div>
-                    <br>
                 </div>
             </div>
         </div>

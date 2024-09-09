@@ -1,13 +1,13 @@
 {% extends "pages/estoque.html" %}
 
     {% block svg %}
-        <a class="aux-button {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/map-pin.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
-        </a>
         <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/group.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
         </a>
-        <a class="aux-button {% if request.endpoint == 'estoque_preset' %}active{% endif %}">
+        <a class="aux-button {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/land-plot.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
+        </a>
+            <a class="aux-button {% if request.endpoint == 'estoque_preset' %}active{% endif %}">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
         </a>
     {% endblock svg %}

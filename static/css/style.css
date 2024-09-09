@@ -128,6 +128,10 @@ html.dark .inline-input:focus {
     box-shadow: none;
 }
 
+html.dark .cor-web {
+    color: var(--cor-destaque);
+}
+
 html.dark div.glow-tl {
     background-color: #ea5a2640;
 }
@@ -1749,7 +1753,6 @@ p.phrase {
     margin: 4px 0;
     display: flex;
     font-size: 14px;
-    color: #7e7e7e;
     text-align: left;
     justify-content: flex-start;
 }
