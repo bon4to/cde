@@ -3175,7 +3175,7 @@ def get_itens_carga():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mov/separacao-pend/<string:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/carga/separacao/p/<string:id_carga>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_pend(id_carga):
     id_carga = id_carga.split('-')[0]
@@ -3193,7 +3193,7 @@ def carga_sep_pend(id_carga):
     )
 
 
-@app.route('/mov/separacao-done/<string:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/carga/separacao/f/<string:id_carga>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_done(id_carga):
     if '-' in id_carga:
