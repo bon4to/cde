@@ -1867,7 +1867,6 @@ def check_ip() -> None:
 
     else:
         current_server_ip = request.host
-        print(f'IP: {client_ip} | SERVIDOR: {current_server_ip}')
         adm_ip = 'debug.cde.com'
         if adm_ip not in current_server_ip:
             if client_ip not in adm_ip:
