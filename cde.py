@@ -2187,7 +2187,7 @@ def get_item():
 # ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
 @app.route('/mov')
 @cde.verify_auth('MOV002')
-def mov():
+def mov() -> str:
     end_lote = EstoqueUtils.get_end_lote()
 
     return render_template(
@@ -2198,7 +2198,7 @@ def mov():
 
 @app.route('/mov/historico')
 @cde.verify_auth('MOV003')
-def historico():
+def historico() -> str:
     page = request.args.get('page', 1, type=int)
     per_page = 20
     estoque, row_count = HistoricoUtils.get_historico(page, per_page)
@@ -2214,7 +2214,7 @@ def historico():
 
 @app.route('/mov/historico/search', methods=['GET', 'POST'])
 @cde.verify_auth('MOV003')
-def historico_search():
+def historico_search() -> str:
     if request.method == 'POST':
         search_term  = request.form['search_term']
         search_index = request.form['search_index']
@@ -2256,12 +2256,12 @@ def historico_search():
 
 @app.route('/mov/faturado')
 @cde.verify_auth('MOV005')
-def faturado():
-    end_lote = EstoqueUtils.get_end_lote_fat()
+def faturado() -> str:
+    saldo_atual = EstoqueUtils.get_end_lote_fat()
 
     return render_template(
         'pages/mov/mov-faturado.html', 
-        saldo_atual=end_lote
+        saldo_atual=saldo_atual
     )
 
 
