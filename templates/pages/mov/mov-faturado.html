@@ -50,12 +50,13 @@
             <div id="table-filter" style="display: none" >
                 <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
                 <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                    <option value=0>Carga (Código)</option>
-                    <option value=2>Item (Código)</option>
-                    <option value=3>Item (Descrição)</option>
-                    <option value=1>Endereço (Letra)</option>
-                    <option value=4>Lote (Código)</option>
+                    <option value=1>Item (Código)</option>
+                    <option value=2>Item (Descrição)</option>
+                    <option value=0>Endereço (Letra)</option>
+                    <option value=3>Lote (Código)</option>
                     <option value=5>Data/Hora</option>
+                    <option value=6>Carga (Código)</option>
+                    <option value=7>Requisição (Código)</option>
                 </select>
             </div>
         </div>
@@ -64,23 +65,25 @@
                 <div class="table-overflow">
                     <table id="filterTable">
                         <tr>
-                            <th>Carga (Código)</th>
                             <th>Endereço</th>
                             <th>Item (Código)</th>
                             <th>Item (Descrição)</th>
-                            <th>Lote</th>
-                            <th>QTDE (Efetiva)</th>
+                            <th>Lote (Código)</th>
+                            <th style="max-width: 50px;">Qtde.</th>
                             <th>Data/Hora</th>
+                            <th style="max-width: 50px;">Carga (Código)</th>
+                            <th style="max-width: 50px;">Requisição (Código)</th>
                         </tr>
                         {% for item in saldo_atual %}
                         <tr>
-                            <td>{{ item['id_carga'] }}</td>
                             <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
                             <td>{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
-                            <td>{{ item['saldo'] }}</td>
+                            <td style="text-align: right">{{ item['saldo'] }}</td>
                             <td>{{ item['time_mov'] }}</td>
+                            <td>{{ item['id_carga'] }} </td>
+                            <td>{{ item['id_req'] }} </td>
                         </tr>
                         {% endfor %}
                     </table>

@@ -169,7 +169,7 @@ async function genCargaReport() {
 
             report.setFont("times", "bold");
             report.setFontSize(16);
-            report.text("Relatório de Cargas", 10, 22);
+            report.text("Relatório de Carga", 10, 22);
 
             report.setFont("times", "normal");
             report.setFontSize(12);
@@ -311,7 +311,7 @@ async function genCargaReport() {
                 report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
             }
 
-            const pdfName = `${getStorageKey()}.pdf`;
+            const pdfName = `MOV006-CG${nroCarga}.pdf`;
             report.save(pdfName);
             btnGenCargaReport.innerHTML = `✓`;
             btnGenCargaReport.classList.add('disabled');
