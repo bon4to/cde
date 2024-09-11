@@ -1,4 +1,4 @@
-{% extends "pages/mov/mov-carga/mov-carga-separacao.html" %}
+{% extends "pages/mov/mov-request/mov-request-separacao.html" %}
 
 
 {% block title %}
@@ -12,30 +12,15 @@
 
 
 {% block aux_buttons %}
-    <form onsubmit="routeMovRedirect('carga/separacao/f'); return false;">
+    <form onsubmit="routeMovRedirect('requesicao/separacao/f'); return false;">
         <div class="flex-row" style="margin: 8px 0">
-            <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Carga...">
-            <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
+            <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Requisição...">
+            <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA REQUISIÇÃO..." >
                 <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
             </button>
         </div>
     </form>
     <hr class="vert">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="INCOMPLETAS" alt="" onclick="window.location.href='{{ url_for('carga_incomp') }}';">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
-    <hr class="vert">
-    <form action="{{ url_for('cargas') }}" method="post">
-        <button type="submit" style="all: unset">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
-        </button>
-    </form>
-    <hr class="vert">
-    <a class="aux-button {% if request.endpoint == 'carga_sep_pend' or request.endpoint == 'carga_sep_done' %}active{% endif %}">
-        <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=id_carga) }}';">
-    </a>
-    <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
 {% endblock aux_buttons %}
 
 
@@ -45,7 +30,7 @@
             <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
         </div>
     </div>
-    <div id="btnGenCargaReport" class="btn-fancy featured" style="height: 45px; margin: 0; max-width: 200px;" onclick="genCargaReport()">
+    <div id="btnGenReqReport" class="btn-fancy featured" style="height: 45px; margin: 0; max-width: 200px;" onclick="genRequestReport()">
         <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
     </div>
 {% endblock separation_buttons %}
@@ -53,7 +38,7 @@
 
 {% block all_separation_status %}
     <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-        <select class="address-three inline-input" style="color: green; font-size: 14px" onchange="window.location.href='/mov/carga/separacao/p/{{ id_carga }}'">
+        <select class="address-three inline-input" style="color: green; font-size: 14px" onchange="window.location.href='/mov/requisicao/separacao/p/{{ id_req }}'">
             <option style="color: green;">Finalizadas</option>
             <option style="color: var(--cor-destaque);">Pendentes</option>
         </select>
@@ -64,10 +49,8 @@
 {% block script %}
     <script>
 
-        const nroCarga    = '{{ id_carga }}';
-        const fantCliente = '{{ fant_cliente }}';
-        const obs_carga   = '{{ obs_carga }}';
-        const seq         = '{{ seq }}';
+        const nroReq   = '{{ id_req }}';
+        const seq      = '{{ seq }}';
 
         function getSeparacao() {
             return new Promise((resolve, reject) => {
@@ -75,19 +58,20 @@
                 if (localStorageData) {
                     reject(new Error(304));
                 } else {
-                    fetch(`/get/carga/load-table-data?filename=${getStorageKey()}&seq=${seq}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(404);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            resolve(data);
-                        })
-                        .catch(error => {
-                            reject(error);
-                        });
+                    fetch(`/get/request/load-table-data?filename=${getStorageKey()}&seq=${seq}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(404);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao obter separação:', error);
+                        reject(error);
+                    });
                 }
             });
         }
@@ -100,12 +84,14 @@
             itemsTable.innerHTML = '';
 
             try {
-                const sepCarga = await getSeparacao();
+                const sepReq = await getSeparacao();
+                        
+                console.log(sepReq)
 
-                // Obter itens da carga
-                let itens_carga;
+                // Obter itens da req
+                let itens_req;
                 try {
-                    const response = await fetch(`/api/itens_carga?id_carga=${nroCarga}`, {
+                    const response = await fetch(`/api/itens_req?id_req=${nroReq}`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
@@ -117,14 +103,14 @@
                     }
         
                     const result = await response.json();
-                    itens_carga = result.itens;
+                    itens_req = result.itens;
                 } catch (error) {
-                    console.error('Erro ao obter itens_carga:', error);
+                    console.error('Erro ao obter itens_req:', error);
                     return;
                 }
         
                 // Agrupar os itens por código de item
-                const groupedItems = sepCarga.reduce((acc, item) => {
+                const groupedItems = sepReq.reduce((acc, item) => {
                     if (!acc[item.cod_item]) {
                         acc[item.cod_item] = [];
                     }
@@ -160,7 +146,7 @@
                         }
                     }
 
-                    const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
+                    const qtde_solic = await fetchQtdeSolic(nroReq, cod_item);
                     const subtotalRow = itemsTable.insertRow();
 
                     subtotalRow.insertCell(0);
@@ -177,8 +163,8 @@
                     subtotalRow.classList.add('sub-total');
                 }
         
-                // Criar linhas de subtotal para itens zerados que não estão em sepCarga
-                for (const item of itens_carga) {
+                // Criar linhas de subtotal para itens zerados que não estão em sepReq
+                for (const item of itens_req) {
                     if (!groupedItems[item]) {
                         const subtotalRow = itemsTable.insertRow();
 
@@ -192,7 +178,7 @@
                         const cell1 = subtotalRow.insertCell(3);
                         cell1.textContent = 'Subtotal:';
 
-                        const qtde_solic = await fetchQtdeSolic(nroCarga, item);
+                        const qtde_solic = await fetchQtdeSolic(nroReq, item);
                         subtotalRow.insertCell(4).innerHTML = '<span class="cor-web">0</span> / ' + qtde_solic;
 
                         subtotalRow.classList.add('sub-total');
@@ -223,7 +209,7 @@
                         <div class="msg-error">
                             <details>
                                 <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
+                                Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/requisicao">separação da requisição</a> para realizar o faturamento.
                             </details>
                         </div>
                     `;
@@ -241,7 +227,7 @@
         async function reloadTables() {
             renderItems();
             renderCartSubtotals();
-            listSeparationsFromServer('carga/separacao/f', 'cargas');
+            listSeparationsFromServer('requisicao/separacao/f', 'requests');
         }
 
         

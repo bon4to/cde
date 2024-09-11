@@ -1,19 +1,19 @@
-// lb-cargas.js
+// lb-request.js
 
 let headerMainLogo;
 
 var itemCount = 0;
 
-if (nroCarga != '') {
+if (nroReq != '') {
     reloadItemSubtotal();
 }
 
 
 function getStorageKey() {
-    // retorna a chave do localStorage para a separação da carga
-    // parsificada por 'nroCarga'
-    // (ex.: 'separacao-carga-123')
-    return `separacao-carga-${nroCarga}`;
+    // retorna a chave do localStorage para a separação da requisicao
+    // parsificada por 'nroReq'
+    // (ex.: 'separacao-requisicao-123')
+    return `separacao-request-${nroReq}`;
 }
 
 
@@ -37,7 +37,7 @@ function routeMovRedirect(routePage) {
     // Expressão regular para validar números inteiros ou com sufixos como -1, -2, etc.
     const regex = /^-?\d+(-\d+)?$/;
 
-    // Verifica se o input de carga foi preenchido corretamente
+    // Verifica se o input de requisicao foi preenchido corretamente
     if (regex.test(idInput.value)) {
         redirectToMov(routePage, idInput.value);
     } else {
@@ -47,9 +47,9 @@ function routeMovRedirect(routePage) {
 }
 
 
-function redirectToMov(routePage, nroCarga) {
+function redirectToMov(routePage, nroReq) {
     // redireciona para a rota informada
-    const url = `/mov/${routePage}/${nroCarga}`;
+    const url = `/mov/${routePage}/${nroReq}`;
     window.location.href = url;
 }
 
@@ -59,11 +59,11 @@ function listSeparationsLocalStorage(routePage) {
     const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
     allSeparationsTable.innerHTML = '';
 
-    // obtem todas as chaves (de carga) armazenadas no localStorage
+    // obtem todas as chaves (de requisicao) armazenadas no localStorage
     const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('separacao-carga-')) {
+        if (key.startsWith('separacao-request-')) {
             keys.push(key);
         }
     }
@@ -78,16 +78,16 @@ function listSeparationsLocalStorage(routePage) {
         row.insertCell(0).textContent = 'Nenhuma separação iniciada';
     }
 
-    // remove prefixo 'separacao-carga-'
+    // remove prefixo 'separacao-request-'
     // percorre as chaves e adiciona as linhas na tabela
     keys.forEach(key => {
-        const cargaNumber = key.replace('separacao-carga-', '');
+        const reqNumber = key.replace('separacao-request-', '');
         const row = allSeparationsTable.insertRow();
-        row.insertCell(0).textContent = cargaNumber;
+        row.insertCell(0).textContent = reqNumber;
         row.classList.add("selectable-row");
 
         row.addEventListener('click', function() {
-            redirectToMov(routePage, cargaNumber);
+            redirectToMov(routePage, reqNumber);
         });
     });
 }
@@ -109,7 +109,7 @@ async function getSeparadorName(user_id) {
 }
 
 
-async function genCargaReport() {
+async function genRequestReport() {
     const { jsPDF } = window.jspdf;
     const report    = new jsPDF();
     const tableData = [];
@@ -117,11 +117,11 @@ async function genCargaReport() {
     const userName  = document.getElementById('separador-info').innerText;
     
     // Seleciona o botão de finalizar separação.
-    const btnGenCargaReport = document.getElementById('btnGenCargaReport');
+    const btnGenReqReport = document.getElementById('btnGenReqReport');
     
     // Exibe um indicador de carregamento e desativa o botão de finalizar.
-    btnGenCargaReport.onclick = '';
-    btnGenCargaReport.innerHTML = '<span class="loader-inline"></span>';
+    btnGenReqReport.onclick = '';
+    btnGenReqReport.innerHTML = '<span class="loader-inline"></span>';
     
     await visualDelay(700);
     
@@ -169,7 +169,7 @@ async function genCargaReport() {
 
             report.setFont("times", "bold");
             report.setFontSize(16);
-            report.text("Relatório de Carga", 10, 22);
+            report.text("Relatório de Requisição", 10, 22);
 
             report.setFont("times", "normal");
             report.setFontSize(12);
@@ -181,15 +181,10 @@ async function genCargaReport() {
             report.setDrawColor(0, 0, 0);
 
             report.setFontSize(10);
-
-            if (typeof fantCliente !== 'undefined') {
-                report.setFont("times", "bold");
-                report.text(`CLIENTE: ${fantCliente}`, 10, 38);
-            }
             
-            if (typeof nroCarga !== 'undefined') {
+            if (typeof nroReq !== 'undefined') {
                 report.setFont("times", "normal");
-                report.text(`CARGA: ${nroCarga}`, 10, 42);
+                report.text(`REQUISIÇÃO: ${nroReq}`, 10, 38);
             }
             report.setDrawColor(192, 192, 192);
         };
@@ -301,25 +296,25 @@ async function genCargaReport() {
             drawTable(data);
             drawFooter(report.internal.getNumberOfPages());
 
-            if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
+            if (typeof obs_requisicao !== 'undefined' && obs_requisicao.trim().length > 0) {
                 const finalY = startY + 10;
                 report.setFontSize(10);
                 report.setFont("times", "bold");
                 report.text("OBSERVACÃO: ", 10, finalY);
 
                 report.setFont("times", "normal");
-                report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
+                report.text(obs_requisicao, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
             }
 
-            const pdfName = `MOV006-CG${nroCarga}.pdf`;
+            const pdfName = `MOV007-RQ${nroReq}.pdf`;
             report.save(pdfName);
-            btnGenCargaReport.innerHTML = `✓`;
-            btnGenCargaReport.classList.add('disabled');
+            btnGenReqReport.innerHTML = `✓`;
+            btnGenReqReport.classList.add('disabled');
         });
     } catch (error) {
         console.error('Erro ao gerar relatório:', error);
-        btnGenCargaReport.innerHTML = `✘`;
-        btnGenCargaReport.classList.add('disabled');
+        btnGenReqReport.innerHTML = `✘`;
+        btnGenReqReport.classList.add('disabled');
     }
 }
 
@@ -355,10 +350,12 @@ function renderSubtotals() {
     const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
     subtotalsTable.innerHTML = '';
 
-    getSeparacao().then(sepCarga => {        
+    getSeparacao().then(sepReq => {        
         let subtotals = {};
+        
+        console.log(sepReq)
 
-        sepCarga.forEach(item => {
+        sepReq.forEach(item => {
             if (subtotals[item.cod_item]) {
                 subtotals[item.cod_item] += item.qtde_sep;
             } else {
@@ -378,7 +375,7 @@ function renderSubtotals() {
 }
 
 
-function listSeparationsFromServer(route, reportDir='cargas') {
+function listSeparationsFromServer(route, reportDir='requests') {
     const payload = {
         report_dir: reportDir
     };
@@ -401,15 +398,15 @@ function listSeparationsFromServer(route, reportDir='cargas') {
             cell.textContent = files.error;
         } else {
             files.forEach(file => {
-                const cargaNumber = file.replace('separacao-carga-', '').replace('.json', '');
+                const requisicaoNumber = file.replace('separacao-request-', '').replace('.json', '');
                 const row = tableBody.insertRow();
                 const cell = row.insertCell(0);
-                cell.textContent = cargaNumber;
+                cell.textContent = requisicaoNumber;
 
                 row.classList.add("selectable-row");
 
                 row.addEventListener('click', function() {
-                    window.location.href = `/mov/${route}/${cargaNumber}`;
+                    window.location.href = `/mov/${route}/${requisicaoNumber}`;
                 });
             });
         }
@@ -428,7 +425,7 @@ function clearAllSeparations() {
         } else {
             for (let i = localStorage.length - 1; i >= 0; i--) {
                 const key = localStorage.key(i);
-                if (key.startsWith('separacao-carga-')) {
+                if (key.startsWith('separacao-request-')) {
                     localStorage.removeItem(key);
                 }
             }
@@ -443,10 +440,12 @@ function renderCartSubtotals() {
     const cartItemsContainer = document.querySelector('.cart-items');
     cartItemsContainer.innerHTML = '';
 
-    getSeparacao().then(sepCarga => {
+    getSeparacao().then(sepReq => {
         let subtotals = {};
 
-        sepCarga.forEach(item => {
+        console.log(sepReq) // remover
+
+        sepReq.forEach(item => {
             if (subtotals[item.cod_item]) {
                 subtotals[item.cod_item] += item.qtde_sep;
             } else {
@@ -490,10 +489,12 @@ function renderCartSubtotals() {
 
 
 function reloadItemSubtotal() {
-    getSeparacao().then(sepCarga => {
+    getSeparacao().then(sepReq => {
         let subtotals = {};
+        
+        console.log(sepReq)
 
-        sepCarga.forEach(item => {
+        sepReq.forEach(item => {
             if (subtotals[item.cod_item]) {
                 subtotals[item.cod_item] += item.qtde_sep;
             } else {
@@ -538,16 +539,16 @@ function updateItemSubtotal(cod_item, subtotal) {
 function removeItem(index) {
     const confirmation = confirm('Você tem certeza que deseja remover este item?');
     if (confirmation) {
-        let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
-        sepCarga.splice(index, 1);
-        localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+        let sepReq = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+        sepReq.splice(index, 1);
+        localStorage.setItem(getStorageKey(), JSON.stringify(sepReq));
         renderItems();
     }
 }
 
 
 function clearItems() {
-    const confirmation = confirm(`Você tem certeza que deseja limpar a separacao de ${nroCarga}?`);
+    const confirmation = confirm(`Você tem certeza que deseja limpar a separacao de ${nroReq}?`);
     if (confirmation) {
         localStorage.removeItem(getStorageKey());
         renderItems();
@@ -555,7 +556,7 @@ function clearItems() {
 }
 
 
-function saveIntoServer(data, filename, reportDir='cargas') {
+function saveIntoServer(data, filename, reportDir='requests') {
     const payload = {
         data: data,
         filename: filename,
@@ -579,7 +580,7 @@ function saveIntoServer(data, filename, reportDir='cargas') {
 }
 
 
-function getQtdeItemEnderecoLS(storageKey, cod_item, nroCarga, lote_item, rua_letra, rua_numero) {
+function getQtdeItemEnderecoLS(storageKey, cod_item, nroReq, lote_item, rua_letra, rua_numero) {
     const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
     const quantidade = storage.reduce((acc, item) => {
         if (
@@ -597,21 +598,21 @@ function getQtdeItemEnderecoLS(storageKey, cod_item, nroCarga, lote_item, rua_le
 
 
 function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lote_item) {
-    var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroCarga, lote_item, rua_letra, rua_numero);
+    var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroReq, lote_item, rua_letra, rua_numero);
     showQuantityPopup(qtdeSolic, maxEstoque, this_qtde_separada, function(value) {
         showLoading();
-        addItem(nroCarga, codItem, lote_item, rua_letra, rua_numero, value);
+        addItem(nroReq, codItem, lote_item, rua_letra, rua_numero, value);
         hideLoading();
     });
 }
 
 
-function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
-    let sepCarga = JSON.parse(localStorage.getItem(getStorageKey())) || [];
+function addItem(nroreq, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
+    let sepReq = JSON.parse(localStorage.getItem(getStorageKey())) || [];
     let user_id = userID
-    let item = { nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep, user_id };
-    sepCarga.push(item);
-    localStorage.setItem(getStorageKey(), JSON.stringify(sepCarga));
+    let item = { nroreq, cod_item, lote_item, rua_letra, rua_numero, qtde_sep, user_id };
+    sepReq.push(item);
+    localStorage.setItem(getStorageKey(), JSON.stringify(sepReq));
 }
 
 
@@ -672,35 +673,14 @@ function hidePopUp() {
 }
 
 
-async function fetchQtdeSolic(id_carga, cod_item) {
+async function fetchQtdeSolic(id_req, cod_item) {
     try {
-        const response = await fetch(`/api/carga/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
+        const response = await fetch(`/api/req/qtde_solic?id_req=${id_req}&cod_item=${cod_item}`);
         const data = await response.json();
         return data.qtde_solic;
     } catch (error) {
-        console.error("Erro ao obter quantidade solicitada na rota '/api/carga/qtde_solic?id_carga=<id_carga>&cod_item=<cod_item>':", error);
+        console.error("Erro ao obter quantidade solicitada na rota '/api/req/qtde_solic?id_req=<id_req>&cod_item=<cod_item>':", error);
         return null;
-    }
-}
-
-
-async function getPendingItems() {
-    try {
-        const response = await fetch('/get/itens_carga_incomp/' + nroCarga, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        const result = await response.json();
-        const items = result.items;
-        const cod_items = items.map(item => item[1]);
-
-        return cod_items;
-    } catch (error) {
-        console.error('Erro ao verificar se há itens pendentes na tabela carga_incomp:', error);
-        
-        return false;
     }
 }
 
@@ -713,83 +693,40 @@ async function hasPendingItems() {
 }
 
 
-async function hasCargaAtHistory() {
-    try {
-        const response = await fetch('/get/has_carga_at_history/' + nroCarga, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        const result = await response.json();
-        const bool_result = result.bool;
-        return bool_result;
-    } catch (error) {
-        console.error('Erro ao verificar se há cargas já faturadas neste código:', error);
-        return false;
-    }
-}
-
-
 async function concludeSeparacao() {
     // Obtém os dados da separação atual.
     // Seleciona o botão de finalizar separação.
-    const sepCarga = await getSeparacao();
+    const sepReq = await getSeparacao();
     const finalizarBtn = document.getElementById('finalizarBtn');
 
     // Exibe um indicador de carregamento e desativa o botão de finalizar.
     showLoading();
     finalizarBtn.onclick = '';
     finalizarBtn.innerHTML = '<span class="loader-inline"></span>';
-
-    // Verifica se há uma carga no histórico.
-    // Obtém os itens pendentes e verifica se há itens pendentes.
-    const hasHistory = await hasCargaAtHistory();
-    const PendingItems = await getPendingItems();
-    const hasPendingItems = Array.isArray(PendingItems) && PendingItems.length > 0;
     
-    // Inicializa a variável que armazenará os itens da carga.
+    // Inicializa a variável que armazenará os itens da requisicao.
     // Inicializa a variável que identifica se a separação é incompleta.
-    let itensCarga = [];
-    let isIncompSeparation = false;
+    let itensReq = [];
 
     await visualDelay(200);
 
-    if (!hasHistory) {
-        // se não há carga no historico, continua a separação
-        showToast('A carga é válida para ser separada...', 1);
-    } else {
-        // se houver, verifica se a carga está completa antes de continuar
-        if (!hasPendingItems) {
-            // se não houver itens pendentes, aborta a separação
-            showToast('A carga já está completa e finalizada.', 3);
-            return;
-        } else {
-            // se houver itens pendentes, prossegue a separação
-            showToast('Continuando a separação da carga incompleta...', 0);
-            isIncompSeparation = true;
-        }
-    }
+    // se não há requisicao no historico, continua a separação
+    showToast('A requisicao é válida para ser separada...', 1);
 
     await visualDelay(700);
 
-    if (!hasPendingItems) {
-        // Se não houver itens pendentes, tenta obter os itens da carga da API.
-        try {
-            const response = await fetch(`/api/itens_carga?id_carga=${nroCarga}`, {method: 'GET', headers: {'Content-Type': 'application/json'}});
-            const result = await response.json();
-            itensCarga = result.itens;
-        } catch (error) {
-            console.error('Erro ao obter itensCarga:', error);
-            return;
-        }
-    } else {
-        // Caso contrário, usa os itens pendentes obtidos anteriormente.
-        itensCarga = PendingItems;
+    // Se não houver itens pendentes, tenta obter os itens da requisicao da API.
+    try {
+        const response = await fetch(`/api/itens_req?id_req=${nroReq}`, {method: 'GET', headers: {'Content-Type': 'application/json'}});
+        const result = await response.json();
+        itensReq = result.itens;
+    } catch (error) {
+        console.error('Erro ao obter itensReq:', error);
+        return;
     }
 
-    // Agrupa os itens separados pela carga atual com base no código do item.
-    const groupedItems = sepCarga.reduce((acc, item) => {
+    // Agrupa os itens separados pela requisicao atual com base no código do item.
+    const groupedItems = sepReq.reduce((acc, item) => {
         if (!acc[item.cod_item]) {
             acc[item.cod_item] = [];
         }
@@ -799,8 +736,8 @@ async function concludeSeparacao() {
     
     var nonAvailableItems = [];
 
-    // Para cada item na carga, verifica se a quantidade solicitada é igual à quantidade separada.
-    for (const cod_item of itensCarga) {
+    // Para cada item na requisicao, verifica se a quantidade solicitada é igual à quantidade separada.
+    for (const cod_item of itensReq) {
         let subTotal = 0;
 
         if (groupedItems[cod_item]) {
@@ -811,7 +748,7 @@ async function concludeSeparacao() {
         }
         // Recupera a quantidade solicitada para este item específico
         // ex.: fetchQtdeSolic(8967, '000123')
-        const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
+        const qtde_solic = await fetchQtdeSolic(nroReq, cod_item);
 
         // Verifica se a quantidade solicitada é igual à quantidade separada
         if (qtde_solic !== subTotal) {
@@ -823,104 +760,40 @@ async function concludeSeparacao() {
         await visualDelay(100);
     }
 
-    let saveAsPendingItems;
-    const confirmationText = `[CARGA: ${nroCarga}]\nVocê tem certeza que deseja finalizar a separação?\n`
-
     // Verifica se houve itens não separados
     if (nonAvailableItems.length > 0) {
-        const confirmation = confirm(
-            `${confirmationText}\nALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`
+        alert(
+            `ALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`
         );
-        if (confirmation) {
-            saveAsPendingItems = true;
-        } else {
-            showToast('Operação cancelada.', 3);
-            hideLoading();
-            await visualDelay(400);
-            finalizarBtn.innerHTML = '✘';
-            return;
-        }
-    }
-
-    const confirmation = saveAsPendingItems || confirm(`${confirmationText}`);
-
-    if (confirmation) {
-        const storageKey = getStorageKey();
-        const sepCarga = JSON.parse(localStorage.getItem(storageKey)) || [];
+        showToast('Operação cancelada.', 3);
+        hideLoading();
+        await visualDelay(400);
+        finalizarBtn.innerHTML = '✘';
+        return;
+    } else {
         
-        if (sepCarga.length === 0) {
-            
+        const storageKey = getStorageKey();
+        const sepReq = JSON.parse(localStorage.getItem(storageKey)) || [];
+        
+        if (sepReq.length === 0) {
             showToast('Não há itens separados para finalizar.', 3);
             return;
         }
     
-        fetch('/mov/carga/moving/bulk', {
+        fetch('/mov/request/moving/bulk', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(sepCarga),
+            body: JSON.stringify(sepReq),
         })
         .then(response => response.json())
         .then(async (data) => {
             if (data.success) {
-                // se for uma separação incompleta, remove a pendencia da carga_incompleta
-                if (isIncompSeparation) {
-                    fetch('/api/conclude-incomp/' + nroCarga, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showToast('Pendencia da carga realizada com sucesso.', 1, 10000);
-                        } else {
-                            showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${data.error}</details>`, 3, 10000);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                        showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${error}</details>`, 3, 10000);
-                    });
-                }
-                
-                for (const cod_item of nonAvailableItems) {
-                    let subTotal = 0;
-                    if (groupedItems[cod_item]) {
-                        subTotal = groupedItems[cod_item].reduce((acc, item) => acc + item.qtde_sep, 0);
-                    }
-                    
-                    const qtdeSolic = await fetchQtdeSolic(nroCarga, cod_item);
-                    
-                    try {
-                        const response = await fetch('/api/insert_carga_incomp', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                id_carga: nroCarga,
-                                cod_item: cod_item,
-                                qtde_atual: subTotal,
-                                qtde_solic: qtdeSolic
-                            })
-                        });
-                        
-                        const result = await response.json();
-                        if (!result.success) {
-                            console.error(`Erro ao inserir ${cod_item} para a carga incompleta.`, result.error);
-                        }
-                    } catch (error) {
-                        console.error(`Erro ao enviar item ${cod_item} da carga incompleta para o database.`, error);
-                    }
-                }
-
                 try {
                     getSeparacao().then(separacao => {
                         // envia json com separacao para o servidor
-                        saveIntoServer(separacao, storageKey, 'cargas');
+                        saveIntoServer(separacao, storageKey, 'requests');
                     })
                     // limpa a separacao atual do cache (localStorage)
                     localStorage.removeItem(storageKey);
@@ -932,10 +805,10 @@ async function concludeSeparacao() {
                     // feedback visual para o front-end
                     // sucesso
                     hideLoading();
-                    showToast('Separação da carga realizada com sucesso.', 1, 10000);
+                    showToast('Separação da requisicao realizada com sucesso.', 1, 10000);
     
                     // gera relatório da separação
-                    genCargaReport();
+                    genRequestReport();
                 }
             } else {
                 showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10000);
@@ -949,12 +822,6 @@ async function concludeSeparacao() {
             
             showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10000);
         });
-    } else {
-        showToast('Operação cancelada.', 3);
-        hideLoading();
-        await visualDelay(400);
-        finalizarBtn.innerHTML = '✘';
-        return;
     }
 }
 
@@ -976,12 +843,12 @@ const fetchItemDescription = async (cod_item) => {
 };
 
 
-function sendCodItem(route, cod_item, carga_id, qtde_solic) {
+function sendCodItem(route, cod_item, id_req, qtde_solic) {
     document.getElementById('cod_item_input').value = cod_item;
-    document.getElementById('carga_id_input').value = carga_id;
+    document.getElementById('id_req_input').value = id_req;
     document.getElementById('qtde_item_input').value = qtde_solic;
     var form = document.getElementById('cod_item_form');
-    form.action = `/mov/${route}/${carga_id}`;
+    form.action = `/mov/${route}/${id_req}`;
     form.submit();
 }
 
