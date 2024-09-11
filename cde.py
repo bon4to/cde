@@ -211,6 +211,7 @@ class cde:
                     user_name  VARCHAR(30),
                     time_mov   DATETIME,
                     id_carga   INTEGER(6), 
+                    id_request INTEGER(6), 
                     id_user    INTEGER
                 );
             ''')
@@ -516,26 +517,25 @@ class EstoqueUtils:
             cursor.execute('''
                 SELECT  
                     h.rua_numero, h.rua_letra, i.cod_item,
-                    i.desc_item,  h.lote_item, h.id_carga, 
-                    SUM( CASE WHEN operacao = 'F' 
-                            THEN (quantidade)
-                            ELSE (quantidade * 0)
-                            END
-                    ) as saldo, h.time_mov
+                    i.desc_item, h.lote_item, h.id_carga, 
+                    h.id_request, h.quantidade, h.time_mov
                 FROM historico h
                 JOIN itens i ON h.cod_item = i.cod_item
-                GROUP BY  
-                    h.id_carga,  h.rua_numero, h.rua_letra,
-                    h.cod_item, h.lote_item
-                HAVING saldo   != 0
-                AND h.id_carga != 0
-                ORDER BY h.time_mov DESC, h.id_carga DESC, h.cod_item ASC;
+                WHERE 
+                    h.operacao = 'F' AND
+                    (h.id_request != 0 OR h.id_request IS NULL) OR
+                    (h.id_carga != 0 OR h.id_carga IS NULL)
+                
+                ORDER BY 
+                    h.time_mov DESC, h.id_carga DESC,
+                    h.id_request DESC, h.cod_item ASC;
+
             ''')
 
             end_lote = [{
                 'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
-                'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[6],
-                'id_carga': row[5], 'time_mov': row[7]
+                'desc_item' : row[3], 'cod_lote' : row[4], 'saldo' : row[7],
+                'id_carga': row[5], 'id_req': row[6], 'time_mov': row[8]
             } for row in cursor.fetchall()]
 
         return end_lote
@@ -916,6 +916,153 @@ class CargaUtils:
         return cargas
 
 
+class MovRequestUtils:
+    @staticmethod
+    def get_mov_request(id_req=False):
+        # filtros para apenas requisições
+        # produtos acabados
+        # no deposito 2
+        where_clause = \
+            """
+            WHERE 
+                M.OBS LIKE '%Requisicao :%' AND 
+                (
+                    GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
+                    GRUPO_DESCRICAO = 'REVENDA'
+                ) AND
+                I.UNIDADE_DESCRICAO = 'CX' AND
+                M.DEPOSITO = 2 AND
+                TIPO_MOVIMENTO = 'S'
+            """
+        
+        if id_req:
+            # complementa o where_clause
+            # para retornar apenas uma requisição
+            where_clause += f" AND M.DOC_ORIGEM = '{id_req}'"
+        
+        query = f'''
+            SELECT DISTINCT
+                M.DOCUMENTO           AS LOG_PROMOB,
+                M.DOC_ORIGEM          AS DOC_ORIGEM,
+                M.TIPO_TRANSACAO      AS TIPO_TRANSACAO, 
+                M.TIPO_MOVIMENTO      AS TIPO_MOVIMENTO,
+                M.DEPOSITO            AS DEPOSITO,
+                I.ITEM                AS COD_ITEM,
+                I.ITEM_DESCRICAO      AS DESC_ITEM, 
+                I.UNIDADE_DESCRICAO   AS UNIDADE,
+                CAST(QTDE AS INTEGER) AS QTDE,
+                USUARIO               AS USUARIO,
+                M.DATA_MOVIMENTACAO   AS DATA,
+                M.OBS                 AS OBS
+            FROM 
+                DB2ADMIN.HUGO_PIETRO_VIEW_MOVIMENTOS M
+            JOIN 
+                DB2ADMIN.HUGO_PIETRO_VIEW_ITEM I
+                ON I.ITEM = M.ITEM
+            {where_clause}
+            
+            ORDER BY
+                DOCUMENTO DESC, I.ITEM
+            LIMIT 101 -- debug (temporario);
+        '''
+        
+        dsn = 'HUGOPIET'
+        result, columns = cde.db_query(query, dsn)
+        
+        return result, columns
+
+
+    @staticmethod
+    # lê o arquivo json no servidor local
+    # e retorna a lista da carga
+    def readJsonReqSeq(filename, seq=False):
+        base_path = os.path.join(app.root_path, 'report/requests')
+        seq = int(seq)
+        if not seq:
+            # 1234.json
+            # Unifica todos os arquivos JSON com a mesma base de nome
+            unified_data = []
+            seq = 0
+            while True:
+                file_path = os.path.join(base_path, f'{filename}.json')
+                if seq > 0:  
+                    file_path = os.path.join(base_path, f'{filename}-{seq}.json')
+                
+                if not os.path.exists(file_path):
+                    break
+                with open(file_path, 'r') as file:
+                    data = json.load(file)
+                    unified_data.extend(data)
+                seq += 1
+            if unified_data:
+                return unified_data
+            else:
+                return None
+        else:
+            # 1234-1.json
+            # Lê o arquivo JSON específico com a sequência fornecida
+            file_path = os.path.join(base_path, f'{filename}.json')
+            if seq > 0:  
+                file_path = os.path.join(base_path, f'{filename}-{seq}.json')
+            
+            if os.path.exists(file_path):
+                with open(file_path, 'r') as file:
+                    return json.load(file)
+            else:
+                return None
+    
+class OrdemProducaoUtils:
+    @staticmethod
+    def get_ordem_producao(doc_origem=False):
+        where_clause = """
+            WHERE 
+                I.GRUPO_DESCRICAO = 'PRODUTO ACABADO' AND
+                I.UNIDADE_DESCRICAO = 'CX' AND
+                M.TIPO_TRANSACAO = 'EPP' AND
+                M.DEPOSITO = 2 AND
+                L.ORDEM != 0
+        """
+        
+        if doc_origem:
+            where_clause += f" AND M.DOC_ORIGEM = '{doc_origem}'"
+        
+        query = f'''
+            SELECT DISTINCT
+                M.DOCUMENTO           AS LOG_PROMOB,
+                L.LOTE                AS LOTE_PROMOB,
+                M.DOC_ORIGEM          AS DOC_ORIGEM,
+                L.ORDEM               AS ORDEM_PRODUCAO,
+                M.TIPO_TRANSACAO      AS TIPO_TRANSACAO, 
+                M.TIPO_MOVIMENTO      AS TIPO_MOVIMENTO,
+                M.DEPOSITO            AS DEPOSITO,
+                I.ITEM                AS COD_ITEM,
+                I.ITEM_DESCRICAO      AS DESC_ITEM, 
+                I.UNIDADE_DESCRICAO   AS UNIDADE,
+                CAST(QTDE AS INTEGER) AS QTDE,
+                L.LOTE_FAB            AS COD_LOTE,
+                M.DATA_MOVIMENTACAO   AS DATA,
+                M.OBS                 AS OBS
+            FROM 
+                DB2ADMIN.HUGO_PIETRO_VIEW_MOVIMENTOS M
+            JOIN 
+                DB2ADMIN.HUGO_PIETRO_VIEW_VILOTFAB L 
+                ON M.DOC_ORIGEM = CAST(L.ORDEM AS VARCHAR)
+            JOIN 
+                DB2ADMIN.HUGO_PIETRO_VIEW_ITEM I
+                ON I.ITEM = M.ITEM
+            {where_clause}
+            
+            ORDER BY
+                DOCUMENTO DESC, L.ORDEM, I.ITEM
+            LIMIT 101 -- debug (temporario);
+        '''
+        
+        dsn = 'HUGOPIET'
+        result, columns = cde.db_query(query, dsn)
+        
+        return result, columns
+
+
 class HistoricoUtils:
     @staticmethod
     # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
@@ -941,7 +1088,7 @@ class HistoricoUtils:
 
     @staticmethod
     # INSERE REGISTRO NA TABELA DE HISTÓRICO
-    def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga) -> bool:
+    def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp_out, id_carga=0, id_request=0) -> bool:
         id_user_mov = session['id_user']
         try:    
             with sqlite3.connect(db_path) as connection:
@@ -951,17 +1098,18 @@ class HistoricoUtils:
                     INSERT INTO historico (
                         rua_numero, rua_letra, cod_item,
                         lote_item, quantidade, operacao,
-                        time_mov, id_carga, id_user
+                        time_mov, id_user, id_carga, 
+                        id_request
                     ) VALUES (
                         ?, ?, ?,
                         ?, ?, ?,
-                        ?, ?, ?
-                    );                
-                    ''', 
-                    (
+                        ?, ?, ?,
+                        ?
+                    ) ;''', (
                         numero, letra, cod_item,
                         lote_item, quantidade, operacao, 
-                        timestamp_out, id_carga, id_user_mov
+                        timestamp_out, id_user_mov, id_carga,
+                        id_request
                     )
                 )
                 connection.commit()
@@ -2274,6 +2422,7 @@ def moving():
     operacao        = str(request.form['operacao'])
     is_end_completo = bool(request.form.get('is_end_completo'))
     id_carga        = 0
+    id_request      = 0
 
     timestamp_br    = datetime.now(timezone(timedelta(hours=-3)))
     timestamp_out   = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
@@ -2369,16 +2518,22 @@ def moving():
     return redirect(url_for('mov'))
 
 
-@app.route('/mov/moving/bulk', methods=['POST'])
-@cde.verify_auth('MOV006')
-def moving_bulk():
+@app.route('/mov/request/moving/bulk', methods=['POST'])
+@cde.verify_auth('MOV007')
+def moving_req_bulk():
     sep_carga     = request.json
     timestamp_br  = datetime.now(timezone(timedelta(hours=-3)))
     timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
     
     try:
         for item in sep_carga:
-            haveItem = EstoqueUtils.get_saldo_item(item['rua_numero'], item['rua_letra'], item['cod_item'], item['lote_item'])
+            # VERIFICA SE O ITEM E LOTE (NO ENDEREÇO) AINDA TEM ESTOQUE SUFICIENTE
+            haveItem = EstoqueUtils.get_saldo_item(
+                item['rua_numero'],
+                item['rua_letra'],
+                item['cod_item'],
+                item['lote_item']
+            )
             if haveItem < item['qtde_sep']:
                 return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
         
@@ -2386,14 +2541,52 @@ def moving_bulk():
             cursor = connection.cursor()
             for item in sep_carga:
                 HistoricoUtils.insert_historico(
+                    timestamp_out=timestamp_out,
                     numero=item['rua_numero'],
                     letra=item['rua_letra'],
                     cod_item=item['cod_item'],
                     lote_item=item['lote_item'],
                     quantidade=item['qtde_sep'],
-                    operacao='F',
+                    id_request=item['nroreq'],
+                    operacao='F'
+                )
+            connection.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f'[ERRO] Erro ao inserir histórico: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/mov/carga/moving/bulk', methods=['POST'])
+@cde.verify_auth('MOV006')
+def moving_carga_bulk():
+    sep_carga     = request.json
+    timestamp_br  = datetime.now(timezone(timedelta(hours=-3)))
+    timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
+    
+    try:
+        for item in sep_carga:
+            haveItem = EstoqueUtils.get_saldo_item(
+                item['rua_numero'],
+                item['rua_letra'],
+                item['cod_item'],
+                item['lote_item']
+            )
+            if haveItem < item['qtde_sep']:
+                return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
+        
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            for item in sep_carga:
+                HistoricoUtils.insert_historico(
                     timestamp_out=timestamp_out,
-                    id_carga=item['nrocarga']
+                    numero=item['rua_numero'],
+                    letra=item['rua_letra'],
+                    cod_item=item['cod_item'],
+                    lote_item=item['lote_item'],
+                    quantidade=item['qtde_sep'],
+                    id_carga=item['nrocarga'],
+                    operacao='F'
                 )
             connection.commit()
         return jsonify({'success': True})
@@ -3109,17 +3302,196 @@ def cargas():
 @app.route('/mov/requisicao/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def mov_request():
-    result, columns = MovRequestUtils.get_epp_request()
+    if request.method == 'POST':
+        result, columns = MovRequestUtils.get_mov_request()
+        
+        class_alert = 'success'
+        alert = 'A lista foi carregada com sucesso.'
+        if len(result) == 1:
+            class_alert = 'error'
+            alert = result[0][0]
+    
+        return render_template(
+            'pages/mov/mov-request/mov-request.html',
+            result=result,
+            columns=columns,
+            alert=alert,
+            class_alert=class_alert
+        )
     return render_template(
-        'pages/mov/mov-request/mov-request.html',
-        result=result,
-        columns=columns
+        'pages/mov/mov-request/mov-request.html'
     )
 
 
-@app.route('/api/qtde_solic', methods=['GET'])
+@app.route('/mov/requisicao/<int:id_req>', methods=['GET', 'POST'])
+@cde.verify_auth('MOV007')
+def mov_request_id(id_req):
+    result_local, columns_local = [], []
+    if request.method == 'GET':
+        cod_item = request.args.get('cod_item', '')
+        qtde_solic = request.args.get('qtde_solic', '')
+        
+        if cod_item:
+            result_local, columns_local = EstoqueUtils.estoque_endereco_with_item(cod_item)
+            
+        result, columns = MovRequestUtils.get_mov_request(id_req)
+        
+        class_alert = 'success'
+        alert = 'A lista foi carregada com sucesso.'
+        if len(result) == 1:
+            class_alert = 'error'
+            alert = result[0][0]
+
+        return render_template(
+            'pages/mov/mov-request/mov-request.html',
+            id_req=id_req,
+            result=result, columns=columns,
+            result_local=result_local, columns_local=columns_local,
+            cod_item=cod_item, qtde_solic=qtde_solic,
+            class_alert=class_alert, alert=alert
+        )
+    return render_template(
+        'pages/mov/mov-request/mov-request.html'
+    )
+
+
+@app.route('/mov/requisicao/separacao/p/<string:id_req>', methods=['GET', 'POST'])
+@cde.verify_auth('MOV007')
+def req_sep_pend(id_req):
+    id_req = id_req.split('-')[0]
+
+    id_user   = session.get('id_user')
+    user_info = UserUtils.get_userdata(id_user)
+    obs_carga = CargaUtils.get_obs_with_carga(id_req)
+    return render_template(
+        'pages/mov/mov-request/mov-request-separacao-pend.html', 
+        id_req=id_req, 
+        user_info=user_info,
+        obs_carga=obs_carga
+    )
+
+
+@app.route('/mov/requisicao/separacao/f/<string:id_req>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
-def get_qtde_solic():
+def req_sep_done(id_req):
+    if '-' in id_req:
+        id_req, seq = id_req.split('-')
+    else:
+        seq = 0
+
+    id_user   = session.get('id_user')
+    user_info = UserUtils.get_userdata(id_user)
+    obs_carga = CargaUtils.get_obs_with_carga(id_req)
+    return render_template(
+        'pages/mov/mov-request/mov-request-separacao-done.html', 
+        id_req=id_req,
+        seq=seq, 
+        user_info=user_info,
+        obs_carga=obs_carga
+    )
+
+
+@app.route('/api/req/qtde_solic', methods=['GET'])
+@cde.verify_auth('MOV006')
+def get_req_qtde_solic():
+    id_req = request.args.get('id_req', type=int)
+    cod_item = request.args.get('cod_item', type=str)
+    
+    query = f'''
+        SELECT DISTINCT
+            SUM(CAST(M.QTDE AS INTEGER)) AS QTDE_SOLIC
+        FROM 
+            DB2ADMIN.HUGO_PIETRO_VIEW_MOVIMENTOS M
+		JOIN 
+        	DB2ADMIN.HUGO_PIETRO_VIEW_ITEM I
+            ON I.ITEM = M.ITEM
+        WHERE 
+            M.OBS LIKE '%Requisicao :%' AND 
+            (
+                GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
+                GRUPO_DESCRICAO = 'REVENDA'
+            ) AND
+            I.UNIDADE_DESCRICAO = 'CX' AND
+            M.DEPOSITO = 2 AND
+            TIPO_MOVIMENTO = 'S' AND
+            M.DOC_ORIGEM = '{id_req}' AND
+            I.ITEM = '{cod_item}'
+    '''
+    try:
+        dsn = 'HUGOPIET'
+        result, columns = cde.db_query(query, dsn)
+        if result:
+            qtde_solic = result[0][0]
+        else:
+            qtde_solic = 0
+        return jsonify({'qtde_solic': qtde_solic})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/itens_req', methods=['GET'])
+@cde.verify_auth('MOV007')
+def get_itens_req():
+    id_req = request.args.get('id_req', type=int)
+    
+    query = f'''
+        SELECT DISTINCT
+            M.ITEM
+        FROM 
+            DB2ADMIN.HUGO_PIETRO_VIEW_MOVIMENTOS M
+		JOIN 
+        	DB2ADMIN.HUGO_PIETRO_VIEW_ITEM I
+            ON I.ITEM = M.ITEM
+        WHERE 
+            M.OBS LIKE '%Requisicao :%' AND 
+            (
+                GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
+                GRUPO_DESCRICAO = 'REVENDA'
+            ) AND
+            I.UNIDADE_DESCRICAO = 'CX' AND
+            M.DEPOSITO = 2 AND
+            TIPO_MOVIMENTO = 'S' AND
+            M.DOC_ORIGEM = '{id_req}'
+    '''
+    try:
+        dsn = 'HUGOPIET'
+        result, columns = cde.db_query(query, dsn)
+        if result:
+            itens = [row[0] for row in result]
+        else:
+            itens = ['Erro: Nenhum item encontrado.']
+        return jsonify({'itens': itens})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/mov/op', methods=['GET', 'POST'])
+@cde.verify_auth('MOV007')
+def mov_op():
+    if request.method == 'POST':
+        result, columns = OrdemProducaoUtils.get_ordem_producao()
+        
+        class_alert = 'success'
+        alert = 'A lista foi carregada com sucesso.'
+        if len(result) == 1:
+            class_alert = 'error'
+            alert = result[0][0]
+    
+        return render_template(
+            'pages/mov/mov-op.html',
+            result=result,
+            columns=columns,
+            alert=alert,
+            class_alert=class_alert
+        )
+    return render_template(
+        'pages/mov/mov-op.html'
+    )
+
+
+@app.route('/api/carga/qtde_solic', methods=['GET'])
+@cde.verify_auth('MOV006')
+def get_carga_qtde_solic():
     id_carga = request.args.get('id_carga', type=int)
     cod_item = request.args.get('cod_item', type=str)
     
@@ -3248,16 +3620,32 @@ def save_localstorage():
             return jsonify({'error': 'Nenhum dado recebido do localStorage.'}), 400
         
         items_data = data.get('data')
+        report_dir = data.get('report_dir')
         filename = data.get('filename')
 
-        if not items_data or not filename:
+        if not items_data or not filename or not report_dir:
             return jsonify({'error': 'Dados inválidos ou ausentes.'}), 400
 
-        # Verifica se o arquivo já existe e cria um nome com sufixo sequencial se necessário
-        save_path = os.path.join(app.root_path, 'report/cargas', f'{filename}.json')
+        # verifica se o arquivo já existe
+        # cria um nome com sufixo sequencial se necessário
+        save_path = os.path.join(
+            app.root_path,
+            # exemplo: 
+            # 'c:/users/user/desktop/cde/'
+            f'report/{report_dir}', f'{filename}.json'
+            # exemplo: 
+            # 'report/cargas/separacao-carga-123.json'
+        )
         seq = 1
         while os.path.exists(save_path):
-            save_path = os.path.join(app.root_path, 'report/cargas', f'{filename}-{seq}.json')
+            save_path = os.path.join(
+                app.root_path,
+                # exemplo: 
+                # 'c:/users/user/desktop/cde/'
+                f'report/{report_dir}', f'{filename}-{seq}.json'
+                # exemplo: 
+                # 'report/cargas/separacao-carga-123-1.json'
+            )
             seq += 1
 
         with open(save_path, 'w') as file:
@@ -3282,9 +3670,9 @@ def has_carga_at_history(id_carga):
     )
 
 
-@app.route('/get/load-table-data', methods=['GET'])
+@app.route('/get/carga/load-table-data', methods=['GET'])
 @cde.verify_auth('MOV006')
-def load_table_data():
+def get_carga_table_data():
     try:
         filename = request.args.get('filename')
         seq = request.args.get('seq', False)
@@ -3297,17 +3685,48 @@ def load_table_data():
         return jsonify(data), 200
     
     except FileNotFoundError:
+        return jsonify({'error': 'FileNotFound'}), 404
+    
+    except Exception as e:
+        return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
+    
+    
+@app.route('/get/request/load-table-data', methods=['GET'])
+@cde.verify_auth('MOV006')
+def get_request_table_data():
+    try:
+        filename = request.args.get('filename')
+        seq = request.args.get('seq', False)
+        
+        if not filename:
+            return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
+
+        data = MovRequestUtils.readJsonReqSeq(filename, seq)
+
+        return jsonify(data), 200
+    
+    except FileNotFoundError:
         return jsonify({'error': 'Arquivo de dados da carga não encontrado.'}), 404
     
     except Exception as e:
         return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
     
 
-@app.route('/get/list-all-separations', methods=['GET'])
+@app.route('/get/list-all-separations', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def list_all_separations():
     try:
-        directory = os.path.join(app.root_path, 'report/cargas')
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'Nenhum dado recebido do localStorage.'}), 400
+
+        report_dir = data.get('report_dir')
+
+        directory = os.path.join(
+            app.root_path,
+            f'report/{report_dir}'
+        )
         files = [f for f in os.listdir(directory) if f.endswith('.json')]
         files_sorted = sorted(files, reverse=True)
         return jsonify(files_sorted), 200

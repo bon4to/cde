@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <title>Cargas {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+        <title>Requisição {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
@@ -9,11 +9,11 @@
             <h1>
                 <a href="{{ url_for('mov') }}">MOV</a>
                 <span class="dash">/</span>
-                <span>CARGAS</span>
+                <span>ORDEM DE PRODUÇÃO</span>
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
-                <form onsubmit="routeMovRedirect('carga'); return false;">
+                <form onsubmit="routeMovRedirect('op'); return false;">
                     <div class="flex-row" style="margin: 8px 0">
                         <input class="address-three" style="margin: 0; height: 14px" type="number" id="idInputBrow" min="1" placeholder="Carga...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
@@ -22,19 +22,16 @@
                     </div>
                 </form>
                 <hr class="vert">
-                <a class="aux-button {% if request.endpoint == 'carga_incomp' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="INCOMPLETAS" alt="" onclick="window.location.href='{{ url_for('carga_incomp') }}';">
+                <a class="aux-button {% if request.endpoint == 'mov_op' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/square-arrow-down.svg') }}" title="REQUISIÇÃO" alt="" onclick="window.location.href='{{ url_for('mov_request') }}';">
                 </a>
-                <a class="aux-button {% if request.endpoint == 'faturado' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'cargas' or request.endpoint == 'carga_id' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
+                <a class="aux-button {% if request.endpoint == 'mov_request' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/hand-helping.svg') }}" title="REQUISIÇÃO" alt="" onclick="window.location.href='{{ url_for('mov_request') }}';">
                 </a>
                 <hr class="vert">
-                <form action="{{ url_for('cargas') }}" method="post">
+                <form action="{{ url_for('mov_op') }}" method="post">
                     <button type="submit" style="all: unset" onclick="showLoading()">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE ORDENS">
                     </button>
                 </form>
                 <hr class="vert">
@@ -45,12 +42,18 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
+        <!-- COMO ORGANIZAR A PÁGINA:
+        clicar e confirmar endereço 
+        cada ordem tem um único (não difere):
+         - item
+         - lote_fab
+        -->
         <div class="flex-row" style="min-width: 100%; justify-content: space-between;">
             {% if id_carga %}
             <div class="tables-container" style="max-width: 55%; min-width: 55%;">
                 <div class="flex-column">
                     <div class="split-horizontal">
-                        <h1 style="margin-bottom: 8px">Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                        <h1 style="margin-bottom: 8px">Número de Requisição <span class="cor-web">[{{ id_carga }}]</span></h1>
                         <div class="flex-row" style="gap: 30px">
                             <div class="cart-container" style="display: none">
                                 <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
@@ -62,9 +65,9 @@
                                 </div>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 6px">
-                                <form action="{{ url_for('cargas') }}" method="post">
+                                <form action="{{ url_for('mov_request') }}" method="post">
                                     <button type="submit" style="all: unset" onclick="showLoading()">
-                                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
+                                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('mov_request') }}';" title="FECHAR">
                                             <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                                         </a>
                                     </button>
@@ -75,8 +78,8 @@
                     <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
                 </div>
                 <div class="hidden" id="alert-message"></div>
-                {% if result and 'OBS_CARGA' in columns %}
-                    {% set obs_carga = result[0][columns.index('OBS_CARGA')]|trim %}
+                {% if result and 'OBS' in columns %}
+                    {% set obs_carga = result[0][columns.index('OBS')]|trim %}
                     {% if obs_carga and obs_carga | length > 0 %}
                         <div class="msg-info">
                             <details>
@@ -108,8 +111,8 @@
                             {% set subtotals = {} %}
                             
                             {% for row in result %}
-                                {% set cod_item   = row[columns.index('COD_ITEM')] %}
-                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                {% set cod_item   = row[columns.index('ITEM')] %}
+                                {% set qtde_solic = row[columns.index('QTDE')] %}
                                 {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
                                 {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
                                 {% set items      = items.append(row) or items %}
@@ -117,12 +120,11 @@
                             
                             {% for row_cod_item, subtotal in subtotals.items() %}
                                 {% for row in items %}
-                                    {% if row[columns.index('COD_ITEM')] == row_cod_item %}
+                                    {% if row[columns.index('ITEM')] == row_cod_item %}
                                         <tr class="unselectable-row">
-                                            <td class="over-row">{{ row[columns.index('NROPED_SEQ')] }}</td>
-                                            <td>{{ row[columns.index('COD_ITEM')] }}</td>
-                                            <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
-                                            <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
+                                            <td class="over-row">{{ row[columns.index('LOTE')] }}</td>
+                                            <td>{{ row[columns.index('ITEM')] }}</td>
+                                            <td>{{ row[columns.index('QTDE')] }}</td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -250,81 +252,85 @@
             <input type="hidden" id="carga_id_input" name="carga_id">
             <input type="hidden" id="qtde_item_input" name="qtde_solic">
         </form>
-
         {% if 'user_grant' in session %}
-            {% if not id_carga %}
-                <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
+        <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
                     {% if alert %}
                         {% if class_alert == 'error' %}
-                            <div class="msg-error">
-                                <details>
-                                    <summary>A lista não pôde ser carregada!</summary>
-                                    {{ alert | safe }}
-                                </details>
-                            </div>
-                        {% elif class_alert == 'success' %}
-                            <div class="msg-success">
-                                <details>
-                                    <summary>A lista foi carregada com sucesso!</summary>
-                                    {{ alert | safe }}
-                                </details>
-                            </div>
-                            <h1 class="subtitle">Selecione a <span class="cor-web">carga</span> para iniciar a <span class="cor-web">separação</span>:</h1>
-                        {% endif %}
-                    {% else %}
-                        <div class="msg-info">
+                        <div class="msg-error">
                             <details>
-                                <summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
-                                A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
-                                <br>
+                                <summary>A lista não pôde ser carregada!</summary>
+                                {{ alert | safe }}
                             </details>
                         </div>
-                        
+                        {% elif class_alert == 'success' %}
+                        <div class="msg-success">
+                            <details>
+                                <summary>A lista foi carregada com sucesso!</summary>
+                                {{ alert | safe }}
+                            </details>
+                        </div>
+                        <h1 class="subtitle">Selecione a <span class="cor-web">carga</span> para iniciar sua <span class="cor-web">separação</span>:</h1>
+                        {% endif %}
+                    {% else %}
+                    <div class="msg-info">
+                        <details>
+                            <summary>Carregue a lista para obter as cargas à serem faturadas.</summary>
+                            A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                            <br>
+                        </details>
+                    </div>
                     {% endif %}
+                {% if result %}
                     <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                    {% if class_alert == 'success' %}
                         {% if result %}
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Carga (Código)</th>
-                                        <th>Pedido (Código)</th>
-                                        <th>Cliente (Código)</th>
-                                        <th>Cliente (Descrição)</th>
-                                        <th>Emissão (Data)</th>
-                                        <th>Entrega (Data)</th>
+                                        <th>Lote (Promob)</th>
+                                        <th>Ordem (Código)</th>
+                                        <th>Transação</th>
+                                        <th>Item (Código)</th>
+                                        <th>Item (Descrição)</th>
+                                        <th>Lote (Código)</th>
+                                        <th>Quantidade</th>
+                                        <th>Data</th>
                                         <th>OBS.</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for row in result %}
-                                        {% if class_alert != 'error' %}
-                                            <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('NRO_CARGA')] }}">
-                                                <td>{{ row[columns.index('NRO_CARGA')] }}</td>
-                                                <td>{{ row[columns.index('NRO_PEDIDO')] }}</td>
-                                                <td>{{ row[columns.index('COD_CLIENTE')] }}</td>
-                                                <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
-                                                <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
-                                                <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
+                                    {% if not class_alert == 'error' %}
+                                        {% for row in result %}
+                                            <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('LOG_PROMOB')] }}">
+                                                <td>{{ row[columns.index('LOTE_PROMOB')] }}</td>
+                                                <td>{{ row[columns.index('ORDEM_PRODUCAO')] }}</td>
+                                                <td>{{ row[columns.index('TIPO_TRANSACAO')] }}</td>
+                                                <td>{{ row[columns.index('COD_ITEM')] }}</td>
+                                                <td>{{ row[columns.index('DESC_ITEM')] }}</td>
+                                                <td>{{ row[columns.index('COD_LOTE')] }}</td>
+                                                <td style="text-align: right">{{ row[columns.index('QTDE')] }}</td>
+                                                <td>{{ row[columns.index('DATA')] }}</td>
                                                 <td style="text-align: center">
-                                                    {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
-                                                        <span title="{{ row[columns.index('OBS_CARGA')] }}">🔵</span>
-                                                    {% endif %}
+                                                {% if row[columns.index('OBS')] | trim | length > 1 %}
+                                                    <span title="{{ row[columns.index('OBS')] }}">🔵</span>
+                                                {% endif %}
                                                 </td>
                                             </tr>
-                                        {% endif %}
-                                    {% endfor %}
+                                        {% endfor %}
+                                    {% endif %}
                                 </tbody>
                             </table>
                         {% endif %}
+                    {% endif %}
                     </div>
                     <br>
+                    {% endif %}
                 </div>
-                {% endif %}
-                {% if not cod_item %}
+            {% if not cod_item %}
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
                     <h1 class="subtitle" style="margin: 0;">Separações</h1>
                     <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-                        <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 14px" onchange="window.location.href='/mov/carga/separacao/f/{{ id_carga | default(0) }}'">
+                        <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 14px" onchange="window.location.href='/mov/separacao-done/{{ id_carga | default(0) }}'">
                             <option style="color: var(--cor-destaque);">Pendentes</option>
                             <option style="color: green;">Finalizadas</option>
                         </select>
@@ -421,7 +427,7 @@
                         resolve(JSON.parse(localStorageData));
                     }
                 } else {
-                    fetch(`/get/carga/load-table-data?filename=${getStorageKey()}`)
+                    fetch(`/get/request/load-table-data?filename=${getStorageKey()}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Erro ao carregar dados do servidor');

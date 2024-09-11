@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+    {% block title %}
+        <title>Separação {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+    {% endblock title %}
+    
+    <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+
+    {% include 'shared/header/tl-header.html' %}
+    <div class="titles-container flex-row title-centerer">
+        <h1>
+            <a href="{{ url_for('mov') }}">MOV</a>
+            <span class="dash">/</span>
+            <a href="{{ url_for('mov_request') }}">REQUISIÇÃO</a>
+            <span class="dash">/</span>
+            {% block sep_status %}
+                <span>SEPARAÇÃO</span>
+            {% endblock sep_status %}
+            <span class="id-page">{{session['id_page']}}</span>
+        </h1>
+        <div class="aux-buttons">
+            {% block aux_buttons %}
+                <form onsubmit="routeMovRedirect('requesicao/separacao/f'); return false;">
+                    <div class="flex-row" style="margin: 8px 0">
+                        <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Carga...">
+                        <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
+                            <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                        </button>
+                    </div>
+                </form>
+                <hr class="vert">
+            {% endblock aux_buttons %}
+            <a class="aux-button {% if request.endpoint == 'mov_request' or request.endpoint == 'mov_request_id' %}active{% endif %}">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/hand-helping.svg') }}" title="REQUISIÇÃO" alt="" onclick="window.location.href='{{ url_for('mov_request') }}';">
+            </a>
+            <hr class="vert">
+            <form action="{{ url_for('cargas') }}" method="post">
+                <button type="submit" style="all: unset">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
+                </button>
+            </form>
+            <hr class="vert">
+            <a class="aux-button {% if request.endpoint == 'carga_sep_pend' or request.endpoint == 'carga_sep_done' %}active{% endif %}">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('req_sep_done', id_req=id_req) }}';">
+            </a>
+            <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+        </div>
+    </div>
+    <div class="flex-row" style="min-width: 100%; justify-content: flex-end;">
+        <div class="tables-container" id="sepContainer" style="min-width: 40vw;{% if id_req == '0' %}display: none;{% endif %}">
+            <div class="split-horizontal">
+                <div class="flex-column">
+                    <h1>Número de Requisição <span class="cor-web">[{{ id_req }}{% if seq %}-{{ seq }}{% endif %}]</span></h1>
+                    <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
+                </div>
+                <div class="cart-container">
+                    <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                    <div class="cart-dropdown hidden" id="cart-dropdown">
+                        <ul class="cart-items">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% if obs_carga %}
+                {% set obs_carga = obs_carga|trim %}
+                {% if obs_carga and obs_carga | length > 0 %}
+                    <div class="msg-info">
+                        <details>
+                            <summary>A carga possui uma observação!</summary>
+                            <span id="obs_carga">{{ obs_carga }}</span>
+                        </details>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div class="split-horizontal">
+                <p style="justify-content: flex-start">
+                    Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span>
+                </p>
+                <p style="justify-content: flex-start">
+                    Separador: <span id="separador-info" style="color: var(--cor-tl); margin-left: 4px">carregando...</span>
+                </p>
+            </div>
+            <div class="hidden" id="alert-message"></div>
+            <div id="contentTable">
+                <div class="table-overflow" style="max-height: 400px">
+                    <table id="itemsTable">
+                        <thead>
+                            <tr>
+                                <th>Endereço</th>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th>Lote (Código)</th>
+                                <th>QTDE (Separado)</th>
+                            </tr>
+                        </thead>
+                            <!-- executa renderItems(); -->
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="split-horizontal flex-row" style="margin: 8px 0">
+                    {% block separation_buttons %}
+                        
+                    {% endblock separation_buttons %}
+                </div>
+            </div>
+        </div>
+        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+            <h1 class="subtitle" style="margin: 0;">Separações</h1>
+            {% block all_separation_status %}
+            
+            {% endblock all_separation_status %}
+            <div class="table-overflow" style="max-height: 500px">
+                <form onsubmit="routemovredirect('carga/separacao/f'); return false;">
+                    <div class="flex-row" style="margin: 8px 0">
+                        <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Requisicao...">
+                        <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
+                            <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                        </button>
+                    </div>
+                </form>
+                <table id="allSeparationsTable" style="border-top: 4px solid var(--cor-destaque)">
+                    <tbody>
+                        <!-- executa listSeparationsLocalStorage(); -->
+                    </tbody>
+                </table>
+            </div>
+            {% if session['user_grant'] == 1 %}
+                <div style="margin: 8px 0" class="flex-row">
+                    <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    
+    {% block script %}
+    
+    {% endblock script %}
+    <script src="{{ url_for('static', filename='js/lb-requests.js') }}"></script>
+        
+
+    {% include 'shared/footer.html' %}
