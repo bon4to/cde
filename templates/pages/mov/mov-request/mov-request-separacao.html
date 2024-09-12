@@ -3,7 +3,7 @@
 <head>
 
     {% block title %}
-        <title>Separação {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
+        <title>Requisição Sep. {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANSLÉGUA</title>
     {% endblock title %}
     
     <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
@@ -54,7 +54,9 @@
             <div class="split-horizontal">
                 <div class="flex-column">
                     <h1>Número de Requisição <span class="cor-web">[{{ id_req }}{% if seq %}-{{ seq }}{% endif %}]</span></h1>
-                    <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
+                    {% if result %}
+                        <h1 class="subtitle">Responsável: <span class="cor-web">{{ result[0][columns.index('USUARIO')] }}</span></h1>
+                    {% endif %}
                 </div>
                 <div class="cart-container">
                     <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
