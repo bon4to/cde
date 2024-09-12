@@ -3966,7 +3966,7 @@ def estoque():
 
 @app.route('/estoque-enderecado', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
-def estoque_addresserecado():
+def estoque_enderecado():
     if request.method == 'POST':
         date = request.form['date']
         result = EstoqueUtils.get_address_lote(date)
