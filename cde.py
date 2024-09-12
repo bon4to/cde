@@ -337,31 +337,37 @@ class cde:
 
 
 class EstoqueUtils:
+    # DEFINE A QUERY SQL DE SALDO
+    sql_balance_calc = '''
+        SUM( 
+            CASE 
+            WHEN operacao = 'E' OR operacao = 'TE' 
+            THEN quantidade 
+            
+            WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
+            THEN (quantidade * -1)
+            
+            ELSE (quantidade * 0)
+            END
+        )
+    '''
+    
     @staticmethod
     # retorna saldo do item
-    def estoque_endereco_with_item(cod_item=False):
+    def estoque_address_with_item(cod_item=False):
         if cod_item:
-            query = f'''
+            sql_balance_calc = EstoqueUtils.sql_balance_calc
+            query = '''
                 SELECT  
                     h.rua_numero, h.rua_letra, i.cod_item, 
                     i.desc_item, h.lote_item,
-                    SUM(
-                        CASE 
-                        WHEN operacao = 'E' OR operacao = 'TE'
-                        THEN quantidade 
-                        
-                        WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
-                        THEN (quantidade * -1)
-
-                        ELSE (quantidade * 0)
-                        END
-                    ) as saldo
+                    {a} as saldo
                 FROM historico h
 
                 JOIN itens i 
                 ON h.cod_item = i.cod_item
 
-                WHERE i.cod_item = "{str(cod_item)}"
+                WHERE i.cod_item = "{b}"
                 
                 GROUP BY  
                     h.rua_numero, h.rua_letra, 
@@ -371,7 +377,7 @@ class EstoqueUtils:
                 ORDER BY 
                     h.lote_item ASC, h.rua_letra ASC,
                     h.rua_numero ASC, i.desc_item ASC;
-            '''
+            '''.format(a=sql_balance_calc, b=str(cod_item))
             dsn = 'SQLITE'
             result_local, columns_local = cde.db_query(query, dsn)
             return result_local, columns_local
@@ -386,35 +392,42 @@ class EstoqueUtils:
             timestamp = misc.add_days_to_datetime_str(timestamp, 1)
         timestamp = misc.parse_db_datetime(timestamp)
         
+        sql_balance_calc = EstoqueUtils.sql_balance_calc
+        
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo, COALESCE(t.time_mov, "-") as time_mov
+                SELECT 
+                    i.cod_item, i.desc_item, 
+                    COALESCE(t.saldo, 0) as saldo,
+                    COALESCE(t.time_mov, "-") as time_mov
                 FROM itens i
+                
                 LEFT JOIN (
-                    SELECT cod_item,
-                    SUM(CASE 
-                        WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                        WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                        ELSE (quantidade * 0)
-                        END
-                    ) as saldo,
-                    MAX(time_mov) as time_mov,
-                    ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                    SELECT 
+                        cod_item, {a} as saldo,
+                        MAX(time_mov) as time_mov,
+                        ROW_NUMBER() OVER(
+                            PARTITION BY cod_item 
+                            ORDER BY MAX(time_mov) DESC
+                        ) as rn
                     FROM historico h
                     WHERE time_mov <= ?
                     GROUP BY cod_item
                 ) t ON i.cod_item = t.cod_item
-                WHERE t.rn = 1 OR t.rn IS NULL
+                
+                WHERE 
+                    t.rn = 1 OR 
+                    t.rn IS NULL
                 ORDER BY t.time_mov DESC;
-            ''', (timestamp,))
+            '''.format(a=sql_balance_calc), (timestamp,))
 
-            saldo_visualization = [{
-                'cod_item' : row[1], 'desc_item': row[0], 
-                'saldo'    : row[2], 'ult_mov'  : row[3]
+            result = [{
+                'cod_item': row[0], 'desc_item': row[1], 
+                'saldo'   : row[2], 'ult_mov'  : row[3]
             } for row in cursor.fetchall()]
 
-        return saldo_visualization
+        return result
 
     
     @staticmethod
@@ -424,49 +437,60 @@ class EstoqueUtils:
         
         if not itens:
             return []
-
+        
+        if timestamp:
+            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = misc.parse_db_datetime(timestamp)
+        
+        # prepara uma string sql (ex.: ?, ?, ?...)
+        # e coloca na query
         placeholders = ','.join(['?'] * len(itens))
-        query = f'''
-            SELECT i.desc_item, i.cod_item, COALESCE(t.saldo, 0) as saldo
+        
+        sql_balance_calc = EstoqueUtils.sql_balance_calc
+        
+        query = '''
+            SELECT 
+                i.cod_item, i.desc_item,
+                COALESCE(t.saldo, 0) as saldo
             FROM itens i
+            
             LEFT JOIN (
-                SELECT cod_item,
-                SUM(CASE 
-                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade
-                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                    ELSE (quantidade * 0)
-                    END
-                ) as saldo,
-                MAX(time_mov) as time_mov,
-                ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                SELECT 
+                    cod_item, {a} as saldo,
+                    MAX(time_mov) as time_mov,
+                    ROW_NUMBER() OVER(
+                        PARTITION BY cod_item 
+                        ORDER BY MAX(time_mov) DESC
+                    ) as rn
                 FROM historico h
                 WHERE time_mov <= ?
                 GROUP BY cod_item
             ) t ON i.cod_item = t.cod_item
-            WHERE i.cod_item IN ({placeholders})
+            
+            WHERE i.cod_item IN ({b})
             ORDER BY i.cod_item;
-        '''
-
-        if timestamp:
-            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = misc.parse_db_datetime(timestamp)
+        '''.format(a=sql_balance_calc, b=placeholders)
 
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
+            # executa a query, 
+            # passando o timestamp e os itens p/ os placeholders
             cursor.execute(query, (timestamp, *itens))
-            saldo_visualization = [{
-                'cod_item' : row[1], 'desc_item': row[0], 
-                'saldo'    : row[2]
+        
+            result = [{
+                'cod_item': row[0], 'desc_item': row[1], 
+                'saldo'   : row[2]
             } for row in cursor.fetchall()]
-
-        return saldo_visualization
+        return result
 
     
     @staticmethod
     # BUSCA ITENS DE PRESETS
     def get_preset_itens(index):
         try:
-            with open(f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
+            with open(
+                f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8'
+            ) as file:
                 itens = file.read().strip().split(', ')
         except:
             itens = []
@@ -475,43 +499,48 @@ class EstoqueUtils:
 
     @staticmethod
     # RETORNA ENDEREÇAMENTO POR LOTES
-    def get_end_lote(timestamp=False):
+    def get_address_lote(timestamp=False):
         if timestamp:
             timestamp = misc.add_days_to_datetime_str(timestamp, 1)
         timestamp = misc.parse_db_datetime(timestamp)
         
+        sql_balance_calc = EstoqueUtils.sql_balance_calc
+        
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                SELECT  h.rua_numero, h.rua_letra, i.cod_item, 
-                        i.desc_item, h.lote_item,
-                        SUM( 
-                        CASE 
-                        WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                        WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                        ELSE (quantidade * 0)
-                        END
-                        ) as saldo
+                SELECT  
+                    h.rua_letra, h.rua_numero, 
+                    i.cod_item, i.desc_item, h.lote_item,
+                    {a} as saldo
                 FROM historico h
-                JOIN itens i ON h.cod_item = i.cod_item
+                
+                JOIN itens i 
+                ON h.cod_item = i.cod_item
+                
                 WHERE h.time_mov <= ?
-                GROUP BY h.rua_numero, h.rua_letra, h.cod_item, 
-                        h.lote_item
+                GROUP BY 
+                    h.rua_numero, h.rua_letra, 
+                    h.cod_item, h.lote_item
+                    
                 HAVING saldo != 0
-                ORDER BY h.rua_letra ASC, h.rua_numero ASC, i.desc_item ASC;
-            ''', (timestamp,))
+                ORDER BY 
+                    h.rua_letra ASC, h.rua_numero ASC,
+                    i.desc_item ASC
+                ;'''.format(a=sql_balance_calc),(timestamp,)
+            )
 
-            end_lote = [{
-                'letra'     : row[1], 'numero'   : row[0], 'cod_item': row[2],
-                'desc_item' : row[3], 'cod_lote' : row[4], 'saldo'   : row[5]
+            result = [{
+                'letra'   : row[0], 'numero'   : row[1], 
+                'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
+                'saldo'   : row[5]
             } for row in cursor.fetchall()]
-
-        return end_lote
+        return result
 
 
     @staticmethod
     # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
-    def get_end_lote_fat():
+    def get_address_lote_fat():
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -520,7 +549,10 @@ class EstoqueUtils:
                     i.desc_item, h.lote_item, h.id_carga, 
                     h.id_request, h.quantidade, h.time_mov
                 FROM historico h
-                JOIN itens i ON h.cod_item = i.cod_item
+                
+                JOIN itens i 
+                ON h.cod_item = i.cod_item
+                
                 WHERE 
                     h.operacao = 'F' AND
                     (h.id_request != 0 OR h.id_request IS NULL) OR
@@ -529,32 +561,32 @@ class EstoqueUtils:
                 ORDER BY 
                     h.time_mov DESC, h.id_carga DESC,
                     h.id_request DESC, h.cod_item ASC;
-
             ''')
 
-            end_lote = [{
-                'numero'  : row[0], 'letra': row[1], 'cod_item': row[2],
-                'desc_item' : row[3], 'cod_lote' : row[4], 'saldo' : row[7],
-                'id_carga': row[5], 'id_req': row[6], 'time_mov': row[8]
+            result = [{
+                'numero'   : row[0], 'letra'   : row[1], 'cod_item': row[2],
+                'desc_item': row[3], 'cod_lote': row[4], 'saldo'   : row[7],
+                'id_carga' : row[5], 'id_req'  : row[6], 'time_mov': row[8]
             } for row in cursor.fetchall()]
-
-        return end_lote
+        return result
 
 
     @staticmethod
     # RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
     def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
+        sql_balance_calc = EstoqueUtils.sql_balance_calc
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                SELECT COALESCE(SUM(CASE 
-                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                    ELSE (quantidade * 0)
-                END), 0) as saldo
+                SELECT 
+                    COALESCE({a}, 0) as saldo
                 FROM historico h
-                WHERE rua_numero = ? AND rua_letra = ? AND cod_item = ? AND lote_item = ?;
-            ''', (rua_numero, rua_letra, cod_item, cod_lote))
+                WHERE 
+                    rua_numero = ? AND
+                    rua_letra = ? AND
+                    cod_item = ? AND
+                    lote_item = ?;
+            '''.format(a=sql_balance_calc), (rua_numero, rua_letra, cod_item, cod_lote))
             saldo_item = cursor.fetchone()[0]
         return saldo_item
 
@@ -1067,19 +1099,20 @@ class HistoricoUtils:
     @staticmethod
     # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
     def select_rua(letra, numero):
+        sql_balance_calc = EstoqueUtils.sql_balance_calc
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                SELECT cod_item, lote_item, 
-                COALESCE(SUM(CASE 
-                    WHEN operacao = 'E' OR operacao = 'TE' THEN quantidade 
-                    WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' THEN (quantidade * -1)
-                    ELSE (quantidade * 0)
-                END), 0) as saldo
+                SELECT 
+                    cod_item, lote_item, 
+                    COALESCE({a}, 0) as saldo
                 FROM historico
-                WHERE rua_letra = ? AND rua_numero = ?
-                GROUP BY cod_item, lote_item;
-            ''', (letra, numero))
+                WHERE 
+                    rua_letra = ? AND
+                    rua_numero = ?
+                GROUP BY 
+                    cod_item, lote_item;
+            '''.format(a=sql_balance_calc), (letra, numero))
             
             items = cursor.fetchall()
 
@@ -1902,6 +1935,7 @@ class misc:
         @staticmethod    
         # RETORNA TABELA DE SALDO
         def get_export_promob():
+            sql_balance_calc = EstoqueUtils.sql_balance_calc
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('''
@@ -1914,14 +1948,12 @@ class misc:
                         itens i
                     LEFT JOIN (
                         SELECT 
-                            cod_item,
-                            SUM(CASE 
-                                WHEN operacao IN ('E', 'TE') THEN quantidade
-                                WHEN operacao IN ('S', 'TS', 'F') THEN (quantidade * -1)
-                                ELSE (quantidade * 0)
-                            END) as saldo,
+                            cod_item, {a} as saldo,
                             MAX(time_mov) as time_mov,
-                            ROW_NUMBER() OVER(PARTITION BY cod_item ORDER BY MAX(time_mov) DESC) as rn
+                            ROW_NUMBER() OVER(
+                                PARTITION BY cod_item 
+                                ORDER BY MAX(time_mov) DESC
+                            ) as rn
                         FROM 
                             historico h
                         GROUP BY 
@@ -1933,11 +1965,11 @@ class misc:
                         t.rn = 1 OR t.rn IS NULL
                     ORDER BY 
                         i.cod_item;
-                ''')
+                '''.format(a=sql_balance_calc))
 
                 saldo_visualization = [{
                     'cod_item': row[1],
-                    'deposito': 2,
+                    'deposito': int(2),
                     'qtde'    : row[2]
                 } for row in cursor.fetchall()]
 
@@ -2336,11 +2368,11 @@ def get_item():
 @app.route('/mov')
 @cde.verify_auth('MOV002')
 def mov() -> str:
-    end_lote = EstoqueUtils.get_end_lote()
+    result = EstoqueUtils.get_address_lote()
 
     return render_template(
         'pages/mov/mov.html', 
-        saldo_atual=end_lote
+        saldo_atual=result
     )
 
 
@@ -2405,7 +2437,7 @@ def historico_search() -> str:
 @app.route('/mov/faturado')
 @cde.verify_auth('MOV005')
 def faturado() -> str:
-    saldo_atual = EstoqueUtils.get_end_lote_fat()
+    saldo_atual = EstoqueUtils.get_address_lote_fat()
 
     return render_template(
         'pages/mov/mov-faturado.html', 
@@ -2420,7 +2452,7 @@ def moving():
     numero          = int(request.form['end_number'])
     letra           = str(request.form['end_letra'])
     operacao        = str(request.form['operacao'])
-    is_end_completo = bool(request.form.get('is_end_completo'))
+    is_address_completo = bool(request.form.get('is_address_completo'))
     id_carga        = 0
     id_request      = 0
 
@@ -2430,7 +2462,7 @@ def moving():
 
     print(f'    | OPERAÇÃO: {operacao}')
 
-    if is_end_completo:
+    if is_address_completo:
         # MOVIMENTA ENDEREÇO COMPLETO
         items = HistoricoUtils.select_rua(letra, numero)
         
@@ -2465,8 +2497,8 @@ def moving():
 
     if operacao == 'T':
         # TRANSFERENCIA
-        destino_letter = str(request.form['destino_end_letra'])
-        destino_number = int(request.form['destino_end_number'])
+        destino_letter = str(request.form['destino_address_letra'])
+        destino_number = int(request.form['destino_address_number'])
 
         if items:
             for item in items:
@@ -2653,7 +2685,7 @@ def carga_incomp_id(id_carga):
     qtde_solic = request.args.get('qtde_solic', '')
     
     if cod_item:
-        result_local, columns_local = EstoqueUtils.estoque_endereco_with_item(cod_item)
+        result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
     else:
         result_local, columns_local = [], []
     
@@ -3211,7 +3243,7 @@ def carga_id(id_carga):
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            result_local, columns_local = EstoqueUtils.estoque_endereco_with_item(cod_item)
+            result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
 
         id_carga = id_carga.split('-')[0]
         
@@ -3332,7 +3364,7 @@ def mov_request_id(id_req):
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            result_local, columns_local = EstoqueUtils.estoque_endereco_with_item(cod_item)
+            result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
             
         result, columns = MovRequestUtils.get_mov_request(id_req)
         
@@ -3934,16 +3966,16 @@ def estoque():
 
 @app.route('/estoque-enderecado', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
-def estoque_enderecado():
+def estoque_addresserecado():
     if request.method == 'POST':
         date = request.form['date']
-        end_lote = EstoqueUtils.get_end_lote(date)
+        result = EstoqueUtils.get_address_lote(date)
     else:
-        end_lote = EstoqueUtils.get_end_lote()
+        result = EstoqueUtils.get_address_lote()
         date = False
     return render_template(
         'pages/estoque-enderecado.html',
-        saldo_atual=end_lote,
+        saldo_atual=result,
         search_term=date
     )
 
@@ -3990,10 +4022,10 @@ def export_csv_tipo(tipo):
         data = ProdutoUtils.get_active_itens()
         filename = 'exp_produtos'
     elif tipo == 'saldo':
-        data = EstoqueUtils.get_end_lote()
+        data = EstoqueUtils.get_address_lote()
         filename = 'exp_saldo_lote'
     elif tipo == 'faturado':
-        data = EstoqueUtils.get_end_lote_fat()
+        data = EstoqueUtils.get_address_lote_fat()
         filename = 'exp_faturado'
     elif tipo == 'estoque':
         data = EstoqueUtils.get_saldo_view()
