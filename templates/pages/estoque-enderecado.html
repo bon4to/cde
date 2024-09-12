@@ -41,7 +41,7 @@
         {% if search_term %}
             <div class="split-horizontal">
                 <h1 style="font-size: 22px">Estoque na data <span class="cor-web">{{ search_term }}</span>.</h1>
-                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
+                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';" title="Limpar">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>
             </div>
@@ -64,7 +64,7 @@
                             <td>{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
-                            <td>{{ item['saldo'] }}</td>
+                            <td style="text-align: right">{{ item['saldo'] }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
