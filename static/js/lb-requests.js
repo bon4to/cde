@@ -352,8 +352,6 @@ function renderSubtotals() {
 
     getSeparacao().then(sepReq => {        
         let subtotals = {};
-        
-        console.log(sepReq)
 
         sepReq.forEach(item => {
             if (subtotals[item.cod_item]) {
@@ -443,8 +441,6 @@ function renderCartSubtotals() {
     getSeparacao().then(sepReq => {
         let subtotals = {};
 
-        console.log(sepReq) // remover
-
         sepReq.forEach(item => {
             if (subtotals[item.cod_item]) {
                 subtotals[item.cod_item] += item.qtde_sep;
@@ -491,8 +487,6 @@ function renderCartSubtotals() {
 function reloadItemSubtotal() {
     getSeparacao().then(sepReq => {
         let subtotals = {};
-        
-        console.log(sepReq)
 
         sepReq.forEach(item => {
             if (subtotals[item.cod_item]) {
@@ -580,6 +574,7 @@ function saveIntoServer(data, filename, reportDir='requests') {
 }
 
 
+// retorna a a quantidade de item no local storage
 function getQtdeItemEnderecoLS(storageKey, cod_item, nroReq, lote_item, rua_letra, rua_numero) {
     const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
     const quantidade = storage.reduce((acc, item) => {
@@ -682,14 +677,6 @@ async function fetchQtdeSolic(id_req, cod_item) {
         console.error("Erro ao obter quantidade solicitada na rota '/api/req/qtde_solic?id_req=<id_req>&cod_item=<cod_item>':", error);
         return null;
     }
-}
-
-
-async function hasPendingItems() {
-    const PendingItems = await getPendingItems();
-    if (PendingItems.length > 0) { hasPendingItems = true } else { hasPendingItems = false };
-
-    return hasPendingItems;
 }
 
 
