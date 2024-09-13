@@ -627,8 +627,6 @@ function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit)
     var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
     var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
 
-    input.value = 0
-
     msge.textContent = `${qtde_separada} / ${qtde_solic}`;
     obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
     info.textContent = `(${qtde_faltante} faltante)`;
@@ -639,6 +637,8 @@ function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit)
     maxBtn.onclick = function() {
         input.value = input.max;
     };
+
+    input.value = input.max;
 
     // verifica se o input de quantidade está satisfazendo a quantidade solicitada
     if (qtde_faltante <= 0) {
