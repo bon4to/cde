@@ -356,30 +356,8 @@
                 </div>
             {% endif %}
         {% endif %}
-        <div id="quantityPopup" class="dialog-overlay hidden">
-            <div class="dialog-box">
-                <h1 style="margin-top: 8px; margin-bottom: 14px;">Separar <span class="cor-web">{{ cod_item }}</span>:</h1>
-                <h1 class="sub-label">Separados:</h1>
-                <div class="flex-column">
-                    <h3 id="popupMessage"></h3>
-                    <p class="cor-web" style="font-weight: bold" id="popupFaltante"></p>
-                </div>
-                <h1 class="sub-label">Adicionar:</h1>
-                <div class="flex-column">
-                    <h3 class="cor-web" style="display: flex; justify-content: center;">
-                        <div style="border-bottom: 2px solid var(--cor-destaque); width: max-content;">
-                            <span>+</span>
-                            <input value="0" style="all: unset; width: 70px;" type="number" style="width: 40px;" id="quantityInput" min="1">
-                            <a id="maxBtn">MAX</a>
-                        </div>
-                    </h3>
-                    <p id="popupObs"></p>
-                </div>
-                <br>
-                <button class="btn-fancy" id="submitBtn" required>Confirmar</button>
-                <a class="aux-link" onclick="hidePopUp()">Cancelar</a>
-            </div>
-        </div>
+        <!-- PopUp -->
+        {% include "components/menus/quantity-popup.html" %}
     </div>
     <script>
         const nroCarga = '{{ id_carga }}';
