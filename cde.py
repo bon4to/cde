@@ -2117,6 +2117,23 @@ def inject_version() -> dict:
     return dict(app_version=app.config['APP_VERSION'])
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template(
+        '404.html',
+        error_code=404,
+        error=e
+    ), 404
+
+
+@app.errorhandler(403)
+def page_not_found(e):
+    return render_template(
+        '403.html',
+        error_code=403,
+        error=e
+    ), 403
+
 
 # ROTAS DE ACESSO | URL
 #
