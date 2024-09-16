@@ -41,146 +41,146 @@
         </div>
         <div class="flex-row" style="min-width: 100%; justify-content: space-between;">
             {% if id_req %}
-            <div class="tables-container" style="max-width: 55%; min-width: 55%;">
-                <div class="flex-column">
-                    <div class="split-horizontal">
-                        <h1 style="margin-bottom: 8px">Número de Requisição <span class="cor-web">[{{ id_req }}]</span></h1>
-                        <div class="flex-row" style="gap: 30px">
-                            <div class="cart-container" style="display: none">
-                                <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
-                                <div class="cart-dropdown hidden" id="cart-dropdown">
-                                    <ul class="cart-items">
-                                        <!-- Itens serão renderizados aqui -->
-                                    </ul>
-                                    <button class="checkout-button" onclick="window.location.href='{{ url_for('mov_request') }}';">Visualizar Separação</button>
+                <div class="tables-container" style="max-width: 55%; min-width: 55%;">
+                    <div class="flex-column">
+                        <div class="split-horizontal">
+                            <h1 style="margin-bottom: 8px">Número de Requisição <span class="cor-web">[{{ id_req }}]</span></h1>
+                            <div class="flex-row" style="gap: 30px">
+                                <div class="cart-container" style="display: none">
+                                    <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                                    <div class="cart-dropdown hidden" id="cart-dropdown">
+                                        <ul class="cart-items">
+                                            <!-- Itens serão renderizados aqui -->
+                                        </ul>
+                                        <button class="checkout-button" onclick="window.location.href='{{ url_for('mov_request') }}';">Visualizar Separação</button>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 6px">
+                                    <form action="{{ url_for('mov_request') }}" method="post">
+                                        <button type="submit" style="all: unset" onclick="showLoading()">
+                                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('mov_request') }}';" title="FECHAR">
+                                                <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                            </a>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 6px">
-                                <form action="{{ url_for('mov_request') }}" method="post">
-                                    <button type="submit" style="all: unset" onclick="showLoading()">
-                                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('mov_request') }}';" title="FECHAR">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                                        </a>
-                                    </button>
-                                </form>
+                        </div>
+                        {% if result %}
+                            <h1 class="subtitle">Responsável: <span class="cor-web">{{ result[0][columns.index('USUARIO')] }}</span></h1>
+                        {% endif %}
+                    </div>
+                    <div class="hidden" id="alert-message"></div>
+                    {% if result %}
+                        <div id="detailedTable" class="hidden">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <p>Lista Detalhada</p>
+                                <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                {% if result %}
-                    <h1 class="subtitle">Responsável: <span class="cor-web">{{ result[0][columns.index('USUARIO')] }}</span></h1>
-                {% endif %}
-                </div>
-                <div class="hidden" id="alert-message"></div>
-            {% if result %}
-                <div id="detailedTable" class="hidden">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                        <p>Lista Detalhada</p>
-                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
-                        </div>
-                    </div>
-                    <table style="max-height: 500px; overflow-y: auto;">
-                        <thead>
-                            <tr>
-                                <th>Promob (Log)</th>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th style="width: 100px;">QTDE (Solicitada)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% set items = [] %}
-                            {% set subtotals = {} %}
-                            
-                            {% for row in result %}
-                                {% set cod_item   = row[columns.index('COD_ITEM')] %}
-                                {% set qtde_solic = row[columns.index('QTDE')] %}
-                                {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
-                                {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
-                                {% set items      = items.append(row) or items %}
-                            {% endfor %}
-                            
-                            {% for row_cod_item, subtotal in subtotals.items() %}
-                                {% for row in items %}
-                                    {% if row[columns.index('COD_ITEM')] == row_cod_item %}
-                                        <tr class="unselectable-row">
-                                            <td class="over-row">{{ row[columns.index('LOG_PROMOB')] }}</td>
-                                            <td>{{ row[columns.index('COD_ITEM')] }}</td>
-                                            <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
-                                            <td>{{ row[columns.index('QTDE')] }}</td>
+                            <table style="max-height: 500px; overflow-y: auto;">
+                                <thead>
+                                    <tr>
+                                        <th>Promob (Log)</th>
+                                        <th>Item (Código)</th>
+                                        <th>Item (Descrição)</th>
+                                        <th style="width: 100px;">QTDE (Solicitada)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set items = [] %}
+                                    {% set subtotals = {} %}
+                                    
+                                    {% for row in result %}
+                                        {% set cod_item   = row[columns.index('COD_ITEM')] %}
+                                        {% set qtde_solic = row[columns.index('QTDE')] %}
+                                        {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
+                                        {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
+                                        {% set items      = items.append(row) or items %}
+                                    {% endfor %}
+                                    
+                                    {% for row_cod_item, subtotal in subtotals.items() %}
+                                        {% for row in items %}
+                                            {% if row[columns.index('COD_ITEM')] == row_cod_item %}
+                                                <tr class="unselectable-row">
+                                                    <td class="over-row">{{ row[columns.index('LOG_PROMOB')] }}</td>
+                                                    <td>{{ row[columns.index('COD_ITEM')] }}</td>
+                                                    <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
+                                                    <td>{{ row[columns.index('QTDE')] }}</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <tr 
+                                            class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}"
+                                            onclick="sendCodItem('requisicao', '{{ row_cod_item }}', '{{ id_req }}', '{{ subtotal }}')"
+                                        >
+                                            <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
+                                            <td>{{ subtotal }}</td>
                                         </tr>
-                                    {% endif %}
-                                {% endfor %}
-                                <tr 
-                                    class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}"
-                                    onclick="sendCodItem('requisicao', '{{ row_cod_item }}', '{{ id_req }}', '{{ subtotal }}')"
-                                >
-                                    <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
-                                    <td>{{ subtotal }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div id="standardTable">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                        <p>Lista Subtotal</p>
-                        <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                    <table style="max-height: 500px; overflow-y: auto;">
-                        <thead>
-                            <tr>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th style="width: 100px;">QTDE (Solicitada)</th>
-                                <th style="width: 100px;">QTDE (Separada)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% set items = {} %}
-                            
-                            {% for row in result %}
-                                {% set row_cod_item = row[columns.index('COD_ITEM')] %}
-                                {% set desc_item = row[columns.index('DESC_ITEM')] %}
-                                {% set qtde_solic = row[columns.index('QTDE')] %}
-                                
-                                {% if row_cod_item in items %}
-                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
-                                {% else %}
-                                    {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': qtde_solic}}) or items %}
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {% for row_cod_item, item in items.items() %}
-                                <tr 
-                                    class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
-                                    data-cod-item="{{ row_cod_item }}"
-                                    onclick="sendCodItem('requisicao', '{{ row_cod_item }}', '{{ id_req }}', '{{ item.qtde }}')"
-                                >
-                                    <td>{{ row_cod_item }}</td>
-                                    <td style="text-wrap: balance;">{{ item.desc }}</td>
-                                    <td>{{ item.qtde }}</td>
-                                    <td class="subtotal-cell"></td>
-                                </tr> 
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <br>
-                <div class="btn-fancy" onclick="window.location.href='{{ url_for('req_sep_pend', id_req=id_req) }}';">Visualizar</div>
-            {% else %}
-                <div class="msg-success">
-                    <details>
-                        <summary>A requisição selecionada já foi finalizada.</summary>
-                        Caso necessite visualizá-la, clique no botão abaixo.
-                    </details>
-                </div>
+                        <div id="standardTable">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <p>Lista Subtotal</p>
+                                <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
+                                </div>
+                            </div>
+                            <table style="max-height: 500px; overflow-y: auto;">
+                                <thead>
+                                    <tr>
+                                        <th>Item (Código)</th>
+                                        <th>Item (Descrição)</th>
+                                        <th style="width: 100px;">QTDE (Solicitada)</th>
+                                        <th style="width: 100px;">QTDE (Separada)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set items = {} %}
+                                    
+                                    {% for row in result %}
+                                        {% set row_cod_item = row[columns.index('COD_ITEM')] %}
+                                        {% set desc_item = row[columns.index('DESC_ITEM')] %}
+                                        {% set qtde_solic = row[columns.index('QTDE')] %}
+                                        
+                                        {% if row_cod_item in items %}
+                                            {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
+                                        {% else %}
+                                            {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': qtde_solic}}) or items %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% for row_cod_item, item in items.items() %}
+                                        <tr 
+                                            class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
+                                            data-cod-item="{{ row_cod_item }}"
+                                            onclick="sendCodItem('requisicao', '{{ row_cod_item }}', '{{ id_req }}', '{{ item.qtde }}')"
+                                        >
+                                            <td>{{ row_cod_item }}</td>
+                                            <td style="text-wrap: balance;">{{ item.desc }}</td>
+                                            <td>{{ item.qtde }}</td>
+                                            <td class="subtotal-cell"></td>
+                                        </tr> 
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <br>
+                        <div class="btn-fancy" onclick="window.location.href='{{ url_for('req_sep_pend', id_req=id_req) }}';">Visualizar</div>
+                    {% else %}
+                        <div class="msg-success">
+                            <details>
+                                <summary>A requisição selecionada já foi finalizada.</summary>
+                                Caso necessite visualizá-la, clique no botão abaixo.
+                            </details>
+                        </div>
+                    {% endif %}
             {% endif %}
         </div>
-        
-        {% endif %}
+
         {% if 'user_grant' in session %}
             {% if id_req %}
                 {% if cod_item %}
@@ -257,123 +257,101 @@
                         <h1 class="subtitle">Selecione a <span class="cor-web">requisição</span> para iniciar a <span class="cor-web">separação</span>:</h1>
                         {% endif %}
                     {% else %}
-                    <div class="msg-info">
-                        <details>
-                            <summary>Carregue a lista para obter as requisições à serem faturadas.</summary>
-                            A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
-                            <br>
-                        </details>
-                    </div>
+                        <div class="msg-info">
+                            <details>
+                                <summary>Carregue a lista para obter as requisições à serem faturadas.</summary>
+                                A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
+                                <br>
+                            </details>
+                        </div>
                     {% endif %}
                     {% if result %}
                         <div style="max-height: 540px; overflow-y: auto; width: 100%;">
                             {% if class_alert == 'success' %}
-                            {% if result %}
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 100px">Requisição (Código)</th>
-                                            <th>Item (Código)</th>
-                                            <th>Item (Descrição)</th>
-                                            <th>Quantidade</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% set grouped_data = {} %}
-                                        
-                                        {# Agrupa os itens por data #}
-                                        {% for row in result %}
-                                            {% set data = row[columns.index('DATA')] %}
+                                {% if result %}
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 100px">Requisição (Código)</th>
+                                                <th>Item (Código)</th>
+                                                <th>Item (Descrição)</th>
+                                                <th>Quantidade</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% set grouped_data = {} %}
                                             
-                                            {# Inicializa a lista de itens para essa data se não existir #}
-                                            {% if data not in grouped_data %}
-                                                {% set grouped_data = grouped_data.update({data: []}) or grouped_data %}
-                                            {% endif %}
+                                            {# Agrupa os itens por data #}
+                                            {% for row in result %}
+                                                {% set data = row[columns.index('DATA')] %}
+                                                
+                                                {# Inicializa a lista de itens para essa data se não existir #}
+                                                {% if data not in grouped_data %}
+                                                    {% set grouped_data = grouped_data.update({data: []}) or grouped_data %}
+                                                {% endif %}
+                                                
+                                                {# Adiciona o item à lista de itens da data atual #}
+                                                {% set _ = grouped_data[data].append(row) %}
+                                            {% endfor %}
                                             
-                                            {# Adiciona o item à lista de itens da data atual #}
-                                            {% set _ = grouped_data[data].append(row) %}
-                                        {% endfor %}
-                                        
-                                        {# Exibe os itens agrupados por data #}
-                                        {% for data, items in grouped_data.items() %}
-                                            
-                                            {% for row in items %}
-                                                <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('DOC_ORIGEM')] }}">
-                                                    <td>{{ row[columns.index('DOC_ORIGEM')] }}</td>
-                                                    <td style="text-align: right">{{ row[columns.index('COD_ITEM')] }}</td>
-                                                    <td>{{ row[columns.index('DESC_ITEM')] }}</td>
-                                                    <td style="text-align: right">{{ row[columns.index('QTDE')] }}</td>
+                                            {# Exibe os itens agrupados por data #}
+                                            {% for data, items in grouped_data.items() %}
+                                                
+                                                {% for row in items %}
+                                                    <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('DOC_ORIGEM')] }}">
+                                                        <td>{{ row[columns.index('DOC_ORIGEM')] }}</td>
+                                                        <td style="text-align: right">{{ row[columns.index('COD_ITEM')] }}</td>
+                                                        <td>{{ row[columns.index('DESC_ITEM')] }}</td>
+                                                        <td style="text-align: right">{{ row[columns.index('QTDE')] }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                                <tr class="unselectable-row sub-total">
+                                                    <td colspan="4" style="text-align: right;">{{ data }}</td>
                                                 </tr>
                                             {% endfor %}
-                                            <tr class="unselectable-row sub-total">
-                                                <td colspan="4" style="text-align: right;">{{ data }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                    
-                                </table>
+                                        </tbody>
+                                    </table>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
                         </div>
                         <br>
                     {% endif %}
                 </div>
-                {% if not cod_item %}
-                    <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                        <h1 class="subtitle" style="margin: 0;">Separações</h1>
-                        <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-                            <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 14px" onchange="window.location.href='/mov/requisicao/separacao/f/{{ id_req | default(0) }}'">
-                                <option style="color: var(--cor-destaque);">Pendentes</option>
-                                <option style="color: green;">Finalizadas</option>
-                            </select>
-                        </p>
-                        {% block all_separation_status %}
-                        
-                        {% endblock all_separation_status %}
-                        <div class="table-overflow" style="max-height: 500px">
-                            <form onsubmit="routeMovRedirect('requisicao');">
-                                <div class="flex-row" style="margin: 8px 0; width: 100%;">
-                                    <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Requisição...">
-                                    <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA REQUISIÇÃO..." >
-                                        <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                                    </button>
-                                </div>
-                            </form>
-                            <table id="allSeparationsTable"  style="border-top: 4px solid var(--cor-destaque)">
-                                <tbody>
-                                    <!-- executa listCargasLocalStorage(); -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                {% endif %}
             {% endif %}
         {% endif %}
-        <div id="quantityPopup" class="dialog-overlay hidden">
-            <div class="dialog-box">
-                <h1 style="margin-top: 8px; margin-bottom: 14px;">Separar <span class="cor-web">{{ cod_item }}</span>:</h1>
-                <h1 class="sub-label">Separados:</h1>
-                <div class="flex-column">
-                    <h3 id="popupMessage"></h3>
-                    <p class="cor-web" style="font-weight: bold" id="popupFaltante"></p>
-                </div>
-                <h1 class="sub-label">Adicionar:</h1>
-                <div class="flex-column">
-                    <h3 class="cor-web" style="display: flex; justify-content: center;">
-                        <div style="border-bottom: 2px solid var(--cor-destaque); width: max-content;">
-                            <span>+</span>
-                            <input value="0" style="all: unset; width: 70px;" type="number" style="width: 40px;" id="quantityInput" min="1">
-                            <a id="maxBtn">MAX</a>
+        {% if not cod_item %}
+            <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+                <h1 class="subtitle" style="margin: 0;">Separações</h1>
+                <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
+                    <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 14px" onchange="window.location.href='/mov/requisicao/separacao/f/{{ id_req | default(0) }}'">
+                        <option style="color: var(--cor-destaque);">Pendentes</option>
+                        <option style="color: green;">Finalizadas</option>
+                    </select>
+                </p>
+                {% block all_separation_status %}
+                
+                {% endblock all_separation_status %}
+                <div class="table-overflow" style="max-height: 500px">
+                    <form onsubmit="routeMovRedirect('requisicao');">
+                        <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                            <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Requisição...">
+                            <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA REQUISIÇÃO..." >
+                                <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                            </button>
                         </div>
-                    </h3>
-                    <p id="popupObs"></p>
+                    </form>
+                    <table id="allSeparationsTable"  style="border-top: 4px solid var(--cor-destaque)">
+                        <tbody>
+                            <!-- executa listCargasLocalStorage(); -->
+                        </tbody>
+                    </table>
                 </div>
-                <br>
-                <button class="btn-fancy" id="submitBtn" required>Confirmar</button>
-                <a class="aux-link" onclick="hidePopUp()">Cancelar</a>
             </div>
+        {% endif %}
+        <!-- PopUp -->
+        {% include "components/menus/quantity-popup.html" %}
         </div>
-    </div>
+
     <script>
         const nroReq = '{{ id_req }}';
 
