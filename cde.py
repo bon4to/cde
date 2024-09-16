@@ -1048,6 +1048,48 @@ class MovRequestUtils:
             else:
                 return None
     
+    
+    @staticmethod
+    # Retorna todos os IDs de requisição,
+    # incluindo as requisições 'implantadas', sem duplicatas.
+    def get_all_requests():
+        requests_preset = MovRequestUtils.get_preset_requests(1)
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT DISTINCT id_request
+                FROM historico
+                ORDER BY id_request DESC;
+            ''')
+            rows = cursor.fetchall()
+            
+            # Converte os resultados da consulta em uma lista de inteiros
+            requests_db = [row[0] for row in rows] if rows else []
+
+        # Combina as requests do banco de dados com as do preset
+        combined_requests = requests_db + requests_preset
+        
+        # Remove duplicatas mantendo a ordem
+        seen = set()
+        all_requests = []
+        for request in combined_requests:
+            if request not in seen:
+                all_requests.append(request)
+                seen.add(request)
+        return all_requests
+    
+    
+    @staticmethod
+    # BUSCA requisições FINALIZADAS DE PRESETS
+    def get_preset_requests(index):
+        try:
+            with open(f'report/requests_preset/filtro_{index}.txt', 'r', encoding='utf-8') as file:
+                requests = file.read().strip().split(', ')
+        except:
+            requests = []
+        return requests
+
+    
 class OrdemProducaoUtils:
     @staticmethod
     def get_ordem_producao(doc_origem=False):
