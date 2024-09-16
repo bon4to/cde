@@ -1876,7 +1876,7 @@ class misc:
     def tlg_msg(msg):
         if not session.get('user_grant') == 1:
             if debug == True:
-                print(f'{[TAGS.ERRO]}A mensagem não pôde ser enviada em modo debug')
+                print('[ERRO] A mensagem não pôde ser enviada em modo debug')
                 return None
             else:
                 bot_token = os.getenv('TLG_BOT_TOKEN')
