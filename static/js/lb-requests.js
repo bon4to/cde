@@ -24,25 +24,30 @@ function updateItemCount(itemCount) {
 
 
 function routeMovRedirect(routePage) {
+    const idInput = document.getElementById('idInput');
     const idInputBrow = document.getElementById('idInputBrow');
+
+    var idForRoute;
     try {
-        const idInput = document.getElementById('idInput');
-        if (idInput.value != '') {
-            idInputBrow.value = idInput.value;
+        // Se um dos inputs tiver valor, preencha o outro
+        if (idInput.value) {
+            idForRoute = idInput.value;
+        } else if (idInputBrow.value) {
+            idForRoute = idInputBrow.value;
+        }
+        idForRoute = parseInt(idForRoute);
+        // Expressão regular para validar números inteiros ou com sufixos como -1, -2, etc.
+        const regex = /^-?\d+(-\d+)?$/;
+
+        // Verifica se o input de requisição foi preenchido corretamente
+        if (regex.test(idForRoute)) {
+            redirectToMov(routePage, idForRoute);
+        } else {
+            // Opcional: Mostrar um alerta ou mensagem de erro ao usuário
+            alert('Por favor, insira um número válido (ex: 123 ou 123-1).');
         }
     } catch (error) {
         console.error(error);
-    }
-
-    // Expressão regular para validar números inteiros ou com sufixos como -1, -2, etc.
-    const regex = /^-?\d+(-\d+)?$/;
-
-    // Verifica se o input de requisicao foi preenchido corretamente
-    if (regex.test(idInput.value)) {
-        redirectToMov(routePage, idInput.value);
-    } else {
-        // Opcional: Mostrar um alerta ou mensagem de erro ao usuário
-        alert('Por favor, insira um número válido (ex: 123 ou 123-1).');
     }
 }
 
