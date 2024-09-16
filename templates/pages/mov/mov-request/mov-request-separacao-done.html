@@ -12,8 +12,8 @@
 
 
 {% block aux_buttons %}
-    <form onsubmit="routeMovRedirect('requesicao/separacao/f'); return false;">
-        <div class="flex-row" style="margin: 8px 0">
+    <form onsubmit="routeMovRedirect('requisicao/separacao/f'); return false;">
+        <div class="flex-row" style="margin: 8px 0; width: 100%;">
             <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Requisição...">
             <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA REQUISIÇÃO..." >
                 <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
@@ -85,8 +85,6 @@
 
             try {
                 const sepReq = await getSeparacao();
-                        
-                console.log(sepReq)
 
                 // Obter itens da req
                 let itens_req;
