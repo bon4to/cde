@@ -554,9 +554,9 @@ class EstoqueUtils:
                 ON h.cod_item = i.cod_item
                 
                 WHERE 
-                    h.operacao = 'F' AND
-                    (h.id_request != 0 OR h.id_request IS NULL) OR
-                    (h.id_carga != 0 OR h.id_carga IS NULL)
+                    (h.operacao = 'S' AND (h.id_request != 0 OR h.id_request IS NULL)) 
+                    OR
+                    (h.operacao = 'F' AND (h.id_carga != 0 OR h.id_carga IS NULL))
                 
                 ORDER BY 
                     h.time_mov DESC, h.id_carga DESC,
@@ -598,7 +598,7 @@ class CargaUtils:
     def get_cargas(all_cargas=False):
         if all_cargas:
             cargas_except_query = ', '.join(map(str, all_cargas))
-            query = f'''
+            query = '''
                 SELECT DISTINCT 
                     icrg.CODIGO_GRUPOPED AS NRO_CARGA,
                     icrg.NRO_PEDIDO      AS NRO_PEDIDO,
@@ -627,10 +627,10 @@ class CargaUtils:
                 ON i.ITEM = iped.ITEM
 
                 WHERE icrg.QTDE_FATUR != 0
-                AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
+                AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
                 ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-            '''
+            '''.format(a=cargas_except_query)
         else:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
             
@@ -783,13 +783,13 @@ class CargaUtils:
         if id_carga:
             where_clause += f' AND id_carga = {id_carga}'
 
-        query = f'''
+        query = '''
             SELECT DISTINCT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
             FROM carga_incomp ci
             JOIN itens i
             ON ci.cod_item = i.cod_item
-            {where_clause};
-        '''
+            {a};
+        '''.format(a=where_clause)
         
         dsn = 'SQLITE'
         result, columns = cde.db_query(query, dsn)
@@ -844,7 +844,7 @@ class CargaUtils:
     @staticmethod
     # RETORNA OBSERVACOES COM O ID DE CARGA
     def get_obs_with_carga(id_carga):
-        query = f'''
+        query = '''
             SELECT DISTINCT
                 crg.OBSERVACAO AS OBS_CARGA
 
@@ -863,8 +863,8 @@ class CargaUtils:
             JOIN DB2ADMIN.CLIENTE cl
             ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
 
-            WHERE icrg.CODIGO_GRUPOPED = {id_carga}
-        '''
+            WHERE icrg.CODIGO_GRUPOPED = {a};
+        '''.format(a=id_carga)
 
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -877,7 +877,7 @@ class CargaUtils:
     @staticmethod
     # RETORNA CLIENTE COM O ID DE CARGA
     def get_cliente_with_carga(id_carga):
-        query = f'''
+        query = '''
             SELECT DISTINCT
                 cl.FANTASIA AS FANT_CLIENTE
 
@@ -896,8 +896,8 @@ class CargaUtils:
             JOIN DB2ADMIN.CLIENTE cl
             ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
 
-            WHERE icrg.CODIGO_GRUPOPED = {id_carga}
-        '''
+            WHERE icrg.CODIGO_GRUPOPED = {a};
+        '''.format(a=id_carga)
 
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -956,7 +956,7 @@ class MovRequestUtils:
         # no deposito 2
         where_clause = \
             """
-            WHERE 
+            AND 
                 M.OBS LIKE '%Requisicao :%' AND 
                 (
                     GRUPO_DESCRICAO = 'PRODUTO ACABADO' OR 
@@ -972,7 +972,11 @@ class MovRequestUtils:
             # para retornar apenas uma requisição
             where_clause += f" AND M.DOC_ORIGEM = '{id_req}'"
         
-        query = f'''
+        all_requests = MovRequestUtils.get_all_requests()
+        
+        request_except_query = ', '.join(map(str, all_requests))
+        
+        query = '''
             SELECT DISTINCT
                 M.DOCUMENTO           AS LOG_PROMOB,
                 M.DOC_ORIGEM          AS DOC_ORIGEM,
@@ -991,12 +995,13 @@ class MovRequestUtils:
             JOIN 
                 DB2ADMIN.HUGO_PIETRO_VIEW_ITEM I
                 ON I.ITEM = M.ITEM
-            {where_clause}
+                
+            WHERE M.DOC_ORIGEM NOT IN ({b})
+            {a}
             
             ORDER BY
-                DOCUMENTO DESC, I.ITEM
-            LIMIT 101 -- debug (temporario);
-        '''
+                DOCUMENTO DESC, I.ITEM;
+        '''.format(a=where_clause, b=request_except_query)
         
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -1006,7 +1011,7 @@ class MovRequestUtils:
 
     @staticmethod
     # lê o arquivo json no servidor local
-    # e retorna a lista da carga
+    # e retorna a lista de requests
     def readJsonReqSeq(filename, seq=False):
         base_path = os.path.join(app.root_path, 'report/requests')
         seq = int(seq)
@@ -1058,7 +1063,7 @@ class OrdemProducaoUtils:
         if doc_origem:
             where_clause += f" AND M.DOC_ORIGEM = '{doc_origem}'"
         
-        query = f'''
+        query = '''
             SELECT DISTINCT
                 M.DOCUMENTO           AS LOG_PROMOB,
                 L.LOTE                AS LOTE_PROMOB,
@@ -1082,12 +1087,11 @@ class OrdemProducaoUtils:
             JOIN 
                 DB2ADMIN.HUGO_PIETRO_VIEW_ITEM I
                 ON I.ITEM = M.ITEM
-            {where_clause}
+            {a}
             
             ORDER BY
-                DOCUMENTO DESC, L.ORDEM, I.ITEM
-            LIMIT 101 -- debug (temporario);
-        '''
+                DOCUMENTO DESC, L.ORDEM, I.ITEM;
+        '''.format(a=where_clause)
         
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -1661,14 +1665,12 @@ class UserUtils:
     @staticmethod
     # RETORNA NOME DO USUÁRIO
     def get_username(id_user):
-        query = f'''
+        query = '''
             SELECT DISTINCT
                 u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
-
             FROM users u
-
-            WHERE u.id_user = {id_user};
-        '''
+            WHERE u.id_user = {a};
+        '''.format(a=id_user)
 
         dsn = 'SQLITE'
         result, columns = cde.db_query(query, dsn)
@@ -2434,7 +2436,7 @@ def historico_search() -> str:
     )
 
 
-@app.route('/mov/faturado')
+@app.route('/mov/carga/faturado')
 @cde.verify_auth('MOV005')
 def faturado() -> str:
     saldo_atual = EstoqueUtils.get_address_lote_fat()
@@ -2580,7 +2582,7 @@ def moving_req_bulk():
                     lote_item=item['lote_item'],
                     quantidade=item['qtde_sep'],
                     id_request=item['nroreq'],
-                    operacao='F'
+                    operacao='S'
                 )
             connection.commit()
         return jsonify({'success': True})
@@ -3199,7 +3201,7 @@ def cadastrar_usuario():
                     id_user   = session.get('id_user')
 
                     msg = \
-                    f'''[CADASTRO]\n{request.remote_addr}\n{id_user} - {user_name} [+] {nome_user} {sobrenome_user} ({privilege_user})'''
+                    f'[CADASTRO]\n{request.remote_addr}\n{id_user} - {user_name} [+] {nome_user} {sobrenome_user} ({privilege_user})'
                     misc.tlg_msg(msg)
 
         except sqlite3.IntegrityError as e:
@@ -3254,7 +3256,7 @@ def carga_id(id_carga):
         
         cargas_except_query = ', '.join(map(str, all_cargas))
 
-        query = f'''
+        query = '''
             SELECT DISTINCT 
                 icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
                 icrg.NRO_PEDIDO                       AS NRO_PEDIDO,
@@ -3276,13 +3278,13 @@ def carga_id(id_carga):
             JOIN DB2ADMIN.GRUPOPED crg
             ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
-            WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
-            AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
+            WHERE icrg.CODIGO_GRUPOPED = '{a}'
+            AND icrg.CODIGO_GRUPOPED NOT IN ({b})
 
             ORDER BY COD_ITEM
 
             LIMIT 100;
-        '''
+        '''.format(a=id_carga, b=cargas_except_query)
 
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -3290,7 +3292,7 @@ def carga_id(id_carga):
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
         else:
-            alert = f'''{result[0][0]}'''
+            alert = f'{result[0][0]}'
             class_alert = 'error'
         return render_template(
             'pages/mov/mov-carga/mov-carga.html',
@@ -3317,7 +3319,7 @@ def cargas():
             class_alert = 'success'
 
         else:
-            alert = f'''{result[0][0]}'''
+            alert = f'{result[0][0]}'
             class_alert = 'error'
         return render_template(
             'pages/mov/mov-carga/mov-carga.html',
@@ -3399,7 +3401,8 @@ def req_sep_pend(id_req):
         'pages/mov/mov-request/mov-request-separacao-pend.html', 
         id_req=id_req, 
         user_info=user_info,
-        obs_carga=obs_carga
+        obs_carga=obs_carga,
+        status='p'
     )
 
 
@@ -3419,7 +3422,8 @@ def req_sep_done(id_req):
         id_req=id_req,
         seq=seq, 
         user_info=user_info,
-        obs_carga=obs_carga
+        obs_carga=obs_carga,
+        status='f'
     )
 
 
@@ -3429,7 +3433,7 @@ def get_req_qtde_solic():
     id_req = request.args.get('id_req', type=int)
     cod_item = request.args.get('cod_item', type=str)
     
-    query = f'''
+    query = '''
         SELECT DISTINCT
             SUM(CAST(M.QTDE AS INTEGER)) AS QTDE_SOLIC
         FROM 
@@ -3446,9 +3450,9 @@ def get_req_qtde_solic():
             I.UNIDADE_DESCRICAO = 'CX' AND
             M.DEPOSITO = 2 AND
             TIPO_MOVIMENTO = 'S' AND
-            M.DOC_ORIGEM = '{id_req}' AND
-            I.ITEM = '{cod_item}'
-    '''
+            M.DOC_ORIGEM = '{a}' AND
+            I.ITEM = '{b}';
+    '''.format(a=id_req, b=cod_item)
     try:
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -3466,7 +3470,7 @@ def get_req_qtde_solic():
 def get_itens_req():
     id_req = request.args.get('id_req', type=int)
     
-    query = f'''
+    query = '''
         SELECT DISTINCT
             M.ITEM
         FROM 
@@ -3483,8 +3487,8 @@ def get_itens_req():
             I.UNIDADE_DESCRICAO = 'CX' AND
             M.DEPOSITO = 2 AND
             TIPO_MOVIMENTO = 'S' AND
-            M.DOC_ORIGEM = '{id_req}'
-    '''
+            M.DOC_ORIGEM = '{a}';
+    '''.format(a=id_req)
     try:
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -3527,7 +3531,7 @@ def get_carga_qtde_solic():
     id_carga = request.args.get('id_carga', type=int)
     cod_item = request.args.get('cod_item', type=str)
     
-    query = f'''
+    query = '''
         SELECT
             SUM(CAST(iped.QTDE_SOLICITADA AS INTEGER)) AS QTDE_SOLIC
         FROM DB2ADMIN.ITEMPED iped
@@ -3536,9 +3540,9 @@ def get_carga_qtde_solic():
         ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
         AND icrg.SEQ = iped.SEQ
 
-        WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
-        AND iped.ITEM = '{cod_item}'
-    '''
+        WHERE icrg.CODIGO_GRUPOPED = '{a}'
+        AND iped.ITEM = '{b}';
+    '''.format(a=id_carga, b=cod_item)
     try:
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -3556,7 +3560,7 @@ def get_carga_qtde_solic():
 def get_itens_carga():
     id_carga = request.args.get('id_carga', type=int)
     
-    query = f'''
+    query = '''
         SELECT DISTINCT iped.ITEM
         FROM DB2ADMIN.ITEMPED iped
 
@@ -3564,8 +3568,8 @@ def get_itens_carga():
         ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
         AND icrg.SEQ = iped.SEQ
 
-        WHERE icrg.CODIGO_GRUPOPED = '{id_carga}'
-    '''
+        WHERE icrg.CODIGO_GRUPOPED = '{a}';
+    '''.format(a=id_carga)
     try:
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
@@ -3814,7 +3818,7 @@ def produtos():
 
                 connection.commit()
         else:
-            alert = f'''{result[0][0]}'''
+            alert = f'{result[0][0]}'
             class_alert = 'error'
         itens = ProdutoUtils.get_active_itens()
         return render_template(
@@ -3829,7 +3833,7 @@ def produtos():
     )
 
 
-@app.route('/etiqueta', methods=['GET', 'POST'])
+@app.route('/etiqueta/', methods=['GET', 'POST'])
 @cde.verify_auth('OUT014')
 def etiqueta():
     if request.method == 'POST':
@@ -3842,7 +3846,7 @@ def etiqueta():
     return render_template('pages/etiqueta.html', produtos=produtos)
 
 
-@app.route('/rotulo', methods=['GET', 'POST'])
+@app.route('/rotulo/', methods=['GET', 'POST'])
 @cde.verify_auth('OUT015')
 def rotulo():
     if request.method == 'POST':
@@ -3892,7 +3896,7 @@ def rotulo():
     return render_template('pages/rotulo.html')
 
 
-@app.route('/get/linhas', methods=['POST'])
+@app.route('/get/linhas/', methods=['POST'])
 @cde.verify_auth('ENV006')
 def get_linhas():
     desc_item = request.form['desc_item']
@@ -3948,7 +3952,7 @@ def get_linhas():
             )
 
 
-@app.route('/estoque', methods=['GET', 'POST'])
+@app.route('/estoque/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
 def estoque():
     if request.method == 'POST':
@@ -3964,7 +3968,7 @@ def estoque():
     )
 
 
-@app.route('/estoque-enderecado', methods=['GET', 'POST'])
+@app.route('/estoque/enderecado/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
 def estoque_enderecado():
     if request.method == 'POST':
@@ -3980,7 +3984,7 @@ def estoque_enderecado():
     )
 
 
-@app.route('/estoque-presets', methods=['GET', 'POST'])
+@app.route('/estoque/presets', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
 def estoque_preset():
     preset_id = request.form.get('preset_id', 1)
