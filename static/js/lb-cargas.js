@@ -620,57 +620,6 @@ function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep)
 }
 
 
-function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
-    const popup = document.getElementById('quantityPopup');
-    const obsv = document.getElementById('popupObs');
-    const info = document.getElementById('popupFaltante');
-    const msge = document.getElementById('popupMessage');
-    const input = document.getElementById('quantityInput');
-    const submitBtn = document.getElementById('submitBtn');
-    const maxBtn = document.getElementById('maxBtn');
-
-    var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
-    var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
-
-    msge.textContent = `${qtde_separada} / ${qtde_solic}`;
-    obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
-    info.textContent = `(${qtde_faltante} faltante)`;
-
-    maxEstoque = maxEstoque - this_qtde_separada
-    input.max = Math.min(qtde_faltante, maxEstoque);
-
-    maxBtn.onclick = function() {
-        input.value = input.max;
-    };
-
-    input.value = input.max;
-
-    // verifica se o input de quantidade está satisfazendo a quantidade solicitada
-    if (qtde_faltante <= 0) {
-        alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
-    } else {
-        // mostra o popup
-        popup.classList.remove('hidden');
-
-        submitBtn.onclick = function() {
-            const value = parseInt(input.value);
-
-            // validacao para verificar se o input foi preenchido corretamente
-            if (value > 0 && value <= input.max) {
-                // oculta o popup
-                popup.classList.add('hidden');
-                // adiciona o item na separação
-                onSubmit(value);
-                // carregar totais e subtotais na tabela
-                reloadItemSubtotal();
-            } else {
-                alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
-            }
-        };
-    }
-}
-
-
 function hidePopUp() {
     const popup = document.getElementById('quantityPopup');
     popup.classList.add('hidden');
