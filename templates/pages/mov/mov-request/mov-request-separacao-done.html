@@ -201,6 +201,9 @@
                                 Para visualizá-la, filtre por 'pendentes' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}"> acima.
                             </details>
                         </div>
+                        <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                        </div>
                     `;
                 } else if (error.message == 404) {
                     errorMessage = `
