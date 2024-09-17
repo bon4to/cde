@@ -2166,7 +2166,7 @@ def index():
     return redirect(url_for('home'))
 
 
-@app.route('/debug-page')
+@app.route('/debug-page/')
 @cde.verify_auth('DEV000')
 def debug_page():
     return render_template('pages/debug-page.html')
@@ -2419,7 +2419,7 @@ def change_password():
             return redirect(url_for('change_password'))
 
 
-@app.route('/users/reset-password', methods=['POST'])
+@app.route('/users/reset-password/', methods=['POST'])
 @cde.verify_auth('CDE001')
 def reset_password():
     password      = request.form['input']
@@ -2439,7 +2439,7 @@ def reset_password():
     return redirect(url_for('index'))
 
 
-@app.route('/get/item', methods=['POST'])
+@app.route('/get/item/', methods=['POST'])
 @cde.verify_auth('CDE001')
 def get_item():
     input_code = request.form['input_code'].strip()
@@ -2449,7 +2449,7 @@ def get_item():
 
 
 # ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
-@app.route('/mov')
+@app.route('/mov/')
 @cde.verify_auth('MOV002')
 def mov() -> str:
     result = EstoqueUtils.get_address_lote()
@@ -2460,7 +2460,7 @@ def mov() -> str:
     )
 
 
-@app.route('/mov/historico')
+@app.route('/mov/historico/')
 @cde.verify_auth('MOV003')
 def historico() -> str:
     page = request.args.get('page', 1, type=int)
@@ -2476,7 +2476,7 @@ def historico() -> str:
     )
 
 
-@app.route('/mov/historico/search', methods=['GET', 'POST'])
+@app.route('/mov/historico/search/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV003')
 def historico_search() -> str:
     if request.method == 'POST':
@@ -2518,7 +2518,7 @@ def historico_search() -> str:
     )
 
 
-@app.route('/mov/carga/faturado')
+@app.route('/mov/carga/faturado/')
 @cde.verify_auth('MOV005')
 def faturado() -> str:
     saldo_atual = EstoqueUtils.get_address_lote_fat()
@@ -2530,7 +2530,7 @@ def faturado() -> str:
 
 
 # ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
-@app.route('/mov/moving', methods=['POST'])
+@app.route('/mov/moving/', methods=['POST'])
 @cde.verify_auth('MOV002')
 def moving():
     numero          = int(request.form['end_number'])
@@ -2634,7 +2634,7 @@ def moving():
     return redirect(url_for('mov'))
 
 
-@app.route('/mov/request/moving/bulk', methods=['POST'])
+@app.route('/mov/request/moving/bulk/', methods=['POST'])
 @cde.verify_auth('MOV007')
 def moving_req_bulk():
     sep_carga     = request.json
@@ -2673,7 +2673,7 @@ def moving_req_bulk():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@app.route('/mov/carga/moving/bulk', methods=['POST'])
+@app.route('/mov/carga/moving/bulk/', methods=['POST'])
 @cde.verify_auth('MOV006')
 def moving_carga_bulk():
     sep_carga     = request.json
@@ -2711,7 +2711,7 @@ def moving_carga_bulk():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@app.route('/get/clientes', methods=['GET'])
+@app.route('/get/clientes/', methods=['GET'])
 @cde.verify_auth('CDE001')
 def get_fant_clientes():
     query = '''
@@ -2742,7 +2742,7 @@ def get_fant_clientes():
     return jsonify(response)
 
 
-@app.route('/mov/carga/incompleta', methods=['GET'])
+@app.route('/mov/carga/incompleta/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def carga_incomp():
     result, columns = CargaUtils.get_carga_incomp()
@@ -2756,7 +2756,7 @@ def carga_incomp():
     )
 
 
-@app.route('/mov/carga/incompleta/<string:id_carga>', methods=['GET'])
+@app.route('/mov/carga/incompleta/<string:id_carga>/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def carga_incomp_id(id_carga):
     id_carga = id_carga.split('-')[0]
@@ -2787,7 +2787,7 @@ def carga_incomp_id(id_carga):
     )
 
 
-@app.route('/api/insert_carga_incomp', methods=['POST'])
+@app.route('/api/insert_carga_incomp/', methods=['POST'])
 @cde.verify_auth('MOV006')
 def api_insert_carga_incomp():
     data = request.get_json()
@@ -2803,7 +2803,7 @@ def api_insert_carga_incomp():
         return jsonify(success=False, error=str(e))
 
 
-@app.route('/get/itens_carga_incomp/<string:id_carga>', methods=['GET'])
+@app.route('/get/itens_carga_incomp/<string:id_carga>/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def route_get_carga_incomp(id_carga):
     id_carga = id_carga.split('-')[0]
@@ -2816,7 +2816,7 @@ def route_get_carga_incomp(id_carga):
     )
     
 
-@app.route('/api/conclude-incomp/<string:id_carga>', methods=['POST'])
+@app.route('/api/conclude-incomp/<string:id_carga>/', methods=['POST'])
 @cde.verify_auth('MOV006')
 def conclude_incomp(id_carga):
     try:
@@ -2826,7 +2826,7 @@ def conclude_incomp(id_carga):
         return jsonify(success=False, error=str(e))
 
 
-@app.route('/envase', methods=['GET'])
+@app.route('/envase/', methods=['GET'])
 @cde.verify_auth('ENV006')
 def envase():
     envase_list = Schedule.EnvaseUtils.get_envase()
@@ -2837,7 +2837,7 @@ def envase():
     )
 
 
-@app.route('/envase/calendar')
+@app.route('/envase/calendar/')
 @cde.verify_auth('ENV008')
 def calendar_envase():
     envase_list = Schedule.EnvaseUtils.get_envase()
@@ -2847,7 +2847,7 @@ def calendar_envase():
     )
 
 
-@app.route('/envase/delete/<id_envase>')
+@app.route('/envase/delete/<id_envase>/')
 @cde.verify_auth('ENV007')
 def delete_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
@@ -2862,7 +2862,7 @@ def delete_envase(id_envase):
     return redirect(url_for('envase'))
 
 
-@app.route('/envase/done/<id_envase>')
+@app.route('/envase/done/<id_envase>/')
 @cde.verify_auth('ENV006')
 def conclude_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
@@ -2877,7 +2877,7 @@ def conclude_envase(id_envase):
     return redirect(url_for('envase'))
 
 
-@app.route('/envase/pending/<id_envase>')
+@app.route('/envase/pending/<id_envase>/')
 @cde.verify_auth('ENV007')
 def set_pending_envase(id_envase):
     with sqlite3.connect(db_path) as connection:
@@ -2892,7 +2892,7 @@ def set_pending_envase(id_envase):
     return redirect(url_for('envase'))
 
 
-@app.route('/envase/edit', methods=['GET', 'POST'])
+@app.route('/envase/edit/', methods=['GET', 'POST'])
 @cde.verify_auth('ENV007')
 def edit_envase():
     # TODO: criar função auxiliar
@@ -2947,7 +2947,7 @@ def edit_envase():
         )
 
 
-@app.route('/envase/insert', methods=['POST'])
+@app.route('/envase/insert/', methods=['POST'])
 @cde.verify_auth('ENV006')
 def insert_envase():
     # TODO: criar função auxiliar
@@ -2994,7 +2994,7 @@ def insert_envase():
     return redirect(url_for('envase'))
 
 
-@app.route('/processamento', methods=['GET'])
+@app.route('/processamento/', methods=['GET'])
 @cde.verify_auth('PRC010')
 def producao():
     id_user = session.get('id_user')
@@ -3009,7 +3009,7 @@ def producao():
     )
 
 
-@app.route('/processamento/calendar')
+@app.route('/processamento/calendar/')
 @cde.verify_auth('PRC012')
 def calendar_producao():
     producao_list =  Schedule.ProcessamentoUtils.get_producao()
@@ -3020,7 +3020,7 @@ def calendar_producao():
     )
 
 
-@app.route('/processamento/delete/<id_producao>')
+@app.route('/processamento/delete/<id_producao>/')
 @cde.verify_auth('PRC011')
 def delete_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
@@ -3035,7 +3035,7 @@ def delete_producao(id_producao):
     return redirect(url_for('producao'))
 
 
-@app.route('/processamento/done/<id_producao>')
+@app.route('/processamento/done/<id_producao>/')
 @cde.verify_auth('PRC010')
 def conclude_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
@@ -3050,7 +3050,7 @@ def conclude_producao(id_producao):
     return redirect(url_for('producao'))
 
 
-@app.route('/processamento/pending/<id_producao>')
+@app.route('/processamento/pending/<id_producao>/')
 @cde.verify_auth('PRC011')
 def set_pending_producao(id_producao):
     with sqlite3.connect(db_path) as connection:
@@ -3065,7 +3065,7 @@ def set_pending_producao(id_producao):
     return redirect(url_for('producao'))
 
 
-@app.route('/processamento/edit', methods=['GET', 'POST'])
+@app.route('/processamento/edit/', methods=['GET', 'POST'])
 @cde.verify_auth('PRC011')
 def edit_producao():
     id_user = session.get('id_user')
@@ -3128,7 +3128,7 @@ def edit_producao():
         )
 
 
-@app.route('/processamento/insert', methods=['POST'])
+@app.route('/processamento/insert/', methods=['POST'])
 @cde.verify_auth('PRC010')
 def insert_producao():
     if request.method == 'POST':
@@ -3165,7 +3165,7 @@ def insert_producao():
     return redirect(url_for('producao'))
 
 
-@app.route('/about')
+@app.route('/about/')
 @cde.verify_auth('CDE001')
 def about():
     return render_template(
@@ -3174,7 +3174,7 @@ def about():
     )
 
 
-@app.route('/users/edit', methods=['POST', 'GET'])
+@app.route('/users/edit/', methods=['POST', 'GET'])
 @cde.verify_auth('CDE016')
 def users_edit():
     req_id_user = request.args.get('id_user')
@@ -3193,7 +3193,7 @@ def users_edit():
         )
 
 
-@app.route('/users/remove-perm/<int:id_user>/<string:id_perm>', methods=['GET', 'POST'])
+@app.route('/users/remove-perm/<int:id_user>/<string:id_perm>/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE016')
 def remove_permission(id_user, id_perm):
     with sqlite3.connect(db_path) as connection:
@@ -3210,7 +3210,7 @@ def remove_permission(id_user, id_perm):
     return redirect(url_for('users_edit', id_user=id_user))
 
 
-@app.route('/users/add-perm/<int:id_user>/<string:id_perm>', methods=['GET', 'POST'])
+@app.route('/users/add-perm/<int:id_user>/<string:id_perm>/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE016')
 def add_permission(id_user, id_perm):
     with sqlite3.connect(db_path) as connection:
@@ -3230,7 +3230,7 @@ def add_permission(id_user, id_perm):
     return redirect(url_for('users_edit', id_user=id_user))
 
 
-@app.route('/users/inserting', methods=['POST'])
+@app.route('/users/inserting/', methods=['POST'])
 @cde.verify_auth('CDE016')
 def cadastrar_usuario():
     if request.method == 'POST':
@@ -3318,7 +3318,7 @@ def cadastrar_usuario():
     return render_template('pages/users/users.html')
 
 
-@app.route('/mov/carga/<string:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/carga/<string:id_carga>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_id(id_carga):
     result_local, columns_local = [], []
@@ -3439,7 +3439,7 @@ def mov_request():
     )
 
 
-@app.route('/mov/requisicao/<int:id_req>', methods=['GET', 'POST'])
+@app.route('/mov/requisicao/<int:id_req>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def mov_request_id(id_req):
     result_local, columns_local = [], []
@@ -3471,7 +3471,7 @@ def mov_request_id(id_req):
     )
 
 
-@app.route('/mov/requisicao/separacao/p/<string:id_req>', methods=['GET', 'POST'])
+@app.route('/mov/requisicao/separacao/p/<string:id_req>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def req_sep_pend(id_req):
     id_req = id_req.split('-')[0]
@@ -3488,7 +3488,7 @@ def req_sep_pend(id_req):
     )
 
 
-@app.route('/mov/requisicao/separacao/f/<string:id_req>', methods=['GET', 'POST'])
+@app.route('/mov/requisicao/separacao/f/<string:id_req>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def req_sep_done(id_req):
     if '-' in id_req:
@@ -3509,7 +3509,7 @@ def req_sep_done(id_req):
     )
 
 
-@app.route('/api/req/qtde_solic', methods=['GET'])
+@app.route('/api/req/qtde_solic/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def get_req_qtde_solic():
     id_req = request.args.get('id_req', type=int)
@@ -3547,7 +3547,7 @@ def get_req_qtde_solic():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/itens_req', methods=['GET'])
+@app.route('/api/itens_req/', methods=['GET'])
 @cde.verify_auth('MOV007')
 def get_itens_req():
     id_req = request.args.get('id_req', type=int)
@@ -3583,7 +3583,7 @@ def get_itens_req():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mov/op', methods=['GET', 'POST'])
+@app.route('/mov/op/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def mov_op():
     if request.method == 'POST':
@@ -3607,7 +3607,7 @@ def mov_op():
     )
 
 
-@app.route('/api/carga/qtde_solic', methods=['GET'])
+@app.route('/api/carga/qtde_solic/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def get_carga_qtde_solic():
     id_carga = request.args.get('id_carga', type=int)
@@ -3637,7 +3637,7 @@ def get_carga_qtde_solic():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/itens_carga', methods=['GET'])
+@app.route('/api/itens_carga/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def get_itens_carga():
     id_carga = request.args.get('id_carga', type=int)
@@ -3664,7 +3664,7 @@ def get_itens_carga():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mov/carga/separacao/p/<string:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/carga/separacao/p/<string:id_carga>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_pend(id_carga):
     id_carga = id_carga.split('-')[0]
@@ -3682,7 +3682,7 @@ def carga_sep_pend(id_carga):
     )
 
 
-@app.route('/mov/carga/separacao/f/<string:id_carga>', methods=['GET', 'POST'])
+@app.route('/mov/carga/separacao/f/<string:id_carga>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_done(id_carga):
     if '-' in id_carga:
@@ -3703,7 +3703,7 @@ def carga_sep_done(id_carga):
     )
 
 
-@app.route('/get/description_json/<cod_item>', methods=['GET'])
+@app.route('/get/description_json/<cod_item>/', methods=['GET'])
 def get_description(cod_item):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3722,13 +3722,13 @@ def get_description(cod_item):
     return jsonify({"description": desc_item})
 
 
-@app.route('/get/username/<id_user>', methods=['GET'])
+@app.route('/get/username/<id_user>/', methods=['GET'])
 def get_username_route(id_user):
     username = UserUtils.get_username(id_user)
     return jsonify({"username": username})
 
 
-@app.route('/post/save-localstorage', methods=['POST'])
+@app.route('/post/save-localstorage/', methods=['POST'])
 @cde.verify_auth('MOV006')
 def save_localstorage():
     try:
@@ -3776,7 +3776,7 @@ def save_localstorage():
         return jsonify({'error': 'Erro interno ao salvar dados do localStorage.'}), 500
     
 
-@app.route('/get/has_carga_at_history/<string:id_carga>', methods=['GET'])
+@app.route('/get/has_carga_at_history/<string:id_carga>/', methods=['GET'])
 def has_carga_at_history(id_carga):
     id_carga = id_carga.split('-')[0]
     
@@ -3788,7 +3788,7 @@ def has_carga_at_history(id_carga):
     )
 
 
-@app.route('/get/carga/load-table-data', methods=['GET'])
+@app.route('/get/carga/load-table-data/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def get_carga_table_data():
     try:
@@ -3809,7 +3809,7 @@ def get_carga_table_data():
         return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
     
     
-@app.route('/get/request/load-table-data', methods=['GET'])
+@app.route('/get/request/load-table-data/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def get_request_table_data():
     try:
@@ -3830,7 +3830,7 @@ def get_request_table_data():
         return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
     
 
-@app.route('/get/list-all-separations', methods=['GET', 'POST'])
+@app.route('/get/list-all-separations/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def list_all_separations():
     try:
@@ -3852,7 +3852,7 @@ def list_all_separations():
         return jsonify({'error': f'Erro ao listar arquivos: {str(e)}'}), 500
 
 
-@app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>', methods=['GET', 'POST'])
+@app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>/', methods=['GET', 'POST'])
 @cde.verify_auth('ITE005')
 def produtos_toggle_perm(cod_item, flag):
     ProdutoUtils.toggle_item_flag(cod_item, flag)
@@ -4066,7 +4066,7 @@ def estoque_enderecado():
     )
 
 
-@app.route('/estoque/presets', methods=['GET', 'POST'])
+@app.route('/estoque/presets/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
 def estoque_preset():
     preset_id = request.form.get('preset_id', 1)
@@ -4081,7 +4081,7 @@ def estoque_preset():
     )
 
 
-@app.route('/cargas-presets', methods=['GET', 'POST'])
+@app.route('/cargas-presets/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def cargas_preset():
     preset_id = request.form.get('preset_id', 1)
@@ -4096,7 +4096,7 @@ def cargas_preset():
     )
 
 
-@app.route('/export_csv/<tipo>', methods=['GET'])
+@app.route('/export_csv/<tipo>/', methods=['GET'])
 @cde.verify_auth('CDE017')
 def export_csv_tipo(tipo):
     # EXPORT .csv
