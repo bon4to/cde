@@ -10,17 +10,6 @@
                     <div class="split-horizontal">
                         <div style="display: flex;flex-wrap: nowrap;">
                             <div class="dropdown">
-                                <button class="dropbtn" onclick="window.location.href='{{ url_for('home_hp') }}';">
-                                    <span class="hyperlink">HUGO PIETRO</span>
-                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
-                                </button>
-                                <div class="dropdown-content">
-                                    <a href="{{ url_for('producao') }}">PRC010 | PROCESSAMENTO</a>
-                                    <a href="{{ url_for('envase') }}">ENV006 | ENVASE</a>
-                                    <a href="{{ url_for('produtos') }}">ITE005 | PRODUTOS</a>
-                                </div>
-                            </div>
-                            <div class="dropdown">
                                 <button class="dropbtn" onclick="window.location.href='{{ url_for('home_tl') }}';">
                                     <span class="hyperlink">TRANSLÉGUA</span>
                                     <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
@@ -34,6 +23,17 @@
                                     {% if 'user_grant' in session and session['user_grant'] == 1 %}
                                         <a href="{{ url_for('mov_request') }}">MOV007 | REQUISIÇÕES</a>
                                     {% endif %}
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="dropbtn" onclick="window.location.href='{{ url_for('home_hp') }}';">
+                                    <span class="hyperlink">HUGO PIETRO</span>
+                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                </button>
+                                <div class="dropdown-content">
+                                    <a href="{{ url_for('producao') }}">PRC010 | PROCESSAMENTO</a>
+                                    <a href="{{ url_for('envase') }}">ENV006 | ENVASE</a>
+                                    <a href="{{ url_for('produtos') }}">ITE005 | PRODUTOS</a>
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -70,10 +70,10 @@
                                     <a href="{{ url_for('logout') }}">SAIR</a>
                                 </div>
                             </div>
-                            <div style="margin: 4px;display: flex;">
+                            <div style="margin: 4px; display: flex;">
                                 <hr class="vert" style="width: 0;">
                             </div>
-                            <div class="user-button"onclick=" window.location.href='{{ url_for('login') }}';">
+                            <div class="user-button" onclick=" window.location.href='{{ url_for('cde_account') }}';">
                                 {{ session.get('user_initials', '') }}
                             </div>
                         </div>
