@@ -2202,7 +2202,7 @@ def home_hp():
 @app.route('/in-dev/')
 @cde.verify_auth('CDE001')
 def in_dev():
-    return render_template('pages/developing.html')
+    return render_template('pages/error-handler.html')
 
 
 @app.route('/users/')
