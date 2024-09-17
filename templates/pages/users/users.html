@@ -17,7 +17,7 @@
         <div class="aux-buttons">
             {% if 'user_grant' in session %}
                 {% if session['user_grant'] <= 2 %}
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="EDITAR USUÁRIOS" alt="" onclick="toggleEdit()">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/pen-line.svg') }}" title="EDITAR USUÁRIOS" alt="" onclick="toggleEdit()">
                 {% endif %}
             {% endif %}
             <hr class="vert">

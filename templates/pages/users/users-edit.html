@@ -38,6 +38,7 @@
                             </h4>
                         </div>
                     </div>
+                    <a style="font-size: 14px" class="hyperlink" onclick="redefinePassword('{{ req_id_user }}')">REDEFINIR SENHA</a>
                     <a class="btn-fancy" href="{{ url_for('users') }}">Voltar</a>
                 {% endfor %}
             </form>
@@ -94,6 +95,12 @@
         </div>
     </div>
     <script>
+
+        function redefinePassword(idUser) {
+            if (confirm("Você tem certeza que deseja redefinir a senha do usuário?")) {
+                window.location.href = "/users/redefine-password/" + idUser
+            }
+        }
 
         function confirmRemover(idUser, idPerm, checkbox) {
             if (confirm("Você tem certeza que deseja remover esta permissão?")) {
