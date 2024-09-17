@@ -2536,7 +2536,7 @@ def moving():
     numero          = int(request.form['end_number'])
     letra           = str(request.form['end_letra'])
     operacao        = str(request.form['operacao'])
-    is_address_completo = bool(request.form.get('is_address_completo'))
+    is_end_completo = bool(request.form.get('is_end_completo'))
     id_carga        = 0
     id_request      = 0
 
@@ -2546,7 +2546,7 @@ def moving():
 
     print(f'    | OPERAÇÃO: {operacao}')
 
-    if is_address_completo:
+    if is_end_completo:
         # MOVIMENTA ENDEREÇO COMPLETO
         items = HistoricoUtils.select_rua(letra, numero)
         
@@ -2581,8 +2581,8 @@ def moving():
 
     if operacao == 'T':
         # TRANSFERENCIA
-        destino_letter = str(request.form['destino_address_letra'])
-        destino_number = int(request.form['destino_address_number'])
+        destino_letter = str(request.form['destino_end_letra'])
+        destino_number = int(request.form['destino_end_number'])
 
         if items:
             for item in items:
