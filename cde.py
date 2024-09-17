@@ -1501,6 +1501,28 @@ class UserUtils:
         except Exception as e:
             return False
 
+    
+    @staticmethod
+    def set_password(id_user, password) -> bool:
+        try:
+            # hash the password
+            password = misc.hash_key(password)
+            
+            with sqlite3.connect(db_path) as connection:
+                cursor = connection.cursor()
+                cursor.execute('''
+                    UPDATE users 
+                    SET password_user = ?
+                    WHERE id_user = ?;
+                ''',
+                (password, id_user))
+                connection.commit()
+            return True
+        
+        except Exception as e:
+            print(f'[ERRO] {e}')
+            return False
+
 
     @staticmethod
     def get_user_key(login_user):
@@ -2291,6 +2313,12 @@ def pagina_login():
     return render_template('pages/login.html')
 
 
+@app.route('/cde/minha-conta/', methods=['GET'])
+def cde_account():
+    if session.get('logged_in'):
+        return render_template('pages/account.html')
+
+
 # ROTA DE SESSÃO LOGIN
 @app.route('/login/', methods=['POST'])
 def login():
@@ -2422,19 +2450,20 @@ def change_password():
 @app.route('/users/reset-password/', methods=['POST'])
 @cde.verify_auth('CDE001')
 def reset_password():
-    password      = request.form['input']
-    password_user = misc.hash_key(password)
-    id_user       = session.get('id_user')
+    id_user = session.get('id_user')
+    password = request.form['input']
 
-    with sqlite3.connect(db_path) as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            UPDATE users 
-            SET password_user = ?
-            WHERE id_user     = ?;
-        ''',
-        (password_user, id_user))
-        connection.commit()
+    UserUtils.set_password(id_user, password)
+
+    return redirect(url_for('index'))
+
+
+@app.route('/users/redefine-password/<int:id_user>/')
+@cde.verify_auth('CDE001')
+def redefine_password(id_user):
+    password = '12345'
+
+    UserUtils.set_password(id_user, password)
 
     return redirect(url_for('index'))
 

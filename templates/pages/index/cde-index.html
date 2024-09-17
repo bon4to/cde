@@ -16,7 +16,7 @@
         </h1>
         <div class="aux-buttons">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIO" alt="" onclick="window.location.href='{{ url_for('login') }}';">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIO" alt="" onclick="window.location.href='{{ url_for('cde_account') }}';">
             <hr class="vert">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
             <hr class="vert">
@@ -36,7 +36,7 @@
                 </a>
             </div>
         </div>
-        <div class="item" onclick="window.location.href='{{ url_for('login') }}';">
+        <div class="item" onclick="window.location.href='{{ url_for('cde_account') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
                     <h2 class="text-default">Conta</h2>
