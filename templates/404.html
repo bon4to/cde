@@ -1,4 +1,4 @@
-{% extends "pages/developing.html" %}
+{% extends "pages/error-handler.html" %}
 
 {% block title %}
     Not Found ({{ error_code }})
@@ -9,7 +9,7 @@
 {% endblock type %}
 
 {% block error_code %}
-    <h3 style="color: #d13636; text-align: left">ERRO {{ error_code }}...</h3>
+    <h3 style="color: #d13636; text-align: left">ERRO {{ error_code }}</h3>
 {% endblock error_code %}
 
 {% block message %}
