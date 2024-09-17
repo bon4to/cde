@@ -14,9 +14,9 @@
     --programmed-l5: 165, 235, 255;
     --programmed-l6: 255, 165, 225;
     --programmed-l7: 255, 220, 165;
-    --background: #212121;
+    --background: #222222;
     --dark-background: #252525;
-    --dark-element: #292929;
+    --dark-element: #282828;
     --light-text: #f7f7f7;
 }
 
@@ -46,6 +46,10 @@ span.id-page {
 
 .titles-container .id-page {
     margin-left: 8px;
+    border: 1px solid;
+    border-radius: 6px;
+    padding: 2px 4px;
+    font-size: 10px;
 }
 
 .container {
@@ -162,7 +166,6 @@ html.dark .form-login,
 html.dark .forms-container {
     color: var(--dark-text);
     background-color: var(--dark-element);
-    box-shadow: 0 0 22px rgba(0, 0, 0, 0.6);
 }
 
 td.over-row {
@@ -206,6 +209,7 @@ html.dark .item {
 }
 
 html.dark .item:hover {
+    border-color: var(--cor-destaque);
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.6);
 }
 
@@ -539,14 +543,14 @@ h4 {
     bottom: 0;
     display: flex;
     color: white;
-    margin-top: auto;
-    padding-top: 22px;
+    margin-top: 30px;
+    padding-top: 92px;
     user-select: none;
     text-align: center;
     align-items: center;
     padding-bottom: 22px;
     flex-direction: column;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 46px rgba(0, 0, 0, 0.5);
     background-color: rgb(44, 44, 44);
 }
 
@@ -1557,7 +1561,7 @@ th.calendar {
     display: flex;
     padding: 0 36px;
     justify-content: left;
-    background-color: var(--cor-destaque);
+    background-color: var(--background);
 }
 
 .dropdown {
@@ -1572,8 +1576,7 @@ th.calendar {
     min-width: 200px;
     transition: none;
     position: absolute;
-    padding-bottom: 6px;
-    background-color: var(--cor-destaque);
+    background-color: var(--dark-element);
 }
 
 .dropdown-content a {
@@ -1587,17 +1590,16 @@ th.calendar {
     padding: 12px 16px;
     text-decoration: none;
     font-family: 'Chivo Mono', monospace;
-    background-color: rgba(34, 34, 34, 1);
-    border-left: 1px solid rgba(34, 34, 34, 1);
-    border-right: 1px solid rgba(34, 34, 34, 1);
+    background-color: var(--cor-destaque);
+    border: 1px solid var(--cor-destaque);
 }
 
 .dropdown-content a:hover {
     transition: none;
     background-color: #fff;
-    color: var(--cor-destaque);
-    border-left: 1px solid var(--cor-destaque);
-    border-right: 1px solid var(--cor-destaque);
+    color: var(--dark-element);
+    border: 1px solid var(--cor-destaque);
+    border-top: 1px solid #fff;
 }
 
 .dropdown:hover .dropdown-content {
@@ -1648,7 +1650,7 @@ a.hyperlink {
 
 .dropdown:hover .dropbtn {
     color: #fff;
-    background-color: rgba(34, 34, 34, 1);
+    background-color: var(--cor-destaque);
 }
 
 .session-container {

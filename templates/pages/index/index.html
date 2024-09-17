@@ -35,8 +35,8 @@
                     {% endblock side_banner %}
                     
                     {% if 'user_grant' in session %}
-                        <div style="display: flex; flex-direction: column; justify-content: space-between">
-                            {% if not about %}
+                        {% if not about %}
+                            <div style="display: flex; flex-direction: column; justify-content: space-between">
                                 <div>
                                     <div>
                                         <div class="salute-text">
@@ -46,7 +46,23 @@
                                     </div>
                                     <hr style="margin-left: 20px; width: 20%;">
                                 </div>
-                            {% else %}
+                                <div class="container-grid" style="margin-bottom: 32px; padding: 10px 0">
+                                    {% block grid_buttons %}
+                                        
+                                    {% endblock grid_buttons %}
+                                </div>
+                                <div class="split-horizontal" style="padding: 0; width: auto;">
+                                    <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
+                                        <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
+                                    </a>
+                                    <p style="color: #7e7e7e">Collaborative Developed Enviroment (CDE)</p>
+                                    <a class="btn-fancy button-mini{% if not session['user_grant'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
+                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="max-height: 100%;display: flex; flex-direction: column; justify-content: space-between">
                                 <div>
                                     <div class="salute-text">
                                         <h1>Sobre</h1>
@@ -54,108 +70,29 @@
                                     </div>
                                     <hr style="margin-left: 20px; width: 20%;">
                                 </div>
-                                <div style="max-width: 340px;">
+                                <div style="">
                                     <p style="margin-left: 20px; text-wrap: balance; text-align: left">
                                         CDE é uma plataforma embarcada na rotina das corporações HUGO PIETRO e TRANS LÉGUA.<br>
                                         Teve seu primeiro release em janeiro de 2024 e segue sendo desenvolvido até o presente momento.<br>
                                         O sistema está em fase beta!<br>
                                     </p>
                                 </div>
-                            {% endif %}
-                            <div class="container-grid" style="margin-bottom: 32px; padding: 10px 0">
-                                {% block grid_buttons %}
-                                    <div class="item featured" onclick="window.location.href='{{ url_for('home_hp') }}';">
-                                        <div class="split-horizontal algn-cntr">
-                                            <div style="text-align: left">
-                                                <h2 class="text-default">Hugo Pietro</h2>
-                                                <p class="text-default bold">Acesse as ferramentas da empresa!</p>
-                                            </div>
-                                            <a class="btn-fancy button-mini">
-                                                <img class="svg" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt="">
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="item" onclick="window.location.href='{{ url_for('login') }}';">
-                                        <div class="split-horizontal algn-cntr">
-                                            <div style="text-align: left">
-                                                <h2 class="text-default">Conta</h2>
-                                                <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE003</span></p>
-                                            </div>
-                                            <a class="btn-fancy button-mini">
-                                                <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-user.svg') }}" alt="">
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="item featured" onclick="window.location.href='{{ url_for('home_tl') }}';" >
-                                        <div class="split-horizontal algn-cntr">
-                                            <div style="text-align: left">
-                                                <h2 class="text-default">Trans Légua</h2>
-                                                <p class="text-default bold">Acesse as ferramentas da empresa!</p>
-                                            </div>
-                                            <a class="btn-fancy button-mini">
-                                                <img class="svg" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt="">
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="item" onclick="window.location.href='{{ url_for('in_dev') }}';">
-                                        <div class="split-horizontal algn-cntr">
-                                            <div style="text-align: left">
-                                                <h2 class="text-default">Sobre</h2>
-                                                <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE004</span></p>
-                                            </div>
-                                            <a class="btn-fancy button-mini">
-                                                <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-help.svg') }}" alt="">
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="item" onclick="window.location.href='{{ url_for('users') }}';">
-                                        <div class="split-horizontal algn-cntr">
-                                            <div style="text-align: left">
-                                                <h2 class="text-default">Usuários</h2>
-                                                <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE016</span></p>
-                                            </div>
-                                            <a class="btn-fancy button-mini">
-                                                <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% if session['user_grant'] <= 1 %}
-                                        <div class="item featured" onclick="window.location.href='{{ url_for('api') }}';">
-                                            <div class="split-horizontal algn-cntr">
-                                                <div style="text-align: left">
-                                                    <h2 class="text-default">Database</h2>
-                                                    <p class="text-default bold">Consultas no banco de dados.</p>
-                                                </div>
-                                                <a class="btn-fancy button-mini">
-                                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/database-zap.svg') }}" alt="">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                {% endblock grid_buttons %}
                             </div>
-                            <div class="split-horizontal" style="padding: 0; width: auto;">
-                                <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
-                                    <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
-                                </a>
-                                <p style="color: #7e7e7e">Collaborative Developed Enviroment (CDE)</p>
-                                <a class="btn-fancy button-mini{% if not session['user_grant'] <= 2 %} disabled{% endif %}" href="{{ url_for('users') }}">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                                </a>
-                            </div>
-                        </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
-            <div class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; padding: 24px;">
-                <div id="recent-pages">
-                    <h1 class="cor-web" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
-                    <hr style="margin-right: 4px; width: 20%;">
-                    <table id="recent-pages-table">
-                        
-                    </table>
+            {% if not about %}
+                <div class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; padding: 24px;">
+                    <div id="recent-pages">
+                        <h1 class="cor-web" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
+                        <hr style="margin-right: 4px; width: 20%;">
+                        <table id="recent-pages-table">
+                            
+                        </table>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
         
         <script>
