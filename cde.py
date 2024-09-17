@@ -27,7 +27,7 @@ if __name__:
     app.secret_key = os.getenv('SECRET_KEY')
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-    app.config['APP_VERSION'] = ['0.4.7', 'Setembro/2024', False]
+    app.config['APP_VERSION'] = ['0.4.8', 'Setembro/2024', False]
 
     # GET nome do diretório
     dir_os = os.path.dirname(os.path.abspath(__file__)).upper()
@@ -2117,6 +2117,15 @@ def inject_version() -> dict:
     return dict(app_version=app.config['APP_VERSION'])
 
 
+@app.errorhandler(403)
+def page_not_found(e):
+    return render_template(
+        '403.html',
+        error_code=403,
+        error=e
+    ), 403
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template(
@@ -2126,13 +2135,27 @@ def page_not_found(e):
     ), 404
 
 
-@app.errorhandler(403)
+@app.errorhandler(502)
 def page_not_found(e):
     return render_template(
-        '403.html',
-        error_code=403,
+        '502.html',
+        error_code=502,
         error=e
-    ), 403
+    ), 502
+
+
+@app.errorhandler(503)
+def page_not_found(e):
+    return render_template(
+        '503.html',
+        error_code=503,
+        error=e
+    ), 503
+
+
+@app.route('/force_502')
+def force_502():
+    abort(503)
 
 
 # ROTAS DE ACESSO | URL
