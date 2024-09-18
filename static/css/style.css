@@ -16,7 +16,7 @@
     --programmed-l7: 255, 220, 165;
     --background: #222222;
     --dark-background: #252525;
-    --dark-element: #282828;
+    --dark-element: #303030;
     --light-text: #f7f7f7;
 }
 
@@ -45,7 +45,7 @@ span.id-page {
 }
 
 .titles-container .id-page {
-    margin-left: 8px;
+    margin-left: 12px;
     border: 1px solid;
     border-radius: 6px;
     padding: 2px 4px;
@@ -155,6 +155,10 @@ html.dark .navigation-bar hr {
     border-color: var(--dark-text);
 }
 
+html.dark .navigation-bar {
+    background-color: var(--background);
+}
+
 html.dark .tables-container,
 html.dark .mobile-container,
 html.dark .titles-container,
@@ -166,6 +170,7 @@ html.dark .form-login,
 html.dark .forms-container {
     color: var(--dark-text);
     background-color: var(--dark-element);
+    box-shadow: none;
 }
 
 td.over-row {
@@ -344,6 +349,8 @@ html.dark ::-webkit-scrollbar-track {
     padding: 8px 36px;
     max-height: 84px;
     margin: 0 10px 16px 10px;
+    border-radius: 24px 24px 0 0;
+    border-bottom: 4px inset var(--cor-destaque);
     transition: width 0.3s ease-out;
     max-width: -webkit-fill-available;;
 }
@@ -543,23 +550,20 @@ h4 {
     bottom: 0;
     display: flex;
     color: white;
-    margin-top: 30px;
-    padding-top: 92px;
+    margin-top: 84px;
+    padding: 32px 0;
     user-select: none;
     text-align: center;
     align-items: center;
-    padding-bottom: 22px;
+    padding-bottom: 42px;
     flex-direction: column;
     box-shadow: 0 0 46px rgba(0, 0, 0, 0.5);
-    background-color: rgb(44, 44, 44);
+    background-color: #2b2b2b;
 }
 
 #footer .section {
     margin: auto; 
     width: 120px;
-    height: 110px; 
-    padding-bottom: 32px;
-    justify-content: space-between;
 }
 
 #footer p, #footer ul {
@@ -576,12 +580,13 @@ h4 {
 }
 
 #footer li {
-    margin: 0 10px;
+    margin: 0;
 }
 
 #footer a {
     margin: 0;
     color: white;
+    font-size: 16px;
     font-weight: bold;
     text-decoration: none;
 }
@@ -1561,7 +1566,7 @@ th.calendar {
     display: flex;
     padding: 0 36px;
     justify-content: left;
-    background-color: var(--background);
+    background-color: #323232;
 }
 
 .dropdown {
