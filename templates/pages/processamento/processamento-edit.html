@@ -51,23 +51,23 @@
                                         </div>
                                         <div>
                                             <label for="litros">Litros</label><br>
-                                            <input class="address-three" value="{{ item['litros'] }}" type="number" id="litros" name="litros" min="1" required placeholder="Litros..." {% if 13 in user_permissions %} readonly{% endif %}>
+                                            <input class="address-three" value="{{ item['litros'] }}" type="number" id="litros" name="litros" min="1" required placeholder="Litros..." {% if 'PRC013' in user_perm %} readonly{% endif %}>
                                         </div>
                                     </div>
                                     <hr>
                                     <div class="two-split">
                                         <div>
                                             <label for="data_antec">Entrada Antec.</label><br>
-                                            <input name="data_antec" value="{{ item['data_entr_antec'] }}"  id="data_antec" type="date" placeholder="DD/MM/AAAA" class="address" {% if 13 in user_permissions %} readonly{% endif %}>
+                                            <input name="data_antec" value="{{ item['data_entr_antec'] }}"  id="data_antec" type="date" placeholder="DD/MM/AAAA" class="address" {% if 'PRC013' in user_perm %} readonly{% endif %}>
                                         </div>
                                         <div>
                                             <label for="data_producao">Processamento</label><br>
-                                            <input name="data_producao" value="{{ item['data_producao'] }}"  id="data_producao" type="date" class="address" {% if 13 in user_permissions %} readonly{% endif %}>
+                                            <input name="data_producao" value="{{ item['data_producao'] }}"  id="data_producao" type="date" class="address" {% if 'PRC013' in user_perm %} readonly{% endif %}>
                                         </div>
                                     </div>
                                     <div>
                                         {% if 'user_grant' in session %}
-                                            {% if 10 in user_permissions or 13 in user_permissions or session['user_grant'] <= 2 %}
+                                            {% if 'PRC010' in user_perm or 'PRC013' in user_perm or session['user_grant'] <= 2 %}
                                                 <div>
                                                     <label for="observacao">Observação</label><br>
                                                     <textarea class="address-observ" id="observacao" name="observacao" placeholder="Observações...">{{ item['observacao'] }}</textarea>

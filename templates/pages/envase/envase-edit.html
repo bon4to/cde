@@ -71,7 +71,7 @@
                                     <div style="display: flex;width: 100%;">
                                         <input class="btn-fancy" style="max-width: none;" type="submit" value="Confirmar edição...">
                                         {% if 'user_grant' in session %}
-                                            {% if 6 in user_permissions or 9 in user_permissions or session['user_grant'] <= 2 %}
+                                            {% if 'ENV006' in user_perm or 'ENV009' in user_perm or session['user_grant'] <= 2 %}
                                                 <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="" onclick="confirmDelete('{{ item['id_envase'] }}')">
                                            {% endif %}
                                         {% endif %}

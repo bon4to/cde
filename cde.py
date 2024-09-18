@@ -310,9 +310,9 @@ class cde:
                     id_user = session.get('id_user')
                     session['id_page'] = f'{id_page}'
                     if not session.get('user_grant') <= 2:
-                        user_permissions = UserUtils.get_user_permissions(id_user)
-                        user_permissions = [item['id_perm'] for item in user_permissions]
-                        if id_page in user_permissions:
+                        user_perm = UserUtils.get_user_permissions(id_user)
+                        user_perm = [item['id_perm'] for item in user_perm]
+                        if id_page in user_perm:
                             logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                             return f(*args, **kwargs)
                         else:
@@ -1698,8 +1698,8 @@ class UserUtils:
             rows = cursor.fetchall()
 
             if rows:
-                user_permissions = [{'id_perm': row[0]} for row in rows]
-                return user_permissions
+                result = [{'id_perm': row[0]} for row in rows]
+                return result
             else:
                 return []
 
@@ -2230,9 +2230,14 @@ def in_dev():
 @app.route('/users/')
 @cde.verify_auth('CDE016')
 def users():
+    id_user = session.get('id_user')
+    user_perm = UserUtils.get_user_permissions(id_user)
+    user_perm = [item['id_perm'] for item in user_perm]
+    
     return render_template(
         'pages/users/users.html', 
-        users=UserUtils.get_users()
+        users=UserUtils.get_users(),
+        user_perm=user_perm
     )
 
 
@@ -2663,6 +2668,15 @@ def moving():
     return redirect(url_for('mov'))
 
 
+@app.route('/mov/map/')
+@cde.verify_auth('MOV002')
+def stock_map() -> str:
+
+    return render_template(
+        'pages/stock-map.html'
+    )
+
+
 @app.route('/mov/request/moving/bulk/', methods=['POST'])
 @cde.verify_auth('MOV007')
 def moving_req_bulk():
@@ -2738,6 +2752,14 @@ def moving_carga_bulk():
     except Exception as e:
         print(f'[ERRO] Erro ao inserir histórico: {e}')
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/get/stock_items/')
+@cde.verify_auth('MOV002')
+def get_stock_items() -> str:
+    result = EstoqueUtils.get_address_lote()
+
+    return jsonify(result)
 
 
 @app.route('/get/clientes/', methods=['GET'])
@@ -3027,14 +3049,14 @@ def insert_envase():
 @cde.verify_auth('PRC010')
 def producao():
     id_user = session.get('id_user')
-    user_permissions = UserUtils.get_user_permissions(id_user)
-    user_permissions = [item['id_perm'] for item in user_permissions]
+    user_perm = UserUtils.get_user_permissions(id_user)
+    user_perm = [item['id_perm'] for item in user_perm]
     producao_list = Schedule.ProcessamentoUtils.get_producao()
     
     return render_template(
         'pages/processamento/processamento.html', 
         producao=producao_list, 
-        user_permissions=user_permissions
+        user_perm=user_perm
     )
 
 
@@ -3098,8 +3120,8 @@ def set_pending_producao(id_producao):
 @cde.verify_auth('PRC011')
 def edit_producao():
     id_user = session.get('id_user')
-    user_permissions = UserUtils.get_user_permissions(id_user)
-    user_permissions = [item['id_perm'] for item in user_permissions]
+    user_perm = UserUtils.get_user_permissions(id_user)
+    user_perm = [item['id_perm'] for item in user_perm]
 
     if request.method == 'POST':
         req_id_producao = request.form['id_producao']
@@ -3152,7 +3174,7 @@ def edit_producao():
         return render_template(
             'pages/processamento/processamento-edit.html', 
             prod_edit=prod_edit, 
-            user_permissions=user_permissions, 
+            user_perm=user_perm, 
             mode=mode
         )
 
@@ -3211,11 +3233,11 @@ def users_edit():
         pass
 
     else:
-        user_permissions = UserUtils.get_user_permissions(req_id_user)
+        user_perm = UserUtils.get_user_permissions(req_id_user)
         permissions = UserUtils.get_permissions()
         return render_template(
             'pages/users/users-edit.html', 
-            user_permissions=user_permissions,
+            user_perm=user_perm,
             permissions=permissions, 
             req_id_user=req_id_user,
             user_data=UserUtils.get_userdata(req_id_user)

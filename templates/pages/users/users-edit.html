@@ -58,8 +58,8 @@
                                 <td>{{ permission['id_perm'] }}</td>
                                 <td>{{ permission['desc_perm'] }}</td>
                                 <td class="tb-checkbox">
-                                    {% if user_permissions %}
-                                        {% set perm_ids = user_permissions|map(attribute='id_perm')|list %}
+                                    {% if user_perm %}
+                                        {% set perm_ids = user_perm|map(attribute='id_perm')|list %}
                                         {% if permission['id_perm'] in perm_ids %}
                                             <input 
                                                 checked
