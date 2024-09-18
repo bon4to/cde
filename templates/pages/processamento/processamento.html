@@ -111,7 +111,7 @@
                                 <div style="display: flex;width: 100%;">
                                     <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
                                     {% if 'user_grant' in session %}
-                                        {% if 10 in user_permissions or 13 in user_permissions or session['user_grant'] <= 2 %}
+                                        {% if 'PRC010' in user_perm or 'PRC013' in user_perm or session['user_grant'] <= 2 %}
                                             <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="" onclick="toggleEdit()">
                                         {% endif %}
                                     {% endif %}
