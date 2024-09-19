@@ -9,9 +9,9 @@
 
     {% block brow %}
         <h1>
-            <a href="/home">INICIO</a>
-            <span class="dash">/</span>
-            <span>CDE</span>
+            <span>
+                <a href="/home">CDE</a> (INÍCIO)
+            </span>
             <span class="id-page">{{session['id_page']}}</span>
         </h1>
         <div class="aux-buttons">
@@ -40,7 +40,7 @@
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
                     <h2 class="text-default">Conta</h2>
-                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE003</span></p>
+                    <p class="text-default bold"><span class="id-page">CDE003</span></p>
                 </div>
                 <a class="btn-fancy button-mini">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-user.svg') }}" alt="">
@@ -62,7 +62,7 @@
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
                     <h2 class="text-default">Sobre</h2>
-                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE004</span></p>
+                    <p class="text-default bold"><span class="id-page">CDE004</span></p>
                 </div>
                 <a class="btn-fancy button-mini">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-help.svg') }}" alt="">
@@ -73,7 +73,7 @@
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
                     <h2 class="text-default">Usuários</h2>
-                    <p class="text-default bold"><span style="font-size: 14px" class="id-page">CDE016</span></p>
+                    <p class="text-default bold"><span class="id-page">CDE016</span></p>
                 </div>
                 <a class="btn-fancy button-mini">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">

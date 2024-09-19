@@ -2,14 +2,16 @@
 
             </div>
         </div>
+
         <div id="scroll-to-top-button" class="hidden-opacity">
             <button onclick="scrollToTop()">
                 <img style="height: 24px; width: 24px; padding: 0" class="svg-inv" title="Voltar ao topo" src="{{ url_for('static', filename='svg/arrow-big-up-dash.svg') }}" alt="">
             </button>
         </div>
-        <div class="pre-footer" style="text-wrap: nowrap;">
+
+        <div id="pre-footer" style="text-wrap: nowrap;">
             <div style="display: flex; justify-content: flex-start; width: 260px; margin: 0 8px">
-                <img style="height: 14px; width: 14px; margin-right: 4px; padding: 2px;" class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="CDE">
+                <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="CDE">
                 <div class="version-info">CDE | v{{ app_version[0] }} (beta)</div>
             </div>
             <div style="display: flex; justify-content: center; width: 260px;">
@@ -25,37 +27,29 @@
             </div>
             <div style="display: flex; justify-content: flex-end; width: 260px;">
                 {% if app_version[2] %}
-                    <div class="version-info" style="color: #f78484;">MODO: DESENVOLVEDOR</div>
+                    <div class="version-info" style="color: #ffffff; mix-blend-mode: overlay">MODO: DESENVOLVEDOR</div>
                 {% endif %}
                 <span class="version-info" style="margin: 0 8px" id="current-time"></span>
             </div>
         </div>
+
         <div id="footer">
-            <div class="split-horizontal" style="width: 100%; align-items: start;">
-                <div class="flex-column section" style="width: 460px;">
+            <div class="split-horizontal" style="width: 80%; align-items: start;">
+                <div class="flex-column" style="width: 460px;">
                     <ul class="flex-row" style="justify-content: flex-start; gap: 12px">
-                        <li>
-                            <a href="https://linkedin.com/in/lucas-bonato/" target="_blank">
-                                <img style="height: 18px; width: 18px" class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/linkedin.svg') }}" alt="LinkedIn">
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://github.com/bon4to" target="_blank">
-                                <img style="height: 18px; width: 18px" class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/github.svg') }}" alt="GitHub">
-                            </a>
-                        </li>
-                        <li>
-                            <a href="mailto:bon4to@icloud.com" target="_blank">
-                                <img style="height: 18px;width: 18px" class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/inbox.svg') }}" alt="E-Mail">
-                            </a>
-                        </li>
+                        <li><a href="https://linkedin.com/in/lucas-bonato/" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/linkedin.svg') }}" alt="LinkedIn"></a></li>
+                        <li><a href="https://github.com/bon4to" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/github.svg') }}" alt="GitHub"></a></li>
+                        <li><a href="mailto:bon4to@icloud.com" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/inbox.svg') }}" alt="E-Mail"></a></li>
                     </ul>
-                    <p style="text-align: left; font-size: 14px; padding: 0; margin: 0; justify-content: flex-start;">Released under the MIT License.<br>Copyright © 2024 Lucas G. Bonato</p>
+                    <div>
+                        <p class="flex-column" style="gap: 0; align-items: flex-start; text-align: left; font-size: 14px; padding: 0; margin: 0; justify-content: flex-start;">
+                            <span>Released under the MIT License.</span>
+                            <span style="font-weight: 550">Copyright © 2024 Lucas G. Bonato</span>
+                        </p>
+                    </div>
                 </div>
-                <div class="flex-column section">
-                </div>
-                <div class="flex-column section">
-                    <ul class="flex-row" style="gap: 32px">
+                <div class="flex-column">
+                    <ul class="flex-row" style="gap: 32px; margin: 26px 0">
                         <li><a href="/about" target="_blank">About</a></li>
                         <li><a href="https://github.com/bon4to/cde/blob/main/LICENSE" target="_blank">License</a></li>
                         <li><a href="https://github.com/bon4to/cde" target="_blank">GitHub</a></li>

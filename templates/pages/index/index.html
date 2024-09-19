@@ -26,16 +26,16 @@
             {% endblock brow %}
         </div>
         <div class="flex-row" style="min-width: 100%;">
-            <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
-                <div class="flex-row" style="min-width: 100%; gap: 30px">
-                    {% block side_banner %}  
-                        <div class="side-banner" style="background-color: var(--cor-destaque)">
-                            <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
-                        </div>
-                    {% endblock side_banner %}
+            {% if 'user_grant' in session %}
+                {% if not about %}
+                    <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
+                        <div class="flex-row" style="min-width: 100%; gap: 30px">
+                            {% block side_banner %}  
+                                <div class="side-banner" style="background-color: var(--cor-destaque)">
+                                    <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
+                                </div>
+                            {% endblock side_banner %}
                     
-                    {% if 'user_grant' in session %}
-                        {% if not about %}
                             <div style="display: flex; flex-direction: column; justify-content: space-between">
                                 <div>
                                     <div>
@@ -61,29 +61,48 @@
                                     </a>
                                 </div>
                             </div>
-                        {% else %}
-                            <div style="max-height: 100%;display: flex; flex-direction: column; justify-content: space-between">
-                                <div>
-                                    <div class="salute-text">
-                                        <h1>Sobre</h1>
-                                        <p class="phrase" id="frase-motivacional">Collaborative Developed Enviroment</p>
-                                    </div>
-                                    <hr style="margin-left: 20px; width: 20%;">
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="flex-row" style="margin: 0 80px; gap: 40px">
+                        <div style="height: 100%; display: flex; flex-direction: column; justify-content: space-between">
+                            <div>
+                                <div class="salute-text">
+                                    <h1>Sobre</h1>
+                                    <p class="phrase" id="frase-motivacional">Collaborative Developed Enviroment</p>
                                 </div>
-                                <div style="">
-                                    <p style="margin-left: 20px; text-wrap: balance; text-align: left">
-                                        CDE é uma plataforma embarcada na rotina das corporações HUGO PIETRO e TRANS LÉGUA.<br>
-                                        Teve seu primeiro release em janeiro de 2024 e segue sendo desenvolvido até o presente momento.<br>
-                                        O sistema está em fase beta!<br>
+                                <hr style="margin-left: 20px; width: 20%;">
+                                <div>
+                                    <p class="flex-column" style="align-items: start; gap: 0; margin-left: 20px; text-align: left; font-size: 16px">
+                                        <span>CDE é o sistema embarcado nas corporações <span style="font-weight: 550;">HUGO PIETRO</span> e <span style="font-weight: 550;">TRANS LÉGUA</span>.</span>
+                                        <span style="margin-bottom: 10px;">O mesmo teve seu primeiro release em <span style="font-weight: 550;">janeiro de 2024</span> e segue com seu desenvolvimento até o presente momento.</span>
+                                        <span style="font-weight: 550; color: #ee7e7e">O sistema está em fase beta!</span>
+                                        <span style="font-size: 10px; font-style: italic;">Última versão publicada: v{{ app_version[0] }} ({{ app_version[1] }})</span>
                                     </p>
                                 </div>
                             </div>
-                        {% endif %}
-                    {% endif %}
-                </div>
-            </div>
+                            <div class="split-horizontal">
+                                <p class="flex-column" style="gap: 0; align-items: flex-start; text-align: left; font-size: 14px; padding: 0; margin: 0; justify-content: flex-start;">
+                                    <span>Released under the MIT License.</span>
+                                    <span style="font-weight: 550">Copyright © 2024 Lucas G. Bonato</span>
+                                </p>
+                                <div style="align-items: end;">
+                                    <div class="flex-row" style="gap: 12px; border-radius: 8px; margin-top: 0">
+                                        <a style="margin-top: 0" href="https://linkedin.com/in/lucas-bonato/" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/linkedin.svg') }}" alt="LinkedIn"></a>
+                                        <a style="margin-top: 0" href="https://github.com/bon4to" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/github.svg') }}" alt="GitHub"></a>
+                                        <a style="margin-top: 0" href="mailto:bon4to@icloud.com" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/inbox.svg') }}" alt="E-Mail"></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="side-banner" style="background-color: var(--cor-destaque); filter: brightness(0.95)">
+                            <img class="side-banner" src="{{ url_for('static', filename='img/cde-about.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
             {% if not about %}
-                <div class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; padding: 24px;">
+                <div id="recent-pages-container" class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; padding: 24px;">
                     <div id="recent-pages">
                         <h1 class="cor-web" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
                         <hr style="margin-right: 4px; width: 20%;">

@@ -82,6 +82,7 @@
                             <h1 class="subtitle">Há <span class="cor-web">{{ carga_incomp | count }} produto(s)</span> pendente(s)</h1>
                         {% endif %}
                     </div>
+                    {% if carga_incomp | count > 0 %}
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                         <p>Itens de cargas pendentes</p>
                     </div>
@@ -151,6 +152,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        {% endif %}
                         <br>
                         {% if id_carga %}
                         <div class="btn-fancy" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar</div>
