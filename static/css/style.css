@@ -39,6 +39,10 @@ span.id-page {
     font-family: Reddit Mono, monospace;
 }
 
+.container-grid .item span.id-page {
+    font-size: 14px;
+}
+
 .view-width {
     max-width: 90vw;
     padding: 0 5vw;
@@ -222,8 +226,7 @@ html.dark .back-modal {
     background-color: var(--dark-background)
 }
 
-html.dark #footer,
-html.dark .pre-footer {
+html.dark #footer {
     background-color: #222222;
 }
 
@@ -530,8 +533,9 @@ h4 {
     color: #818181
 }
 
-.pre-footer {
+#pre-footer {
     bottom: 0;
+    color: #fff;
     height: 10px;
     display: flex;
     z-index: 1001;
@@ -541,9 +545,16 @@ h4 {
     user-select: none;
     align-items: center;
     pointer-events: none;
-    background-color: #333132;
     justify-content: space-between;
+    background-color: var(--cor-destaque);
     border-top: 2px solid var(--cor-destaque);
+}
+
+#pre-footer img {
+    height: 14px;
+    width: 14px;
+    margin-right: 4px;
+    padding: 2px;
 }
 
 #footer {
@@ -559,11 +570,6 @@ h4 {
     flex-direction: column;
     box-shadow: 0 0 46px rgba(0, 0, 0, 0.5);
     background-color: #2b2b2b;
-}
-
-#footer .section {
-    margin: auto; 
-    width: 120px;
 }
 
 #footer p, #footer ul {
@@ -589,6 +595,15 @@ h4 {
     font-size: 16px;
     font-weight: bold;
     text-decoration: none;
+}
+
+#footer a:hover {
+    color: var(--cor-destaque);
+}
+
+#footer img {
+    height: 18px; 
+    width: 18px;
 }
 
 .footer-links {
@@ -803,9 +818,8 @@ img.footer:hover {
 
 a {
     cursor: pointer;
-    font-size: 11px;
+    font-size: 12px;
     color: #3a77e8;
-    margin-top: 20px;
     font-weight: bold;
     text-align: center;
     display: inline-block;
@@ -1244,7 +1258,6 @@ div.log {
     font-size: 12px;
     user-select: none;
     align-content: center;
-    mix-blend-mode: difference;
     background-color: transparent;
 }
 
@@ -1916,7 +1929,6 @@ div.msg-alert {
 #recent-pages-table td {
     font-size: 16px;
     font-weight: 500;
-
     border: none;
     font-family: 'Chivo Mono', monospace;
     text-align: right;
@@ -2211,5 +2223,7 @@ h1.subtitle {
     cursor: pointer;
 }
 
-
+#sql-field {
+    box-shadow: 0 0 40px rgb(0, 0, 0, 0.4);
+}
 

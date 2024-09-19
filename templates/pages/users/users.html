@@ -33,10 +33,10 @@
                         <form action="/users/inserting" method="post">
                             <label for="login_user">Login: <span style="color: red">*</span></label>
                             <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
-                            <div class="split-horizontal">
+                            <div onclick="alert('A senha padrão é esta, e deverá ser alterada pelo usuário no seu primeiro acesso.')">
                                 <label for="password_user">Senha: <span style="color: red">*</span></label><label class="cor-web" style="text-align: right;" id="password_strength"></label>
+                                <input class="disabled" id="password_user" name="password_user" placeholder="Senha de usuário..." value="12345" disabled required>
                             </div>
-                            <input class="disabled" id="password_user" name="password_user" placeholder="Senha de usuário..." value="12345" disabled required>
                             <div class="split-horizontal">
                                 <div>
                                     <label for="nome_user">Nome: <span style="color: red">*</span></label><br>
