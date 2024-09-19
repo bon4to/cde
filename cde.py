@@ -2283,27 +2283,28 @@ def permissions_id(id_perm):
 @app.route('/database/', methods=['GET', 'POST'])
 @cde.verify_auth('DEV000')
 def api():
-    if request.method == 'POST':
-        query = request.form['sql_query']
-        dsn   = request.form['sel_schema']
-        if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
-            result = [["Os comandos DELETE, INSERT e UPDATE; não são permitidos."]]
-            return render_template(
-                'pages/api.html', 
-                result=result,
-                query=query,
-                dsn=dsn
-            )
-        else:
-            result, columns = cde.db_query(query, dsn)
+    if debug:
+        if request.method == 'POST':
+            query = request.form['sql_query']
+            dsn   = request.form['sel_schema']
+            if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
+                result = [["Os comandos DELETE, INSERT e UPDATE; não são permitidos."]]
+                return render_template(
+                    'pages/api.html', 
+                    result=result,
+                    query=query,
+                    dsn=dsn
+                )
+            else:
+                result, columns = cde.db_query(query, dsn)
 
-            return render_template(
-                'pages/api.html', 
-                result=result,
-                columns=columns,
-                query=query,
-                dsn=dsn
-            )
+                return render_template(
+                    'pages/api.html', 
+                    result=result,
+                    columns=columns,
+                    query=query,
+                    dsn=dsn
+                )
     return render_template(
         'pages/api.html'
     )

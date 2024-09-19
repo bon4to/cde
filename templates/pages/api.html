@@ -46,7 +46,8 @@
     </div>
     <div class="flex-row" style="min-width: 100%;">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
-            <form action="/database" class="form-login" style="padding: 0; border-radius: 10px; margin-bottom: 40px" method="post" onsubmit="showLoading()" id="form-field">
+            <form id="form-field" action="/database" class="form-login" style="padding: 0; border-radius: 10px; margin-bottom: 40px" method="post" onsubmit="showLoading()">
+                {% if app_version[2] %}
                 <div class="split-horizontal" style="margin: 6px; align-items: center">
                     <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="cor-web subtitle">Console SQL</h1>
                     <div class="flex-row" style="align-items: center; margin: 0 14px;">
@@ -71,9 +72,15 @@
                     >{% if query %}{{ query }}{% else %}
 SELECT * 
 FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
-LIMIT 100;{% endif %}</textarea>
+LIMIT 10;{% endif %}</textarea>
+                </div>  
+                {% else %}
+                <div style="margin: 50% 0; padding: 0 160px;">
+                    <p class="disabled">Seu usuário não possui privilégios para esta ação.</p>
                 </div>
+                {% endif %}
             </form>
+            {% if app_version[2] %}
             <div class="tables-container" style="min-width: 800px; max-width: 90%; width: -webkit-fill-available">
                 <h1 style="text-align: left; margin: 0; padding-left: 0" class="cor-web subtitle">API Results</h1>
                 {% if alert_msge %}
@@ -115,7 +122,8 @@ LIMIT 100;{% endif %}</textarea>
                     <div class="msg-info">Nenhum resultado foi encontrado.</div>
                 {% endif %}
                 <br>
-                </div>
+            </div>
+            {% endif %}
             </div>
         </div>
     </div>
