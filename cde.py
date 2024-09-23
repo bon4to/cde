@@ -2288,7 +2288,7 @@ def api():
             query = request.form['sql_query']
             dsn   = request.form['sel_schema']
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
-                result = [["Os comandos DELETE, INSERT e UPDATE; não são permitidos."]]
+                result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
                     'pages/api.html', 
                     result=result,

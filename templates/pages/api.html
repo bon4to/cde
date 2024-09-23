@@ -70,9 +70,12 @@
                         name="sql_query"
                         required
                     >{% if query %}{{ query }}{% else %}
-SELECT * 
+-- para executar, clique em '▷' acima
+-- query para obter os 15 primeiros itens
+SELECT ITEM, ITEM_DESCRICAO, UNIDADE_DESCRICAO, GTIN_14
 FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
-LIMIT 10;{% endif %}</textarea>
+WHERE GTIN_14 != ''
+LIMIT 15;{% endif %}</textarea>
                 </div>  
                 {% else %}
                 <div style="margin: 50% 0; padding: 0 160px;">
@@ -121,7 +124,6 @@ LIMIT 10;{% endif %}</textarea>
                 {% else %}
                     <div class="msg-info">Nenhum resultado foi encontrado.</div>
                 {% endif %}
-                <br>
             </div>
             {% endif %}
             </div>
