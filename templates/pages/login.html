@@ -1,30 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-    {% if 'logged_in' not in session %}
         <title>Login | CDE</title>
-    {% else %}
-        <title>Usuário | CDE</title>
-    {% endif %}
         <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/cde-header.html' %}
 
-        {% if 'logged_in' in session %}
-            <div class="titles-container flex-row title-centerer">
-                <h1>
-                    <a href="{{ url_for('home') }}">CDE</a>
-                    <span class="dash">/</span>
-                    <span>CONTA</span>
-                    <span class="id-page">CDE003</span>
-                </h1>
-                <div class="aux-buttons">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
-                    <hr class="vert">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-                </div>
-            </div>
-        {% endif %}
         <div class="flex-row" style="min-width: 100%;">
             <div style="display: flex; min-width: 100%; margin: 0 auto;align-items: center;justify-content: center;">
                 <div draggable="false" class="form-login" style="padding: 20px">
@@ -35,7 +16,7 @@
                         {% if 'logged_in' not in session %}
                             <div class="log" style="width: 100%">
                                 <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Entrar</h1>
-                                <form action="/login" method="post" onsubmit="showLoading()" id="form-field">
+                                <form id="form-field" action="/login" method="post" onsubmit="showLoading()">
                                     <div>
                                         <div>
                                             <label for="login_user">Usuário</label><br>
@@ -50,27 +31,6 @@
                                         <input class="btn-fancy" type="submit" value="Entrar" id="submitform">
                                     </div>
                                 </form>
-                            </div>
-                        {% else %}
-                            <div class="log" style="width: 100%; justify-content:space-between;">
-                                <h1 style="font-size: 46px; margin-bottom: 10px" class="cor-web title">Usuário</h1>
-                                <div>
-                                    <div style="margin-bottom: 10px; margin-top: 8px;" class="centralizado">
-                                        <div class="user-button bigger">
-                                            {{ session.get('user_initials', '') }}
-                                        </div>
-                                    </div>
-                                    <h3>{{ session.get('user_name', 'Faça seu Login!') }}</h3>
-                                    <h4 style="margin: 0; text-align: center">{{ 'Administrador' if session.get('user_grant') <= 2 else 'Usuário Padrão' }}</h4>
-                                    <p class="link" style="cursor: pointer;" onclick="window.location.href='/change-password'">EDITAR SENHA</p>
-                                </div>
-                                <div class="form-login-input">
-                                    <div class="flex-row" style="display: flex;width: 100%;">
-                                        <a class="btn-fancy" href="{{ url_for('logout') }}">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
-                                        </a>
-                                    </div>
-                                </div>
                             </div>
                         {% endif %}
                     </div>
