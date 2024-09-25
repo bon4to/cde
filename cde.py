@@ -127,6 +127,15 @@ Pressione ENTER para sair...
 
 class cde:
     @staticmethod
+    # LOGS NO MODO DEBUG
+    def debug_log(text):
+        if debug == True:
+            print(f'[DEBUG] {text}')
+        else:
+            pass
+    
+    
+    @staticmethod
     # CONEXÃO E QUERY NO BANCO DE DADOS
     def db_query(query, dsn):
         dsn = f"DSN={dsn}"
@@ -598,6 +607,9 @@ class CargaUtils:
     def get_cargas(all_cargas=False):
         if all_cargas:
             cargas_except_query = ', '.join(map(str, all_cargas))
+            
+            cde.debug_log(f'cargas_except_query: {cargas_except_query}')
+
             query = '''
                 SELECT DISTINCT 
                     icrg.CODIGO_GRUPOPED AS NRO_CARGA,
@@ -3851,7 +3863,7 @@ def get_carga_table_data():
             return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
 
         data = CargaUtils.readJsonCargaSeq(filename, seq)
-
+        cde.debug_log(f'data: {data}')
         return jsonify(data), 200
     
     except FileNotFoundError:
