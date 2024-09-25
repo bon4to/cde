@@ -24,7 +24,7 @@ function toggleFields() {
     const svgPaths = {
         'E' : "/static/svg/arrow-down-to-dot.svg",
         'S' : "/static/svg/arrow-up-from-dot.svg",
-        'T' : "/static/svg/arrow-down-up.svg",
+        'T' : "/static/svg/arrow-up-down.svg",
         'F' : "/static/svg/package-check.svg"
     };
 
