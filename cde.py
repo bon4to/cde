@@ -139,7 +139,7 @@ class cde:
     # CONEXÃO E QUERY NO BANCO DE DADOS
     def db_query(query, dsn):
         dsn = f"DSN={dsn}"
-        if dsn != 'DSN=SQLITE':
+        if dsn == 'DSN=HUGOPIET':
             uid_pwd = os.getenv('DB_USER').split(';')
             user = uid_pwd[0]
             password = uid_pwd[1]
@@ -155,7 +155,7 @@ class cde:
             except Exception as e:
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
-        else:
+        elif dsn == 'DSN=SQLITE':
             try:
                 with sqlite3.connect(db_path) as connection:
                     cursor = connection.cursor()
@@ -165,6 +165,9 @@ class cde:
             except Exception as e:
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
+        else:
+            result = [[f'DSN desconhecida: {dsn}']]
+            columns = []
             
         return result, columns
 
