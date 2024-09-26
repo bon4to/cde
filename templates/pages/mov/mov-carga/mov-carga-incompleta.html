@@ -34,7 +34,7 @@
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
                 </a>
                 <hr class="vert">
-                <form action="{{ url_for('cargas') }}" method="post">
+                <form class="disabled">
                     <button type="submit" style="all: unset">
                         <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
                     </button>
@@ -203,15 +203,13 @@
             {% else %}
             <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
                 <h1 class="subtitle" style="margin: 0;">Cargas Incompletas</h1>
-                <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-                    <select class="address-three inline-input" style="color: var(--cor-cde); font-size: 14px" onchange="window.location.href='/mov/carga/separacao/f/{{ id_carga | default(0) }}'">
-                        <option style="color: var(--cor-cde);">Incompletas</option>
-                    </select>
-                </p>
+                <select class="address-three inline-input" style="color: var(--cor-cde); font-size: 12px" onchange="window.location.href='/mov/carga/separacao/f/{{ id_carga | default(0) }}'">
+                    <option style="color: var(--cor-cde);">Incompletas</option>
+                </select>
                 {% block all_separation_status %}
                 
                 {% endblock all_separation_status %}
-                    <div class="table-overflow" style="max-height: 500px">
+                    <div class="table-overflow" style="max-height: 700px">
                         {% if id_carga %}
                             
                         {% endif %}
@@ -223,9 +221,9 @@
                                 </button>
                             </div>
                         </form>
-                        <table style="border-top: 4px solid var(--cor-destaque)">
+                        <table id="allSeparationsTable" style="border-top: 4px solid var(--cor-destaque)">
                             <tbody>
-                                {% if not row %}
+                                {% if not carga_list %}
                                     <tr>
                                         <td>Nenhuma carga incompleta pendente</td>
                                     </tr>

@@ -257,12 +257,10 @@
                         <h1 class="subtitle">Selecione a <span class="cor-web">requisição</span> para iniciar a <span class="cor-web">separação</span>:</h1>
                         {% endif %}
                     {% else %}
-                        <div class="msg-info">
-                            <details>
-                                <summary>Carregue a lista para obter as requisições à serem faturadas.</summary>
-                                A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
-                                <br>
-                            </details>
+                        <div style="display: flex; justify-content: center; height: 100%;">
+                            <p class="disabled">
+                                Carregue a lista de requisições clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}"> acima...
+                            </p>
                         </div>
                     {% endif %}
                     {% if result %}
@@ -331,7 +329,7 @@
                 {% block all_separation_status %}
                 
                 {% endblock all_separation_status %}
-                <div class="table-overflow" style="max-height: 500px">
+                <div class="table-overflow" style="max-height: 700px">
                     <form onsubmit="routeMovRedirect('requisicao');">
                         <div class="flex-row" style="margin: 8px 0; width: 100%;">
                             <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Requisição...">

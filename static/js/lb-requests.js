@@ -378,7 +378,7 @@ function renderSubtotals() {
 }
 
 
-function listSeparationsFromServer(route, reportDir='requests') {
+function listSeparationsFromServer(routePage, reportDir='requests') {
     const payload = {
         report_dir: reportDir
     };
@@ -401,17 +401,25 @@ function listSeparationsFromServer(route, reportDir='requests') {
             cell.textContent = files.error;
         } else {
             files.forEach(file => {
-                const requisicaoNumber = file.replace('separacao-request-', '').replace('.json', '');
+                const reqNumber = file.replace('separacao-request-', '').replace('.json', '');
                 const row = tableBody.insertRow();
                 const cell = row.insertCell(0);
-                cell.textContent = requisicaoNumber;
-
+                cell.textContent = reqNumber;
                 row.classList.add("selectable-row");
 
+                if (reqNumber === nroReq) {
+                    row.classList.add("active");
+                    activeRow = row;
+                } 
+        
                 row.addEventListener('click', function() {
-                    window.location.href = `/mov/${route}/${requisicaoNumber}`;
+                    window.location.href = `/mov/${routePage}/${reqNumber}`;
                 });
             });
+        
+            if (activeRow && nroReq != '0') {
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     })
     .catch(error => {
@@ -784,12 +792,12 @@ const fetchItemDescription = async (cod_item) => {
 };
 
 
-function sendCodItem(route, cod_item, id_req, qtde_solic) {
+function sendCodItem(routePage, cod_item, id_req, qtde_solic) {
     document.getElementById('cod_item_input').value = cod_item;
     document.getElementById('id_req_input').value = id_req;
     document.getElementById('qtde_item_input').value = qtde_solic;
     var form = document.getElementById('cod_item_form');
-    form.action = `/mov/${route}/${id_req}`;
+    form.action = `/mov/${routePage}/${id_req}`;
     form.submit();
 }
 

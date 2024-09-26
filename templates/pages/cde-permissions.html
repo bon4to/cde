@@ -62,7 +62,7 @@
                                             <div class="flex-row">
                                                 <input class="address-two" style="margin: 0" type="text" name="desc_perm_add" max="32" placeholder="Descrição...">
                                                 <button class="button-mini btn-fancy" type="submit" id="submitform">
-                                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/plus.svg') }}" title="ADICIONAR">
+                                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-plus.svg') }}" title="ADICIONAR">
                                                 </button>
                                             </div>
                                         </div>
@@ -71,7 +71,7 @@
                             {% endif %}
                         {% endif %}
                     {% else %}
-                        <h1 class="subtitle">Voce não tem permissão para editar estes registros.</h1>
+                        <h1 class="subtitle">Você não tem permissão para editar estes registros.</h1>
                     {% endif %}
                 </div>
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
@@ -80,7 +80,7 @@
                     {% block all_separation_status %}
                     
                     {% endblock all_separation_status %}
-                    <div class="table-overflow" style="max-height: 600px">
+                    <div class="table-overflow" style="max-height: 700px">
                         {% if permissions %}
                             <table style="border-top: 4px solid var(--cor-destaque)">
                                 <tbody>

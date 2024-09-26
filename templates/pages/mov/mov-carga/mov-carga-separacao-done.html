@@ -25,7 +25,7 @@
     <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
     <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
     <hr class="vert">
-    <form action="{{ url_for('cargas') }}" method="post">
+    <form class="disabled">
         <button type="submit" style="all: unset">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
         </button>
@@ -52,12 +52,10 @@
 
 
 {% block all_separation_status %}
-    <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-        <select class="address-three inline-input" style="color: green; font-size: 14px" onchange="window.location.href='/mov/carga/separacao/p/{{ id_carga }}'">
-            <option style="color: green;">Finalizadas</option>
-            <option style="color: var(--cor-destaque);">Pendentes</option>
-        </select>
-    </p>
+    <select class="address-three inline-input" style="color: green; font-size: 12px" onchange="window.location.href='/mov/carga/separacao/p/{{ id_carga }}'">
+        <option style="color: green;">Finalizadas</option>
+        <option style="color: var(--cor-destaque);">Pendentes</option>
+    </select>
 {% endblock all_separation_status %}
 
 
@@ -137,7 +135,7 @@
                     let subtotal = 0;
 
                     for (const [index, item] of items.entries()) {
-                        await visualDelay(100);
+                        await visualDelay(50);
                         await getSeparadorName(item.user_id);
 
                         const row = itemsTable.insertRow();
