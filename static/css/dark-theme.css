@@ -41,13 +41,6 @@ html.dark input:focus {
     transition: border-color 0.2s ease-out;
 }
 
-html.dark .inline-input {
-    margin-left: 8px; 
-    border: 0; 
-    height: auto; 
-    padding: 6px;
-}
-
 html.dark .inline-input:focus {
     border: 0; 
     box-shadow: none;
@@ -84,7 +77,6 @@ html.dark .tables-container,
 html.dark .mobile-container,
 html.dark .titles-container,
 html.dark .popup-content,
-html.dark .cart-dropdown,
 html.dark .form-filter,
 html.dark .dialog-box,
 html.dark .form-login,
@@ -92,6 +84,14 @@ html.dark .forms-container {
     color: var(--dark-text);
     background-color: var(--dark-element);
     box-shadow: none;
+}
+
+html.dark .cart-dropdown {
+    background-color: var(--background);
+}
+
+html.dark .cart-button {
+    background-color: var(--background);
 }
 
 td.over-row {
@@ -200,6 +200,10 @@ html.dark .btn-fancy .svg-inv {
     filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(180deg);
 }
 
+html.dark .msg-svg {
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
 html.dark .btn-fancy .svg-invert {
     filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
 }
@@ -221,7 +225,7 @@ html.dark .svg-gray:hover {
     background-color: #dbdbdb;
 }
 
-html.dark, html.dark th, td {
+html.dark th, html.dark td {
     border-color: #363636;
 }
 
@@ -241,6 +245,12 @@ html.dark ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     border: 3px solid #535353;
 }
+
 html.dark ::-webkit-scrollbar-track {
     background-color: var(--dark-background);
 }
+
+html.dark #sepListContainer {
+    border: 1px solid var(--cor-destaque);
+}
+

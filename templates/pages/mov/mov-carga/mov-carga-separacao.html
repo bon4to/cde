@@ -109,7 +109,7 @@
             {% block all_separation_status %}
             
             {% endblock all_separation_status %}
-            <div class="table-overflow" style="max-height: 500px">
+            <div class="table-overflow" style="max-height: 700px">
                 <form onsubmit="routeMovRedirect('carga/separacao/p'); return false;">
                     <div class="flex-row" style="margin: 8px 0; width: 100%;">
                         <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Carga...">
@@ -124,13 +124,6 @@
                     </tbody>
                 </table>
             </div>
-            {% if session['user_grant'] == 1 %}
-                <div style="margin: 8px 0" class="flex-row">
-                    <div class="button-mini btn-fancy" onclick="clearAllSeparations()" title="APAGAR TODAS AS SEPARAÇÕES">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
-                    </div>
-                </div>
-            {% endif %}
         </div>
     </div>
 

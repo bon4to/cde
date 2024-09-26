@@ -25,7 +25,7 @@
     <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
     <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
     <hr class="vert">
-    <form action="{{ url_for('cargas') }}" method="post">
+    <form class="disabled">
         <button type="submit" style="all: unset">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
         </button>
@@ -60,12 +60,10 @@
 
 
 {% block all_separation_status %}
-<p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-    <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 14px" onchange="window.location.href='/mov/carga/separacao/f/{{ id_carga }}'">
+    <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 12px" onchange="window.location.href='/mov/carga/separacao/f/{{ id_carga }}'">
         <option style="color: var(--cor-destaque);">Pendentes</option>
         <option style="color: green;">Finalizadas</option>
     </select>
-</p>
 {% endblock all_separation_status %}
 
 
@@ -230,7 +228,7 @@
                                 <div class="msg-success">
                                     <details>
                                         <summary>A carga selecionada já foi finalizada.</summary>
-                                        Para visualizá-la, filtre por 'finalizados' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2-check.svg') }}"> acima.
+                                        Para visualizá-la, filtre por 'finalizados' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}"> acima.
                                     </details>
                                 </div>
                             `;

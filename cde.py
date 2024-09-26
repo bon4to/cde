@@ -47,7 +47,7 @@ if __name__:
 
 
     class TAGS:
-        SERVIDOR = f'{ANSI.MAGENTA}[SERVIDOR]{ANSI.RESET}'
+        SERVIDOR = f'{ANSI.MAGENTA}[CDE]{ANSI.RESET}'
         ERRO     = f'{ANSI.RED}[ERRO]{ANSI.RESET}'
         INFO     = f'{ANSI.BLUE}[INFO]{ANSI.RESET}'
         STATUS   = f'{ANSI.GREEN}[STATUS]{ANSI.RESET}'
@@ -55,12 +55,12 @@ if __name__:
         GRANTED  = f'{ANSI.CYAN}200{ANSI.RESET}'
 
 
-    def logging(tag_1, tag_2, msge):
+    def log(tag_1, tag_2, text):
         timestamp = misc.get_timestamp()
         if not tag_2:
-            print(f'{tag_1} {msge}')
+            print(f'{tag_1} {text}')
             return
-        print(f'{tag_1} ({timestamp}) {tag_2} | {msge}')
+        print(f'{tag_1} ({timestamp}) {tag_2} | {text}')
         return
 
 
@@ -325,10 +325,10 @@ class cde:
                         user_perm = UserUtils.get_user_permissions(id_user)
                         user_perm = [item['id_perm'] for item in user_perm]
                         if id_page in user_perm:
-                            logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                            log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                             return f(*args, **kwargs)
                         else:
-                            logging(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                            log(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                             alert_type = 'SEM PERMISSÕES'
                             alert_msge = 'Você não tem permissão para acessar esta página.'
                             alert_more = '''SOLUÇÕES:\n- Solicite ao seu supervisor um novo nível de acesso.'''
@@ -340,7 +340,7 @@ class cde:
                                 url_return=url_for('index')
                             )
                     else:
-                        logging(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                        log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                         return f(*args, **kwargs)
                 else:
                     return redirect(url_for('login'))

@@ -508,7 +508,7 @@ function showToast(message, type = 0, duration = 5000) {
         <div class="toast-timer" style="background-color: ${toastColor};"></div>
     `;
 
-    console.log("- ", message);
+    console.log("[TOAST]", message);
 
     // Adiciona o toast ao container
     toastContainer.appendChild(toast);

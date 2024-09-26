@@ -36,14 +36,14 @@
                 </a>
             </div>
         </div>
-        <div class="item" onclick="window.location.href='{{ url_for('historico') }}';">
+        <div class="item" onclick="window.location.href='{{ url_for('faturado') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
-                    <h2 class="text-default">Histórico</h2>
-                    <p class="text-default bold"><span class="id-page">MOV003</span></p>
+                    <h2 class="text-default">Faturado</h2>
+                    <p class="text-default bold"><span class="id-page">MOV005</span></p>
                 </div>
                 <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/history.svg') }}" alt="">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
                 </a>
             </div>
         </div>
@@ -58,17 +58,6 @@
                 </a>
             </div>
         </div>
-        <div class="item" onclick="window.location.href='{{ url_for('mov') }}';">
-            <div class="split-horizontal algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Movim.</h2>
-                    <p class="text-default bold"><span class="id-page">MOV002</span></p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
         <div class="item" onclick="window.location.href='{{ url_for('estoque') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
@@ -80,25 +69,25 @@
                 </a>
             </div>
         </div>
-        <div class="item" onclick="window.location.href='{{ url_for('produtos') }}';">
+        <div class="item featured" onclick="window.location.href='{{ url_for('mov') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
-                    <h2 class="text-default">Produtos</h2>
-                    <p class="text-default bold"><span class="id-page">ITE005</span></p>
+                    <h2 class="text-default">Movimentar</h2>
+                    <p class="text-default bold"><span class="id-page">MOV002&nbsp;•&nbsp;</span>Movimente manualmente.</p>
                 </div>
                 <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/produtos.svg') }}" alt="">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">
                 </a>
             </div>
         </div>
-        <div class="item" onclick="window.location.href='{{ url_for('faturado') }}';">
+        <div class="item" onclick="window.location.href='{{ url_for('historico') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
-                    <h2 class="text-default">Faturado</h2>
-                    <p class="text-default bold"><span class="id-page">MOV005</span></p>
+                    <h2 class="text-default">Histórico</h2>
+                    <p class="text-default bold"><span class="id-page">MOV003</span></p>
                 </div>
                 <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/history.svg') }}" alt="">
                 </a>
             </div>
         </div>

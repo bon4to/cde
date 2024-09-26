@@ -25,7 +25,7 @@
                 </div>
             {% endblock brow %}
         </div>
-        <div class="flex-row" style="min-width: 100%;">
+        <div class="flex-row" style="min-width: 100%; height: fit-content;">
             {% if 'user_grant' in session %}
                 {% if not about %}
                     <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
@@ -102,7 +102,7 @@
                 {% endif %}
             {% endif %}
             {% if not about %}
-                <div id="recent-pages-container" class="tables-container" style="min-height: -webkit-fill-available; border-radius: 44px; padding: 24px;">
+                <div id="recent-pages-container" class="tables-container" style="max-width: 30%; min-width: 16%; min-height: -webkit-fill-available; border-radius: 44px; padding: 24px;">
                     <div id="recent-pages">
                         <h1 class="cor-web" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
                         <hr style="margin-right: 4px; width: 20%;">
