@@ -104,7 +104,7 @@
 
         function confirmRemover(idUser, idPerm, checkbox) {
             if (confirm("Você tem certeza que deseja remover esta permissão?")) {
-                window.location.href = "remove-perm/" + idUser + "/" + idPerm
+                window.location.href = "/users/remove-perm/" + idUser + "/" + idPerm
             } else {
                 checkbox.checked = true;
             }
