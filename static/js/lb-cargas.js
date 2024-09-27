@@ -383,7 +383,7 @@ function renderSubtotals() {
 }
 
 
-function listSeparationsFromServer(route, reportDir='cargas') {
+function listSeparationsFromServer(routePage, reportDir='cargas') {
     const payload = {
         report_dir: reportDir
     };
@@ -414,7 +414,7 @@ function listSeparationsFromServer(route, reportDir='cargas') {
                 row.classList.add("selectable-row");
 
                 row.addEventListener('click', function() {
-                    window.location.href = `/mov/${route}/${cargaNumber}`;
+                    window.location.href = `/mov/${routePage}/${cargaNumber}`;
                 });
             });
         }
@@ -768,9 +768,12 @@ async function concludeSeparacao() {
         const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
 
         // Verifica se a quantidade solicitada é igual à quantidade separada
-        if (qtde_solic !== subTotal) {
+        if (qtde_solic > subTotal) {
+            const qtde_faltante = qtde_solic - subTotal;
+            // adiciona o item e quantidade
+            // ao array de itens não disponíveis
+            nonAvailableItems.push({ cod_item: cod_item, qtde_faltante: qtde_faltante });
             showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 2);
-            nonAvailableItems.push(cod_item);
         } else {
             showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 1);
         }
@@ -782,8 +785,9 @@ async function concludeSeparacao() {
 
     // Verifica se houve itens não separados
     if (nonAvailableItems.length > 0) {
+        const itemsList = nonAvailableItems.map(item => `${item.cod_item}`).join(', ');
         const confirmation = confirm(
-            `${confirmationText}\nALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`
+            `${confirmationText}\nALERTA:\nA quantidade total para os itens ${itemsList} não corresponde ao solicitado.`
         );
         if (confirmation) {
             saveAsPendingItems = true;
@@ -820,35 +824,37 @@ async function concludeSeparacao() {
             if (data.success) {
                 // se for uma separação incompleta, remove a pendencia da carga_incompleta
                 if (isIncompSeparation) {
-                    fetch('/api/conclude-incomp/' + nroCarga, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
                             showToast('Pendencia da carga realizada com sucesso.', 1, 10000);
+                    // Aguarda a conclusão da operação de remover pendências
+                    try {
+                        const concludeResponse = await fetch(`/api/conclude-incomp/${nroCarga}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        
+                        const concludeData = await concludeResponse.json();
+        
+                        if (concludeData.success) {
                         } else {
                             showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${data.error}</details>`, 3, 10000);
+                            return;
                         }
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
                         showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${error}</details>`, 3, 10000);
-                    });
-                }
-                
-                for (const cod_item of nonAvailableItems) {
-                    let subTotal = 0;
-                    if (groupedItems[cod_item]) {
-                        subTotal = groupedItems[cod_item].reduce((acc, item) => acc + item.qtde_sep, 0);
+                    } catch (error) {
+                        console.error('Erro ao remover pendência da carga incompleta:', error);
+                        return; // Aborta o processo se houver erro
                     }
-                    
-                    const qtdeSolic = await fetchQtdeSolic(nroCarga, cod_item);
-                    
+                }
+
+                // cria a pendencia da carga_incompleta
+                for (const item of nonAvailableItems) {
+                    const { cod_item, qtde_faltante } = item;
+                    console.log('cod_item, qtde_faltante: ', cod_item, qtde_faltante);
+
                     try {
+                        console.log('Inserindo item na pendencia da carga_incompleta...');
                         const response = await fetch('/api/insert_carga_incomp', {
                             method: 'POST',
                             headers: {
@@ -857,16 +863,21 @@ async function concludeSeparacao() {
                             body: JSON.stringify({
                                 id_carga: nroCarga,
                                 cod_item: cod_item,
-                                qtde_atual: subTotal,
-                                qtde_solic: qtdeSolic
+                                qtde_atual: groupedItems[cod_item] ? groupedItems[cod_item].reduce((acc, item) => acc + item.qtde_sep, 0) : 0,
+                                qtde_solic: qtde_faltante
                             })
                         });
-                        
+                
                         const result = await response.json();
                         if (!result.success) {
+                            // ERRO
                             console.error(`Erro ao inserir ${cod_item} para a carga incompleta.`, result.error);
+                        } else {
+                            // SUCESSO
+                            console.log(`Pendencias inseridas com sucesso para o item ${cod_item} (${qtde_faltante}).`);
                         }
                     } catch (error) {
+                        // ERRO
                         console.error(`Erro ao enviar item ${cod_item} da carga incompleta para o database.`, error);
                     }
                 }
@@ -930,12 +941,12 @@ const fetchItemDescription = async (cod_item) => {
 };
 
 
-function sendCodItem(route, cod_item, carga_id, qtde_solic) {
+function sendCodItem(routePage, cod_item, carga_id, qtde_solic) {
     document.getElementById('cod_item_input').value = cod_item;
     document.getElementById('carga_id_input').value = carga_id;
     document.getElementById('qtde_item_input').value = qtde_solic;
     var form = document.getElementById('cod_item_form');
-    form.action = `/mov/${route}/${carga_id}`;
+    form.action = `/mov/${routePage}/${carga_id}`;
     form.submit();
 }
 

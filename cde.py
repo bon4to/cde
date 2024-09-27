@@ -3681,27 +3681,45 @@ def get_carga_qtde_solic():
     cod_item = request.args.get('cod_item', type=str)
     
     query = '''
-        SELECT
-            SUM(CAST(iped.QTDE_SOLICITADA AS INTEGER)) AS QTDE_SOLIC
-        FROM DB2ADMIN.ITEMPED iped
-
-        JOIN DB2ADMIN.IGRUPOPE icrg
-        ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
-        AND icrg.SEQ = iped.SEQ
-
-        WHERE icrg.CODIGO_GRUPOPED = '{a}'
-        AND iped.ITEM = '{b}';
+        SELECT 
+            qtde_solic AS QTDE_SOLIC
+        FROM carga_incomp
+        WHERE 
+            id_carga = '{a}' AND
+            cod_item = '{b}' AND
+            flag_pendente = TRUE
+        ;
     '''.format(a=id_carga, b=cod_item)
-    try:
-        dsn = 'HUGOPIET'
-        result, columns = cde.db_query(query, dsn)
-        if result:
-            qtde_solic = result[0][0]
-        else:
-            qtde_solic = 0
+    dsn = 'SQLITE'
+    result, columns = cde.db_query(query, dsn)
+    cde.debug_log(f'result: {result}')
+    if result != []:
+        qtde_solic = result[0][0]
+        cde.debug_log(f'qtde_solic: {qtde_solic}')
         return jsonify({'qtde_solic': qtde_solic})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    else:
+        query = '''
+            SELECT
+                SUM(CAST(iped.QTDE_SOLICITADA AS INTEGER)) AS QTDE_SOLIC
+            FROM DB2ADMIN.ITEMPED iped
+
+            JOIN DB2ADMIN.IGRUPOPE icrg
+            ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+            AND icrg.SEQ = iped.SEQ
+
+            WHERE icrg.CODIGO_GRUPOPED = '{a}'
+            AND iped.ITEM = '{b}';
+        '''.format(a=id_carga, b=cod_item)
+        try:
+            dsn = 'HUGOPIET'
+            result, columns = cde.db_query(query, dsn)
+            if result:
+                qtde_solic = result[0][0]
+            else:
+                qtde_solic = 0
+            return jsonify({'qtde_solic': qtde_solic})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/itens_carga/', methods=['GET'])
