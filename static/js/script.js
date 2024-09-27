@@ -290,6 +290,18 @@ function reloadPage() {
 }
 
 
+function loadBase64(filePath, callback) {
+    fetch(filePath)
+        .then(response => response.text())
+        .then(base64String => {
+            callback(base64String);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar o arquivo Base64:', error);
+        });
+}
+
+
 function getQtdeItemLS(storageKey, cod_item) {
     const storage = JSON.parse(localStorage.getItem(storageKey)) || [];
     const quantidade = storage.reduce((acc, item) => {
