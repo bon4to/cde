@@ -327,12 +327,10 @@
             {% if not cod_item %}
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
                     <h1 class="subtitle" style="margin: 0;">Separações</h1>
-                    <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-                        <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 14px" onchange="window.location.href='/mov/separacao-done/{{ id_carga | default(0) }}'">
-                            <option style="color: var(--cor-destaque);">Pendentes</option>
-                            <option style="color: green;">Finalizadas</option>
-                        </select>
-                    </p>
+                    <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 12px" onchange="window.location.href='/mov/separacao-done/{{ id_carga | default(0) }}'">
+                        <option style="color: var(--cor-destaque);">Pendentes</option>
+                        <option style="color: green;">Finalizadas</option>
+                    </select>
                     {% block all_separation_status %}
                     
                     {% endblock all_separation_status %}

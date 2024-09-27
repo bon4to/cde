@@ -91,10 +91,19 @@ function listSeparationsLocalStorage(routePage) {
         row.insertCell(0).textContent = reqNumber;
         row.classList.add("selectable-row");
 
+        if (reqNumber === nroReq) {
+            row.classList.add("active");
+            activeRow = row;
+        } 
+
         row.addEventListener('click', function() {
-            redirectToMov(routePage, reqNumber);
+            window.location.href = `/mov/${routePage}/${reqNumber}`;
         });
     });
+
+    if (activeRow && nroReq != '0') {
+        activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 
