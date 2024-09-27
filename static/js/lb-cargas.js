@@ -345,18 +345,6 @@ async function genCargaReport() {
 }
 
 
-function loadBase64(filePath, callback) {
-    fetch(filePath)
-        .then(response => response.text())
-        .then(base64String => {
-            callback(base64String);
-        })
-        .catch(error => {
-            console.error('Erro ao carregar o arquivo Base64:', error);
-        });
-}
-
-
 function toggleCart() {
     const cartDropdown = document.getElementById('cart-dropdown');
     const itemsCountElement = document.querySelector('.item-count');

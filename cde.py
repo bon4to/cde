@@ -27,7 +27,7 @@ if __name__:
     app.secret_key = os.getenv('SECRET_KEY')
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-    app.config['APP_VERSION'] = ['0.4.8', 'Setembro/2024', False]
+    app.config['APP_VERSION'] = ['0.4.9', 'Outubro/2024', False]
 
     # GET nome do diretório
     dir_os = os.path.dirname(os.path.abspath(__file__)).upper()
@@ -2190,8 +2190,8 @@ def page_not_found(e):
     ), 503
 
 
-@app.route('/force_502')
-def force_502():
+@app.route('/force_503')
+def force_503():
     abort(503)
 
 
@@ -2685,12 +2685,13 @@ def moving():
 
 
 @app.route('/mov/map/')
-@cde.verify_auth('MOV002')
+@cde.verify_auth('MOV008')
 def stock_map() -> str:
-
-    return render_template(
-        'pages/stock-map.html'
-    )
+    if debug:
+        return render_template(
+            'pages/stock-map.html'
+        )
+    return force_503()
 
 
 @app.route('/mov/request/moving/bulk/', methods=['POST'])
@@ -3556,7 +3557,7 @@ def req_sep_pend(id_req):
 
 
 @app.route('/mov/requisicao/separacao/f/<string:id_req>/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV007')
 def req_sep_done(id_req):
     if '-' in id_req:
         id_req, seq = id_req.split('-')
@@ -3577,7 +3578,7 @@ def req_sep_done(id_req):
 
 
 @app.route('/api/req/qtde_solic/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV007')
 def get_req_qtde_solic():
     id_req = request.args.get('id_req', type=int)
     cod_item = request.args.get('cod_item', type=str)
