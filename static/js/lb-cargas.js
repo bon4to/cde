@@ -62,6 +62,11 @@ function redirectToMov(routePage, nroCarga) {
 function listSeparationsLocalStorage(routePage) {
     // limpa a tabela atual, evitando duplicações e dados desatualizados
     const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
+
+    // Verifica se a URL da página corresponde à rota "/mov/carga/incompleta"
+    if (window.location.pathname == '/mov/carga/incompleta/') {
+        return;
+    }
     allSeparationsTable.innerHTML = '';
 
     // obtem todas as chaves (de carga) armazenadas no localStorage
@@ -83,6 +88,8 @@ function listSeparationsLocalStorage(routePage) {
         row.insertCell(0).textContent = 'Nenhuma separação iniciada';
     }
 
+    let activeRow = null;
+
     // remove prefixo 'separacao-carga-'
     // percorre as chaves e adiciona as linhas na tabela
     keys.forEach(key => {
@@ -91,10 +98,19 @@ function listSeparationsLocalStorage(routePage) {
         row.insertCell(0).textContent = cargaNumber;
         row.classList.add("selectable-row");
 
+        if (cargaNumber === nroCarga) {
+            row.classList.add("active");
+            activeRow = row;
+        } 
+
         row.addEventListener('click', function() {
-            redirectToMov(routePage, cargaNumber);
+            window.location.href = `/mov/${routePage}/${cargaNumber}`;
         });
     });
+
+    if (activeRow && nroCarga != '0') {
+        activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 
@@ -399,6 +415,8 @@ function listSeparationsFromServer(routePage, reportDir='cargas') {
         const tableBody = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
         tableBody.innerHTML = '';
 
+        let activeRow = null;
+
         if (files.error) {
             const row = tableBody.insertRow();
             const cell = row.insertCell(0);
@@ -410,13 +428,20 @@ function listSeparationsFromServer(routePage, reportDir='cargas') {
                 const row = tableBody.insertRow();
                 const cell = row.insertCell(0);
                 cell.textContent = cargaNumber;
-
                 row.classList.add("selectable-row");
+
+                if (cargaNumber === nroCarga) {
+                    row.classList.add("active");
+                    activeRow = row;
+                } 
 
                 row.addEventListener('click', function() {
                     window.location.href = `/mov/${routePage}/${cargaNumber}`;
                 });
             });
+            if (activeRow && nroCarga != '0') {
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     })
     .catch(error => {
@@ -824,7 +849,6 @@ async function concludeSeparacao() {
             if (data.success) {
                 // se for uma separação incompleta, remove a pendencia da carga_incompleta
                 if (isIncompSeparation) {
-                            showToast('Pendencia da carga realizada com sucesso.', 1, 10000);
                     // Aguarda a conclusão da operação de remover pendências
                     try {
                         const concludeResponse = await fetch(`/api/conclude-incomp/${nroCarga}`, {
@@ -837,13 +861,14 @@ async function concludeSeparacao() {
                         const concludeData = await concludeResponse.json();
         
                         if (concludeData.success) {
+                            showToast('Pendência da carga removida com sucesso.', 1, 10);
                         } else {
-                            showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${data.error}</details>`, 3, 10000);
+                            showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${concludeData.error}</details>`, 3, 10);
                             return;
                         }
-                        showToast(`<details><summary>Erro ao remover pendencia da carga incompleta:</summary> ${error}</details>`, 3, 10000);
                     } catch (error) {
                         console.error('Erro ao remover pendência da carga incompleta:', error);
+                        showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${error}</details>`, 3, 10);
                         return; // Aborta o processo se houver erro
                     }
                 }
@@ -892,18 +917,18 @@ async function concludeSeparacao() {
                 } catch (error) {
                     // feedback visual para o front-end
                     // erro
-                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 3, 10000);
+                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 3, 10);
                 } finally {
                     // feedback visual para o front-end
                     // sucesso
                     hideLoading();
-                    showToast('Separação da carga realizada com sucesso.', 1, 10000);
+                    showToast('Separação da carga realizada com sucesso.', 1, 10);
     
                     // gera relatório da separação
                     genCargaReport();
                 }
             } else {
-                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10000);
+                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10);
             }
             // atualiza tabelas no front-end
             reloadTables();
@@ -912,7 +937,7 @@ async function concludeSeparacao() {
         .catch(error => {
             console.error('Erro:', error);
             
-            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10000);
+            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10);
         });
     } else {
         showToast('Operação cancelada.', 3);

@@ -37,12 +37,10 @@
 
 
 {% block all_separation_status %}
-    <p style="justify-content: flex-start; margin: 0 0 12px 0;">Status:
-        <select class="address-three inline-input" style="color: green; font-size: 14px" onchange="window.location.href='/mov/requisicao/separacao/p/{{ id_req }}'">
-            <option style="color: green;">Finalizadas</option>
-            <option style="color: var(--cor-destaque);">Pendentes</option>
-        </select>
-    </p>
+    <select class="address-three inline-input" style="color: green; font-size: 12px" onchange="window.location.href='/mov/requisicao/separacao/p/{{ id_req }}'">
+        <option style="color: green;">Finalizadas</option>
+        <option style="color: var(--cor-destaque);">Pendentes</option>
+    </select>
 {% endblock all_separation_status %}
 
 
