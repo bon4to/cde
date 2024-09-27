@@ -749,18 +749,18 @@ async function concludeSeparacao() {
                 } catch (error) {
                     // feedback visual para o front-end
                     // erro
-                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 3, 10000);
+                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 3, 10);
                 } finally {
                     // feedback visual para o front-end
                     // sucesso
                     hideLoading();
-                    showToast('Separação da requisicao realizada com sucesso.', 1, 10000);
+                    showToast('Separação da requisicao realizada com sucesso.', 1, 10);
     
                     // gera relatório da separação
                     genRequestReport();
                 }
             } else {
-                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10000);
+                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10);
             }
             // atualiza tabelas no front-end
             reloadTables();
@@ -769,7 +769,7 @@ async function concludeSeparacao() {
         .catch(error => {
             console.error('Erro:', error);
             
-            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10000);
+            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10);
         });
     }
 }

@@ -458,10 +458,11 @@ function clearRecentPages() {
 }
 
 
-function showToast(message, type = 0, duration = 5000) {
+function showToast(message, type = 0, duration = 5) {
     const toastContainer = document.getElementById('toast-container');
     let icon;
     let toastColor;
+    duration = duration * 1000;
 
     switch(type) {
         case 1: // Success
