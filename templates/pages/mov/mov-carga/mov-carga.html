@@ -367,7 +367,7 @@
                         hasPendingItems().then(bool => {
                             console.log('after hasPendingItems');
                             if(bool == true) {
-                                showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
+                                showToast('A carga está incompleta. Verifique seus itens!', 2, 10)
     
                                 errorMessage = 
                                 `
@@ -405,7 +405,7 @@
                         reject(new Error('A carga selecionada já foi finalizada.'));
                         hasPendingItems().then(bool => {
                             if(bool == true) {
-                                showToast('A carga está incompleta. Verifique seus itens!', 2, 10000)
+                                showToast('A carga está incompleta. Verifique seus itens!', 2, 10)
 
                                 errorMessage = 
                                 `
