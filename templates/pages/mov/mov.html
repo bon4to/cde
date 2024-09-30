@@ -41,7 +41,7 @@
                 </button>
                 <div class="centralizado">
                     <div>
-                        <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
+                        <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()" style="display: block;">
                             <div>
                                 <label for="input_code"></label>
                                 <div class="split-horizontal input-container">
@@ -73,18 +73,18 @@
                                         </label><br>
                                         <input class="address-three" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Ex.: CS0000">
                                     </div>
+                                    <div>
+                                        <label for="lote_item">Operação</label><br>
+                                        <select name="operacao" id="operacao" class="address-four" onchange="toggleFields()">
+                                            <option value="E">E</option>
+                                            <option value="S">S</option>
+                                            <option value="T">T</option>
+                                            <!-- <option value="F">F</option> # uso foi substituido por /mov/carga/ -->
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            <hr>
                             <div style="display: flex;">
-                                <div>
-                                    <select name="operacao" id="operacao" style="margin-top: 14px" class="address-three" onchange="toggleFields()">
-                                        <option value="E">Entrada</option>
-                                        <option value="S">Saída</option>
-                                        <option value="T">Transferir</option>
-                                        <option value="F">Faturado</option>
-                                    </select>
-                                </div>
                                 <div style="display: flex; align-items: center">
                                     <img id="svg-image" class="svg-orange" style="width: 22px; height: 22px; margin-left: 4px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
                                 </div>
@@ -134,10 +134,12 @@
                                             <option value="PP4"  >PP4</option>
                                             <option value="AM"   >AMOSTRA</option>
                                             <option value="CAM"  >CÂMARA FRIA</option>
-                                            <option value="DEVOL">DEVOLUÇÃO</option>
-                                            <option value="LOJA" >LOJA</option>
-                                            <option value="PROD" >PRODUÇÃO</option>
-                                            <option value="SEPAR">SEPARAÇÃO</option>
+                                            <!--
+                                                <option value="DEVOL">DEVOLUÇÃO</option>
+                                                <option value="LOJA" >LOJA</option>
+                                                <option value="PROD" >PRODUÇÃO</option>
+                                                <option value="SEPAR">SEPARAÇÃO</option>
+                                            -->
                                         </select>
                                     </div>
                                 </div>
@@ -166,10 +168,12 @@
                                             <option value="PP4"  >PP4</option>
                                             <option value="AM"   >AMOSTRA</option>
                                             <option value="CAM"  >CÂMARA FRIA</option>
-                                            <option value="DEVOL">DEVOLUÇÃO</option>
-                                            <option value="LOJA" >LOJA</option>
-                                            <option value="PROD" >PRODUÇÃO</option>
-                                            <option value="SEPAR">SEPARAÇÃO</option>
+                                            <!--
+                                                <option value="DEVOL">DEVOLUÇÃO</option>
+                                                <option value="LOJA" >LOJA</option>
+                                                <option value="PROD" >PRODUÇÃO</option>
+                                                <option value="SEPAR">SEPARAÇÃO</option>
+                                            -->
                                         </select>
                                     </div>
                                     <div>
@@ -204,7 +208,7 @@
             </div>
             <div class="tables-container" id="tables-cont">
                 <div class="table-overflow">
-                    <table id="filterTable">
+                    <table id="filterTable" style="max-height: revert-layer;">
                         <tr>
                             <th>Endereço</th>
                             <th>Item (Código)</th>

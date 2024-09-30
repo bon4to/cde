@@ -72,7 +72,7 @@
                 document.getElementById('current-time').textContent = formattedTime;
             });
         </script>
-        {% if request.path == '/mov', '/envase', '/producao' %}
+        {% if request.path == '/mov/' %}
             <script src="{{ url_for('static', filename='js/lb-float-cont.js') }}"></script>
         {% endif %}
         <script src="{{ url_for('static', filename='js/lb-filter.js') }}"></script>
