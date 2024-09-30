@@ -1,5 +1,5 @@
 
-.dark {
+html.dark {
     --programmed-l1: 155, 072, 060;
     --programmed-l2: 081, 129, 040;
     --programmed-l3: 065, 065, 155;
@@ -10,12 +10,12 @@
 }
 
 html.dark {
-    background-color: var(--background);
+    background-color: var(--strong-dark-h);
 }
 
 html.dark body,
 html.dark div.container {
-    background-color: var(--background);
+    background-color: var(--strong-dark-h);
     color: var(--dark-text);
 }
 
@@ -70,7 +70,7 @@ html.dark .navigation-bar hr {
 }
 
 html.dark .navigation-bar {
-    background-color: var(--background);
+    background-color: var(--strong-dark-h);
 }
 
 html.dark .tables-container,
@@ -82,16 +82,16 @@ html.dark .dialog-box,
 html.dark .form-login,
 html.dark .forms-container {
     color: var(--dark-text);
-    background-color: var(--dark-element);
+    background-color: var(--strong-dark-l);
     box-shadow: none;
 }
 
 html.dark .cart-dropdown {
-    background-color: var(--background);
+    background-color: var(--strong-dark-h);
 }
 
 html.dark .cart-button {
-    background-color: var(--background);
+    background-color: var(--strong-dark-h);
 }
 
 td.over-row {
@@ -135,7 +135,7 @@ html.dark p.alert {
 html.dark .item {
     color: var(--dark-text);
     border-color: #1b1b1b;
-    background-color: var(--dark-background);
+    background-color: var(--strong-dark-m);
 }
 
 html.dark .item:hover {
@@ -144,7 +144,7 @@ html.dark .item:hover {
 }
 
 html.dark .back-modal {
-    background-color: var(--dark-background)
+    background-color: var(--strong-dark-m)
 }
 
 html.dark #footer {
@@ -236,21 +236,25 @@ html.dark, html.dark th {
 
 html.dark, html.dark td {
     border-color: #363636;
-    background-color: var(--dark-background);
+    background-color: var(--strong-dark-m);
     color: #fff;
 }
 
 html.dark ::-webkit-scrollbar-thumb {
-    background-color: var(--dark-element);
+    background-color: var(--strong-dark-l);
     border-radius: 10px;
     border: 3px solid #535353;
 }
 
 html.dark ::-webkit-scrollbar-track {
-    background-color: var(--dark-background);
+    background-color: var(--strong-dark-m);
 }
 
 html.dark #sepListContainer {
     border: 1px solid var(--cor-destaque);
 }
 
+
+html.dark .legend {
+    background-color: var(--strong-dark-m);
+}

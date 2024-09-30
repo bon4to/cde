@@ -14,9 +14,10 @@
     --programmed-l5: 165, 235, 255;
     --programmed-l6: 255, 165, 225;
     --programmed-l7: 255, 220, 165;
-    --background: #222222;
-    --dark-background: #252525;
-    --dark-element: #303030;
+    --strong-dark-h: #222222;
+    --strong-dark-m: #252525;
+    --strong-dark-l: #303030;
+    --medium-dark-h: #3a3a3a;
     --light-text: #f7f7f7;
 }
 
@@ -480,7 +481,7 @@ input.address, select.address {
 }
 
 input.address-one, select.address-one {
-    width: 244px;
+    width: -webkit-fill-available;
 }
 
 input.address-three, select.address-three {
@@ -502,6 +503,14 @@ input:focus, select:focus, textarea:focus{
     outline: none;
     box-shadow: 0 0px 8px rgba(0, 0, 0, 0.3);
     border-bottom: 2px solid var(--cor-destaque);
+}
+
+select#operacao {
+    font-weight: bold;
+}
+
+select#operacao option {
+    font-weight: bold;
 }
 
 img.header {
@@ -1350,7 +1359,7 @@ th.calendar {
     min-width: 200px;
     transition: none;
     position: absolute;
-    background-color: var(--dark-element);
+    background-color: var(--strong-dark-l);
 }
 
 .dropdown-content a {
@@ -1371,7 +1380,7 @@ th.calendar {
 .dropdown-content a:hover {
     transition: none;
     background-color: #fff;
-    color: var(--dark-element);
+    color: var(--strong-dark-l);
     border: 1px solid var(--cor-destaque);
     border-top: 1px solid #fff;
 }
@@ -1993,4 +2002,118 @@ h1.subtitle {
     font-size: 16px;
     font-family: 'Reddit Mono', sans-serif;
     text-align: center;
+}
+
+.map-grid {
+    display: grid;
+    gap: 0;
+    margin-top: 10px;
+    grid-template-columns: repeat(36, 24px);
+    cursor: grab;
+    background-color: #ccc;
+    padding: 8px;
+    border: 80px solid #b1b1b1;
+}
+
+.map-grid:hover {
+    cursor: grabbing;
+}
+
+.map-buttons {
+    display: flex;
+    position: relative;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    flex-direction: column;
+}
+
+.map-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--cor-destaque);
+    margin: 4px;
+    cursor: pointer;
+    height: 40px;
+    width: 40px;
+}
+
+.map-cell {
+    text-align: center;
+    background-color: transparent;
+    min-height: 30px;
+    padding: 2px;
+    position: relative;
+}
+
+.empty-cell {
+    background-color: #e0e0e0;
+}
+
+.stacked-bar {
+    display: flex;
+    flex-direction: column;
+    height: 60px;
+    width: 20px;
+    margin: 0 auto;
+    position: relative;
+    cursor: pointer;
+}
+
+.item-bar {
+    width: 100%;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.legend {
+    display: none;
+    overflow: visible;
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 5px;
+    border: 1px solid #ddd;
+    font-size: 0.8em;
+    z-index: 10;
+    text-align: center;
+    white-space: nowrap;
+    left: 110%;
+    top: 50%;
+    transform: translateY(-50%);
+    user-select: none;
+    pointer-events: none;
+}
+
+.item-bar:hover .legend {
+    display: block;
+}
+
+.invisible-cell {
+    border: 1px solid transparent;
+    color: transparent;
+    background-color: #ccc;
+    min-height: 60px;
+    position: relative;
+    cursor: default;
+}
+
+.corredor-space {
+    grid-column: 1 / -1;
+    min-height: 40px;
+    background-color: #ccc;
+}
+
+#map {
+    position: relative;
+    margin-top: auto;
+}
+
+#map-container {
+    background-color: #f4f4f4;
+    overflow: hidden;
+    max-width: 50%;
+    border-radius: 16px;
+    height: 100%;
 }
