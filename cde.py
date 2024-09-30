@@ -3307,7 +3307,7 @@ def cadastrar_usuario():
         sobrenome_user = str(request.form['sobrenome_user'])
         privilege_user = int(request.form['privilege_user'])
         data_cadastro  = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        password_user  = misc.hash_key(request.form['password_user'])
+        password_user  = misc.hash_key(str(12345))
 
         try:
             with sqlite3.connect(db_path) as connection:
