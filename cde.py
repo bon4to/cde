@@ -19,6 +19,8 @@ from dotenv import load_dotenv
 from functools import wraps
 from math import pi, ceil
 
+from werkzeug.wrappers.response import Response
+
 
 if __name__:
     # PARÂMETROS
@@ -2098,19 +2100,25 @@ def renew_session() -> None:
 
 @app.before_request
 def check_session_expiry() -> None | Response:
-    # VERIFICA SE A SESSÃO ESTÁ EXPIRADA
+# verifica se a sessão está expirada
     if request.path.startswith(('/static', '/get', '/post')):
-        # IGNORA AS REQUISICOES DE ARQUIVOS ESTÁTICOS
+        # ignora as requisições de arquivos estáticos
         return None
     if 'last_active' in session:
+    # se ultimo acesso estiver definido
         next_url = request.url
-        last_active     = session.get('last_active')
-        expiration_time = app.config['CDE_SESSION_LIFETIME']
-        if isinstance(last_active, datetime):
-            utc_now     = datetime.now(timezone.utc)
-            if (utc_now - last_active) > expiration_time:
-                session.clear()
-                session['next_url'] = next_url
+        last_active = session.get('last_active')             # horário da ultima requisição
+        expiration_time = app.config['CDE_SESSION_LIFETIME'] # lifetime da sessão
+        
+        if isinstance(last_active, datetime): 
+        # se é um objeto datetime...
+            time_now = datetime.now(timezone.utc)
+            
+            # compara a diferença de tempo
+            if (time_now - last_active) > expiration_time: 
+                # se ultrapassar o tempo de expiração...
+                session.clear() # limpa todos os dados da sessão
+                session['next_url'] = next_url # define ultimo url acessado
                 return redirect(url_for('login'))
     session['last_active'] = datetime.now(timezone.utc)
 
@@ -2155,7 +2163,7 @@ def inject_version() -> dict:
 
 
 @app.errorhandler(403)
-def page_not_found(e):
+def page_not_found(e) -> tuple[str, 403]:
     return render_template(
         '403.html',
         error_code=403,
@@ -2164,7 +2172,7 @@ def page_not_found(e):
 
 
 @app.errorhandler(404)
-def page_not_found(e):
+def page_not_found(e) -> tuple[str, 404]:
     return render_template(
         '404.html',
         error_code=404,
@@ -2173,7 +2181,7 @@ def page_not_found(e):
 
 
 @app.errorhandler(502)
-def page_not_found(e):
+def page_not_found(e) -> tuple[str, 502]:
     return render_template(
         '502.html',
         error_code=502,
@@ -2182,7 +2190,7 @@ def page_not_found(e):
 
 
 @app.errorhandler(503)
-def page_not_found(e):
+def page_not_found(e) -> tuple[str, 503]:
     return render_template(
         '503.html',
         error_code=503,
@@ -2190,28 +2198,29 @@ def page_not_found(e):
     ), 503
 
 
-@app.route('/force_503')
-def force_503():
+@app.route('/force_503/')
+def force_503() -> None:
     abort(503)
+    return None
 
 
 # ROTAS DE ACESSO | URL
 #
 @app.route('/')
 @cde.verify_auth('CDE001')
-def index():
+def index() -> Response:
     return redirect(url_for('home'))
 
 
 @app.route('/debug-page/')
 @cde.verify_auth('DEV000')
-def debug_page():
+def debug_page() -> str:
     return render_template('pages/debug-page.html')
 
 
 @app.route('/home/')
 @cde.verify_auth('CDE001')
-def home():
+def home() -> str:
     return render_template(
         'pages/index/cde-index.html', 
         frase=misc.get_frase()
@@ -2220,7 +2229,7 @@ def home():
 
 @app.route('/home/tl/')
 @cde.verify_auth('CDE001')
-def home_tl():
+def home_tl() -> str:
     return render_template(
         'pages/index/tl-index.html', 
         frase=misc.get_frase()
@@ -2229,7 +2238,7 @@ def home_tl():
 
 @app.route('/home/hp/')
 @cde.verify_auth('CDE001')
-def home_hp():
+def home_hp() -> str:
     return render_template(
         'pages/index/hp-index.html', 
         frase=misc.get_frase()
@@ -2238,27 +2247,28 @@ def home_hp():
 
 @app.route('/in-dev/')
 @cde.verify_auth('CDE001')
-def in_dev():
+def in_dev() -> str:
     return render_template('pages/error-handler.html')
 
 
 @app.route('/users/')
 @cde.verify_auth('CDE016')
-def users():
+def users() -> str:
     id_user = session.get('id_user')
+    users = UserUtils.get_users()
     user_perm = UserUtils.get_user_permissions(id_user)
     user_perm = [item['id_perm'] for item in user_perm]
     
     return render_template(
         'pages/users/users.html', 
-        users=UserUtils.get_users(),
+        users=users,
         user_perm=user_perm
     )
 
 
 @app.route('/cde/permissions/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE018')
-def permissions():
+def permissions() -> str:
     if request.method == 'POST':
         id_perm_add = request.form['id_perm_add']
         desc_perm_add = request.form['desc_perm_add']
@@ -2276,7 +2286,7 @@ def permissions():
 
 @app.route('/cde/permissions/<string:id_perm>/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE018')
-def permissions_id(id_perm):
+def permissions_id(id_perm) -> str:
     if request.method == 'POST':
         input_id_perm = request.form['id_perm']
         input_desc_perm = request.form['desc_perm']
@@ -2297,7 +2307,7 @@ def permissions_id(id_perm):
 # ROTA DE DATABASE MANAGER
 @app.route('/database/', methods=['GET', 'POST'])
 @cde.verify_auth('DEV000')
-def api():
+def api() -> str:
     if debug:
         if request.method == 'POST':
             query = request.form['sql_query']
@@ -2327,42 +2337,49 @@ def api():
 
 # ROTA PAGINA DE LOGIN
 @app.route('/login/', methods=['GET'])
-def pagina_login():
+def pagina_login() -> Response | str:
     if session.get('logged_in'):
+    # somente se estiver logado
+        # define o nome da rota de acesso 
         cde.verify_auth('CDE003')
         return redirect(url_for('index'))
     return render_template('pages/login.html')
 
 
 @app.route('/cde/minha-conta/', methods=['GET'])
-def cde_account():
+def cde_account() -> str | None:
     if session.get('logged_in'):
         return render_template('pages/account.html')
+    return None
 
 
 # ROTA DE SESSÃO LOGIN
 @app.route('/login/', methods=['POST'])
 def login():
     # TODO: método auxiliar
-    if request.method == 'POST':
-        if 'logged_in' in session:
+    if not request.method == 'POST':
+        return redirect(url_for('login'))
+    else:
+        if 'logged_in' in session: 
+            # se já estiver logado, entra no sistema
             return redirect(url_for('index'))
     
-        input_login = str(request.form['login_user'])
-        input_pwd = str(request.form['password_user'])
+        input_login = str(request.form['login_user'])  # login
+        input_pwd = str(request.form['password_user']) # senha
 
+        # busca senha do user com o input de login
         user_pwd = UserUtils.get_user_key(input_login)
 
-        # check if user exists
-        if not user_pwd:
+        if not user_pwd: 
+        # ou seja, user não existe
             alert_msge = 'O usuário não foi encontrado. Tente novamente.'
             return render_template(
-                'pages/login.html', 
+                'pages/login.html',
                 alert_msge=alert_msge
             )
         
-        # check if user password is correct
         if not misc.check_key(user_pwd, input_pwd):
+        # verifica se a senha do user corresponde à hash
             alert_msge = 'A senha está incorreta. Tente novamente.'
             return render_template(
                 'pages/login.html', 
@@ -2372,32 +2389,44 @@ def login():
         # get dados do user
         user_data = UserUtils.get_user_data(input_login)
         if user_data is not None:
-            user_id = user_data[0]
-            user_nome = user_data[1]
-            user_snome = user_data[2]
-            user_role = user_data[3]
+            user_id = user_data[0]    # id
+            user_nome = user_data[1]  # nome
+            user_snome = user_data[2] # sobrenome
+            user_role = user_data[3]  # privilegios
 
         try:
-            if user_snome == ' ':
-                session['user_name'] = f'{user_nome}'
-                session['user_initials'] = f'{user_nome[0]}{user_nome[1]}'
-            else:
-                session['user_name'] = f'{user_nome} {user_snome}'
-                session['user_initials'] = f'{user_nome[0]}{user_snome[0]}'
+            # pega as inicias do user
+            get_user_initials(user_nome, user_snome)
 
+        except Exception as e:
+            print(e)
+            
         finally:
-            session['user_grant'] = user_role
-            session['id_user'] = user_id
-            session['logged_in'] = True
-
+            session['id_user'] = user_id      # id
+            session['user_grant'] = user_role # privilegios
+            session['logged_in'] = True       # logado
+            
+            # grava log no telegram
             msg = f'[LOG-IN]\n{user_id} - {user_nome} {user_snome}\n{request.remote_addr}'
             misc.tlg_msg(msg)
 
-            # verifica se a senha inserida
-            # é a senha temporária
+            # senha temporária
             input_pwd = '12345'
 
-            if misc.check_key(user_pwd, input_pwd):
+            # verifica se a senha inserida é a senha temporária
+            if not misc.check_key(user_pwd, input_pwd): 
+                if debug == False:
+                # if ult_acesso:
+                    UserUtils.set_ult_acesso(user_id)
+                    
+                next_url = session.get('next_url')
+                if next_url:
+                    return redirect(next_url)
+                # else:
+                return redirect(url_for('index'))
+
+            else:
+            # se a senha é temporária...
                 alert_type = 'REDEFINIR (SENHA)'
                 alert_msge = 'Você deve definir sua senha no seu primeiro acesso.'
                 alert_more = '/users/reset-password'
@@ -2412,31 +2441,27 @@ def login():
                     alert_more=alert_more,
                     url_return=url_return
                 )
-            else:
-                # if ult_acesso:
-                if debug == False:
-                    UserUtils.set_ult_acesso(user_id)
-                    
-                next_url = session.get('next_url')
-                if next_url:
-                    return redirect(next_url)
-                # else:
-                return redirect(url_for('index'))
+
+def get_user_initials(nome, snome): # nome e sobrenome
+    if snome == ' ': # verifica se o sobrenome é vazio
+        session['user_name'] = f'{nome}'
+        session['user_initials'] = f'{nome[0]}{snome[1]}'
     else:
-        # if not request.method == 'POST':
-        return redirect(url_for('login'))
+        session['user_name'] = f'{nome} {snome}'
+        session['user_initials'] = f'{nome[0]}{snome[0]}'
+    
 
 
 # ROTA DE SAÍDA DO USUÁRIO
 @app.route('/logout/')
-def logout():
+def logout() -> Response:
     session.clear()
     return redirect(url_for('login'))
 
 
 # ROTA DE ALTERAÇÃO DE SENHA
 @app.route('/change-password/', methods=['GET', 'POST'])
-def change_password():
+def change_password() -> str | Response:
     if request.method == 'GET':
         alert_type = 'QUAL A SENHA ATUAL?'
         alert_msge = 'Primeiramente, informe sua senha.'
@@ -2470,7 +2495,7 @@ def change_password():
 
 @app.route('/users/reset-password/', methods=['POST'])
 @cde.verify_auth('CDE001')
-def reset_password():
+def reset_password() -> Response:
     id_user = session.get('id_user')
     password = request.form['input']
 
@@ -2481,7 +2506,7 @@ def reset_password():
 
 @app.route('/users/redefine-password/<int:id_user>/')
 @cde.verify_auth('CDE001')
-def redefine_password(id_user):
+def redefine_password(id_user) -> Response:
     password = '12345'
 
     UserUtils.set_password(id_user, password)
@@ -2491,7 +2516,7 @@ def redefine_password(id_user):
 
 @app.route('/get/item/', methods=['POST'])
 @cde.verify_auth('CDE001')
-def get_item():
+def get_item() -> Response:
     input_code = request.form['input_code'].strip()
     result_json = ProdutoUtils.get_item_json(input_code)
     
@@ -2582,7 +2607,7 @@ def faturado() -> str:
 # ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
 @app.route('/mov/moving/', methods=['POST'])
 @cde.verify_auth('MOV002')
-def moving():
+def moving() -> str | Response:
     numero          = int(request.form['end_number'])
     letra           = str(request.form['end_letra'])
     operacao        = str(request.form['operacao'])
@@ -2781,7 +2806,7 @@ def get_stock_items() -> str:
 
 @app.route('/get/clientes/', methods=['GET'])
 @cde.verify_auth('CDE001')
-def get_fant_clientes():
+def get_fant_clientes() -> Response:
     query = '''
         SELECT FANTASIA
         FROM DB2ADMIN.CLIENTE;
@@ -2826,7 +2851,7 @@ def carga_incomp():
 
 @app.route('/mov/carga/incompleta/<string:id_carga>/', methods=['GET'])
 @cde.verify_auth('MOV006')
-def carga_incomp_id(id_carga):
+def carga_incomp_id(id_carga) -> str:
     id_carga = id_carga.split('-')[0]
     
     result, columns = CargaUtils.get_carga_incomp(id_carga)
@@ -2857,7 +2882,7 @@ def carga_incomp_id(id_carga):
 
 @app.route('/api/insert_carga_incomp/', methods=['POST'])
 @cde.verify_auth('MOV006')
-def api_insert_carga_incomp():
+def api_insert_carga_incomp() -> Response:
     data = request.get_json()
     id_carga = data.get('id_carga')
     cod_item = data.get('cod_item')
@@ -2873,7 +2898,7 @@ def api_insert_carga_incomp():
 
 @app.route('/get/itens_carga_incomp/<string:id_carga>/', methods=['GET'])
 @cde.verify_auth('MOV006')
-def route_get_carga_incomp(id_carga):
+def route_get_carga_incomp(id_carga) -> Response:
     id_carga = id_carga.split('-')[0]
     
     pending_items = CargaUtils.get_carga_incomp(id_carga)[0]
@@ -2886,7 +2911,7 @@ def route_get_carga_incomp(id_carga):
 
 @app.route('/api/conclude-incomp/<string:id_carga>/', methods=['POST'])
 @cde.verify_auth('MOV006')
-def conclude_incomp(id_carga):
+def conclude_incomp(id_carga) -> Response:
     try:
         CargaUtils.conclude_carga_incomp(id_carga)
         return jsonify(success=True)
@@ -2896,7 +2921,7 @@ def conclude_incomp(id_carga):
 
 @app.route('/envase/', methods=['GET'])
 @cde.verify_auth('ENV006')
-def envase():
+def envase() -> str:
     envase_list = Schedule.EnvaseUtils.get_envase()
 
     return render_template(
@@ -2907,7 +2932,7 @@ def envase():
 
 @app.route('/envase/calendar/')
 @cde.verify_auth('ENV008')
-def calendar_envase():
+def calendar_envase() -> str:
     envase_list = Schedule.EnvaseUtils.get_envase()
     return render_template(
         'pages/envase/envase-calendar.html', 
@@ -2917,7 +2942,7 @@ def calendar_envase():
 
 @app.route('/envase/delete/<id_envase>/')
 @cde.verify_auth('ENV007')
-def delete_envase(id_envase):
+def delete_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -2932,7 +2957,7 @@ def delete_envase(id_envase):
 
 @app.route('/envase/done/<id_envase>/')
 @cde.verify_auth('ENV006')
-def conclude_envase(id_envase):
+def conclude_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -2947,7 +2972,7 @@ def conclude_envase(id_envase):
 
 @app.route('/envase/pending/<id_envase>/')
 @cde.verify_auth('ENV007')
-def set_pending_envase(id_envase):
+def set_pending_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -2962,7 +2987,7 @@ def set_pending_envase(id_envase):
 
 @app.route('/envase/edit/', methods=['GET', 'POST'])
 @cde.verify_auth('ENV007')
-def edit_envase():
+def edit_envase() -> Response | str:
     # TODO: criar função auxiliar
     if request.method == 'POST':
 
@@ -3017,7 +3042,7 @@ def edit_envase():
 
 @app.route('/envase/insert/', methods=['POST'])
 @cde.verify_auth('ENV006')
-def insert_envase():
+def insert_envase() -> Response:
     # TODO: criar função auxiliar
     if request.method == 'POST':
         linha           = request.form['linha']
@@ -3064,7 +3089,7 @@ def insert_envase():
 
 @app.route('/processamento/', methods=['GET'])
 @cde.verify_auth('PRC010')
-def producao():
+def producao() -> str:
     id_user = session.get('id_user')
     user_perm = UserUtils.get_user_permissions(id_user)
     user_perm = [item['id_perm'] for item in user_perm]
@@ -3079,7 +3104,7 @@ def producao():
 
 @app.route('/processamento/calendar/')
 @cde.verify_auth('PRC012')
-def calendar_producao():
+def calendar_producao() -> str:
     producao_list =  Schedule.ProcessamentoUtils.get_producao()
 
     return render_template(
@@ -3090,7 +3115,7 @@ def calendar_producao():
 
 @app.route('/processamento/delete/<id_producao>/')
 @cde.verify_auth('PRC011')
-def delete_producao(id_producao):
+def delete_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -3105,7 +3130,7 @@ def delete_producao(id_producao):
 
 @app.route('/processamento/done/<id_producao>/')
 @cde.verify_auth('PRC010')
-def conclude_producao(id_producao):
+def conclude_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -3120,7 +3145,7 @@ def conclude_producao(id_producao):
 
 @app.route('/processamento/pending/<id_producao>/')
 @cde.verify_auth('PRC011')
-def set_pending_producao(id_producao):
+def set_pending_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -3135,7 +3160,7 @@ def set_pending_producao(id_producao):
 
 @app.route('/processamento/edit/', methods=['GET', 'POST'])
 @cde.verify_auth('PRC011')
-def edit_producao():
+def edit_producao() -> Response | str:
     id_user = session.get('id_user')
     user_perm = UserUtils.get_user_permissions(id_user)
     user_perm = [item['id_perm'] for item in user_perm]
@@ -3157,11 +3182,13 @@ def edit_producao():
                     observacao      = ?
                 WHERE id_producao   = ?;
             ''',
-            (litros, data_entr_antec, data_producao, observacao, req_id_producao))
+            (litros, data_entr_antec, data_producao, observacao, req_id_producao)
+        )
             
         return redirect(url_for('producao'))
     else:
         req_id_producao = request.args.get('id_producao')
+        # se possui id_producao, puxa apenas uma produção
         if req_id_producao:
             mode = 'singleRow'
             with sqlite3.connect(db_path) as connection:
@@ -3198,7 +3225,7 @@ def edit_producao():
 
 @app.route('/processamento/insert/', methods=['POST'])
 @cde.verify_auth('PRC010')
-def insert_producao():
+def insert_producao() -> Response:
     if request.method == 'POST':
         linha           = request.form['linha']
         liq_tipo        = request.form['liq_tipo']
@@ -3235,7 +3262,7 @@ def insert_producao():
 
 @app.route('/about/')
 @cde.verify_auth('CDE001')
-def about():
+def about() -> str:
     return render_template(
         'pages/about.html',
         about=True
@@ -3244,12 +3271,9 @@ def about():
 
 @app.route('/users/edit/', methods=['POST', 'GET'])
 @cde.verify_auth('CDE016')
-def users_edit():
+def users_edit() -> str | None:
     req_id_user = request.args.get('id_user')
-    if request.method == 'POST':
-        pass
-
-    else:
+    if request.method == 'GET':
         user_perm = UserUtils.get_user_permissions(req_id_user)
         permissions = UserUtils.get_permissions()
         return render_template(
@@ -3259,11 +3283,13 @@ def users_edit():
             req_id_user=req_id_user,
             user_data=UserUtils.get_userdata(req_id_user)
         )
+    else:
+        return None
 
 
 @app.route('/users/remove-perm/<int:id_user>/<string:id_perm>/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE016')
-def remove_permission(id_user, id_perm):
+def remove_permission(id_user, id_perm) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -3280,7 +3306,7 @@ def remove_permission(id_user, id_perm):
 
 @app.route('/users/add-perm/<int:id_user>/<string:id_perm>/', methods=['GET', 'POST'])
 @cde.verify_auth('CDE016')
-def add_permission(id_user, id_perm):
+def add_permission(id_user, id_perm) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -3300,7 +3326,7 @@ def add_permission(id_user, id_perm):
 
 @app.route('/users/inserting/', methods=['POST'])
 @cde.verify_auth('CDE016')
-def cadastrar_usuario():
+def cadastrar_usuario() -> Response | str:
     if request.method == 'POST':
         login_user     = str(request.form['login_user'])
         nome_user      = str(request.form['nome_user'])
@@ -3388,7 +3414,7 @@ def cadastrar_usuario():
 
 @app.route('/mov/carga/<string:id_carga>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
-def carga_id(id_carga):
+def carga_id(id_carga) -> str:
     result_local, columns_local = [], []
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
@@ -3458,7 +3484,7 @@ def carga_id(id_carga):
 
 @app.route('/mov/carga/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
-def cargas():
+def cargas() -> str:
     if request.method == 'POST':
         all_cargas = CargaUtils.get_cargas_finalizadas()
         
@@ -3485,7 +3511,7 @@ def cargas():
 
 @app.route('/mov/requisicao/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
-def mov_request():
+def mov_request() -> str:
     if request.method == 'POST':
         result, columns = MovRequestUtils.get_mov_request()
         
@@ -3509,7 +3535,7 @@ def mov_request():
 
 @app.route('/mov/requisicao/<int:id_req>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
-def mov_request_id(id_req):
+def mov_request_id(id_req) -> str:
     result_local, columns_local = [], []
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
@@ -3541,7 +3567,7 @@ def mov_request_id(id_req):
 
 @app.route('/mov/requisicao/separacao/p/<string:id_req>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
-def req_sep_pend(id_req):
+def req_sep_pend(id_req) -> str:
     id_req = id_req.split('-')[0]
 
     id_user   = session.get('id_user')
@@ -3552,13 +3578,14 @@ def req_sep_pend(id_req):
         id_req=id_req, 
         user_info=user_info,
         obs_carga=obs_carga,
-        status='p'
+        status='p' # pendente
     )
 
 
 @app.route('/mov/requisicao/separacao/f/<string:id_req>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
-def req_sep_done(id_req):
+def req_sep_done(id_req) -> str:
+    # se houver sequencia, usa, senão usa 0 (código padrao)
     if '-' in id_req:
         id_req, seq = id_req.split('-')
     else:
@@ -3573,7 +3600,7 @@ def req_sep_done(id_req):
         seq=seq, 
         user_info=user_info,
         obs_carga=obs_carga,
-        status='f'
+        status='f' # finalizado
     )
 
 
@@ -3653,7 +3680,7 @@ def get_itens_req():
 
 @app.route('/mov/op/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
-def mov_op():
+def mov_op() -> str:
     if request.method == 'POST':
         result, columns = OrdemProducaoUtils.get_ordem_producao()
         
@@ -3752,7 +3779,7 @@ def get_itens_carga():
 
 @app.route('/mov/carga/separacao/p/<string:id_carga>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
-def carga_sep_pend(id_carga):
+def carga_sep_pend(id_carga) -> str:
     id_carga = id_carga.split('-')[0]
     
     id_user   = session.get('id_user')
@@ -3770,7 +3797,7 @@ def carga_sep_pend(id_carga):
 
 @app.route('/mov/carga/separacao/f/<string:id_carga>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
-def carga_sep_done(id_carga):
+def carga_sep_done(id_carga) -> str:
     if '-' in id_carga:
         id_carga, seq = id_carga.split('-')
     else:
@@ -3790,7 +3817,7 @@ def carga_sep_done(id_carga):
 
 
 @app.route('/get/description_json/<cod_item>/', methods=['GET'])
-def get_description(cod_item):
+def get_description(cod_item) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute('''
@@ -3809,7 +3836,7 @@ def get_description(cod_item):
 
 
 @app.route('/get/username/<id_user>/', methods=['GET'])
-def get_username_route(id_user):
+def get_username_route(id_user) -> Response:
     username = UserUtils.get_username(id_user)
     return jsonify({"username": username})
 
@@ -3863,7 +3890,7 @@ def save_localstorage():
     
 
 @app.route('/get/has_carga_at_history/<string:id_carga>/', methods=['GET'])
-def has_carga_at_history(id_carga):
+def has_carga_at_history(id_carga) -> Response:
     id_carga = id_carga.split('-')[0]
     
     has_carga_at_history = bool(CargaUtils.get_carga_incomp(id_carga)[0])
@@ -3940,14 +3967,14 @@ def list_all_separations():
 
 @app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>/', methods=['GET', 'POST'])
 @cde.verify_auth('ITE005')
-def produtos_toggle_perm(cod_item, flag):
+def produtos_toggle_perm(cod_item, flag) -> Response:
     ProdutoUtils.toggle_item_flag(cod_item, flag)
     return redirect(url_for('produtos_flag'))
 
 
 @app.route('/produtos/status/', methods=['GET', 'POST'])
 @cde.verify_auth('ITE005')
-def produtos_flag():
+def produtos_flag() -> str:
     itens = ProdutoUtils.get_all_itens()
     
     return render_template(
@@ -3958,7 +3985,7 @@ def produtos_flag():
 
 @app.route('/produtos/', methods=['GET', 'POST'])
 @cde.verify_auth('ITE005')
-def produtos():
+def produtos() -> str:
     itens = ProdutoUtils.get_active_itens()
     if request.method == 'POST':
         result, columns = ProdutoUtils.get_itens_from_erp()
@@ -4003,7 +4030,7 @@ def produtos():
 
 @app.route('/etiqueta/', methods=['GET', 'POST'])
 @cde.verify_auth('OUT014')
-def etiqueta():
+def etiqueta() -> str:
     if request.method == 'POST':
         qr_text   = str(request.form['qr_text'])
         desc_item = str(request.form['desc_item'])
@@ -4016,7 +4043,7 @@ def etiqueta():
 
 @app.route('/rotulo/', methods=['GET', 'POST'])
 @cde.verify_auth('OUT015')
-def rotulo():
+def rotulo() -> Response | str:
     if request.method == 'POST':
         espessura_fita      = misc.parse_float(request.form['espessura_fita'])
         diametro_inicial    = misc.parse_float(request.form['diametro_inicial'])
@@ -4066,7 +4093,7 @@ def rotulo():
 
 @app.route('/get/linhas/', methods=['POST'])
 @cde.verify_auth('ENV006')
-def get_linhas():
+def get_linhas() -> Response | None:
     desc_item = request.form['desc_item']
 
     def find_emb(desc_item):
@@ -4122,7 +4149,7 @@ def get_linhas():
 
 @app.route('/estoque/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
-def estoque():
+def estoque() -> str:
     if request.method == 'POST':
         date = request.form['date']
         saldo_visualization = EstoqueUtils.get_saldo_view(date)
@@ -4138,7 +4165,7 @@ def estoque():
 
 @app.route('/estoque/enderecado/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
-def estoque_enderecado():
+def estoque_enderecado() -> str:
     if request.method == 'POST':
         date = request.form['date']
         result = EstoqueUtils.get_address_lote(date)
@@ -4154,7 +4181,7 @@ def estoque_enderecado():
 
 @app.route('/estoque/presets/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
-def estoque_preset():
+def estoque_preset() -> str:
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
         saldo_preset = EstoqueUtils.get_saldo_preset(preset_id, False)
@@ -4169,7 +4196,7 @@ def estoque_preset():
 
 @app.route('/cargas-presets/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
-def cargas_preset():
+def cargas_preset() -> str:
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
         cargas_preset = EstoqueUtils.get_saldo_preset(preset_id, False)
@@ -4184,7 +4211,7 @@ def cargas_preset():
 
 @app.route('/export_csv/<tipo>/', methods=['GET'])
 @cde.verify_auth('CDE017')
-def export_csv_tipo(tipo):
+def export_csv_tipo(tipo) -> str | Response:
     # EXPORT .csv
     header = True
     if tipo == 'historico':
