@@ -565,8 +565,16 @@ window.addEventListener("load", function() {
 window.onload = function () {
     capitalizeText();
     blockImg();
-    updateFilterIndex();
-    toggleContainer();
+    try {
+        updateFilterIndex();
+    } catch (error) {
+        console.log('[INFO] lb-filter: A rota não contém filtros!');
+    }
+    try {
+        toggleContainer();
+    } catch (error) {
+        console.log('[INFO] lb-float: A rota não contém float-container!');
+    }
     hideLoading();
 };
 
