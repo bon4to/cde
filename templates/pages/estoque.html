@@ -13,6 +13,16 @@
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
+                <a class="aux-button">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                </a>
+                <a class="aux-button active">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+                </a>
+                    <a class="aux-button">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                </a>
+                <hr class="vert">
                 {% block svg %}
                 <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/group.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
@@ -24,16 +34,6 @@
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
                 </a>
                 {% endblock svg %}
-                <hr class="vert">
-                <a class="aux-button">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
-                </a>
-                <a class="aux-button active">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
-                </a>
-                    <a class="aux-button">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
-                </a>
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
