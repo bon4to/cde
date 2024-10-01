@@ -333,7 +333,7 @@ class cde:
                             log(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                             alert_type = 'SEM PERMISSÕES'
                             alert_msge = 'Você não tem permissão para acessar esta página.'
-                            alert_more = '''SOLUÇÕES:\n- Solicite ao seu supervisor um novo nível de acesso.'''
+                            alert_more = 'SOLUÇÕES:\n• Solicite ao seu supervisor um novo nível de acesso.'
                             return render_template(
                                 'components/menus/alert.html', 
                                 alert_type=alert_type,
@@ -1578,6 +1578,16 @@ class UserUtils:
                 return row
             return row
 
+    
+    @staticmethod
+    def get_user_initials(nome, snome): # nome e sobrenome
+        if snome == ' ': # verifica se o sobrenome é vazio
+            session['user_name'] = f'{nome}'
+            session['user_initials'] = f'{nome[0]}{snome[1]}'
+        else:
+            session['user_name'] = f'{nome} {snome}'
+            session['user_initials'] = f'{nome[0]}{snome[0]}'
+   
 
     @staticmethod
     # RETORNA DADOS DE PERMISSÃO
@@ -2077,9 +2087,11 @@ class misc:
             else:
                 alert_type = 'DOWNLOAD IMPEDIDO \n'
                 alert_msge = 'A tabela não tem informações o suficiente para exportação. \n'
-                alert_more = ('''POSSÍVEIS SOLUÇÕES:
-                            - Verifique se a tabela possui mais de uma linha.
-                            - Contate o suporte. ''')
+                alert_more = ('''
+                    POSSÍVEIS SOLUÇÕES:
+                    • Verifique se a tabela possui mais de uma linha.
+                    • Contate o suporte. 
+                ''')
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type=alert_type, 
@@ -2396,7 +2408,7 @@ def login():
 
         try:
             # pega as inicias do user
-            get_user_initials(user_nome, user_snome)
+            UserUtils.get_user_initials(user_nome, user_snome)
 
         except Exception as e:
             print(e)
@@ -2440,16 +2452,7 @@ def login():
                     alert_msge=alert_msge,
                     alert_more=alert_more,
                     url_return=url_return
-                )
-
-def get_user_initials(nome, snome): # nome e sobrenome
-    if snome == ' ': # verifica se o sobrenome é vazio
-        session['user_name'] = f'{nome}'
-        session['user_initials'] = f'{nome[0]}{snome[1]}'
-    else:
-        session['user_name'] = f'{nome} {snome}'
-        session['user_initials'] = f'{nome[0]}{snome[0]}'
-    
+                ) 
 
 
 # ROTA DE SAÍDA DO USUÁRIO
@@ -2608,12 +2611,35 @@ def faturado() -> str:
 @app.route('/mov/moving/', methods=['POST'])
 @cde.verify_auth('MOV002')
 def moving() -> str | Response:
-    numero          = int(request.form['end_number'])
-    letra           = str(request.form['end_letra'])
-    operacao        = str(request.form['operacao'])
+    try:
+    # tenta acessar dados cruciais do formulário
+        numero   = int(request.form['end_number'])
+        letra    = str(request.form['end_letra'])
+        operacao = str(request.form['operacao'])
+        
+    except Exception as e:
+    # parametros de entrada inválidos 
+        print(f'    | ERRO: {e}')
+        alert_type = 'OPERAÇÃO CANCELADA'
+        alert_msge = 'Os parâmetros de entrada são INVÁLIDOS.'
+        alert_more = ('''
+            POSSÍVEIS SOLUÇÕES:
+            • Verifique se está movimentando o item correspondente.
+            • Verifique a quantidade de movimentação.
+            • Verifique a operação selecionada. 
+        ''')
+        
+        return render_template(
+            'components/menus/alert.html', 
+            alert_type=alert_type,
+            alert_msge=alert_msge,
+            alert_more=alert_more, 
+            url_return=url_for('mov')
+        )
+        
     is_end_completo = bool(request.form.get('is_end_completo'))
-    id_carga        = 0
-    id_request      = 0
+    id_carga        = str(request.form.get('id_carga', 0))
+    id_request      = str(request.form.get('id_req', 0))
 
     timestamp_br    = datetime.now(timezone(timedelta(hours=-3)))
     timestamp_out   = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
@@ -2622,29 +2648,32 @@ def moving() -> str | Response:
     print(f'    | OPERAÇÃO: {operacao}')
 
     if is_end_completo:
-        # MOVIMENTA ENDEREÇO COMPLETO
+    # se o modo for movimetação de endereço completo,
+    # seleciona todos os itens de registro positivo
         items = HistoricoUtils.select_rua(letra, numero)
         
         print(f'    | ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
     else:
+    # seleção padrao de item no endereço
         cod_item   = str(request.form['cod_item'])
         lote_item  = str(request.form['cod_lote'])
         quantidade = int(request.form['quantidade'])
         items      = [(cod_item, lote_item, quantidade)]
-        # MOVIMENTA ITEM ÚNICO
         
         print(f'    | ITEM ÚNICO ({letra}.{numero}): {items}')
 
         saldo_item  = int(EstoqueUtils.get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:
-            # IMPOSSIBILITA ESTOQUE NEGATIVO 
+        # impossibilita estoque negativo
             alert_type = 'OPERAÇÃO CANCELADA'
             alert_msge = 'O saldo do item selecionado é INSUFICIENTE.'
-            alert_more = ('''POSSÍVEIS SOLUÇÕES:
-                            - Verifique se está movimentando o item correspondente.
-                            - Verifique a quantidade de movimentação.
-                            - Verifique a operação selecionada. ''')
+            alert_more = ('''
+                POSSÍVEIS SOLUÇÕES:
+                • Verifique se está movimentando o item correspondente.
+                • Verifique a quantidade de movimentação.
+                • Verifique a operação selecionada. 
+            ''')
             
             return render_template(
                 'components/menus/alert.html', 
@@ -2655,7 +2684,7 @@ def moving() -> str | Response:
             )
 
     if operacao == 'T':
-        # TRANSFERENCIA
+    # transferência
         destino_letter = str(request.form['destino_end_letra'])
         destino_number = int(request.form['destino_end_number'])
 
@@ -2665,46 +2694,51 @@ def moving() -> str | Response:
                 if quantidade > 0:
                     # SAÍDA DO ENDEREÇO DE ORIGEM
                     HistoricoUtils.insert_historico(
-                        numero, letra, cod_item, 
-                        lote_item, quantidade, 'TS', 
-                        timestamp_out, id_carga
+                        numero=numero, letra=letra, 
+                        cod_item=cod_item, lote_item=lote_item,
+                        quantidade=quantidade, operacao='TS', # transferencia saida
+                        timestamp_out=timestamp_out, 
+                        id_carga=id_carga
                     )
                     # ENTRADA NO ENDEREÇO DE DESTINO
                     HistoricoUtils.insert_historico(
-                        destino_number, destino_letter, cod_item, 
-                        lote_item, quantidade, 'TE', 
-                        timestamp_in, id_carga
+                        numero=numero, letra=letra, 
+                        cod_item=cod_item, lote_item=lote_item,
+                        quantidade=quantidade, operacao='TE', # transferencia entrada 
+                        timestamp_out=timestamp_out, 
+                        id_carga=id_carga
                     )
                     print(f'    | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
         
     elif operacao == 'F':
-        # FATURAMENTO
-        id_carga = str(request.form['id_carga'])
-
-        if items:
+    # faturamento
+        if items: # se items foi definido (cod_item, cod_lote, quantidade)
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
                     HistoricoUtils.insert_historico(
-                        numero, letra, cod_item, 
-                        lote_item, quantidade, operacao, 
-                        timestamp_out, id_carga
+                        numero=numero, letra=letra, 
+                        cod_item=cod_item, lote_item=lote_item,
+                        quantidade=quantidade, operacao=operacao, 
+                        timestamp_out=timestamp_out, 
+                        id_carga=id_carga
                     )
                     print(f'    | {letra}.{numero}: ', cod_item, lote_item, quantidade)
 
     elif operacao == 'E' or operacao == 'S':
-        # OPERAÇÃO PADRÃO (entrada 'E' ou saída 'S')
+    # operacao padrao (entrada 'E' ou saída 'S')
         HistoricoUtils.insert_historico(
-            numero, letra, cod_item, 
-            lote_item, quantidade, operacao, 
-            timestamp_out, id_carga
+            numero=numero, letra=letra, 
+            cod_item=cod_item, lote_item=lote_item,
+            quantidade=quantidade, operacao=operacao, 
+            timestamp_out=timestamp_out, 
+            id_carga=id_carga
         )
         print(f'    | {letra}.{numero}: ', cod_item, lote_item, quantidade)
     
     else:
-
-        # OPERAÇÃO INVÁLIDA
-        print(f'[ERRO] {letra}.{numero}: ', cod_item, lote_item, quantidade, ': OPERAÇÃO INVÁLIDA')
+    # operacao invalida
+        print(f'[ERRO] {letra}.{numero}: ', cod_item, lote_item, quantidade, f': OPERAÇÃO INVÁLIDA ({operacao})')
 
     return redirect(url_for('mov'))
 
@@ -3384,7 +3418,7 @@ def cadastrar_usuario() -> Response | str:
             if 'UNIQUE constraint failed' in str(e):
                 alert_type = 'CADASTRO (USUÁRIO)'
                 alert_msge = 'Não foi possível criar usuário...'
-                alert_more = 'MOTIVO:\n- Já existe um usuário com este login.'
+                alert_more = 'MOTIVO:\n• Já existe um usuário com este login.'
                 
                 return render_template(
                     'components/menus/alert.html', 
@@ -3397,7 +3431,7 @@ def cadastrar_usuario() -> Response | str:
             else:
                 alert_type = 'CADASTRO (USUÁRIO)'
                 alert_msge = 'Não foi possível criar usuário...'
-                alert_more = f'DESCRIÇÃO DO ERRO:\n- {e}.'
+                alert_more = f'DESCRIÇÃO DO ERRO:\n• {e}.'
                 
                 return render_template(
                     'components/menus/alert.html', 
@@ -4245,7 +4279,7 @@ def export_csv_tipo(tipo) -> str | Response:
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
         alert_msge = 'A tabela não tem informações suficientes para exportação. \n'
-        alert_more = 'POSSÍVEIS SOLUÇÕES:\n- Verifique se a tabela possui mais de uma linha.\n- Contate o suporte.'
+        alert_more = 'POSSÍVEIS SOLUÇÕES:\n• Verifique se a tabela possui mais de uma linha.\n• Contate o suporte.'
         return render_template(
             'components/menus/alert.html', 
             alert_type=alert_type, 
