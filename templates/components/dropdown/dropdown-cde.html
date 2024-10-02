@@ -15,14 +15,59 @@
                                     <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
                                 </button>
                                 <div class="dropdown-content">
-                                    <a href="{{ url_for('mov') }}">MOV002 | MOVIMENTAR</a>
-                                    <a href="{{ url_for('historico') }}">MOV003 | HISTÓRICO</a>
-                                    <a href="{{ url_for('estoque') }}">MOV004 | ESTOQUE</a>
-                                    <a href="{{ url_for('faturado') }}">MOV005 | FATURADO</a>
-                                    <a href="{{ url_for('cargas') }}">MOV006 | CARGAS</a>
-                                    {% if 'user_grant' in session and session['user_grant'] == 1 %}
-                                        <a href="{{ url_for('mov_request') }}">MOV007 | REQUISIÇÕES</a>
-                                    {% endif %}
+                                    <div class="submenu">
+                                        <a class="submenu-title" href="{{ url_for('mov') }}">
+                                            <div class="split-horizontal" style="align-items: center;">
+                                                <span>MOV002 | MOVIMENTAR</span>
+                                                <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                            </div>
+                                        </a>
+                                        <div class="submenu-content">
+                                            <a href="{{ url_for('mov') }}">MOVIMENTAR</a>
+                                            <a href="{{ url_for('historico') }}">HISTÓRICO</a>
+                                        </div>
+                                    </div>
+                                    <div class="submenu">
+                                        <a class="submenu-title" href="{{ url_for('estoque') }}">
+                                            <div class="split-horizontal" style="align-items: center;">
+                                                <span>MOV004 | ESTOQUE</span>
+                                                <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                            </div>
+                                        </a>
+                                        <div class="submenu-content">
+                                            <a href="{{ url_for('estoque') }}">AGRUPADO</a>
+                                            <a href="{{ url_for('estoque_enderecado') }}">ENDEREÇADO</a>
+                                            <a href="{{ url_for('estoque_preset') }}">PRESET</a>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="submenu">
+                                        <a class="submenu-title" href="{{ url_for('cargas') }}">
+                                            <div class="split-horizontal" style="align-items: center;">
+                                                <span>MOV006 | CARGAS</span>
+                                                <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                            </div>
+                                        </a>
+                                        <div class="submenu-content">
+                                            <a href="{{ url_for('cargas') }}">CARGAS</a>
+                                            <a href="{{ url_for('carga_incomp') }}">INCOMPLETAS</a>
+                                            <a href="{{ url_for('faturado') }}">FATURADAS</a>
+                                            <a href="{{ url_for('carga_sep_done', id_carga=0) }}">SEPARAÇÃO</a>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="submenu">
+                                        <a class="submenu-title" href="{{ url_for('mov_request') }}">
+                                            <div class="split-horizontal" style="align-items: center;">
+                                                <span>MOV007 | REQUISIÇÕES</span>
+                                                <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                            </div>
+                                        </a>
+                                        <div class="submenu-content">
+                                            <a href="{{ url_for('mov_request') }}">REQUISIÇÕES</a>
+                                            <a href="{{ url_for('req_sep_done', id_req=0) }}">SEPARAÇÃO</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="dropdown">
