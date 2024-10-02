@@ -423,7 +423,7 @@ select, textarea, input {
     font-size: 12px;
     border-radius: 8px;
     box-sizing: border-box;
-    margin: 4px 8px 14px 8px;
+    margin: 8px;
     border: 1px solid #dcdcdc;
     border-bottom: 2px solid #dcdcdc;
     background-color: #efefef;
@@ -484,6 +484,10 @@ input.address-one, select.address-one {
     width: -webkit-fill-available;
 }
 
+input.address-two, select.address-two {
+    width: 244px;
+}
+
 input.address-three, select.address-three {
     width: 114px;
 }
@@ -541,12 +545,15 @@ img.footer:hover {
     border-radius: 8px;
     font-weight: bolder;
     align-items: center;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     justify-content: center;
-    margin: 4px auto 12px auto;
     background-color: #333132;
-    font-family: 'Poppins', sans-serif;
-    transition: box-shadow 0.3s ease-out, scale 0.3s ease-out, background-color 0.3s, letter-spacing 0.3s, border-radius 0.2s;
+    font-family: 'Inter', sans-serif;
+    transition: box-shadow 0.3s ease-out, background-color 0.3s, letter-spacing 0.3s, border-radius 0.2s;
+}
+
+.btn-fancy:focus {
+    border-bottom: none !important;
 }
 
 .btn-fancy.safe:hover {
@@ -574,7 +581,6 @@ img.footer:hover {
 }
 
 .btn-fancy:hover, .btn-fancy:focus {
-    scale: 1.0;
     color: #fff;
     border-radius: 12px;
     letter-spacing: 3px;
@@ -657,8 +663,7 @@ td {
 .form-login,
 .form-filter {
     margin: 0 auto;
-    padding: 12px 20px;
-    border-radius: 40px;
+    border-radius: 12px;
     box-sizing: border-box;
     background-color: #ffffff;
     box-shadow: 0 0 18px rgba(0, 0, 0, 0.2);
@@ -667,14 +672,13 @@ td {
 .form-filter {
     top: 50%;
     left: 50%;
-    width: 380px;
     z-index: 2000;
     position: fixed;
     transform: translate(-50%, -50%);
 }
 
-.form-login .generic {
-    width: 600px;
+.form-filter .generic {
+    width: 800px;
     height: unset;
     max-height: unset;
     border-radius: 14px;
@@ -851,8 +855,14 @@ header {
     z-index: 1003;
 }
 
-div.split-horizontal {
+.split-horizontal {
     width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.split-vertical {
+    height: 100%;
     display: flex;
     justify-content: space-between;
 }
@@ -1364,12 +1374,20 @@ a.hyperlink {
     min-width: 200px;
     transition: none;
     position: absolute;
-    background-color: var(--strong-dark-l);
+    background-color: var(--cor-destaque);
+}
+
+.dropdown-content hr {
+    margin: 0px 17px;
+    width: 20%;
+    border: none;
+    height: 1px;
+    background-color: #fff;
+    opacity: 0.4;
 }
 
 .dropdown-content a {
     color: #fff;
-    margin-top: 0;
     display: block;
     font-size: 12px;
     text-align: left;
@@ -1387,7 +1405,6 @@ a.hyperlink {
     background-color: #fff;
     color: var(--strong-dark-l);
     border: 1px solid var(--cor-destaque);
-    border-top: 1px solid #fff;
 }
 
 .dropdown:hover .dropdown-content {
@@ -1412,6 +1429,23 @@ a.hyperlink {
     color: var(--cor-destaque);
 }
 
+.submenu {
+    position: relative;
+}
+
+.submenu-content {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background-color: var(--cor-destaque);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.submenu:hover .submenu-content {
+    display: block;
 }
 
 .dropbtn:hover .hyperlink {
@@ -1432,6 +1466,25 @@ a.hyperlink {
 .dropdown:hover .svg-inv {
     rotate: 180deg;
     transition: rotate 0.1s ease-in-out;
+}
+
+.submenu:hover .svg-inv,
+.submenu:hover .dropdown-content {
+    rotate: 90deg;
+    transition: rotate 0.1s ease-in-out;
+    filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+.submenu:hover a.submenu-title,
+.submenu:hover a.submenu-title {
+    background-color: #fff;
+    color: var(--strong-dark-l);
+}
+
+.submenu:hover .dropbtn, 
+.submenu-content:hover .dropbtn {
+    background-color: var(--cor-destaque);
+    color: #fff;
 }
 
 .dropdown:hover .dropbtn {
@@ -1897,10 +1950,6 @@ h1.subtitle {
     border: 1px solid var(--cor-cde);
 }
 
-#table-filter input, select {
-    margin: 4px;
-}
-
 #table-filter button {
     margin: auto;
 }
@@ -1912,10 +1961,6 @@ h1.subtitle {
     justify-content: flex-end;
     background-color: #3e5ea640;
     border: 1px solid var(--cor-cde);
-}
-
-.table-filter input, select {
-    margin: 4px;
 }
 
 .table-filter button {
