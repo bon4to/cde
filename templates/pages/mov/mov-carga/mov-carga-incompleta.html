@@ -155,7 +155,19 @@
                         {% endif %}
                         <br>
                         {% if id_carga %}
-                        <div class="btn-fancy" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar</div>
+                        <div class="split-horizontal">
+                            <div class="flex-row">
+                                <div class="button-mini btn-fancy" onclick="excludeCargaIncompleta()" title="APAGAR CARGA INCOMPLETA">
+                                    <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="">
+                                </div>
+                            </div>
+                            <div 
+                                class="btn-fancy featured" 
+                                style="height: 45px; margin: 0; max-width: 200px;" 
+                                onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
+                                <span>VISUALIZAR</span>
+                            </div>
+                        </div>
                         {% endif %}
                     </div>
             {% endif %}
