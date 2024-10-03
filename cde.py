@@ -1347,11 +1347,11 @@ class ProdutoUtils:
     def get_item_json(input_code):
         if 'EM.' not in input_code:
             input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
-        print(f'    | Código fornecido: {input_code}')
+        print(f'  | Código fornecido: {input_code}')
         
         if len(input_code) == 4 or len(input_code) == 0:
             desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO OU INATIVO', '', '', ''
-            print(f'    | {desc_item}')
+            print(f'  | {desc_item}')
             return jsonify(
                 {
                 'json_cod_item' : cod_item, 
@@ -1413,7 +1413,7 @@ class ProdutoUtils:
                                 cod_lote = ''
                     else:
                         desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-                        print(f'    | {desc_item}')
+                        print(f'  | {desc_item}')
                     return jsonify(
                         {
                         'json_cod_item': cod_item,
@@ -1451,7 +1451,7 @@ class ProdutoUtils:
                             cod_lote = 'VINHOS'
                     else:
                         desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-                        print(f'    | {desc_item}')
+                        print(f'  | {desc_item}')
                     return jsonify(
                         {
                         'json_cod_item' : cod_item, 
@@ -1462,7 +1462,7 @@ class ProdutoUtils:
 
             else:
                 desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
-                print(f'    | {desc_item}')
+                print(f'  | {desc_item}')
                 return jsonify(
                     {
                     'json_cod_item' : cod_item, 
@@ -2619,7 +2619,7 @@ def moving() -> str | Response:
         
     except Exception as e:
     # parametros de entrada inválidos 
-        print(f'    | ERRO: {e}')
+        print(f'  | ERRO: {e}')
         alert_type = 'OPERAÇÃO CANCELADA'
         alert_msge = 'Os parâmetros de entrada são INVÁLIDOS.'
         alert_more = ('''
@@ -2645,14 +2645,14 @@ def moving() -> str | Response:
     timestamp_out   = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
     timestamp_in    = (timestamp_br + timedelta(seconds=1)).strftime('%Y/%m/%d %H:%M:%S')
 
-    print(f'    | OPERAÇÃO: {operacao}')
+    print(f'  | OPERAÇÃO: {operacao}')
 
     if is_end_completo:
     # se o modo for movimetação de endereço completo,
     # seleciona todos os itens de registro positivo
         items = HistoricoUtils.select_rua(letra, numero)
         
-        print(f'    | ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
+        print(f'  | ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
     else:
     # seleção padrao de item no endereço
@@ -2661,7 +2661,7 @@ def moving() -> str | Response:
         quantidade = int(request.form['quantidade'])
         items      = [(cod_item, lote_item, quantidade)]
         
-        print(f'    | ITEM ÚNICO ({letra}.{numero}): {items}')
+        print(f'  | ITEM ÚNICO ({letra}.{numero}): {items}')
 
         saldo_item  = int(EstoqueUtils.get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:
@@ -2708,7 +2708,7 @@ def moving() -> str | Response:
                         timestamp_out=timestamp_out, 
                         id_carga=id_carga
                     )
-                    print(f'    | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
+                    print(f'  | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
         
     elif operacao == 'F':
     # faturamento
@@ -2723,7 +2723,7 @@ def moving() -> str | Response:
                         timestamp_out=timestamp_out, 
                         id_carga=id_carga
                     )
-                    print(f'    | {letra}.{numero}: ', cod_item, lote_item, quantidade)
+                    print(f'  | {letra}.{numero}: ', cod_item, lote_item, quantidade)
 
     elif operacao == 'E' or operacao == 'S':
     # operacao padrao (entrada 'E' ou saída 'S')
@@ -2734,7 +2734,7 @@ def moving() -> str | Response:
             timestamp_out=timestamp_out, 
             id_carga=id_carga
         )
-        print(f'    | {letra}.{numero}: ', cod_item, lote_item, quantidade)
+        print(f'  | {letra}.{numero}: ', cod_item, lote_item, quantidade)
     
     else:
     # operacao invalida
@@ -4147,7 +4147,7 @@ def get_linhas() -> Response | None:
         for tipo, volumes in tipos_embalagem.items():
             for volume in volumes:
                 if volume in desc_item:
-                    print(f'    | EMBALAGEM {tipo} {volume}')
+                    print(f'  | EMBALAGEM {tipo} {volume}')
                     return tipo, volume
 
         return '', ''
