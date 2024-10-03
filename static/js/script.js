@@ -151,9 +151,11 @@ function alterarCor() {
 }
 
 
-function verifyCaptcha() {
-    const captcha    = 'CONFIRMAR';
-    const userInput  = prompt(`Por favor, digite '${captcha}' para confirmar a remoção:`);
+function verifyCaptcha(captcha='') {
+    if (captcha == '') {
+        captcha = 'CONFIRMAR';
+    }
+    const userInput  = prompt(`Por favor, digite ''${captcha}'' para confirmar a remoção:`);
     return userInput === captcha;
 }
 

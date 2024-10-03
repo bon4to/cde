@@ -457,6 +457,44 @@ function clearAllSeparations() {
 }
 
 
+async function toggleDoneCargaIncompleta() {
+    try {
+        const concludeResponse = await fetch(`/api/conclude-incomp/${nroCarga}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const concludeData = await concludeResponse.json();
+
+        if (concludeData.success) {
+            showToast('Pendência da carga removida com sucesso.', 1, 10);
+        } else {
+            showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${concludeData.error}</details>`, 3, 10);
+            return;
+        }
+    } catch (error) {
+        console.error('Erro ao remover pendência da carga incompleta:', error);
+        showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${error}</details>`, 3, 10);
+        return; // Aborta o processo se houver erro
+    }
+}
+
+
+
+function excludeCargaIncompleta() {
+    const confirmation = confirm('Você tem certeza que deseja limpar TODOS os itens incompletos? Esta ação não pode ser desfeita.');
+    if (confirmation) {
+        if (!verifyCaptcha(nroCarga)) {
+            showToast('O captcha foi cancelado ou preenchido incorretamente.', 3, 10);
+            return;
+        }
+        toggleDoneCargaIncompleta();
+    }
+}
+
+
 function renderCartSubtotals() {
     const cartItemsContainer = document.querySelector('.cart-items');
     cartItemsContainer.innerHTML = '';
