@@ -2939,6 +2939,11 @@ def route_get_carga_incomp(id_carga) -> Response:
     return jsonify(
         {
             'items': pending_items
+            # items = {
+            #   id_carga, i.cod_item,
+            #   desc_item, qtde_atual,
+            #   qtde_solic   
+            # }
         }
     )
     

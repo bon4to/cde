@@ -10,15 +10,24 @@
             <h1>
                 <a href="{{ url_for('home') }}">CDE</a>
                 <span class="dash">/</span>
+                <a href="{{ url_for('home') }}">OUTROS</a>
+                <span class="dash">/</span>
                 <span>ETIQUETA</span>
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
+                <a class="aux-button {% if request.endpoint == 'etiqueta' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/sticky-note.svg') }}" title="ETIQUETA" alt="" onclick="window.location.href='{{ url_for('etiqueta') }}';">
+                </a>
+                <a class="aux-button {% if request.endpoint == 'rotulo' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/roll.svg') }}" title="RÓTULO" alt="" onclick="window.location.href='{{ url_for('rotulo') }}';">
+                </a>
+                <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
         <div class="flex-row" style="min-width: 100%;">
-            <div draggable="false" class="form-login">
+            <div draggable="false" style="display: flex; align-items: center;" class="form-login">
                 <div class="flex-row">
                     <div class="log">
                         <div style="max-width: 400px; justify-content: flex-start; margin: auto">
@@ -26,7 +35,7 @@
                                 <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
                                     <label for="input_code"></label>
                                     <div class="split-horizontal">
-                                        <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o QR-Code ou o DUN-14...">
+                                        <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o código aqui...">
                                         <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
                                     </div>
                                     <hr>
@@ -36,43 +45,64 @@
                                 <div>
                                     <label for="desc_item">Produto
                                         <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                    </label><br>
-                                    <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" onclick="maximizeText(this)" required readonly placeholder="Produto...">
+                                    </label>
+                                    <br>
+                                    <input 
+                                        id="desc_item" 
+                                        name="desc_item" 
+                                        type="text" 
+                                        value="{{ json_desc_item }}" 
+                                        onclick="maximizeText(this)" 
+                                        required 
+                                        readonly 
+                                        placeholder="Produto..."
+                                    >
                                 </div>
-    
                                 <div class="two-split">
                                     <div>
                                         <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
                                             <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                        </label><br>
+                                        </label>
+                                        <br>
                                         <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
                                     </div>
-    
                                     <div>
                                         <label for="lote_item">Lote
                                             <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                        </label><br>
-                                        <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Lote...">
+                                        </label>
+                                        <br>
+                                        <input 
+                                            id="lote_item" 
+                                            name="cod_lote" 
+                                            class="address" 
+                                            pattern="[A-Z0-9]{6}" 
+                                            maxlength="6" 
+                                            type="text" 
+                                            value="{{ json_cod_lote }}" 
+                                            required 
+                                            readonly 
+                                            placeholder="Lote..."
+                                        >
                                     </div>
                                 </div>
                                 <br>
-                                <div style="display: flex;width: 100%;">
-                                    <input class="btn-fancy" style="max-width: none;" type="submit" value="Emitir Etiqueta">
-                                    <img class="btn-fancy" id="img_checkbox" style="height: 35px;width: 35px; padding: 12px;margin-left: 15px" src="{{ url_for('static', filename='svg/image-down.svg') }}" onclick="toggleCheckbox('img_checkbox','img_download')" alt="">
+                                <div class="flex-row" style="gap: 0; min-width: 100%;">
+                                    <input class="btn-fancy" type="submit" value="GERAR">
+                                    <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px" >
+                                        <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" onclick="toggleCheckbox('imgCheckbox','imgDownload')" alt="">
+                                    </button>
                                 </div>
-    
-                                <div class="split-horizontal">
-                                    <input class="check_box" style="display: none" type="checkbox" id="img_download" name="img_download">
-                                </div>
+                                <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">
                             </form>
                         </div>
                     </div>
-                    <div id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
+                    <div id="tables-cont" style="margin: 40px;">
                         <div class="centralizado">
                             <div class="centralizado" style="background-color: var(--cor-destaque); border-radius: 20px; width: 450px; height: 450px;">
                                 <img id="qrCodeImage" style="border-radius: 10px;" src="" alt="">
                             </div>
                         </div>
+                        <p id="label-success" style="font-weight: 500; color: var(--cor-destaque);">Aguardando dados...</p>
                     </div>
                 </div>
             </div>
@@ -145,15 +175,15 @@
             });
 
                 $("#form-field").submit(function(event) {
-                     event.preventDefault();
+                    event.preventDefault();
 
-                     var qr_text = $("#cod_item").val() + ";" + $("#lote_item").val();
-                     var desc_item = $("#desc_item").val();
-                     var cod_item = $("#cod_item").val();
-                     var lote_item = $("#lote_item").val();
-                     var check = $("#img_download").prop('checked');
+                    var qr_text = $("#cod_item").val() + ";" + $("#lote_item").val();
+                    var desc_item = $("#desc_item").val();
+                    var cod_item = $("#cod_item").val();
+                    var lote_item = $("#lote_item").val();
+                    var check = $("#imgDownload").prop('checked');
 
-                     exibirQRCode(qr_text, desc_item, lote_item, cod_item, check);
+                    exibirQRCode(qr_text, desc_item, lote_item, cod_item, check);
 
                 });
 
@@ -163,6 +193,8 @@
                         url: "/etiqueta",
                         data: { qr_text: qr_text, desc_item: desc_item, lote_item: lote_item, cod_item: cod_item, check: check },
                         success: function(response) {
+                            var labelStatus = document.getElementById("label-success");
+
                             if (check === false) {
                                 $("#qrCodeImage").attr("src", "data:image/img;base64," + response);
                             }
@@ -176,8 +208,15 @@
                                 link.click();
                                 document.body.removeChild(link);
                             }
+                            labelStatus.innerHTML = 'A etiqueta foi gerada com sucesso!';
+                            labelStatus.style.color = '#33b333';
                         },
                         error: function(error) {
+                            var labelStatus = document.getElementById("label-success");
+
+                            labelStatus.innerHTML = 'A etiqueta não pôde ser gerada!';
+                            labelStatus.style.color = '#b33333';
+
                             console.error("Erro ao exibir QR Code:", error);
                         }
                     });

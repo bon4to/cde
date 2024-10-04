@@ -57,6 +57,7 @@
         
             {% if 'user_grant' in session %}
                 <div class="tables-container" style="max-width: 55%; min-width: 55%;">
+                    {% if carga_incomp | count > 0 %}
                     <div class="flex-column">
                         {% if id_carga %}
                             <div class="split-horizontal">
@@ -82,7 +83,6 @@
                             <h1 class="subtitle">Há <span class="cor-web">{{ carga_incomp | count }} produto(s)</span> pendente(s)</h1>
                         {% endif %}
                     </div>
-                    {% if carga_incomp | count > 0 %}
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                         <p>Itens de cargas pendentes</p>
                     </div>
@@ -91,13 +91,13 @@
                             <thead>
                                 <tr>
                                     {% if not id_carga %}
-                                        <th>Carga (Código)</th>
+                                    <th>Carga (Código)</th>
                                     {% endif %}
                                     <th>Item (Código)</th>
                                     <th>Item (Descrição)</th>
                                     <th style="width: 100px;">QTDE (Solicitada)</th>
                                     {% if id_carga %}
-                                        <th style="width: 100px;">QTDE (Separada)</th>
+                                    <th style="width: 100px;">QTDE (Separada)</th>
                                     {% endif %}
                                 </tr>
                             </thead>
@@ -113,11 +113,13 @@
                                         
                                         {% if row_cod_item in items %}
                                             {% set items = 
-                                                items.update({ row_cod_item: {
-                                                    'priv_id_carga': priv_id_carga,
-                                                    'desc': priv_desc_item,
-                                                    'qtde': items[row_cod_item]['qtde'] + priv_qtde_solic
-                                                }}) 
+                                                items.update({ 
+                                                    row_cod_item: {
+                                                        'priv_id_carga': priv_id_carga,
+                                                        'desc': priv_desc_item,
+                                                        'qtde': items[row_cod_item]['qtde'] + priv_qtde_solic
+                                                    }
+                                                }) 
                                                 or items 
                                             %}
                                         {% else %}
@@ -152,6 +154,10 @@
                                 </tbody>
                             </table>
                         </div>
+                        {% else %}
+                            <div style="margin: 50% 0; padding: 0 160px;">
+                                <p class="disabled">Não há cargas incompletas para finalizar.</p>
+                            </div>
                         {% endif %}
                         <br>
                         {% if id_carga %}
