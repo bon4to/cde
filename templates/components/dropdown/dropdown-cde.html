@@ -76,8 +76,30 @@
                                     <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
                                 </button>
                                 <div class="dropdown-content">
-                                    <a href="{{ url_for('producao') }}">PRC010 | PROCESSAMENTO</a>
-                                    <a href="{{ url_for('envase') }}">ENV006 | ENVASE</a>
+                                    <div class="submenu">
+                                        <a class="submenu-title" href="{{ url_for('producao') }}">
+                                            <div class="split-horizontal" style="align-items: center;">
+                                                <span>PRC010 | PROCESSAMENTO</span>
+                                                <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                            </div>
+                                        </a>
+                                        <div class="submenu-content">
+                                            <a href="{{ url_for('producao') }}">PROGRAMAÇÃO</a>
+                                            <a href="{{ url_for('calendar_producao') }}">CALENDÁRIO</a>
+                                        </div>
+                                    </div>
+                                    <div class="submenu">
+                                        <a class="submenu-title" href="{{ url_for('envase') }}">
+                                            <div class="split-horizontal" style="align-items: center;">
+                                                <span>ENV006 | ENVASE</span>
+                                                <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                            </div>
+                                        </a>
+                                        <div class="submenu-content">
+                                            <a href="{{ url_for('envase') }}">PROGRAMAÇÃO</a>
+                                            <a href="{{ url_for('calendar_envase') }}">CALENDÁRIO</a>
+                                        </div>
+                                    </div>
                                     <a href="{{ url_for('produtos') }}">ITE005 | PRODUTOS</a>
                                 </div>
                             </div>
@@ -102,14 +124,23 @@
                                     <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
                                 </button>
                                 <div class="dropdown-content" style="right: 0; left:unset">
+                                    {% if session['user_grant'] == 1 %}
+                                        <div class="submenu">
+                                            <a class="submenu-title" href="#">
+                                                <div class="split-horizontal" style="align-items: center;">
+                                                    <span>FERRAMENTAS</span>
+                                                    <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                                </div>
+                                            </a>
+                                            <div class="submenu-content" style="left: unset; right: 100%; border-left: unset; border-right: 6px solid var(--dark-or-white);">
+                                                <a href="{{ url_for('api') }}">DEV000 | DATABASE</a>
+                                                <a href="{{ url_for('permissions') }}">CDE018 | PERMISSÕES</a>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                     {% if session['user_grant'] <= 2 %}
                                         <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
                                     {% endif %}
-                                    {% if session['user_grant'] <= 2 %}
-                                        <a href="{{ url_for('api') }}">DEV000 | DATABASE</a>
-                                        <a href="{{ url_for('permissions') }}">CDE018 | PERMISSÕES</a>
-                                    {% endif %}
-                                    <a href="{{ url_for('in_dev') }}">CDE017 | REGISTROS</a>
                                     <a href="{{ url_for('in_dev') }}">CONFIGURAÇÕES</a>
                                     <a href="{{ url_for('in_dev') }}">AJUDA</a>
                                     <a href="{{ url_for('logout') }}">SAIR</a>
