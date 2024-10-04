@@ -18,7 +18,12 @@
     --strong-dark-m: #252525;
     --strong-dark-l: #303030;
     --medium-dark-h: #3a3a3a;
+    --light-white-h: #e7e7e7;
+    --light-white-m: #f7f7f7;
+    --light-white-l: #ffffff;
     --light-text: #f7f7f7;
+    --dark-or-white: var(--light-white-m);
+    --white-or-dark: var(--medium-dark-h);
 }
 
 html, body {
@@ -1371,7 +1376,7 @@ a.hyperlink {
 .dropdown-content {
     z-index: 1;
     display: none;
-    min-width: 200px;
+    min-width: 220px;
     transition: none;
     position: absolute;
     background-color: var(--cor-destaque);
@@ -1387,24 +1392,23 @@ a.hyperlink {
 }
 
 .dropdown-content a {
+    margin: 0;
     color: #fff;
     display: block;
     font-size: 12px;
     text-align: left;
     transition: none;
     font-weight: bold;
-    padding: 12px 16px;
+    padding: 14px 16px;
     text-decoration: none;
     font-family: 'Chivo Mono', monospace;
     background-color: var(--cor-destaque);
-    border: 1px solid var(--cor-destaque);
 }
 
 .dropdown-content a:hover {
     transition: none;
-    background-color: #fff;
-    color: var(--strong-dark-l);
-    border: 1px solid var(--cor-destaque);
+    background-color: var(--dark-or-white);
+    color: var(--white-or-dark);
 }
 
 .dropdown:hover .dropdown-content {
@@ -1425,8 +1429,8 @@ a.hyperlink {
 }
 
 .dropbtn:hover {
-    background-color: #fff;
-    color: var(--cor-destaque);
+    background-color: var(--dark-or-white);
+    color: var(--white-or-dark);
 }
 
 .submenu {
@@ -1434,14 +1438,15 @@ a.hyperlink {
 }
 
 .submenu-content {
-    display: none;
-    position: absolute;
-    left: 100%;
     top: 0;
-    background-color: var(--cor-destaque);
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    left: 100%;
     z-index: 1;
+    display: none;
+    min-width: 200px;
+    position: absolute;
+    background-color: var(--cor-destaque);
+    border-left: 6px solid var(--dark-or-white);
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
 
 .submenu:hover .submenu-content {
@@ -1477,8 +1482,8 @@ a.hyperlink {
 
 .submenu:hover a.submenu-title,
 .submenu:hover a.submenu-title {
-    background-color: #fff;
-    color: var(--strong-dark-l);
+    background-color: var(--dark-or-white);
+    color: var(--white-or-dark);
 }
 
 .submenu:hover .dropbtn, 
@@ -1786,6 +1791,7 @@ h1.sub-label {
     color: #353535;
     padding-left: 18px;
     font-family: 'Poppins', sans-serif;
+    font-weight: 500;
 }
 
 .selectable-row.sub-total.active td {
