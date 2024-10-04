@@ -172,7 +172,8 @@ html.dark label {
     font-weight: 300;
 }
 
-html.dark .btn-fancy {
+html.dark .btn-fancy,
+html.dark .btn-fancy-sober  {
     background-color: #1a1a1a;
 }
 
@@ -195,9 +196,12 @@ html.dark .btn-fancy.featured:hover {
     background-color: rgb(32, 96, 214);
 }
 
-html.dark .btn-fancy .svg,
-html.dark .btn-fancy .svg-inv {
+html.dark .btn-fancy .svg {
     filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+html.dark .btn-fancy .svg-inv {
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
 }
 
 html.dark .msg-svg {

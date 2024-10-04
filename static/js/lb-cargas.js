@@ -785,7 +785,7 @@ async function concludeSeparacao() {
             const result = await response.json();
             itensCarga = result.itens;
         } catch (error) {
-            console.error('Erro ao obter itensCarga:', error);
+            console.error('[ERROR] Erro ao obter itensCarga:', error);
             return;
         }
     } else {
@@ -902,10 +902,10 @@ async function concludeSeparacao() {
                 // cria a pendencia da carga_incompleta
                 for (const item of nonAvailableItems) {
                     const { cod_item, qtde_faltante } = item;
-                    console.log('cod_item, qtde_faltante: ', cod_item, qtde_faltante);
+                    console.log('[INFO] cod_item, qtde_faltante: ', cod_item, qtde_faltante);
 
                     try {
-                        console.log('Inserindo item na pendencia da carga_incompleta...');
+                        console.log('[INFO] Inserindo item na pendencia da carga_incompleta...');
                         const response = await fetch('/api/insert_carga_incomp', {
                             method: 'POST',
                             headers: {
@@ -922,14 +922,14 @@ async function concludeSeparacao() {
                         const result = await response.json();
                         if (!result.success) {
                             // ERRO
-                            console.error(`Erro ao inserir ${cod_item} para a carga incompleta.`, result.error);
+                            console.error(`[ERROR] Erro ao inserir ${cod_item} para a carga incompleta.`, result.error);
                         } else {
                             // SUCESSO
-                            console.log(`Pendencias inseridas com sucesso para o item ${cod_item} (${qtde_faltante}).`);
+                            console.log(`[INFO] Pendencias inseridas com sucesso para o item ${cod_item} (${qtde_faltante}).`);
                         }
                     } catch (error) {
                         // ERRO
-                        console.error(`Erro ao enviar item ${cod_item} da carga incompleta para o database.`, error);
+                        console.error(`[ERROR] Erro ao enviar item ${cod_item} da carga incompleta para o database.`, error);
                     }
                 }
 

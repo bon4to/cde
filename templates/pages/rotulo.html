@@ -14,6 +14,13 @@
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
+                <a class="aux-button {% if request.endpoint == 'etiqueta' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/sticky-note.svg') }}" title="ETIQUETA" alt="" onclick="window.location.href='{{ url_for('etiqueta') }}';">
+                </a>
+                <a class="aux-button {% if request.endpoint == 'rotulo' %}active{% endif %}">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/roll.svg') }}" title="RÓTULO" alt="" onclick="window.location.href='{{ url_for('rotulo') }}';">
+                </a>
+                <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
@@ -25,29 +32,76 @@
                             <form style="display: flex;" id="form-field" method="post" action="{{ url_for('rotulo') }}">
                                 <div class="two-split">
                                     <div>
-                                        <label for="diametro_inicial" >Diâmetro (Externo)</label><br>
-                                        <input class="address" maxlength="6" id="diametro_inicial" type="number" name="diametro_minimo" oninput="verificarComprimento()" required placeholder="Diâmetro...">
+                                        <label for="diametro_inicial" >Diâmetro (Externo)</label>
+                                        <br>
+                                        <input 
+                                            class="address" 
+                                            maxlength="6" 
+                                            id="diametro_inicial" 
+                                            type="number" 
+                                            name="diametro_minimo" 
+                                            oninput="verificarComprimento()" 
+                                            required placeholder="Diâmetro..."
+                                        >
                                     </div>
                                     <div>
-                                        <label for="diametro_minimo">Diâmetro (Interno)</label><br>
-                                        <input class="address" maxlength="6" id="diametro_minimo" type="number" name="diametro_minimo" oninput="verificarComprimento()" required placeholder="Diâmetro...">
+                                        <label for="diametro_minimo">Diâmetro (Interno)</label>
+                                        <br>
+                                        <input 
+                                        class="address" 
+                                        maxlength="6" 
+                                        id="diametro_minimo" 
+                                        type="number" 
+                                        name="diametro_minimo" 
+                                        oninput="verificarComprimento()" 
+                                        required 
+                                        placeholder="Diâmetro..."
+                                    >
                                     </div>
                                 </div>
                                 <hr>
                                 <div class="two-split">
                                     <div>
-                                        <label for="espessura_fita">Rótulo (Espessura)</label><br>
-                                        <input class="address" maxlength="6" name="espessura_fita" id="espessura_fita" type="number" oninput="verificarComprimento()"  required placeholder="Espessura...">
+                                        <label for="espessura_fita">Rótulo (Espessura)</label>
+                                        <br>
+                                        <input 
+                                            class="address" 
+                                            maxlength="6" 
+                                            name="espessura_fita" 
+                                            id="espessura_fita" 
+                                            type="number" 
+                                            oninput="verificarComprimento()" 
+                                            required 
+                                            placeholder="Espessura..."
+                                        >
                                     </div>
-    
                                     <div>
-                                        <label for="espessura_papelao">Tubete (Espessura)</label><br>
-                                        <input class="address" maxlength="6" type="number" id="espessura_papelao" name="espessura_papelao" oninput="verificarComprimento()"  required placeholder="Espessura...">
+                                        <label for="espessura_papelao">Tubete (Espessura)</label>
+                                        <br>
+                                        <input 
+                                            class="address" 
+                                            maxlength="6" 
+                                            type="number" 
+                                            id="espessura_papelao" 
+                                            name="espessura_papelao" 
+                                            oninput="verificarComprimento()" 
+                                            required 
+                                            placeholder="Espessura..."
+                                        >
                                     </div>
                                 </div>
                                     <div>
-                                        <label for="compr_rotulo">Rótulo (Comprimento)</label><br>
-                                        <input  type="number" maxlength="6" id="compr_rotulo" name="compr_rotulo" oninput="verificarComprimento()"  required placeholder="Distância do início de um rótulo ao início de outro...">
+                                        <label for="compr_rotulo">Rótulo (Comprimento)</label>
+                                        <br>
+                                        <input 
+                                            type="number" 
+                                            maxlength="6" 
+                                            id="compr_rotulo" 
+                                            name="compr_rotulo" 
+                                            oninput="verificarComprimento()" 
+                                            required 
+                                            placeholder="Distância do início de um rótulo ao início de outro..."
+                                        >
                                     </div>
                                 <hr>
                                 <h3 id="resposta1" class="alert">Calculadora</h3>

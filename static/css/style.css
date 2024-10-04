@@ -538,7 +538,7 @@ img.footer:hover {
     filter: invert(95%)
 }
 
-.btn-fancy {
+.btn-fancy, .btn-fancy-sober {
     width: 100%;
     height: 60px;
     border: none;
@@ -578,8 +578,6 @@ img.footer:hover {
     background-color: rgb(25, 130, 201);
     box-shadow: 0 0 6px rgb(19, 75, 180);
 }
-
-
 
 .limit-lenght {
     max-width: 256px;
@@ -668,7 +666,7 @@ td {
 .form-login,
 .form-filter {
     margin: 0 auto;
-    border-radius: 12px;
+    border-radius: 30px;
     box-sizing: border-box;
     background-color: #ffffff;
     box-shadow: 0 0 18px rgba(0, 0, 0, 0.2);
