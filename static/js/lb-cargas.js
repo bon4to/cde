@@ -677,9 +677,9 @@ function hidePopUp() {
 }
 
 
-async function fetchQtdeSolic(id_carga, cod_item) {
+async function fetchQtdeSolic(id_carga, cod_item, isTotal=0) {
     try {
-        const response = await fetch(`/api/carga/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}`);
+        const response = await fetch(`/api/carga/qtde_solic?id_carga=${id_carga}&cod_item=${cod_item}&is_total=${isTotal}`);
         const data = await response.json();
         return data.qtde_solic;
     } catch (error) {
