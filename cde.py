@@ -934,6 +934,9 @@ class CargaUtils:
             cursor.execute('''
                 SELECT DISTINCT id_carga
                 FROM historico
+                WHERE 
+                    id_carga != '' AND
+                    id_carga != '0'
                 ORDER BY id_carga DESC;
             ''')
             rows = cursor.fetchall()
@@ -2935,7 +2938,7 @@ def api_insert_carga_incomp() -> Response:
 def route_get_carga_incomp(id_carga) -> Response:
     id_carga = id_carga.split('-')[0]
     
-    pending_items = CargaUtils.get_carga_incomp(id_carga)[0]
+    pending_items = CargaUtils.get_carga_incomp(id_carga)[0] #index 0 para pegar o result
     return jsonify(
         {
             'items': pending_items
@@ -3747,19 +3750,39 @@ def get_carga_qtde_solic():
     id_carga = request.args.get('id_carga', type=int)
     cod_item = request.args.get('cod_item', type=str)
     
-    query = '''
-        SELECT 
-            qtde_solic AS QTDE_SOLIC
-        FROM carga_incomp
-        WHERE 
-            id_carga = '{a}' AND
-            cod_item = '{b}' AND
-            flag_pendente = TRUE
-        ;
-    '''.format(a=id_carga, b=cod_item)
-    dsn = 'SQLITE'
-    result, columns = cde.db_query(query, dsn)
-    cde.debug_log(f'result: {result}')
+    # solicita o valor inicial/máximo da quantidade solicitada
+    # usado em relatórios finais
+    is_total = request.args.get('is_total', type=int) 
+    cde.debug_log(f'is_total: {is_total}')
+    
+    if is_total != 0:
+        query = '''
+            SELECT DISTINCT 
+                MAX(qtde_solic) AS QTDE_SOLIC
+            FROM carga_incomp
+            WHERE 
+                id_carga = '{a}' AND
+                cod_item = '{b}'
+            ;
+        '''.format(a=id_carga, b=cod_item)
+        dsn = 'SQLITE'
+        result, columns = cde.db_query(query, dsn)
+        cde.debug_log(f'MAX: {result}')
+    else:
+        query = '''
+            SELECT 
+                qtde_solic AS QTDE_SOLIC
+            FROM carga_incomp
+            WHERE 
+                id_carga = '{a}' AND
+                cod_item = '{b}' AND
+                flag_pendente = TRUE
+            ;
+        '''.format(a=id_carga, b=cod_item)
+        dsn = 'SQLITE'
+        result, columns = cde.db_query(query, dsn)
+        cde.debug_log(f'result: {result}')
+        
     if result != []:
         qtde_solic = result[0][0]
         cde.debug_log(f'qtde_solic: {qtde_solic}')
