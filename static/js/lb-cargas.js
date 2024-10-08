@@ -699,6 +699,12 @@ async function getPendingItems() {
         });
         const result = await response.json();
         const items = result.items;
+
+        // Fazer log no console e no servidor
+        console.log('[DEBUG] itens pendentes:', items);
+        console.log('[DEBUG] itens pendentes: ' + JSON.stringify(items));
+        logOnServer('[DEBUG] itens pendentes: ' + JSON.stringify(items)); 
+
         const cod_items = items.map(item => item[1]);
 
         return cod_items;
@@ -784,6 +790,7 @@ async function concludeSeparacao() {
             const response = await fetch(`/api/itens_carga?id_carga=${nroCarga}`, {method: 'GET', headers: {'Content-Type': 'application/json'}});
             const result = await response.json();
             itensCarga = result.itens;
+            console.log('[DEBUG] itens:', result.itens);
         } catch (error) {
             console.error('[ERROR] Erro ao obter itensCarga:', error);
             return;
@@ -825,8 +832,14 @@ async function concludeSeparacao() {
             // ao array de itens não disponíveis
             nonAvailableItems.push({ cod_item: cod_item, qtde_faltante: qtde_faltante });
             showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 2);
-        } else {
+
+        } else if (qtde_solic == subTotal) {
             showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 1);
+
+        } else {
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 3);
+            showToast(`Quantidade EXCEDENTE para o item ${cod_item}`, 3);
+            return;
         }
         await visualDelay(100);
     }
