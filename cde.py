@@ -125,9 +125,35 @@ Pressione ENTER para sair...
         # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
         print(error_foot)
         sys.exit(2)
+        
+    log_directory = os.path.join(os.getcwd(), 'logs')
+    rep_directory = os.path.join(os.getcwd(), 'reports')
+
+    # cria os diretórios se não existirem
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+    if not os.path.exists(rep_directory):
+        os.makedirs(rep_directory)
 
 
 class cde:
+    @staticmethod
+    # Função para salvar logs em um arquivo com nome de data
+    def save_log(log_message):
+        # Nome do arquivo de log com a data atual
+        user_id = session.get('id_user', 'unknown')
+        log_file_name = datetime.now().strftime('%Y-%m-%d') + f'-u{user_id}' + '.log'
+        log_file_path = os.path.join(log_directory, log_file_name)
+
+        with open(log_file_path, 'a') as log_file:
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Se o log_message for uma lista ou dicionário, converte para JSON
+            if isinstance(log_message, (list, dict)):
+                log_message = json.dumps(log_message, ensure_ascii=False)
+            
+            log_file.write(f'[{timestamp}] {log_message}\n')
+    
     @staticmethod
     # LOGS NO MODO DEBUG
     def debug_log(text):
@@ -2279,6 +2305,16 @@ def users() -> str:
         users=users,
         user_perm=user_perm
     )
+
+
+@app.route('/log', methods=['POST'])
+def log_message():
+    data = request.json
+    if 'message' in data:
+        cde.save_log(data['message'])
+        return jsonify({'status': 'success'}), 200
+    else:
+        return jsonify({'status': 'error', 'message': 'No log message provided'}), 400
 
 
 @app.route('/cde/permissions/', methods=['GET', 'POST'])
