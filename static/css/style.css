@@ -1372,7 +1372,7 @@ a.hyperlink {
 }
 
 .dropdown-content {
-    z-index: 1;
+    z-index: 1999;
     display: none;
     min-width: 220px;
     transition: none;
@@ -1438,7 +1438,7 @@ a.hyperlink {
 .submenu-content {
     top: 0;
     left: 100%;
-    z-index: 1;
+    z-index: 1999;
     display: none;
     min-width: 200px;
     position: absolute;
