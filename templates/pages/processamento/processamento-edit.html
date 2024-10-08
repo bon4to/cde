@@ -83,7 +83,7 @@
     
                                         {% if 'user_grant' in session %}
                                             {% if session['user_grant'] <= 2 %}
-                                                <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash-can.svg') }}" alt="" onclick="confirmDelete('{{ item['id_producao'] }}')">
+                                                <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="" onclick="confirmDelete('{{ item['id_producao'] }}')">
                                             {% endif %}
                                         {% endif %}
                                     </div>
