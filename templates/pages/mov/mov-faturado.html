@@ -114,7 +114,7 @@
                         $("#cod_item").empty();
 
                         if (response.json_cod_item.length > 1) {
-                            lockIcoHide("label-cod_item");
+                            hideLockLabel("label-cod_item");
                         }
 
                         if (response.json_cod_item) {
@@ -129,7 +129,7 @@
                         $("#lote_item").val(response.json_cod_lote);
 
                         if (response.json_cod_lote === "") {
-                            lockIcoHide("label-cod_lote")
+                            hideLockLabel("label-cod_lote")
 
                             $("#lote_item").prop("readonly", false);
                         } else {

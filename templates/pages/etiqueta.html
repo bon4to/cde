@@ -32,7 +32,7 @@
                     <div class="log">
                         <div style="max-width: 400px; justify-content: flex-start; margin: auto">
                             <div>
-                                <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
+                                <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
                                     <label for="input_code"></label>
                                     <div class="split-horizontal">
                                         <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o código aqui...">
@@ -64,7 +64,7 @@
                                             <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                         </label>
                                         <br>
-                                        <select class="address" id="cod_item" name="cod_item" required onchange="lockIcoShow()"></select>
+                                        <select class="address" id="cod_item" name="cod_item" required onchange="showLockLabel()"></select>
                                     </div>
                                     <div>
                                         <label for="lote_item">Lote
@@ -144,7 +144,7 @@
                         }
 
                         if (response.json_cod_item.length > 1) {
-                            lockIcoHide("label-cod_item");
+                            hideLockLabel("label-cod_item");
                             ultimoCodigo = codigo
                         }
 
@@ -158,7 +158,7 @@
                         $("#lote_item").val(response.json_cod_lote);
                         
                         if (response.json_cod_lote === "") {
-                            lockIcoHide("label-cod_lote")
+                            hideLockLabel("label-cod_lote")
                             $("#lote_item").prop("readonly", false);
                         } else {
                             $("#lote_item").prop("readonly", true);
