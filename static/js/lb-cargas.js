@@ -470,6 +470,16 @@ async function toggleDoneCargaIncompleta() {
 
         if (concludeData.success) {
             showToast('Pendência da carga removida com sucesso.', 1, 10);
+            // recarregar a tabela
+            document.getElementById('incompTable').innerHTML = `
+            <div style="display: flex; justify-content: center; height: 100%;">
+                <p class="disabled">
+                    Pendência da carga removida com sucesso.
+                </p>
+            </div>
+            `;
+            stockTable = document.getElementById('stockTable')
+            if (stockTable) stockTable.style.display = 'none';
         } else {
             showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${concludeData.error}</details>`, 3, 10);
             return;
