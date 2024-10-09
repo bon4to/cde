@@ -2307,14 +2307,13 @@ def users() -> str:
     )
 
 
-@app.route('/log', methods=['POST'])
-def log_message():
+@app.route('/api/log/', methods=['POST'])
+def log_message() -> None:
     data = request.json
     if 'message' in data:
         cde.save_log(data['message'])
-        return jsonify({'status': 'success'}), 200
     else:
-        return jsonify({'status': 'error', 'message': 'No log message provided'}), 400
+        return print(f'{TAGS.ERRO} Não foi possível salvar o log.')
 
 
 @app.route('/cde/permissions/', methods=['GET', 'POST'])

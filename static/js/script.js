@@ -3,19 +3,12 @@
 
 function logOnServer(logMessage) {
     console.log(logMessage);
-    fetch('/log', {
+    fetch('/api/log/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message: logMessage })
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log('Log enviado com sucesso!');
-        } else {
-            console.error('Erro ao enviar log.');
-        }
     })
     .catch(error => {
         console.error('Erro de conexão:', error);
