@@ -638,8 +638,6 @@ class CargaUtils:
     def get_cargas(all_cargas=False):
         if all_cargas:
             cargas_except_query = ', '.join(map(str, all_cargas))
-            
-            cde.debug_log(f'cargas_except_query: {cargas_except_query}')
 
             query = '''
                 SELECT DISTINCT 
@@ -3817,8 +3815,7 @@ def get_carga_qtde_solic():
     
     # solicita o valor inicial/máximo da quantidade solicitada
     # usado em relatórios finais
-    is_total = request.args.get('is_total', type=int) 
-    cde.debug_log(f'is_total: {is_total}')
+    is_total = request.args.get('is_total', type=int)
     
     if is_total != 0:
         query = '''
@@ -3832,7 +3829,6 @@ def get_carga_qtde_solic():
         '''.format(a=id_carga, b=cod_item)
         dsn = 'SQLITE'
         result, columns = cde.db_query(query, dsn)
-        cde.debug_log(f'MAX: {result}')
     else:
         query = '''
             SELECT 
@@ -3846,11 +3842,9 @@ def get_carga_qtde_solic():
         '''.format(a=id_carga, b=cod_item)
         dsn = 'SQLITE'
         result, columns = cde.db_query(query, dsn)
-        cde.debug_log(f'result: {result}')
         
     if result != []:
         qtde_solic = result[0][0]
-        cde.debug_log(f'qtde_solic: {qtde_solic}')
         return jsonify({'qtde_solic': qtde_solic})
     else:
         query = '''
@@ -4039,7 +4033,6 @@ def get_carga_table_data():
             return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
 
         data = CargaUtils.readJsonCargaSeq(filename, seq)
-        cde.debug_log(f'data: {data}')
         return jsonify(data), 200
     
     except FileNotFoundError:
