@@ -96,23 +96,23 @@ function handleCheckChange() {
 }
 
 
-// VISUAL DE CADEADOS
-function lockIcoHide(idLabel) {
+// esconde o cadeado (que indica que o campo está bloqueado)
+// por id
+function hideLockLabel(idLabel) {
     let label = document.getElementById(idLabel);
     label.style.opacity = '0';
 }
 
 
-// VISUAL DE CADEADOS
-function lockIcoShow() {
-    let label2 = document.getElementById("label-cod_item");
+// mostra todos os cadeados de uma vez
+function showLockLabel() {
+    let label1 = document.getElementById("label-cod_item");
+    let label2 = document.getElementById("label-cod_lote");
     let label3 = document.getElementById("label-linha");
 
-    label2.style.opacity = '1';
-    label3.style.opacity = '1';
-
-    let label1 = document.getElementById("label-cod_lote");
-    label1.style.opacity = '1';
+    if (label1) label1.style.opacity = '1';
+    if (label2) label2.style.opacity = '1';
+    if (label3) label3.style.opacity = '1';
 }
 
 

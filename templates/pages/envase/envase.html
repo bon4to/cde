@@ -42,7 +42,7 @@
                 <div class="centralizado">
                     <div>
                         <div>
-                            <form id="formBuscarItens" method="post" onsubmit="lockIcoShow()">
+                            <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
                                 <label for="input_code"></label>
                                 <div class="split-horizontal">
                                     <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="DUN-14 ou código do item...">
@@ -235,7 +235,7 @@
                         $("#linha").empty();
 
                         if (response.cod_linha.length > 1) {
-                            lockIcoHide("label-linha");
+                            hideLockLabel("label-linha");
                         }
 
                         response.cod_linha.forEach(function(linha) {
@@ -269,7 +269,7 @@
                         buscarLinhas();
 
                         if (response.json_cod_item.length > 1) {
-                            lockIcoHide("label-cod_item");
+                            hideLockLabel("label-cod_item");
                         }
 
                         if (response.json_cod_item) {
@@ -284,7 +284,7 @@
                         $("#lote_item").val(response.json_cod_lote);
 
                         if (response.json_cod_lote === "") {
-                            lockIcoHide("label-cod_lote")
+                            hideLockLabel("label-cod_lote")
 
                             $("#lote_item").prop("readonly", false);
                         } else {
