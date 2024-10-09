@@ -2934,6 +2934,18 @@ def carga_incomp_id(id_carga) -> str:
     cod_item = request.args.get('cod_item', '')
     qtde_solic = request.args.get('qtde_solic', '')
     
+    if columns:
+        # cria lista dos itens da carga (p/ validação de necessidade no jinja)
+        cod_item_list = []
+        for row in result:
+            cod_item_list.append(row[columns.index('cod_item')])
+        
+        alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+        class_alert = 'success'
+    else:
+        alert = f'{result[0][0]}'
+        class_alert = 'error'
+    
     if cod_item:
         result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
     else:
@@ -2941,6 +2953,7 @@ def carga_incomp_id(id_carga) -> str:
     
     return render_template(
         'pages/mov/mov-carga/mov-carga-incompleta.html',
+        alert=alert, class_alert=class_alert,
         carga_incomp=result,
         columns=columns,
         carga_list=carga_list,
@@ -2949,7 +2962,8 @@ def carga_incomp_id(id_carga) -> str:
         cod_item=cod_item,
         qtde_solic=qtde_solic,
         result_local=result_local,
-        columns_local=columns_local
+        columns_local=columns_local,
+        cod_item_list=cod_item_list
     )
 
 
@@ -3543,6 +3557,11 @@ def carga_id(id_carga) -> str:
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
         if columns:
+            # cria lista dos itens da carga (p/ validação de necessidade no jinja)
+            cod_item_list = []
+            for row in result:
+                cod_item_list.append(row[columns.index('COD_ITEM')])
+            
             alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
             class_alert = 'success'
         else:
@@ -3554,7 +3573,7 @@ def carga_id(id_carga) -> str:
             class_alert=class_alert, id_carga=id_carga, 
             cod_item=cod_item, qtde_solic=qtde_solic,
             result_local=result_local, columns_local=columns_local,
-            fant_cliente=fant_cliente
+            fant_cliente=fant_cliente, cod_item_list=cod_item_list
         )
     result = []
     return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=columns)
@@ -3621,11 +3640,21 @@ def mov_request_id(id_req) -> str:
         
         if cod_item:
             result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
-            
+
         result, columns = MovRequestUtils.get_mov_request(id_req)
-        
-        class_alert = 'success'
-        alert = 'A lista foi carregada com sucesso.'
+
+        if columns:
+            # cria lista dos itens da requisicao (p/ validação de necessidade no jinja)
+            cod_item_list = []
+            for row in result:
+                cod_item_list.append(row[columns.index('COD_ITEM')])
+            
+            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+            class_alert = 'success'
+        else:
+            alert = f'{result[0][0]}'
+            class_alert = 'error'
+
         if len(result) == 1:
             class_alert = 'error'
             alert = result[0][0]
@@ -3636,7 +3665,8 @@ def mov_request_id(id_req) -> str:
             result=result, columns=columns,
             result_local=result_local, columns_local=columns_local,
             cod_item=cod_item, qtde_solic=qtde_solic,
-            class_alert=class_alert, alert=alert
+            class_alert=class_alert, alert=alert,
+            cod_item_list=cod_item_list
         )
     return render_template(
         'pages/mov/mov-request/mov-request.html'

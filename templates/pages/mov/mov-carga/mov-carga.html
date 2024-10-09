@@ -198,9 +198,9 @@
         {% endif %}
         {% if 'user_grant' in session %}
             {% if id_carga %}
-                {% if cod_item %}
+                {% if cod_item and cod_item in cod_item_list %}
                     <div class="tables-container glow-tl">
-                        <span style="display:space-between: width: 100%;">
+                        <span>
                             <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
                         </span>
                         {% if result %}
