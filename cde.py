@@ -2738,13 +2738,13 @@ def moving() -> str | Response:
                     )
                     # ENTRADA NO ENDEREÇO DE DESTINO
                     HistoricoUtils.insert_historico(
-                        numero=numero, letra=letra, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao='TE', # transferencia entrada 
                         timestamp_out=timestamp_out, 
                         id_carga=id_carga
                     )
                     print(f'  | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
+                            numero=destino_number, letra=destino_letter, 
         
     elif operacao == 'F':
     # faturamento
