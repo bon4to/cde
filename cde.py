@@ -2729,7 +2729,7 @@ def moving() -> str | Response:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
                     # SAÍDA DO ENDEREÇO DE ORIGEM
-                    HistoricoUtils.insert_historico(
+                    mov_ts = HistoricoUtils.insert_historico(
                         numero=numero, letra=letra, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao='TS', # transferencia saida
@@ -2737,14 +2737,19 @@ def moving() -> str | Response:
                         id_carga=id_carga
                     )
                     # ENTRADA NO ENDEREÇO DE DESTINO
-                    HistoricoUtils.insert_historico(
+                    mov_te = HistoricoUtils.insert_historico(
+                        numero=destino_number, letra=destino_letter, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao='TE', # transferencia entrada 
                         timestamp_out=timestamp_out, 
                         id_carga=id_carga
                     )
-                    print(f'  | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
-                            numero=destino_number, letra=destino_letter, 
+                    # verifica se operação foi realizada corretamente
+                    sucesso = mov_ts and mov_te
+                    if sucesso:
+                        print(f'  | {letra}.{numero} >> {destino_letter}.{destino_number}: ', cod_item, lote_item, quantidade)
+                    else:
+                        print(f'  | ERRO AO MOVIMENTAR: {letra}.{numero} ({mov_ts}) >> {destino_letter}.{destino_number} ({mov_te}): ', cod_item, lote_item, quantidade)
         
     elif operacao == 'F':
     # faturamento
@@ -2752,25 +2757,31 @@ def moving() -> str | Response:
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-                    HistoricoUtils.insert_historico(
+                    sucesso = HistoricoUtils.insert_historico(
                         numero=numero, letra=letra, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao=operacao, 
                         timestamp_out=timestamp_out, 
                         id_carga=id_carga
                     )
-                    print(f'  | {letra}.{numero}: ', cod_item, lote_item, quantidade)
+                    if sucesso:
+                        print(f'  | {letra}.{numero}: ', cod_item, lote_item, quantidade)
+                    else:
+                        print(f'  | ERRO AO MOVIMENTAR: {letra}.{numero}: ', cod_item, lote_item, quantidade)
 
     elif operacao == 'E' or operacao == 'S':
     # operacao padrao (entrada 'E' ou saída 'S')
-        HistoricoUtils.insert_historico(
+        sucesso = HistoricoUtils.insert_historico(
             numero=numero, letra=letra, 
             cod_item=cod_item, lote_item=lote_item,
             quantidade=quantidade, operacao=operacao, 
             timestamp_out=timestamp_out, 
             id_carga=id_carga
         )
-        print(f'  | {letra}.{numero}: ', cod_item, lote_item, quantidade)
+        if sucesso:
+            print(f'  | {letra}.{numero}: ', cod_item, lote_item, quantidade)
+        else:
+            print(f'  | ERRO AO MOVIMENTAR: {letra}.{numero}: ', cod_item, lote_item, quantidade)
     
     else:
     # operacao invalida
