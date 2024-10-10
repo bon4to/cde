@@ -3681,7 +3681,7 @@ def mov_request_id(id_req) -> str:
     )
 
 
-@app.route('/mov/requisicao/separacao/p/<string:id_req>/', methods=['GET', 'POST'])
+@app.route('/mov/requisicao/separacao/p/<string:id_req>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def req_sep_pend(id_req) -> str:
     id_req = id_req.split('-')[0]
@@ -3698,7 +3698,7 @@ def req_sep_pend(id_req) -> str:
     )
 
 
-@app.route('/mov/requisicao/separacao/f/<string:id_req>/', methods=['GET', 'POST'])
+@app.route('/mov/requisicao/separacao/f/<string:id_req>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def req_sep_done(id_req) -> str:
     # se houver sequencia, usa, senão usa 0 (código padrao)
@@ -3909,7 +3909,7 @@ def get_itens_carga():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mov/carga/separacao/p/<string:id_carga>/', methods=['GET', 'POST'])
+@app.route('/mov/carga/separacao/p/<string:id_carga>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_pend(id_carga) -> str:
     id_carga = id_carga.split('-')[0]
@@ -3923,11 +3923,12 @@ def carga_sep_pend(id_carga) -> str:
         id_carga=id_carga, 
         user_info=user_info,
         fant_cliente=fant_cliente,
-        obs_carga=obs_carga
+        obs_carga=obs_carga,
+        status='p' # pendente
     )
 
 
-@app.route('/mov/carga/separacao/f/<string:id_carga>/', methods=['GET', 'POST'])
+@app.route('/mov/carga/separacao/f/<string:id_carga>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_done(id_carga) -> str:
     if '-' in id_carga:
@@ -3944,7 +3945,8 @@ def carga_sep_done(id_carga) -> str:
         seq=seq, 
         user_info=user_info,
         fant_cliente=fant_cliente,
-        obs_carga=obs_carga
+        obs_carga=obs_carga,
+        status='f' # finalizado
     )
 
 
