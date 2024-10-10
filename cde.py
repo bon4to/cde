@@ -127,7 +127,7 @@ Pressione ENTER para sair...
         sys.exit(2)
         
     log_directory = os.path.join(os.getcwd(), 'logs')
-    rep_directory = os.path.join(os.getcwd(), 'reports')
+    rep_directory = os.path.join(os.getcwd(), 'report')
 
     # cria os diretórios se não existirem
     if not os.path.exists(log_directory):
