@@ -61,10 +61,10 @@
                     {% for item in saldo_atual %}
                         <tr>
                             <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
-                            <td>{{ item['cod_item'] }}</td>
+                            <td class="number">{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
-                            <td style="text-align: right">{{ item['saldo'] }}</td>
+                            <td class="number">{{ item['saldo'] }},0</td>
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -660,7 +660,9 @@ th {
 
 td {
     background-color: rgb(243, 243, 243);
-    font-family: "Roboto", sans-serif;
+    font-family: Reddit Mono;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .form-login,
@@ -1284,6 +1286,15 @@ div.user-name {
     padding: 5px;
     border: 0 solid #ddd;
     background-color: transparent;
+}
+
+
+.number {
+    font-family: Reddit Mono;
+}
+
+td.number {
+    text-align: right;
 }
 
 img.table-more {
@@ -2168,4 +2179,43 @@ h1.subtitle {
     max-width: 50%;
     border-radius: 16px;
     height: 100%;
+}
+
+#idCargaContainerSelect {
+    pointer-events: all;
+    text-align: center;
+    margin: 0 2px;
+    padding: 0 6px;
+    color: var(--cor-destaque);
+    font-weight: bold;
+    width: unset;
+    height: unset;
+    font-size: unset;
+    font-family: unset;
+}
+
+#idCargaContainerSelect option {
+    text-align: center;
+    background-color: var(--medium-dark-h);
+    color: white;
+    border-color: transparent;
+}
+
+#idCargaContainer {
+    pointer-events: none;
+    text-align: center;
+    margin: 0 2px;
+    padding: 0 6px;
+    color: var(--cor-destaque);
+    font-weight: bold;
+    width: 120px;
+    height: unset;
+    font-size: unset;
+    font-family: unset;
+}
+
+#divContent {
+    display: flex;
+    flex-direction: row;
+    min-width: 100%;
 }

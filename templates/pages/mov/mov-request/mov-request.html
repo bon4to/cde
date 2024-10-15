@@ -44,7 +44,7 @@
                 <div class="tables-container" style="max-width: 55%; min-width: 55%;">
                     <div class="flex-column">
                         <div class="split-horizontal">
-                            <h1 style="margin-bottom: 8px">Número de Requisição <span class="cor-web">[{{ id_req }}]</span></h1>
+                            <h1 style="margin-bottom: 8px">Número de Requisição <input id="idCargaContainer" class="cor-web" value="{{ id_req }}"></h1>
                             <div class="flex-row" style="gap: 30px">
                                 <div class="cart-container" style="display: none">
                                     <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
@@ -319,7 +319,7 @@
         {% endif %}
         {% if not cod_item %}
             <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                <h1 class="subtitle" style="margin: 0;">Separações</h1>
+                <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
                 <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 12px" onchange="window.location.href='/mov/requisicao/separacao/f/{{ id_req | default(0) }}'">
                     <option style="color: var(--cor-destaque);">Pendentes</option>
                     <option style="color: green;">Finalizadas</option>
