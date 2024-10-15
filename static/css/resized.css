@@ -21,6 +21,10 @@
     .item {
         grid-column: span 2;
     }
+    
+    #divContent {
+        flex-direction: column;
+    }
 }
 
 @media screen and (max-width: 1300px) {
