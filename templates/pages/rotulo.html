@@ -10,6 +10,8 @@
             <h1>
                 <a href="{{ url_for('home') }}">CDE</a>
                 <span class="dash">/</span>
+                <a href="{{ url_for('home') }}">OUTROS</a>
+                <span class="dash">/</span>
                 <span>RÓTULO</span>
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
@@ -25,11 +27,11 @@
             </div>
         </div>
         <div id="divContent">
-            <div draggable="false" class="form-login">
+            <div draggable="false" style="display: flex; align-items: center;" class="form-login">
                 <div class="flex-row">
                     <div class="log">
-                        <div style="max-width: 400px; justify-content: flex-start; margin: auto;">
-                            <form style="display: flex;" id="form-field" method="post" action="{{ url_for('rotulo') }}">
+                        <div style="max-width: 400px; justify-content: flex-start; margin: auto">
+                            <form style="max-width: 400px; justify-content: flex-start; margin: auto" id="form-field" method="post" action="{{ url_for('rotulo') }}">
                                 <div class="two-split">
                                     <div>
                                         <label for="diametro_inicial" >Diâmetro (Externo)</label>
@@ -39,8 +41,7 @@
                                             maxlength="6" 
                                             id="diametro_inicial" 
                                             type="number" 
-                                            name="diametro_minimo" 
-                                            oninput="verificarComprimento()" 
+                                            name="diametro_minimo"  
                                             required placeholder="Diâmetro..."
                                         >
                                     </div>
@@ -52,8 +53,7 @@
                                         maxlength="6" 
                                         id="diametro_minimo" 
                                         type="number" 
-                                        name="diametro_minimo" 
-                                        oninput="verificarComprimento()" 
+                                        name="diametro_minimo"
                                         required 
                                         placeholder="Diâmetro..."
                                     >
@@ -69,8 +69,7 @@
                                             maxlength="6" 
                                             name="espessura_fita" 
                                             id="espessura_fita" 
-                                            type="number" 
-                                            oninput="verificarComprimento()" 
+                                            type="number"  
                                             required 
                                             placeholder="Espessura..."
                                         >
@@ -83,8 +82,7 @@
                                             maxlength="6" 
                                             type="number" 
                                             id="espessura_papelao" 
-                                            name="espessura_papelao" 
-                                            oninput="verificarComprimento()" 
+                                            name="espessura_papelao"  
                                             required 
                                             placeholder="Espessura..."
                                         >
@@ -98,26 +96,26 @@
                                             maxlength="6" 
                                             id="compr_rotulo" 
                                             name="compr_rotulo" 
-                                            oninput="verificarComprimento()" 
                                             required 
                                             placeholder="Distância do início de um rótulo ao início de outro..."
                                         >
                                     </div>
                                 <hr>
                                 <h3 id="resposta1" class="alert">Calculadora</h3>
-                                <p id="resposta3">Digite os parâmetros...</p>
+                                <p id="resposta2">Digite os parâmetros...</p>
                                 <div style="display: none" class="split-horizontal">
                                     <input class="btn-fancy" type="submit" value="Calcular...">
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <div id="tables-cont" style="max-width: 580px;margin: 10px; margin-left: 40px;">
+                    <div id="tables-cont" style="margin: 40px;">
                         <div class="centralizado">
-                            <div>
+                            <div class="centralizado" style="background-color: var(--cor-destaque); border-radius: 20px; width: 450px; height: 450px;">
                                 <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="">
                             </div>
                         </div>
+                        <p id="resposta3" style="font-weight: 500; color: var(--cor-destaque);">Aguardando dados...</p>
                     </div>
                 </div>
             </div>
@@ -151,13 +149,13 @@
                 });
 
                 $("#field").submit(function(event) {
-                     event.preventDefault();
-                     var espessura_fita = $("#espessura_fita").val();
-                     var diametro_inicial = $("#diametro_inicial").val();
-                     var diametro_minimo = $("#diametro_minimo").val();
-                     var espessura_papelao = $("#espessura_papelao").val();
-                     var compr_rotulo = $("#compr_rotulo").val();
-                     calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo);
+                    event.preventDefault();
+                    var espessura_fita = $("#espessura_fita").val();
+                    var diametro_inicial = $("#diametro_inicial").val();
+                    var diametro_minimo = $("#diametro_minimo").val();
+                    var espessura_papelao = $("#espessura_papelao").val();
+                    var compr_rotulo = $("#compr_rotulo").val();
+                    calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo);
                 });
 
                 $(document).ready(function() {
@@ -184,8 +182,8 @@
                         data: { espessura_fita: espessura_fita, diametro_inicial: diametro_inicial, diametro_minimo: diametro_minimo, espessura_papelao: espessura_papelao, compr_rotulo: compr_rotulo },
                         success: function(response) {
                             $("#resposta1").text(response.num_rotulos_str + " rótulos");
-                            $("#resposta2").text(response.num_voltas + " voltas");
-                            $("#resposta3").text(response.comprimento_mtrs + " metros");
+                            $("#resposta2").text(response.comprimento_mtrs + " metros");
+                            $("#resposta3").text("O tubo de rótulo tem " + response.num_voltas + " voltas");
                         },
                         error: function(error) {
                             console.error("Erro ao exibir o valor", error);
