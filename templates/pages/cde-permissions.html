@@ -22,7 +22,7 @@
             </div>
         </div>
         <div class="flex-row" style="min-width: 100%; justify-content: space-between;">
-                <div class="tables-container" style="min-width: 40vw; max-width: max-content;">   
+                <div class="tables-container" style="min-width: 40vw;">   
                     {% if session['user_grant'] == 1 %}
                         {% if permissions %}
                             {% if id_perm_data %}
@@ -76,7 +76,7 @@
                 </div>
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
                     <h1 class="subtitle" style="margin: 0;">Listagem de páginas</h1>
-                    <p style="justify-content: flex-start; margin: 0 0 12px 0;">ou permissões</p>
+                    <p style="justify-content: flex-start; margin: 0 0 12px 0;">& permissões de acesso</p>
                     {% block all_separation_status %}
                     
                     {% endblock all_separation_status %}

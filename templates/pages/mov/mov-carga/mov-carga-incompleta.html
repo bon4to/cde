@@ -56,12 +56,12 @@
         </form>
         
             {% if 'user_grant' in session %}
-                <div id="incompTable" class="tables-container" style="max-width: 55%; min-width: 55%;">
+                <div id="incompTable" class="tables-container" style="min-width: 55%;">
                     {% if carga_incomp | count > 0 %}
                     <div class="flex-column">
                         {% if id_carga %}
                             <div class="split-horizontal">
-                                <h1 style="margin-bottom: 8px">Número de Carga <span class="cor-web">[{{ id_carga }}]</span></h1>
+                                <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="cor-web" value="{{ id_carga }}"></h1>
                                 <div style="display: flex; flex-direction: column; gap: 6px">
                                     <div class="cart-container" style="display: none">
                                         <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
@@ -220,7 +220,7 @@
                 </div>
             {% else %}
             <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                <h1 class="subtitle" style="margin: 0;">Cargas Incompletas</h1>
+                <h1 class="subtitle" style="margin: 0;">Buscar cargas...</h1>
                 <select class="address-three inline-input" style="color: var(--cor-cde); font-size: 12px" onchange="window.location.href='/mov/carga/separacao/f/{{ id_carga | default(0) }}'">
                     <option style="color: var(--cor-cde);">Incompletas</option>
                 </select>

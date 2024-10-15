@@ -94,9 +94,9 @@
                             <tbody>
                                 {% for item in saldo_visualization %}
                                     <tr>
-                                        <td>{{ item.cod_item }}</td>
+                                        <td class="number">{{ item.cod_item }}</td>
                                         <td>{{ item.desc_item }}</td>
-                                        <td style="text-align: right">{{ item.saldo }}</td>
+                                        <td class="number">{{ item.saldo }},0</td>
                                         <td>{{ item.ult_mov }}</td>
                                     </tr>
                                 {% endfor %}

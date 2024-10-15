@@ -95,7 +95,7 @@
                                 <div style="display: flex;">
                                     <div class="flex-row">
                                         <div style="display: flex; align-items: center">
-                                            <img id="svg-image" class="svg-orange" style="width: 22px; height: 22px; margin-left: 4px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
+                                            <img id="svg-image" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
                                         </div>
                                         <div style="display: flex; align-items: center">
                                             <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
@@ -235,7 +235,7 @@
                             <td>{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
-                            <td style="text-align: right">{{ item['saldo'] }}</td>
+                            <td class="number">{{ item['saldo'] }},0</td>
                         </tr>
                         {% endfor %}
                     </table>
