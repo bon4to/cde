@@ -144,16 +144,20 @@ class cde:
         user_id = session.get('id_user', 'unknown')
         log_file_name = datetime.now().strftime('%Y-%m-%d') + f'-u{user_id}' + '.log'
         log_file_path = os.path.join(log_directory, log_file_name)
+        try:
+            with open(log_file_path, 'a') as log_file:
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                
+                # Se o log_message for uma lista ou dicionário, converte para JSON
+                if isinstance(log_message, (list, dict)):
+                    log_message = json.dumps(log_message, ensure_ascii=False)
+                
+                log_file.write(f'[{timestamp}] {log_message}\n')
+                return True
+        except Exception as e:
+            return False
 
-        with open(log_file_path, 'a') as log_file:
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            
-            # Se o log_message for uma lista ou dicionário, converte para JSON
-            if isinstance(log_message, (list, dict)):
-                log_message = json.dumps(log_message, ensure_ascii=False)
-            
-            log_file.write(f'[{timestamp}] {log_message}\n')
-    
+
     @staticmethod
     # LOGS NO MODO DEBUG
     def debug_log(text):
@@ -703,6 +707,16 @@ class CargaUtils:
     def readJsonCargaSeq(filename, seq=False):
         base_path = os.path.join(app.root_path, 'report/cargas')
         seq = int(seq)
+        
+        num_files = 0
+        while True:
+            file_path = os.path.join(base_path, f'{filename}.json')
+            if num_files > 0:
+                file_path = os.path.join(base_path, f'{filename}-{num_files}.json')
+            if not os.path.exists(file_path):
+                break
+            num_files += 1
+        
         if not seq:
             # 1234.json
             # Unifica todos os arquivos JSON com a mesma base de nome
@@ -720,9 +734,9 @@ class CargaUtils:
                     unified_data.extend(data)
                 seq += 1
             if unified_data:
-                return unified_data
+                return unified_data, num_files
             else:
-                return None
+                return None, num_files
         else:
             # 1234-1.json
             # Lê o arquivo JSON específico com a sequência fornecida
@@ -732,9 +746,9 @@ class CargaUtils:
             
             if os.path.exists(file_path):
                 with open(file_path, 'r') as file:
-                    return json.load(file)
+                    return json.load(file), num_files
             else:
-                return None
+                return None, num_files
 
 
     @staticmethod
@@ -2306,12 +2320,17 @@ def users() -> str:
 
 
 @app.route('/api/log/', methods=['POST'])
-def log_message() -> None:
+def log_message():
     data = request.json
     if 'message' in data:
-        cde.save_log(data['message'])
+        if cde.save_log(data['message']) == True:
+            print(f'{TAGS.INFO} Log salvo com sucesso.')
+            return None
+        print(f'{TAGS.ERRO} Não foi possível salvar o log.')        
+        return None
     else:
-        return print(f'{TAGS.ERRO} Não foi possível salvar o log.')
+        print(f'{TAGS.ERRO} Nenhuma mensagem foi recebida.')
+        return None
 
 
 @app.route('/cde/permissions/', methods=['GET', 'POST'])
@@ -4045,8 +4064,8 @@ def get_carga_table_data():
         if not filename:
             return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
 
-        data = CargaUtils.readJsonCargaSeq(filename, seq)
-        return jsonify(data), 200
+        data, num_files = CargaUtils.readJsonCargaSeq(filename, seq)
+        return jsonify({'data': data, 'num_files': num_files}), 200
     
     except FileNotFoundError:
         return jsonify({'error': 'FileNotFound'}), 404
@@ -4091,7 +4110,8 @@ def list_all_separations():
             app.root_path,
             f'report/{report_dir}'
         )
-        files = [f for f in os.listdir(directory) if f.endswith('.json')]
+        files = [f for f in os.listdir(directory) if f.endswith('.json') and len(f.split('-')) == 3]
+        
         files_sorted = sorted(files, reverse=True)
         return jsonify(files_sorted), 200
     except Exception as e:

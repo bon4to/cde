@@ -14,7 +14,7 @@
 {% block aux_buttons %}
     <form onsubmit="routeMovRedirect('carga/separacao/f'); return false;">
         <div class="flex-row" style="margin: 8px 0; width: 100%;">
-            <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Carga...">
+            <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="{{ id_carga }}">
             <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
                 <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
             </button>
@@ -38,6 +38,14 @@
     <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
 {% endblock aux_buttons %}
 
+{% block switch %}
+    <input id="idCargaContainer" class="cor-web" value="{{ id_carga }}">
+    <select id="idCargaContainerSelect" style="display: none">
+        {% if seq != "0" or seq != None %}
+            <option style="color: var(--cor-destaque);" value="{{ seq }}">{{ id_carga }}-{{ seq }}</option>
+        {% endif %}
+    </select>
+{% endblock switch %}
 
 {% block separation_buttons %}
     <div class="flex-row">
@@ -62,10 +70,46 @@
 {% block script %}
     <script>
 
-        const nroCarga    = '{{ id_carga }}';
+        const nroCarga = '{{ id_carga }}';
+        const seq = '{{ seq }}';
+        const seqMax = [];
+
         const fantCliente = '{{ fant_cliente }}';
-        const obs_carga   = '{{ obs_carga }}';
-        const seq         = '{{ seq }}';
+        const obs_carga = '{{ obs_carga }}';
+
+
+        function createSelect(options) {
+            // pega o elemento select
+            const select = document.getElementById('idCargaContainerSelect');
+            const header = document.getElementById('idCargaContainer');
+            
+            console.log(options);
+            console.log(options.length);
+
+            if (options.length > 1) {
+                header.style.display = 'none';
+                select.style.display = 'inline-block';
+            }
+            
+            // adiciona as opções ao select
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.text = `${nroCarga}-${option}`;
+                select.appendChild(opt);
+            });
+
+            // detecta quando o usuário seleciona uma opção
+            select.addEventListener('change', function() {
+                const selectedValue = this.value;
+                // obtém a URL atual
+                const currentUrl = window.location.pathname;
+                // altera a URL com o valor selecionado
+                // pega a primeira parte da URL e adiciona o seq
+                const newUrl = currentUrl.split('-')[0] + '-' + selectedValue;
+                window.location.href = newUrl;
+            });
+        }
 
         function getSeparacao() {
             return new Promise((resolve, reject) => {
@@ -80,8 +124,9 @@
                             }
                             return response.json();
                         })
-                        .then(data => {
-                            resolve(data);
+                        .then(result => {
+                            const { data: cargaData, num_files } = result;
+                            resolve({cargaData, num_files});
                         })
                         .catch(error => {
                             reject(error);
@@ -98,7 +143,14 @@
             itemsTable.innerHTML = '';
 
             try {
-                const sepCarga = await getSeparacao();
+                const { cargaData: sepCarga, num_files: numFiles } = await getSeparacao();
+
+                const seqArray = [];
+
+                for (let i = 0; i < numFiles; i++) {
+                    seqArray.push(i);
+                }
+                createSelect(seqArray)
 
                 // Obter itens da carga
                 let itens_carga;
@@ -120,15 +172,18 @@
                     console.error('Erro ao obter itens_carga:', error);
                     return;
                 }
-        
-                // Agrupar os itens por código de item
-                const groupedItems = sepCarga.reduce((acc, item) => {
-                    if (!acc[item.cod_item]) {
-                        acc[item.cod_item] = [];
-                    }
-                    acc[item.cod_item].push(item);
-                    return acc;
-                }, {});
+                // try {
+                    // Agrupar os itens por código de item
+                    const groupedItems = sepCarga.reduce((acc, item) => {
+                        if (!acc[item.cod_item]) {
+                            acc[item.cod_item] = [];
+                        }
+                        acc[item.cod_item].push(item);
+                        return acc;
+                    }, {});
+                // } catch (error) {
+                //     console.error('Carga inválida (pode não existir seu arquivo):', error);
+                // }
 
                 // Iterar sobre os grupos de itens
                 for (const [cod_item, items] of Object.entries(groupedItems)) {
@@ -140,7 +195,9 @@
 
                         const row = itemsTable.insertRow();
                         row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
-                        row.insertCell(1).textContent = item.cod_item;
+                        rowCodItem = row.insertCell(1)
+                        rowCodItem.textContent = item.cod_item;
+                        rowCodItem.style.textAlign = 'right';
 
                         const descCell = row.insertCell(2);
                         row.insertCell(3).textContent = item.lote_item;
@@ -158,7 +215,7 @@
                         }
                     }
 
-                    const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
+                    const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item, 0);
                     const subtotalRow = itemsTable.insertRow();
 
                     subtotalRow.insertCell(0);
