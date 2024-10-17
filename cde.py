@@ -2328,9 +2328,8 @@ def log_message():
             return None
         print(f'{TAGS.ERRO} Não foi possível salvar o log.')        
         return None
-    else:
-        print(f'{TAGS.ERRO} Nenhuma mensagem foi recebida.')
-        return None
+    print(f'{TAGS.ERRO} Nenhuma mensagem foi recebida.')
+    return None
 
 
 @app.route('/cde/permissions/', methods=['GET', 'POST'])

@@ -196,6 +196,10 @@ html.dark .btn-fancy.featured:hover {
     background-color: rgb(32, 96, 214);
 }
 
+html.dark button.checked {
+    background-color: var(--cor-destaque);
+}
+
 html.dark .btn-fancy .svg {
     filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(180deg);
 }
