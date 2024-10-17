@@ -263,13 +263,51 @@
                                 </details>
                             </div>
                         {% elif class_alert == 'success' %}
+                            <h1 class="subtitle">Selecione a <span class="cor-web">carga</span> para iniciar a <span class="cor-web">separação</span>:</h1>
+                            <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                                {% if result %}
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Carga (Código)</th>
+                                                <th>Pedido (Código)</th>
+                                                <th>Cliente (Código)</th>
+                                                <th>Cliente (Descrição)</th>
+                                                <th>Emissão (Data)</th>
+                                                <th>Entrega (Data)</th>
+                                                <th>OBS.</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in result %}
+                                                {% if class_alert != 'error' %}
+                                                    <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('NRO_CARGA')] }}">
+                                                        <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
+                                                        <td class="number">{{ row[columns.index('NRO_PEDIDO')] }}</td>
+                                                        <td class="number">{{ row[columns.index('COD_CLIENTE')] }}</td>
+                                                        <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                                        <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
+                                                        <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
+                                                        <td style="text-align: center">
+                                                            {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
+                                                                <span title="{{ row[columns.index('OBS_CARGA')] }}">🔵</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% endif %}
+                            </div>
+                            <br>
                             <div class="msg-success">
                                 <details>
                                     <summary>A lista foi carregada com sucesso!</summary>
                                     {{ alert | safe }}
                                 </details>
                             </div>
-                            <h1 class="subtitle">Selecione a <span class="cor-web">carga</span> para iniciar a <span class="cor-web">separação</span>:</h1>
+                            <br>
                         {% endif %}
                     {% else %}
                         <div style="display: flex; justify-content: center; height: 100%;">
@@ -278,43 +316,6 @@
                             </p>
                         </div>
                     {% endif %}
-                    <div style="max-height: 540px; overflow-y: auto; width: 100%;">
-                        {% if result %}
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Carga (Código)</th>
-                                        <th>Pedido (Código)</th>
-                                        <th>Cliente (Código)</th>
-                                        <th>Cliente (Descrição)</th>
-                                        <th>Emissão (Data)</th>
-                                        <th>Entrega (Data)</th>
-                                        <th>OBS.</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in result %}
-                                        {% if class_alert != 'error' %}
-                                            <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('NRO_CARGA')] }}">
-                                                <td>{{ row[columns.index('NRO_CARGA')] }}</td>
-                                                <td>{{ row[columns.index('NRO_PEDIDO')] }}</td>
-                                                <td>{{ row[columns.index('COD_CLIENTE')] }}</td>
-                                                <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
-                                                <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
-                                                <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
-                                                <td style="text-align: center">
-                                                    {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
-                                                        <span title="{{ row[columns.index('OBS_CARGA')] }}">🔵</span>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                        {% endif %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% endif %}
-                    </div>
-                    <br>
                 </div>
                 {% endif %}
                 {% if not cod_item %}
