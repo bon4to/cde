@@ -40,11 +40,18 @@
 
 {% block switch %}
     <input id="idCargaContainer" class="cor-web" value="{{ id_carga }}">
-    <select id="idCargaContainerSelect" style="display: none">
-        {% if seq != "0" or seq != None %}
-            <option style="color: var(--cor-destaque);" value="{{ seq }}">{{ id_carga }}-{{ seq }}</option>
-        {% endif %}
+    <select id="idCargaContainerSelect" style="display: none;">
+        <option style="color: var(--cor-destaque);" value="{{ seq }}">{{ id_carga }}-{{ seq }}</option>
     </select>
+    {% if seq != 0 %}
+        <img 
+            alt=""
+            class="svg-invert" 
+            style="pointer-events: all; cursor: pointer;"
+            src="{{ url_for('static', filename='svg/eraser.svg') }}" 
+            onclick="window.location.href='/mov/carga/separacao/f/{{ id_carga }}';"
+        >
+    {% endif %}
 {% endblock switch %}
 
 {% block separation_buttons %}
@@ -93,10 +100,12 @@
             
             // adiciona as opções ao select
             options.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option;
-                opt.text = `${nroCarga}-${option}`;
-                select.appendChild(opt);
+                if (option != 0 && option != seq) {
+                    const opt = document.createElement('option');
+                    opt.value = option;
+                    opt.text = `${nroCarga}-${option}`;
+                    select.appendChild(opt);
+                }
             });
 
             // detecta quando o usuário seleciona uma opção
