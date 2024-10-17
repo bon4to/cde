@@ -88,8 +88,8 @@
                                 <br>
                                 <div class="flex-row" style="gap: 0; min-width: 100%;">
                                     <input class="btn-fancy" type="submit" value="GERAR">
-                                    <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px" >
-                                        <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" onclick="toggleCheckbox('imgCheckbox','imgDownload')" alt="">
+                                    <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px" onclick="toggleCheckbox('imgCheckbox','imgDownload')" >
+                                        <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" alt="">
                                     </button>
                                 </div>
                                 <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">

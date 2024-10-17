@@ -206,9 +206,9 @@ function toggleCheckbox(checkboxImg, checkboxInput) {
     checkbox.checked = !checkbox.checked;
 
     if (checkbox.checked) {
-        imgCheckbox.classList.add("checked");
+        checkbox.classList.add("checked");
     } else {
-        imgCheckbox.classList.remove("checked");
+        checkbox.classList.remove("checked");
     }
 }
 
