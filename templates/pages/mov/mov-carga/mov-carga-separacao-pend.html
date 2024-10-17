@@ -157,7 +157,7 @@
 
                         try {
                             const descricao = await fetchItemDescription(item.cod_item);
-                            descCell.style.textWrap = "balance";
+                            descCell.style.textWrap = "pretty";
                             descCell.textContent = descricao;
                         } catch (error) {
                             console.error('Erro ao obter descrição:', error);

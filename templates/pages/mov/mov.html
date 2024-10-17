@@ -39,7 +39,6 @@
                 <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
                 </button>
-
                     <div>
                         <form id="formBuscarItens" method="post" onsubmit="showLockLabel()" style="display: block; height: unset">
                             <div>
@@ -232,7 +231,7 @@
                         {% for item in saldo_atual %}
                         <tr>
                             <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
-                            <td>{{ item['cod_item'] }}</td>
+                            <td class="number">{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
                             <td class="number">{{ item['saldo'] }},0</td>

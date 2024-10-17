@@ -13,7 +13,7 @@
                     // Recupera o histórico existente ou inicia um novo array
                     let recentPages = JSON.parse(localStorage.getItem('recentPages')) || [];
                 
-                    if (pageId === 'CDE001' || pageId === '') {
+                    if (pageId === '' || pageId === 'CDE001' || pageId === 'CDE017') {
                         return;
                     } else {
                         // Remove a entrada existente com o mesmo pageId, se existir
