@@ -378,6 +378,16 @@ class cde:
                     return redirect(url_for('login'))
             return decorador
         return decorator
+    
+    
+    @staticmethod
+    # method to split codes from their sequences
+    def split_code_seq(code):
+        if '-' in code:
+            code, seq = code.split('-')
+            return code, seq
+        seq = '0'
+        return code, seq
 
 
 class EstoqueUtils:
@@ -2951,7 +2961,7 @@ def carga_incomp():
 @app.route('/mov/carga/incompleta/<string:id_carga>/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def carga_incomp_id(id_carga) -> str:
-    id_carga = id_carga.split('-')[0]
+    id_carga = cde.split_code_seq(id_carga)[0]
     
     result, columns = CargaUtils.get_carga_incomp(id_carga)
     fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
@@ -3012,7 +3022,7 @@ def api_insert_carga_incomp() -> Response:
 @app.route('/get/itens_carga_incomp/<string:id_carga>/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def route_get_carga_incomp(id_carga) -> Response:
-    id_carga = id_carga.split('-')[0]
+    id_carga = cde.split_code_seq(id_carga)[0]
     
     pending_items = CargaUtils.get_carga_incomp(id_carga)[0] #index 0 para pegar o result
     return jsonify(
@@ -3541,7 +3551,7 @@ def carga_id(id_carga) -> str:
         if cod_item:
             result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
 
-        id_carga = id_carga.split('-')[0]
+        id_carga = cde.split_code_seq(id_carga)[0]
         
         fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
         all_cargas = CargaUtils.get_cargas_finalizadas()
@@ -3930,7 +3940,7 @@ def get_itens_carga():
 @app.route('/mov/carga/separacao/p/<string:id_carga>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_pend(id_carga) -> str:
-    id_carga = id_carga.split('-')[0]
+    id_carga = cde.split_code_seq(id_carga)[0]
     
     id_user   = session.get('id_user')
     user_info = UserUtils.get_userdata(id_user)
@@ -3950,7 +3960,7 @@ def carga_sep_pend(id_carga) -> str:
 @cde.verify_auth('MOV006')
 def carga_sep_done(id_carga) -> str:
     if '-' in id_carga:
-        id_carga, seq = id_carga.split('-')
+        id_carga, seq = cde.split_code_seq(id_carga)
     else:
         seq = 0
     id_user      = session.get('id_user')
@@ -4043,7 +4053,7 @@ def save_localstorage():
 
 @app.route('/get/has_carga_at_history/<string:id_carga>/', methods=['GET'])
 def has_carga_at_history(id_carga) -> Response:
-    id_carga = id_carga.split('-')[0]
+    id_carga = cde.split_code_seq(id_carga)[0]
     
     has_carga_at_history = bool(CargaUtils.get_carga_incomp(id_carga)[0])
     return jsonify(
