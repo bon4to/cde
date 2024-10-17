@@ -31,7 +31,7 @@
             <div style="{% if id_carga == '0' %}display: none;{% endif %}">
                 <div class="split-horizontal">
                     <div class="flex-column">
-                        <h1>Número de Carga {% block switch %}<input id="idCargaContainer" class="cor-web" value="{{ id_carga }}">{% endblock switch %}</h1>
+                        <h1 class="flex-row" style="align-items: center;">Número de Carga {% block switch %}<input id="idCargaContainer" class="cor-web" value="{{ id_carga }}">{% endblock switch %}</h1>
                         {% if result %}
                             <h1 class="subtitle">Responsável: <span class="cor-web">{{ result[0][columns.index('USUARIO')] }}</span></h1>
                         {% endif %}
