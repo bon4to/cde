@@ -23,7 +23,7 @@
     }
     
     #divContent {
-        flex-direction: column;
+        flex-wrap: wrap;
     }
 }
 
@@ -47,6 +47,11 @@
 @media screen and (max-width: 1000px) {
     .h1 {
         font-size: 20px;
+    }
+    
+    #divContent {
+        flex-wrap: nowrap;
+        flex-direction: column;
     }
 }
 /*
