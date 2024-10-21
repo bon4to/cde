@@ -47,7 +47,7 @@
         </div>
         <div class="flex-row" style="min-width: 100%; justify-content: space-between;">
             {% if id_carga %}
-            <div class="tables-container" style="max-width: 55%; min-width: 55%;">
+            <div id="cargaContainer" class="tables-container" style="max-width: 55%; min-width: 55%;">
                 <div class="flex-column">
                     <div class="split-horizontal">
                         <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="cor-web" value="{{ id_carga }}"></h1>
@@ -184,7 +184,21 @@
                     </table>
                 </div>
                 <br>
-                <div class="btn-fancy" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar</div>
+                {% if id_carga %}
+                <div class="split-horizontal">
+                    <div class="flex-row">
+                        <div class="button-mini btn-fancy" onclick="excludeCarga()" title="APAGAR CARGA">
+                            <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                        </div>
+                    </div>
+                    <div 
+                        class="btn-fancy featured" 
+                        style="height: 45px; margin: 0; max-width: 200px;" 
+                        onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
+                        <span>VISUALIZAR</span>
+                    </div>
+                </div>
+                {% endif %}
             {% else %}
                 <div class="msg-success">
                     <details>

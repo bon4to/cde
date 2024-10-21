@@ -1015,6 +1015,14 @@ class CargaUtils:
             cargas = []
         return cargas
 
+    
+    @staticmethod
+    # exclui carga colocando ela no preset de cargas (.txt)
+    def excluir_carga(id_carga):
+        with open('report/cargas_preset/filtro_1.txt', 'a', encoding='utf-8') as file:
+            file.write(', ' + id_carga)
+        return
+
 
 class MovRequestUtils:
     @staticmethod
@@ -3035,7 +3043,17 @@ def route_get_carga_incomp(id_carga) -> Response:
             # }
         }
     )
-    
+
+
+@app.route('/api/conclude-carga/<string:id_carga>/', methods=['POST'])
+@cde.verify_auth('MOV006')
+def conclude_carga(id_carga) -> Response:
+    try:
+        CargaUtils.excluir_carga(id_carga)
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(success=False, error=str(e))
+
 
 @app.route('/api/conclude-incomp/<string:id_carga>/', methods=['POST'])
 @cde.verify_auth('MOV006')
