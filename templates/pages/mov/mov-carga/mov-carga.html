@@ -213,7 +213,7 @@
         {% if 'user_grant' in session %}
             {% if id_carga %}
                 {% if cod_item and cod_item in cod_item_list %}
-                    <div class="tables-container glow-tl">
+                    <div id="stockTable" class="tables-container glow-tl">
                         <span>
                             <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
                         </span>
