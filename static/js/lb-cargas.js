@@ -457,6 +457,41 @@ function clearAllSeparations() {
 }
 
 
+async function toggleDoneCarga() {
+    try {
+        const concludeResponse = await fetch(`/api/conclude-carga/${nroCarga}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const concludeData = await concludeResponse.json();
+
+        if (concludeData.success) {
+            showToast('Carga removida com sucesso.', 1, 10);
+            // recarregar a tabela
+            document.getElementById('cargaContainer').innerHTML = `
+            <div style="display: flex; justify-content: center; height: 100%;">
+                <p class="disabled">
+                    Carga removida com sucesso.
+                </p>
+            </div>
+            `;
+            stockTable = document.getElementById('stockTable')
+            if (stockTable) stockTable.style.display = 'none';
+        } else {
+            showToast(`<details><summary>Erro ao remover a carga:</summary> ${concludeData.error}</details>`, 3, 10);
+            return;
+        }
+    } catch (error) {
+        console.error('Erro ao remover a carga:', error);
+        showToast(`<details><summary>Erro ao remover a carga:</summary> ${error}</details>`, 3, 10);
+        return; // Aborta o processo se houver erro
+    }
+}
+
+
 async function toggleDoneCargaIncompleta() {
     try {
         const concludeResponse = await fetch(`/api/conclude-incomp/${nroCarga}`, {
@@ -491,6 +526,17 @@ async function toggleDoneCargaIncompleta() {
     }
 }
 
+
+function excludeCarga() {
+    const confirmation = confirm('Você tem certeza que deseja limpar TODOS os itens desta carga? Esta ação não pode ser desfeita.');
+    if (confirmation) {
+        if (!verifyCaptcha(nroCarga)) {
+            showToast('O captcha foi cancelado ou preenchido incorretamente.', 3, 10);
+            return;
+        }
+        toggleDoneCarga();
+    }
+}
 
 
 function excludeCargaIncompleta() {
