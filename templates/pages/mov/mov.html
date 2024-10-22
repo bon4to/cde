@@ -34,7 +34,7 @@
                 </select>
             </div>
         </div>
-        <div id="divContent">
+        <div id="divContent" style="flex-wrap: wrap;">
             <div id="floating-container" draggable="false" class="forms-container" style="position: relative; max-width: max-content">
                 <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
@@ -213,11 +213,42 @@
                                     </div>
                                 </div>
                             </div>
-                            <input class="btn-fancy" style="" type="submit" value="REGISTRAR" id="submitform">
+                            <div class="flex-row" style="gap: 0; min-width: 100%;">
+                                <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
+                                <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px">
+                                    <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
+                                </button>
+                            </div>
                         </form>
                     </div>
-
             </div>
+            {% if session['user_grant'] == 1 %} <!-- admin #debug -->
+                <div id="bundle-container" class="tables-container glow-tl" style="max-width: -webkit-fill-available; min-width: 800px;">
+                    <h1 class="subtitle">Pacote de itens:</h1>
+                    <table id="bundleTable" style="max-height: revert-layer;">
+                        <tr>
+                            <th>Endereço</th>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
+                            <th>Lote (Código)</th>
+                            <th>QTDE (Separada)</th>
+                            <th>Ação</th>
+                        </tr>
+                        <tr>
+                            <td>A.4 </td>
+                            <td class="number">000757</td>
+                            <td>O TRADICIONAL SUCO DE UVA BRANCO INTEGRAL 6X1,5L</td>
+                            <td>CS9022</td>
+                            <td class="number">421,0</td>
+                            <td>
+                                <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px">
+                                    <img class="svg-inv" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            {% endif %}
             <div id="tables-container" class="tables-container" style="max-height: 600px">
                 <div class="table-overflow">
                     <table id="filterTable" style="max-height: revert-layer;">
