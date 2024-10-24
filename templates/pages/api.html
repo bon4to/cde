@@ -46,43 +46,63 @@
     </div>
     <div id="divContent">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
-            <form id="sql-field" action="/database" class="form-login" style="padding: 0; border-radius: 10px; margin-bottom: 40px" method="post" onsubmit="showLoading()">
-                {% if app_version[2] %}
-                <div class="split-horizontal" style="margin: 6px; align-items: center">
-                    <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="cor-web subtitle">Console SQL</h1>
-                    <div class="flex-row" style="align-items: center; margin: 0 14px;">
-                        <select id="sel_schema" name="sel_schema" class="address" required>
-                            {% if dsn %}
-                                <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
-                            {% endif %}
-                            <option>HUGOPIET</option>
-                            <option>SQLITE</option>
-                        </select>
-                        <button class="button-mini btn-fancy" type="submit" id="submitform">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/play.svg') }}" title="EXECUTAR">
-                        </button>
+            <div class="flex-row" style="min-height: unset; margin-bottom: 40px; padding: 0;">
+                <form id="sql-field" action="/database" class="form-login" method="post" onsubmit="showLoading()">
+                    {% if app_version[2] %}
+                    <div class="split-horizontal" style="margin: 6px; align-items: center">
+                        <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="cor-web subtitle">Console SQL</h1>
+                        <div class="flex-row" style="align-items: center; margin: 0 14px;">
+                            <select id="sel_schema" name="sel_schema" class="address" required>
+                                {% if dsn %}
+                                    <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
+                                {% endif %}
+                                <option>HUGOPIET</option>
+                                <option>SQLITE</option>
+                            </select>
+                            <button class="button-mini btn-fancy" type="submit" id="submitform">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/play.svg') }}" title="EXECUTAR">
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <textarea 
-                        class="query"
-                        id="sql_query" 
-                        name="sql_query"
-                        required
-                    >{% if query %}{{ query }}{% else %}
+                    <div style="border-radius: 10px;">
+                        <textarea 
+                            class="query"
+                            id="sql_query" 
+                            name="sql_query"
+                            required
+                        >{% if query %}{{ query }}{% else %}
 -- para executar, clique em '▷' acima
 -- query para obter os 15 primeiros itens
 SELECT ITEM, ITEM_DESCRICAO, UNIDADE_DESCRICAO, GTIN_14
 FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
 WHERE GTIN_14 != ''
 LIMIT 15;{% endif %}</textarea>
-                </div>  
-                {% else %}
-                <div style="margin: 50% 0; padding: 0 160px;">
-                    <p class="disabled">Seu usuário não possui privilégios para esta ação.</p>
+                    </div>  
+                    {% else %}
+                    <div style="margin: 50% 0; padding: 0 160px;">
+                        <p class="disabled">Seu usuário não possui privilégios para esta ação.</p>
+                    </div>
+                    {% endif %}
+                </form>
+                <div class="tables-container" style="min-height: unset; max-width: 90%; width: -webkit-fill-available">
+                    <div style="max-height: 600px; overflow: auto">
+                        <table style="width: 200px">
+                            <thead>
+                                <tr>
+                                    <th>Tabela</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in tables %}
+                                <tr>
+                                    <td>{{ row[0] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                {% endif %}
-            </form>
+            </div>
             {% if app_version[2] %}
             <div class="tables-container" style="min-width: 800px; max-width: 90%; width: -webkit-fill-available">
                 <h1 style="text-align: left; margin: 0; padding-left: 0" class="cor-web subtitle">API Results</h1>

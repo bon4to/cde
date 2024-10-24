@@ -138,7 +138,7 @@ Pressione ENTER para sair...
 
 class cde:
     @staticmethod
-    # Função para salvar logs em um arquivo com nome de data
+    # função para salvar logs em um arquivo com nome de data
     def save_log(log_message):
         # Nome do arquivo de log com a data atual
         user_id = session.get('id_user', 'unknown')
@@ -159,7 +159,7 @@ class cde:
 
 
     @staticmethod
-    # LOGS NO MODO DEBUG
+    # logs no modo debug
     def debug_log(text):
         if debug == True:
             print(f'[DEBUG] {text}')
@@ -168,7 +168,7 @@ class cde:
     
     
     @staticmethod
-    # CONEXÃO E QUERY NO BANCO DE DADOS
+    # conexão e consulta no banco de dados
     def db_query(query, dsn):
         dsn = f"DSN={dsn}"
         if dsn == 'DSN=HUGOPIET':
@@ -203,6 +203,37 @@ class cde:
             
         return result, columns
 
+    
+    @staticmethod
+    # consulta tabelas do schema
+    def db_get_tables(dsn):
+        try:
+            if dsn == 'HUGOPIET':
+                query = '''
+                    SELECT TABNAME
+                    FROM SYSCAT.TABAUTH
+                    WHERE GRANTEE = 'CDEADMIN'
+                    AND SELECTAUTH = 'Y';
+                '''
+                
+                result, columns = cde.db_query(query, dsn)
+    
+            elif dsn == 'SQLITE':
+                query = '''
+                    SELECT name 
+                    FROM sqlite_master 
+                    WHERE type = 'table' 
+                        AND name NOT LIKE 'sqlite_%'
+                    ORDER BY name;
+                '''
+                result, columns = cde.db_query(query, dsn)
+
+            else:
+                result = [[f'DSN desconhecida: {dsn}']]
+        except Exception as e:
+            result = [[f'Erro de consulta: {e}']]
+        return result
+    
     
     @staticmethod
     # GERADOR DE TABELAS
@@ -2395,12 +2426,15 @@ def api() -> str:
     if debug:
         if request.method == 'POST':
             query = request.form['sql_query']
-            dsn   = request.form['sel_schema']
+            dsn = request.form['sel_schema']
+            tables = cde.db_get_tables(dsn)
+            print(f'query: {query}; dsn: {dsn}; tables: {tables}') # print(query, dsn, tables)
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
                 result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
                     'pages/api.html', 
                     result=result,
+                    tables=tables,
                     query=query,
                     dsn=dsn
                 )
@@ -2411,6 +2445,7 @@ def api() -> str:
                     'pages/api.html', 
                     result=result,
                     columns=columns,
+                    tables=tables,
                     query=query,
                     dsn=dsn
                 )
