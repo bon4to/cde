@@ -215,9 +215,6 @@ class cde:
                     WHERE GRANTEE = 'CDEADMIN'
                     AND SELECTAUTH = 'Y';
                 '''
-                
-                result, columns = cde.db_query(query, dsn)
-    
             elif dsn == 'SQLITE':
                 query = '''
                     SELECT name 
@@ -226,13 +223,13 @@ class cde:
                         AND name NOT LIKE 'sqlite_%'
                     ORDER BY name;
                 '''
-                result, columns = cde.db_query(query, dsn)
-
             else:
-                result = [[f'DSN desconhecida: {dsn}']]
+                return [[f'DSN desconhecida: {dsn}']]
+            
         except Exception as e:
-            result = [[f'Erro de consulta: {e}']]
-        return result
+            return [[f'Erro de consulta: {e}']]
+        
+        return cde.db_query(query, dsn)[0]
     
     
     @staticmethod
