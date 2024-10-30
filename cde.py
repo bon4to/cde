@@ -29,7 +29,7 @@ if __name__:
     app.secret_key = os.getenv('SECRET_KEY')
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
-    app.config['APP_VERSION'] = ['0.4.9', 'Outubro/2024', False]
+    app.config['APP_VERSION'] = ['0.5.0', 'Novembro/2024', False]
 
     # GET nome do diretório
     dir_os = os.path.dirname(os.path.abspath(__file__)).upper()
