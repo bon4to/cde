@@ -2809,7 +2809,7 @@ def moving() -> str | Response:
                         numero=destino_number, letra=destino_letter, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao='TE', # transferencia entrada 
-                        timestamp_out=timestamp_out, 
+                        timestamp_out=timestamp_in, 
                         id_carga=id_carga
                     )
                     # verifica se operação foi realizada corretamente
@@ -2913,6 +2913,7 @@ def moving_carga_bulk():
     sep_carga     = request.json
     timestamp_br  = datetime.now(timezone(timedelta(hours=-3)))
     timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
+    timestamp_in  = (timestamp_br + timedelta(seconds=1)).strftime('%Y/%m/%d %H:%M:%S')
     
     try:
         for item in sep_carga:
@@ -2928,16 +2929,64 @@ def moving_carga_bulk():
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             for item in sep_carga:
-                HistoricoUtils.insert_historico(
-                    timestamp_out=timestamp_out,
-                    numero=item['rua_numero'],
-                    letra=item['rua_letra'],
-                    cod_item=item['cod_item'],
-                    lote_item=item['lote_item'],
-                    quantidade=item['qtde_sep'],
-                    id_carga=item['nrocarga'],
-                    operacao='F'
-                )
+                if not item['operacao']:
+                    operacao = 'F'
+                    
+                    HistoricoUtils.insert_historico(
+                        timestamp_out=timestamp_out,
+                        numero=item['rua_numero'],
+                        letra=item['rua_letra'],
+                        cod_item=item['cod_item'],
+                        lote_item=item['lote_item'],
+                        quantidade=item['qtde_sep'],
+                        id_carga=item['nrocarga'],
+                        operacao=operacao
+                    )
+                elif item['operacao'] == 'S':
+                    operacao = 'S'
+                
+                    HistoricoUtils.insert_historico(
+                        timestamp_out=timestamp_out,
+                        numero=item['rua_numero'],
+                        letra=item['rua_letra'],
+                        cod_item=item['cod_item'],
+                        lote_item=item['lote_item'],
+                        quantidade=item['qtde_sep'],
+                        id_carga=item['nrocarga'],
+                        operacao=operacao
+                    )
+                    
+                # verificar se o campo 'operacao' foi enviado
+                elif item['operacao'] == 'T':
+                    operacao = 'TS'
+                
+                    HistoricoUtils.insert_historico(
+                        timestamp_out=timestamp_out,
+                        numero=item['rua_numero'],
+                        letra=item['rua_letra'],
+                        cod_item=item['cod_item'],
+                        lote_item=item['lote_item'],
+                        quantidade=item['qtde_sep'],
+                        id_carga=item['nrocarga'],
+                        operacao=operacao
+                    )
+                    
+                    operacao = 'TE'
+                    
+                    letra_destino = item['endereco_destino'].split('.')[0]
+                    numero_destino = item['endereco_destino'].split('.')[1]
+                    
+                    HistoricoUtils.insert_historico(
+                        timestamp_out=timestamp_in,
+                        numero=numero_destino,
+                        letra=letra_destino,
+                        cod_item=item['cod_item'],
+                        lote_item=item['lote_item'],
+                        quantidade=item['qtde_sep'],
+                        id_carga=item['nrocarga'],
+                        operacao=operacao
+                    )
+                
             connection.commit()
         return jsonify({'success': True})
     except Exception as e:
