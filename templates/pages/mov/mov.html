@@ -222,6 +222,7 @@
                     </form>
                 </div>
             </div>
+
             <div id="tables-container" class="tables-container" style="max-height: 600px">
                 <div class="table-overflow">
                     <table id="filterTable" style="max-height: revert-layer;">
@@ -263,29 +264,29 @@
                 <a href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Baixar tabela...</a>
             </div>
             
-            {% if session['user_grant'] == 1 %} <!-- admin #debug -->
-                <div id="bundle-container" class="tables-container glow-tl" style="display: none; max-width: -webkit-fill-available; min-width: 800px;">
-                    <div style="display: flex; justify-content: space-between; flex-direction: column; height: 100%;">
-                        <div>
-                            <h1 class="subtitle">Pacote de itens:</h1>
-                            <div class="table-overflow">
-                                <table id="bundleTable" style="max-height: revert-layer;">
-                                    <tr>
-                                        <th>Endereço</th>
-                                        <th>Item (Código)</th>
-                                        <th>Item (Descrição)</th>
-                                        <th>Lote (Código)</th>
-                                        <th>QTDE (Separada)</th>
-                                        <th style="width: 100px; padding: 0;"></th>
-                                    </tr>
-                                    <tr>
-                                        <!-- itens serao preenchidos dinamicamente -->
-                                    </tr>
-                                </table>
-                            </div>
+            <div id="bundle-container" class="tables-container glow-tl" style="display: none; max-width: -webkit-fill-available; min-width: 800px;">
+                <div style="display: flex; justify-content: space-between; flex-direction: column; height: 100%;">
+                    <div>
+                        <h1 class="subtitle">Pacote de itens:</h1>
+                        <div class="table-overflow">
+                            <table id="bundleTable" style="max-height: revert-layer;">
+                                <tr>
+                                    <th>Endereço</th>
+                                    <th>Item (Código)</th>
+                                    <th>Item (Descrição)</th>
+                                    <th>Lote (Código)</th>
+                                    <th>QTDE (Separada)</th>
+                                    <th style="width: 100px; padding: 0;"></th>
+                                </tr>
+                                <tr>
+                                    <!-- itens serao preenchidos dinamicamente -->
+                                </tr>
+                            </table>
                         </div>
-                        <div class="split-horizontal">
-                            <select style="height: 40px" name="operacao" id="operacao" class="address-four" onchange="toggleFields()">
+                    </div>
+                    <div class="split-horizontal">
+                        <div style="display: flex;">
+                            <select style="height: 40px" name="operacao" id="bundleOperation" class="address-four" onchange="toggleBundleEndereco()">
                                 <option value="S">S</option>
                                 <option value="T">T</option>
                                 <!-- 
@@ -293,17 +294,142 @@
                                 <option value="F">F</option> 
                                 -->
                             </select>
-                            <input style="height: 40px; cursor: pointer;" class="address-two" onclick="getTableDataAsDict()" type="submit" value="REGISTRAR" id="submitform">
+                            <div id="bundleEnderecoContainer" style="display: none;">
+                                <p style="margin-left: 10px; font-family: 'Inter', sans-serif;">Transferir para:</p>
+                                <select style="height: 40px" class="address-four" id="bundleLetra" required>
+                                    <option value="A"  >A</option>
+                                    <option value="B"  >B</option>
+                                    <option value="C"  >C</option>
+                                    <option value="D"  >D</option>
+                                    <option value="PP1">PP1</option>
+                                    <option value="PP2">PP2</option>
+                                    <option value="PP3">PP3</option>
+                                    <option value="PP4">PP4</option>
+                                    <option value="AM" >AMOSTRA</option>
+                                    <option value="CAM">CÂMARA FRIA</option>
+                                    <!--
+                                        <option value="DEVOL">DEVOLUÇÃO</option>
+                                        <option value="LOJA" >LOJA</option>
+                                        <option value="PROD" >PRODUÇÃO</option>
+                                        <option value="SEPAR">SEPARAÇÃO</option>
+                                    -->
+                                </select>
+                                <input style="height: 40px" class="address-four" type="number" id="bundleNumero" step="any" min="1" max="999" required placeholder="1">
+                            </div>
                         </div>
+
+                        <input 
+                            id="registrarBtn"
+                            value="REGISTRAR" 
+                            class="address-two" 
+                            style="
+                                height: 40px; 
+                                cursor: pointer;
+                            " 
+                            type="submit" 
+                            onclick="concludeBundle()" 
+                        >
                     </div>
                 </div>
-            {% endif %}
+            </div>
         </div>
+
         {% include "components/menus/quantity-popup.html" %}
         <script>
-            let ultimoCodigo = '';
             let isColumnVisible = false;
+            let ultimoCodigo = '';
             var tableData = [];
+
+            function toggleBundleEndereco() {
+                const operacao = document.getElementById("bundleOperation").value;
+                if (operacao === 'T') {
+                    document.getElementById("bundleEnderecoContainer").style.display = 'flex';
+                } else {
+                    document.getElementById("bundleEnderecoContainer").style.display = 'none';
+                }
+            }
+
+            function concludeBundle() {
+                const registrarBtn = document.getElementById('registrarBtn');
+
+                // Exibe um indicador de carregamento e desativa o botão de finalizar.
+                showLoading();
+                registrarBtn.onclick = '';
+                registrarBtn.innerHTML = '<span class="loader-inline"></span>';
+
+                const tableData = getTableDataAsDict();
+                const operation = getBundleOperation();
+                var enderecoDestino = '';
+                
+                if (operation === 'T') {
+                    enderecoDestino = getEnderecoDestino();
+                    if (enderecoDestino === '') {
+                        showToast('Selecione um endereço de destino.', 3);
+
+                        registrarBtn.onclick = function() {
+                            concludeBundle();
+                        };
+                        hideLoading();
+
+                        return;
+                    }
+                } else {
+                    enderecoDestino = '';
+                }
+
+                if (tableData.length < 1) { // criterio para identificar se a tabela possui itens
+                    showToast('Não há itens no pacote para finalizar.', 3);
+                    
+                    registrarBtn.onclick = function() {
+                        concludeBundle();
+                    };
+                    hideLoading();
+                    
+                    return;
+                }
+
+                const dataToSend = tableData.map(item => {
+                    return {
+                        ...item,
+                        operacao: operation,
+                        endereco_destino: enderecoDestino // adiciona a operacao
+                    };
+                });
+            
+                fetch('/mov/carga/moving/bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataToSend),
+                })
+                .then(response => response.json())
+                .then(async (data) => {
+                    if (data.success) {
+                        showToast('Pacote concluído com sucesso! Recarregando tela...', 1, 4);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 4000);
+                    } else {
+                        showToast(`<details><summary>Erro ao finalizar o pacote:</summary> ${data.error}</details>`, 3, 0);
+                    }
+                })
+                .catch(error => {
+                    showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 0);
+                });
+
+            }
+
+            function getEnderecoDestino() {
+                const letra = document.getElementById("bundleLetra").value;
+                const numero = document.getElementById("bundleNumero").value;
+
+                if (!letra || !numero) {
+                    return '';
+                }
+
+                return letra + '.' + numero;
+            }
 
             function toggleColumnVisibility() {
                 const button = document.getElementById("toggleColumnButton");
@@ -445,46 +571,48 @@
                 return false; // Nenhum item duplicado encontrado
             }
 
+            function getBundleOperation() {
+                const operacao = document.getElementById("bundleOperation").value;
+                return operacao;
+            }
+
             function getTableDataAsDict() {
                 const table = document.getElementById("bundleTable");
-                
-                // Definir nomes das colunas de acordo com a ordem da tabela (ignorando a coluna de descrição)
-                const columnNames = ["endereco", "item", "quantidade", "lote"];
-                
                 const data = [];
                 
-                // Percorrer todas as linhas da tabela (ignorando o cabeçalho, se houver)
-                for (let i = 1; i < table.rows.length; i++) { // Começando de 1 para ignorar a linha de cabeçalho
+                // percorrer todas as linhas da tabela (ignorando o cabeçalho)
+                for (let i = 2; i < table.rows.length; i++) { // começando de 2 para ignorar a linha de cabeçalho
                     const row = table.rows[i];
-                    
-                    // Verificar se a linha contém o texto "ADICIONAR"
+
+                    // verificar se a linha contém "ADICIONAR"
                     if (row.cells[row.cells.length - 1]?.innerText.trim() === "ADICIONAR") {
-                        continue; // Ignorar esta linha
+                        continue; // ignora a linha
                     }
-            
+                    
                     const rowData = {};
-            
-                    // Percorrer as células da linha e adicionar ao dicionário (ignorando a célula de descrição)
-                    rowData[columnNames[0]] = row.cells[0]?.innerText.trim(); // Endereço
-                    rowData[columnNames[1]] = row.cells[1]?.innerText.trim(); // Item
-            
-                    // Verificar se a célula de quantidade possui um campo <input>
-                    const inputCell = row.cells[4]?.querySelector('input');
-                    if (inputCell) {
-                        rowData[columnNames[2]] = inputCell.value; // Quantidade (valor do input)
-                    } else {
-                        console.error(`Input não encontrado na linha ${i}`);
-                        rowData[columnNames[2]] = null; // Ou você pode atribuir um valor padrão ou pular essa linha
+                    
+                    const inputCell = row.cells[4]?.querySelector('input'); // input na celula
+                    const quantidade = parseInt(inputCell.value) || 0; // (valor do input)
+                    
+                    if (quantidade === 0) { 
+                        continue; 
                     }
-            
-                    rowData[columnNames[3]] = row.cells[3]?.innerText.trim(); // Lote
-            
-                    // Adicionar o dicionário à lista de dados
+                    
+                    // endereço: combinação de rua_letra e rua_numero
+                    rowData['rua_letra'] = row.cells[0]?.innerText.trim().split(".")[0];
+                    rowData['rua_numero'] = row.cells[0]?.innerText.trim().split(".")[1];
+                    
+                    rowData['cod_item'] = row.cells[1]?.innerText.trim();
+                    rowData['lote_item'] = row.cells[3]?.innerText.trim();
+                    
+                    rowData['qtde_sep'] = quantidade; 
+                    
+                    rowData['user_id'] = "1"; // TODO - valor dinâmico
+                    rowData['nrocarga'] = "0"; // valor fixo
+                    
                     data.push(rowData);
                 }
-            
-                const tableData = data;
-                console.log(tableData);
+                return data;
             }
 
             $(function() {
