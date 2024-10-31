@@ -9,14 +9,14 @@
         <div class="titles-container flex-row title-centerer">
             <h1>MOVIMENTAR<span class="id-page">{{session['id_page']}}</span></h1>
             <div class="aux-buttons">
-                <a class="aux-button {% if request.endpoint == 'mov' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
+                <a class="aux-button {% if request.endpoint == 'mov' %}active{% endif %}" onclick="window.location.href='{{ url_for('mov') }}';">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="">
                 </a>
-                <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+                <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}" onclick="window.location.href='{{ url_for('estoque') }}';">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="">
                 </a>
-                    <a class="aux-button {% if request.endpoint == 'historico' %}active{% endif %}">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
+                <a class="aux-button {% if request.endpoint == 'historico' %}active{% endif %}" onclick="window.location.href='{{ url_for('historico') }}';">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="">
                 </a>
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
@@ -35,6 +35,15 @@
             </div>
         </div>
         <div id="divContent" style="flex-wrap: wrap;">
+            <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
+                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (UNITÁRIO)" onclick="toggleContainer()">
+                    <img class="svg-inv" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">
+                </div>
+                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (PACOTE)" onclick="toggleBundleContainer()">
+                    <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
+                </div>
+            </div>
+
             <div id="floating-container" draggable="false" class="forms-container" style="position: relative; max-width: max-content">
                 <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
@@ -135,22 +144,7 @@
                                     <label for="end_letra">Endereço</label><br>
                                     <div class="endereco-container">
                                         <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
-                                            <option value="A"  >A</option>
-                                            <option value="B"  >B</option>
-                                            <option value="C"  >C</option>
-                                            <option value="D"  >D</option>
-                                            <option value="PP1">PP1</option>
-                                            <option value="PP2">PP2</option>
-                                            <option value="PP3">PP3</option>
-                                            <option value="PP4">PP4</option>
-                                            <option value="AM" >AMOSTRA</option>
-                                            <option value="CAM">CÂMARA FRIA</option>
-                                            <!--
-                                                <option value="DEVOL">DEVOLUÇÃO</option>
-                                                <option value="LOJA" >LOJA</option>
-                                                <option value="PROD" >PRODUÇÃO</option>
-                                                <option value="SEPAR">SEPARAÇÃO</option>
-                                            -->
+                                            {% include "shared/elements/address-select.html" %}
                                         </select>
                                     </div>
                                 </div>
@@ -169,22 +163,7 @@
                                     <div class="endereco-container">
                                         <label for="destino_end_letra">End. de Destino</label><br>
                                         <select class="address-three" id="destino_end_letra" name="destino_end_letra" onchange="toggleEndNumber()">
-                                            <option value="A"  >A</option>
-                                            <option value="B"  >B</option>
-                                            <option value="C"  >C</option>
-                                            <option value="D"  >D</option>
-                                            <option value="PP1">PP1</option>
-                                            <option value="PP2">PP2</option>
-                                            <option value="PP3">PP3</option>
-                                            <option value="PP4">PP4</option>
-                                            <option value="AM" >AMOSTRA</option>
-                                            <option value="CAM">CÂMARA FRIA</option>
-                                            <!--
-                                                <option value="DEVOL">DEVOLUÇÃO</option>
-                                                <option value="LOJA" >LOJA</option>
-                                                <option value="PROD" >PRODUÇÃO</option>
-                                                <option value="SEPAR">SEPARAÇÃO</option>
-                                            -->
+                                            {% include "shared/elements/address-select.html" %}
                                         </select>
                                     </div>
                                     <div>
@@ -215,9 +194,6 @@
                         </div>
                         <div class="flex-row" style="gap: 0; min-width: 100%;">
                             <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
-                            <div class="btn-fancy" style="max-height: 60px; max-width: 60px; margin: 8px" onclick="toggleBundleContainer()">
-                                <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
-                            </div>
                         </div>
                     </form>
                 </div>
@@ -241,41 +217,32 @@
                                 <td>{{ item['desc_item'] }}</td>
                                 <td>{{ item['cod_lote'] }}</td>
                                 <td class="number">{{ item['saldo'] }},0</td>
-                                <td 
-                                    class="action-cell"
-                                    onclick="addToBundle({{ loop.index }})" 
-                                    style="
-                                        display: none;
-                                        max-width: 100px; 
-                                        cursor: pointer; 
-                                        text-align: center; 
-                                        background-color: #34bb34; 
-                                        border-color: #34bb34; 
-                                        color: white; 
-                                        font-weight: 500;
-                                        padding: 0;
-                                    ">
-                                    ADICIONAR
+                                <td class="action-cell green" onclick="addToBundle({{ loop.index }})">
+                                    <span>ADICIONAR</span>
                                 </td>
                             </tr>
                         {% endfor %}
                     </table>
                 </div>
-                <a href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Baixar tabela...</a>
             </div>
             
             <div id="bundle-container" class="tables-container glow-tl" style="display: none; max-width: -webkit-fill-available; min-width: 800px;">
                 <div style="display: flex; justify-content: space-between; flex-direction: column; height: 100%;">
                     <div>
                         <h1 class="subtitle">Pacote de itens:</h1>
+                        <div id="bundleMessage" style="display: flex; justify-content: center; height: 100%;">
+                            <p class="disabled">
+                                Adicione os itens acima para fazer uma movimentação em massa...
+                            </p>
+                        </div>
                         <div class="table-overflow">
-                            <table id="bundleTable" style="max-height: revert-layer;">
+                            <table id="bundleTable" style="max-height: revert-layer; opacity: 0;">
                                 <tr>
-                                    <th>Endereço</th>
-                                    <th>Item (Código)</th>
-                                    <th>Item (Descrição)</th>
-                                    <th>Lote (Código)</th>
-                                    <th>QTDE (Separada)</th>
+                                    <th style="width: 100px;">Endereço</th>
+                                    <th style="width: 100px;">Item (Código)</th>
+                                    <th style="width: 400px;">Item (Descrição)</th>
+                                    <th style="width: 100px;">Lote (Código)</th>
+                                    <th style="width: 100px;">QTDE (Separada)</th>
                                     <th style="width: 100px; padding: 0;"></th>
                                 </tr>
                                 <tr>
@@ -297,24 +264,19 @@
                             <div id="bundleEnderecoContainer" style="display: none;">
                                 <p style="margin-left: 10px; font-family: 'Inter', sans-serif;">Transferir para:</p>
                                 <select style="height: 40px" class="address-four" id="bundleLetra" required>
-                                    <option value="A"  >A</option>
-                                    <option value="B"  >B</option>
-                                    <option value="C"  >C</option>
-                                    <option value="D"  >D</option>
-                                    <option value="PP1">PP1</option>
-                                    <option value="PP2">PP2</option>
-                                    <option value="PP3">PP3</option>
-                                    <option value="PP4">PP4</option>
-                                    <option value="AM" >AMOSTRA</option>
-                                    <option value="CAM">CÂMARA FRIA</option>
-                                    <!--
-                                        <option value="DEVOL">DEVOLUÇÃO</option>
-                                        <option value="LOJA" >LOJA</option>
-                                        <option value="PROD" >PRODUÇÃO</option>
-                                        <option value="SEPAR">SEPARAÇÃO</option>
-                                    -->
+                                    {% include "shared/elements/address-select.html" %}
                                 </select>
-                                <input style="height: 40px" class="address-four" type="number" id="bundleNumero" step="any" min="1" max="999" required placeholder="1">
+                                <input 
+                                    id="bundleNumero" 
+                                    type="number" 
+                                    step="any" 
+                                    min="1" 
+                                    max="999" 
+                                    required 
+                                    placeholder="1"
+                                    class="address-four" 
+                                    style="height: 40px" 
+                                >
                             </div>
                         </div>
 
@@ -338,6 +300,7 @@
         <script>
             let isColumnVisible = false;
             let ultimoCodigo = '';
+            let userID = '{{ session['id_user'] }}';
             var tableData = [];
 
             function toggleBundleEndereco() {
@@ -349,7 +312,7 @@
                 }
             }
 
-            function concludeBundle() {
+            async function concludeBundle() {
                 const registrarBtn = document.getElementById('registrarBtn');
 
                 // Exibe um indicador de carregamento e desativa o botão de finalizar.
@@ -360,6 +323,8 @@
                 const tableData = getTableDataAsDict();
                 const operation = getBundleOperation();
                 var enderecoDestino = '';
+
+                await visualDelay(700);
                 
                 if (operation === 'T') {
                     enderecoDestino = getEnderecoDestino();
@@ -391,8 +356,8 @@
                 const dataToSend = tableData.map(item => {
                     return {
                         ...item,
-                        operacao: operation,
-                        endereco_destino: enderecoDestino // adiciona a operacao
+                        operacao: operation,  // adiciona a operacao (string: "S")
+                        endereco_destino: enderecoDestino // adiciona o endereco de destino (string: "A.1")
                     };
                 });
             
@@ -411,13 +376,14 @@
                             location.reload();
                         }, 4000);
                     } else {
+                        console.error(data.error);
                         showToast(`<details><summary>Erro ao finalizar o pacote:</summary> ${data.error}</details>`, 3, 0);
                     }
                 })
                 .catch(error => {
+                    console.error(error);
                     showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 0);
                 });
-
             }
 
             function getEnderecoDestino() {
@@ -448,12 +414,21 @@
             }
 
             function toggleBundleContainer() {
+                closeContainer() // closes the floating container
+
                 const bundleContainer = document.getElementById("bundle-container");
                 bundleContainer.style.display = bundleContainer.style.display === "none" ? "block" : "none";
                 toggleColumnVisibility()
             }
             
             function addToBundle(rowIndex) {
+                const bundleTable = document.getElementById("bundleTable");
+                const bundleMessage = document.getElementById("bundleMessage");
+
+                bundleTable.style.opacity = "1";
+                bundleMessage.style.display = "none";
+                
+
                 // Obter a tabela de origem e a linha a ser copiada
                 const originalRow = document.getElementById("row-" + rowIndex);
                 
@@ -524,12 +499,9 @@
                 
                 // Adicionar uma célula de ação com um botão de remoção (texto EXCLUIR)
                 const actionCell = newRow.insertCell(originalRow.cells.length - 1);
-                actionCell.style.textAlign = "center";
-                actionCell.style.borderColor = "#d72828";
-                actionCell.style.backgroundColor = "#d72828";
-                actionCell.style.color = "white";
-                actionCell.style.cursor = "pointer";
-                actionCell.style.fontWeight = "500";
+                actionCell.classList.add("action-cell");
+                actionCell.classList.add("red");
+                actionCell.style.display = "table-cell";
                 
                 // Definir o evento onclick para remover a linha
                 actionCell.onclick = function() { 
@@ -607,7 +579,7 @@
                     
                     rowData['qtde_sep'] = quantidade; 
                     
-                    rowData['user_id'] = "1"; // TODO - valor dinâmico
+                    rowData['user_id'] = userID;
                     rowData['nrocarga'] = "0"; // valor fixo
                     
                     data.push(rowData);
