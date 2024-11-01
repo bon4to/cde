@@ -26,23 +26,25 @@ if (container) {
 function toggleContainer() {
     var container = document.getElementById('floating-container');
     if (container) {
-        container.classList.toggle('show');
-        try {
-            document.getElementById("input_code").focus();
-        } catch (error) {
-            console.info('O campo flutuante não existe:', error)
+        if (container.style.display === 'block') {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'block';
+            try {
+                document.getElementById("input_code").focus();
+            } catch (error) {
+                console.info('O campo flutuante não existe:', error);
+            }
         }
-        // console.log(suplementstat_fc + "O container foi inicializado para uso.");
     } else {
-        // console.log(suplementstat_fc + "O elemento 'floating-container' não foi encontrado.");
+        console.info("O elemento 'floating-container' não foi encontrado.");
     }
 }
-
 
 function closeContainer() {
     var container = document.getElementById('floating-container');
     // console.log(suplementstat_fc + "O container foi ocultado.");
-    container.classList.remove('show');
+    container.style.display = 'none';
 }
 
 function stopDragging() {
