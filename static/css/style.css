@@ -82,7 +82,6 @@ span.id-page {
     padding: 22px 36px;
     border-radius: 24px;
     box-sizing: border-box;
-    margin: 0 10px 14px 10px;
     background-color: #fff;
     box-shadow: 0 0 22px rgba(0, 0, 0, 0.2);
 }
@@ -114,7 +113,7 @@ span.id-page {
     min-height: 80px;
     padding: 8px 36px;
     max-height: 84px;
-    margin: 0 10px 16px 10px;
+    margin: 0 0 16px 0;
     border-radius: 24px 24px 0 0;
     border-bottom: 4px inset var(--cor-destaque);
     transition: width 0.3s ease-out;
@@ -2218,4 +2217,31 @@ h1.subtitle {
     display: flex;
     flex-direction: row;
     min-width: 100%;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.action-cell {
+    cursor: pointer; 
+    display: none;
+    max-width: 100px; 
+    text-align: center; 
+    color: white; 
+    font-weight: 500;
+    padding: 0;
+}
+
+.action-cell.red {
+    background-color: #d72828; 
+    border-color: #d72828; 
+}
+
+.action-cell.green {
+    background-color: #34bb34; 
+    border-color: #34bb34; 
+}
+
+.action-cell.blue {
+    background-color: #346ebb; 
+    border-color: #346ebb; 
 }
