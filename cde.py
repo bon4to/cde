@@ -2925,6 +2925,10 @@ def moving_carga_bulk():
     
     try:
         for item in sep_carga:
+            # Define o valor padrão 'F' para 'operacao' caso não esteja presente
+            operacao = item.get('operacao', 'F')
+
+            # Verifica a quantidade em estoque
             haveItem = EstoqueUtils.get_saldo_item(
                 item['rua_numero'],
                 item['rua_letra'],
@@ -2933,67 +2937,52 @@ def moving_carga_bulk():
             )
             if haveItem < item['qtde_sep']:
                 return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
-        
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            for item in sep_carga:
-                if not item['operacao']:
-                    operacao = 'F'
-                    
-                    HistoricoUtils.insert_historico(
-                        timestamp=timestamp_out,
-                        numero=item['rua_numero'],
-                        letra=item['rua_letra'],
-                        cod_item=item['cod_item'],
-                        lote_item=item['lote_item'],
-                        quantidade=item['qtde_sep'],
-                        id_carga=item['nrocarga'],
-                        operacao=operacao
-                    )
-                elif item['operacao'] == 'S':
-                    operacao = 'S'
-                
-                    HistoricoUtils.insert_historico(
-                        timestamp=timestamp_out,
-                        numero=item['rua_numero'],
-                        letra=item['rua_letra'],
-                        cod_item=item['cod_item'],
-                        lote_item=item['lote_item'],
-                        quantidade=item['qtde_sep'],
-                        operacao=operacao
-                    )
-                    
-                # verificar se o campo 'operacao' foi enviado
-                elif item['operacao'] == 'T':
-                    operacao = 'TS'
-                
-                    HistoricoUtils.insert_historico(
-                        timestamp=timestamp_out, # timestamp de saída do item
-                        numero=item['rua_numero'],
-                        letra=item['rua_letra'],
-                        cod_item=item['cod_item'],
-                        lote_item=item['lote_item'],
-                        quantidade=item['qtde_sep'],
-                        operacao=operacao
-                    )
-                    
-                    operacao = 'TE'
-                    
-                    letra_destino = item['endereco_destino'].split('.')[0]
-                    numero_destino = item['endereco_destino'].split('.')[1]
-                    
-                    HistoricoUtils.insert_historico(
-                        timestamp=timestamp_in, # timestamp de entrada do item
-                        numero=numero_destino,
-                        letra=letra_destino,
-                        cod_item=item['cod_item'],
-                        lote_item=item['lote_item'],
-                        quantidade=item['qtde_sep'],
-                        id_carga=item['nrocarga'],
-                        operacao=operacao
-                    )
-                
-            connection.commit()
+
+            # Logica para inserir histórico de acordo com a operação
+            if operacao == 'F':
+                HistoricoUtils.insert_historico(
+                    timestamp=timestamp_out,
+                    numero=item['rua_numero'],
+                    letra=item['rua_letra'],
+                    cod_item=item['cod_item'],
+                    lote_item=item['lote_item'],
+                    quantidade=item['qtde_sep'],
+                    id_carga=item['nrocarga'],
+                    operacao=operacao
+                )
+            elif operacao == 'S':
+                HistoricoUtils.insert_historico(
+                    timestamp=timestamp_out,
+                    numero=item['rua_numero'],
+                    letra=item['rua_letra'],
+                    cod_item=item['cod_item'],
+                    lote_item=item['lote_item'],
+                    quantidade=item['qtde_sep'],
+                    operacao=operacao
+                )
+            elif operacao == 'T':
+                # Operação de transferência
+                HistoricoUtils.insert_historico(
+                    timestamp=timestamp_out,
+                    numero=item['rua_numero'],
+                    letra=item['rua_letra'],
+                    cod_item=item['cod_item'],
+                    lote_item=item['lote_item'],
+                    quantidade=item['qtde_sep'],
+                    operacao='TS'
+                )
+                letra_destino, numero_destino = item['endereco_destino'].split('.')
+                HistoricoUtils.insert_historico(
+                    timestamp=timestamp_in,
+                    numero=numero_destino,
+                    letra=letra_destino,
+                    cod_item=item['cod_item'],
+                    lote_item=item['lote_item'],
+                    quantidade=item['qtde_sep'],
+                    id_carga=item['nrocarga'],
+                    operacao='TE'
+                )
+
         return jsonify({'success': True})
     except Exception as e:
         print(f'[ERRO] Erro ao inserir histórico: {e}')
