@@ -49,7 +49,7 @@
             <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
         </div>
     </div>
-    <div class="flex-row" style="min-width: 100%; justify-content: flex-end;">
+    <div id="divContent" style="flex-wrap: wrap;">
         <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
             <div style="{% if id_req == '0' %}display: none;{% endif %}">
                 <div class="split-horizontal">
