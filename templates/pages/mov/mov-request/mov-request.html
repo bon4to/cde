@@ -39,7 +39,7 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
-        <div class="flex-row" style="min-width: 100%; justify-content: space-between;">
+        <div id="divContent" style="flex-wrap: wrap;">
             {% if id_req %}
                 <div class="tables-container" style="max-width: 55%; min-width: 55%;">
                     <div class="flex-column">
@@ -178,8 +178,8 @@
                             </details>
                         </div>
                     {% endif %}
+                </div>
             {% endif %}
-        </div>
 
         {% if 'user_grant' in session %}
             {% if id_req %}
@@ -347,6 +347,7 @@
         <!-- PopUp -->
         {% include "components/menus/quantity-popup.html" %}
         </div>
+    </div>
 
     <script>
         const nroReq = '{{ id_req }}';
