@@ -2377,13 +2377,15 @@ def users() -> str:
 def log_message():
     data = request.json
     if 'message' in data:
-        if cde.save_log(data['message']) == True:
+        if cde.save_log(data['message']):
             print(f'{TAGS.INFO} Log salvo com sucesso.')
-            return None
-        print(f'{TAGS.ERRO} Não foi possível salvar o log.')        
-        return None
-    print(f'{TAGS.ERRO} Nenhuma mensagem foi recebida.')
-    return None
+            return jsonify({"status": "success", "message": "Log salvo com sucesso."}), 200
+        else:
+            print(f'{TAGS.ERRO} Não foi possível salvar o log.')
+            return jsonify({"status": "error", "message": "Não foi possível salvar o log."}), 500
+    else:
+        print(f'{TAGS.ERRO} Nenhuma mensagem foi recebida.')
+        return jsonify({"status": "error", "message": "Nenhuma mensagem foi recebida."}), 400
 
 
 @app.route('/cde/permissions/', methods=['GET', 'POST'])
