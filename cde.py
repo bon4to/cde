@@ -2432,7 +2432,7 @@ def permissions_id(id_perm) -> str:
 def api() -> str:
     if debug:
         if request.method == 'POST':
-            query = request.form['sql_query']
+            query = request.form['sql_query'].replace("▷", ".").replace("-- para executar, clique em '.' acima", "")
             dsn = request.form['sel_schema']
             tables = cde.db_get_tables(dsn)
             print(f'query: {query}; dsn: {dsn}; tables: {tables}') # print(query, dsn, tables)
