@@ -69,29 +69,24 @@ if __name__:
     # STRINGS DE EXECUCAO
     exec_head   = \
 f'''
--.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-
-  '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'
 
-                                                                    
-          CCCCCCCCCCCCC   DDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-       CCC::::::::::::C   D::::::::::::DDD        E::::::::::::::::::::E
-     CC:::::::::::::::C   D:::::::::::::::DD      E::::::::::::::::::::E
-    C::::::CCCCCCCCCCCC   DDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
-   C:::::CC                           DD:::::D                          
-  C:::::C                               D:::::D                         
-  C:::::C                               D:::::D   EEEEEEEEEEEEEEEEEEEE  
-  C:::::C                               D:::::D   E::::::::::::::::::E  
-  C:::::C                               D:::::D   EEEEEEEEEEEEEEEEEEEE  
-  C:::::C                               D:::::D                         
-   C:::::CC                           DD:::::D                          
-    C::::::CCCCCCCCCCCC   DDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
-     CC:::::::::::::::C   D:::::::::::::::DD      E::::::::::::::::::::E
-       CCC::::::::::::C   D::::::::::::DDD        E::::::::::::::::::::E
-          CCCCCCCCCCCCC   DDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+          CCCCCCCCCCCCCCC   DDDDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
+       CCC::::::::::::::C   D::::::::::::::DDD        E::::::::::::::::::::E
+     CC:::::::::::::::::C   D:::::::::::::::::DD      E::::::::::::::::::::E
+    C::::::CCCCCCCCCCCCCC   DDDDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+   C:::::CC                               DD:::::D                          
+  C:::::C                                   D:::::D                         
+  C:::::C                                   D:::::D   EEEEEEEEEEEEEEEEEEEE  
+  C:::::C                                   D:::::D   E::::::::::::::::::E  
+  C:::::C                                   D:::::D   EEEEEEEEEEEEEEEEEEEE  
+  C:::::C                                   D:::::D                         
+   C:::::CC                               DD:::::D                          
+    C::::::CCCCCCCCCCCCCC   DDDDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
+     CC:::::::::::::::::C   D:::::::::::::::::DD      E::::::::::::::::::::E
+       CCC::::::::::::::C   D::::::::::::::DDD        E::::::::::::::::::::E
+          CCCCCCCCCCCCCCC   DDDDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
 
 
--.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-.     .-
-  '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'   '._.'
 '''
     start_head  = \
 f'''
