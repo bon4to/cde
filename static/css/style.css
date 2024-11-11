@@ -590,6 +590,10 @@ img.footer:hover {
     box-shadow: 0 0 6px var(--cor-destaque);
 }
 
+.btn-fancy.active {
+    background-color: var(--cor-destaque);
+}
+
 a {
     cursor: pointer;
     margin: 4px 0;

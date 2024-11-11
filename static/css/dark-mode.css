@@ -216,6 +216,10 @@ html.dark .btn-fancy .svg-invert {
     filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
 }
 
+html.dark .btn-fancy.active {
+    background-color: var(--cor-destaque);
+}
+
 html.dark .side-banner {
     filter: brightness(0.9);
 }
