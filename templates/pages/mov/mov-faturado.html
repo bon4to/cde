@@ -6,7 +6,8 @@
 
         {% include "shared/header/tl-header.html" %}
 
-        <div class="titles-container flex-row title-centerer">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             <h1>
                 <a href="{{ url_for('mov') }}">MOV</a>
                 <span class="dash">/</span>
@@ -59,6 +60,7 @@
                     <option value=7>Requisição (Código)</option>
                 </select>
             </div>
+        </div>
         </div>
         <div id="divContent">
             <div class="tables-container" id="tables-container">

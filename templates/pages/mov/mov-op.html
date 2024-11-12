@@ -5,7 +5,8 @@
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
-        <div class="titles-container flex-row title-centerer">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             <h1>
                 <a href="{{ url_for('mov') }}">MOV</a>
                 <span class="dash">/</span>
@@ -48,6 +49,7 @@
          - item
          - lote_fab
         -->
+        </div>
         <div id="divContent" style="flex-wrap: wrap;">
             {% if id_carga %}
             <div class="tables-container" style="max-width: 55%; min-width: 55%;">

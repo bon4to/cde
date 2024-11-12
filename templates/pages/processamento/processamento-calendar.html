@@ -5,7 +5,8 @@
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include "shared/header/hp-header.html" %}
-        <div class="titles-container flex-row title-centerer">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             <h1>
                 <a href="{{ url_for('producao') }}">PROCESS</a>
                 <span class="dash">/</span>
@@ -15,6 +16,7 @@
             <div class="aux-buttons">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="window.location.href='{{ url_for('producao') }}';">
             </div>
+        </div>
         </div>
         <div id="divContent">
             <div class="form-login">

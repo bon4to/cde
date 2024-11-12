@@ -7,7 +7,8 @@
 
             {% include 'shared/header/cde-header.html' %}
         {% endblock title %}
-        <div class="titles-container flex-row title-centerer">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             {% block brow %}
                 <h1>
                     <a href="#">CDE</a>
@@ -24,6 +25,7 @@
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/exit.svg') }}" title="SAIR" alt="" onclick="confirmLogout()">
                 </div>
             {% endblock brow %}
+            </div>
         </div>
         <div id="divContent" style="flex-wrap: wrap;">
             {% if 'user_grant' in session %}
