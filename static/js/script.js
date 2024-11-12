@@ -435,43 +435,37 @@ function visualDelay(ms) {
 
 
 function loadRecentPages() {
-    // Recupera o histórico do localStorage
+    // recupera o histórico do localStorage
     let recentPages = JSON.parse(localStorage.getItem('recentPages')) || [];
     recentPages.reverse(); // Inverte a ordem para exibir os itens mais recentes primeiro
 
-    // Seleciona o elemento da tabela onde os dados serão inseridos
-    let table = document.getElementById('recent-pages-table');
-    table.innerHTML = ''; // Limpa a tabela antes de inserir novos dados
+    // seleciona o contêiner de botões
+    let buttonsContainer = document.getElementById('recent-pages-buttons-container');
+    buttonsContainer.innerHTML = ''; // Limpa os botões antes de inserir novos dados
 
     if (recentPages.length > 0) {
-        // Itera sobre o histórico e cria as linhas da tabela
+        // itera sobre o histórico e cria os botões
         recentPages.forEach(page => {
-            let row = table.insertRow(); // Cria uma nova linha para cada item
-            row.classList.add('selectable-row');
-            
-            // Insere a célula com pageId
-            let cell1 = row.insertCell(0);
-            cell1.textContent = page.pageId;
+            let button = document.createElement('button'); // cria um botão para cada item
+            button.classList.add('recent-page-button');
+            button.textContent = page.pageId;
 
-            /*
-            let cell2 = row.insertCell(1);
-            cell2.innerHTML = page.pageName;
-            cell2.style.textAlign = 'right';
-            cell2.style.border = 'none';
-            */
-            
-            // Adiciona o evento de clique para redirecionar para a página correspondente
-            row.onclick = function() {
+            // adiciona o evento de clique para redirecionar para a página correspondente
+            button.onclick = function() {
                 window.location.href = page.pageLink;
             };
+
+            // adiciona o botão ao contêiner
+            buttonsContainer.appendChild(button);
         });
     } else {
-        let row = table.insertRow(); // Cria uma linha para exibir a mensagem de "Não há recentes"
-        row.classList.add('selectable-row');
-        row.style.cursor = 'default';
+        // se não houver páginas recentes, mostra uma mensagem
+        let messageButton = document.createElement('button');
+        messageButton.classList.add('recent-page-button');
+        messageButton.textContent = 'Não há recentes';
+        messageButton.style.cursor = 'default'; // para evitar que seja clicado
 
-        let cell1 = row.insertCell(0);
-        cell1.textContent = 'Não há recentes';
+        buttonsContainer.appendChild(messageButton);
     }
 }
 
