@@ -24,12 +24,17 @@ if (container) {
 
 // CONTAINER FLUTUANTE
 function toggleContainer() {
-    var container = document.getElementById('floating-container');
+    let container = document.getElementById('floating-container');
+    let containerBtn = document.getElementById('move-btn');
+
     if (container) {
         if (container.style.display === 'block') {
             container.style.display = 'none';
+            containerBtn.classList.remove('active');
         } else {
             container.style.display = 'block';
+            containerBtn.classList.add('active');
+
             try {
                 document.getElementById("input_code").focus();
             } catch (error) {
