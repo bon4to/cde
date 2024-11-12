@@ -86,11 +86,18 @@
                             </tr>
                             {% for item in users %}
                                 <tr>
-                                    <td>{{ item['cod_user'] }}</td>
+                                    <td class="number">{{ item['cod_user'] }}</td>
                                     <td>{{ item['user_name'] }}</td>
                                     <td>{{ item['user_grant'] }}</td>
-                                    <td>{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
-                                    <td class="td-more hidden-button" data-toggle="tooltip" ><img class="svg-link table-more" src="{{ url_for('static', filename='svg/edit-link.svg') }}" onclick="redirectToEdit('{{ item['cod_user'] }}')" alt=""></td>
+                                    <td style="text-align: right">{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
+                                    <td class="td-more hidden-button" data-toggle="tooltip" style="background-color: transparent">
+                                        <img 
+                                            alt=""
+                                            class="svg-link table-more" 
+                                            onclick="redirectToEdit('{{ item['cod_user'] }}')" 
+                                            src="{{ url_for('static', filename='svg/edit-link.svg') }}" 
+                                        >
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </table>
