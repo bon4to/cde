@@ -4,8 +4,9 @@
         <title>Estoque {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | TRANS LÉGUA</title>
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
-            {% include 'shared/header/tl-header.html' %}
-        <div class="titles-container flex-row title-centerer">
+        {% include 'shared/header/tl-header.html' %}
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             <h1>
                 <a href="{{ url_for('mov') }}">MOV</a>
                 <span class="dash">/</span>
@@ -22,18 +23,6 @@
                     <a class="aux-button">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
                 </a>
-                <hr class="vert">
-                {% block svg %}
-                <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/group.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/land-plot.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'estoque_preset' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
-                </a>
-                {% endblock svg %}
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
@@ -52,7 +41,19 @@
                 </select>
             </div>
         </div>
-        <div class="flex-row" style="min-width: 100%; justify-content: center;">
+        </div>
+        <div id="divContent" style="flex-wrap: wrap;">
+            <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
+                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (AGRUPADO)" onclick="window.location.href='{{ url_for('estoque') }}';">
+                    <img class="svg-inv" src="{{ url_for('static', filename='svg/group.svg') }}" alt="">
+                </div>
+                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (ENDEREÇADO)" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
+                    <img class="svg-inv" src="{{ url_for('static', filename='svg/land-plot.svg') }}" alt="">
+                </div>
+                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (PRESET)" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
+                    <img class="svg-inv" src="{{ url_for('static', filename='svg/blend.svg') }}" alt="">
+                </div>
+            </div>
             <div class="tables-container" style="max-width: 100vw;">
                 {% block table %}
                     <div class="split-horizontal">
@@ -105,9 +106,7 @@
                     </div>
                     <div class="split-horizontal">
                         <a href="{{ url_for('export_csv_tipo', tipo='estoque') }}">Baixar tabela...</a>
-                        {% if session['user_grant'] <= 2 %}
-                            <a href="{{ url_for('export_csv_tipo', tipo='export_promob') }}">Exportar para PROMOB (ESM009)...</a>
-                        {% endif %}
+                        <a href="{{ url_for('export_csv_tipo', tipo='export_promob') }}">Exportar para PROMOB (ESM009)...</a>
                     </div>
                 {% endblock table %}
             </div>

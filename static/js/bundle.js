@@ -109,10 +109,19 @@ function toggleColumnVisibility() {
 }
 
 function toggleBundleContainer() {
-    closeContainer() // closes the floating container
+    toggleContainer() // closes the floating container
 
     const bundleContainer = document.getElementById("bundle-container");
-    bundleContainer.style.display = bundleContainer.style.display === "none" ? "block" : "none";
+    const bundleBtn = document.getElementById("bundle-btn");
+
+    if (bundleContainer.style.display === 'none') {
+        bundleContainer.style.display = 'block';
+        bundleBtn.classList.add('active');
+    } else {
+        bundleContainer.style.display = 'none';
+        bundleBtn.classList.remove('active');
+    }
+
     toggleColumnVisibility()
 }
 

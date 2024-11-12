@@ -6,40 +6,42 @@
 
         {% include "shared/header/tl-header.html" %}
 
-        <div class="titles-container flex-row title-centerer">
-            <h1>MOVIMENTAR<span class="id-page">{{session['id_page']}}</span></h1>
-            <div class="aux-buttons">
-                <a class="aux-button {% if request.endpoint == 'mov' %}active{% endif %}" onclick="window.location.href='{{ url_for('mov') }}';">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}" onclick="window.location.href='{{ url_for('estoque') }}';">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'historico' %}active{% endif %}" onclick="window.location.href='{{ url_for('historico') }}';">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="">
-                </a>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
+                <h1>MOVIMENTAR<span class="id-page">{{session['id_page']}}</span></h1>
+                <div class="aux-buttons">
+                    <a class="aux-button {% if request.endpoint == 'mov' %}active{% endif %}" onclick="window.location.href='{{ url_for('mov') }}';">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="">
+                    </a>
+                    <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}" onclick="window.location.href='{{ url_for('estoque') }}';">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="">
+                    </a>
+                    <a class="aux-button {% if request.endpoint == 'historico' %}active{% endif %}" onclick="window.location.href='{{ url_for('historico') }}';">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="">
+                    </a>
+                    <hr class="vert">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" title="VOLTAR" onclick="goBack()">
+                </div>
+            </div>
+            <div id="filterBreak" style="justify-content: flex-end">
+                <div id="table-filter" style="display: none" >
+                    <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                    <select class="address" id="filterSelect" onchange="updateFilterIndex()">
+                        <option value=1>Item (Código)</option>
+                        <option value=0>Endereço</option>
+                        <option value=2>Item (Descrição)</option>
+                        <option value=3>Lote (Código)</option>
+                    </select>
+                </div>
             </div>
         </div>
-        <div id="filterBreak" style="justify-content: flex-end">
-            <div id="table-filter" style="display: none" >
-                <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
-                <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                    <option value=1>Item (Código)</option>
-                    <option value=0>Endereço</option>
-                    <option value=2>Item (Descrição)</option>
-                    <option value=3>Lote (Código)</option>
-                </select>
-            </div>
-        </div>
-        <div id="divContent" style="flex-wrap: wrap;">
+        <div id="divContent" style="flex-wrap: wrap; flex-direction: row">
             <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
-                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (UNITÁRIO)" onclick="toggleContainer()">
+                <div id="move-btn" class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (UNITÁRIO)" onclick="toggleContainer()">
                     <img class="svg-inv" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">
                 </div>
-                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (PACOTE)" onclick="toggleBundleContainer()">
+                <div id="bundle-btn" class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (PACOTE)" onclick="toggleBundleContainer()">
                     <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
                 </div>
             </div>

@@ -113,7 +113,6 @@ span.id-page {
     min-height: 80px;
     padding: 8px 36px;
     max-height: 84px;
-    margin: 0 0 16px 0;
     border-radius: 24px 24px 0 0;
     border-bottom: 4px inset var(--cor-destaque);
     transition: width 0.3s ease-out;
@@ -1961,7 +1960,7 @@ h1.subtitle {
 
 #table-filter {
     padding: 6px;
-    margin: 8px 0;
+    margin: 6px 0;
     border-radius: 12px;
     justify-content: flex-end;
     background-color: #3e5ea640;
