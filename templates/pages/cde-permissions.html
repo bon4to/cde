@@ -5,7 +5,8 @@
         <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/cde-header.html' %}
-        <div class="titles-container flex-row title-centerer">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             <h1>
                 <a href="{{ url_for('home') }}">CDE</a>
                 <span class="dash">/</span>
@@ -20,6 +21,7 @@
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
+        </div>
         </div>
         <div id="divContent" style="flex-wrap: wrap;">
                 <div class="tables-container" style="min-width: 40vw;">   

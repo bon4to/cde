@@ -7,7 +7,8 @@
         {% include 'shared/header/cde-header.html' %}
 
     <!-- TABELA -->
-    <div class="titles-container flex-row title-centerer">
+    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
         <h1>
             <a href="{{ url_for('home') }}">CDE</a>
             <span class="dash">/</span>
@@ -20,7 +21,8 @@
             <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
         </div>
     </div>
-    <div id="divContent">
+    </div>
+        <div id="divContent">
         <div draggable="false" class="forms-container" style="display: unset; max-height: 480px; min-height: unset;">
             <form style="justify-content: space-between">
                 <h1 class="cor-web">Editar Usuário</h1>

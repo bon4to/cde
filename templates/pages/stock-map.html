@@ -6,7 +6,8 @@
 
         {% include 'shared/header/tl-header.html' %}
 
-    <div class="titles-container flex-row title-centerer">
+    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
         <h1>
             <a href="{{ url_for('mov') }}">MOV</a>
             <span class="dash">/</span>
@@ -33,7 +34,8 @@
             </select>
         </div>
     </div>
-    <div id="divContent" style="flex-wrap: wrap;">
+    </div>
+        <div id="divContent" style="flex-wrap: wrap;">
         <div class="tables-container" style="max-width: 100%; min-width: 55%; padding: 22px;">
             <div id="map-container">
                 <div id="map" style="width: fit-content;" class="map-grid">

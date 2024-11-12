@@ -5,7 +5,8 @@
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include "shared/header/hp-header.html" %}
-        <div class="titles-container flex-row title-centerer">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             <h1>
                 <span>PROCESSAMENTO</span>
                 <span class="id-page">{{session['id_page']}}</span>
@@ -36,6 +37,7 @@
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>
             </div>
+        </div>
         </div>
         <div id="divContent">
             <div id="floating-container" draggable="false" class="forms-container" style="position: relative">

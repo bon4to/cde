@@ -5,7 +5,8 @@
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
-        <div class="titles-container flex-row title-centerer">
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
             <h1>
                 <a href="{{ url_for('mov') }}">MOV</a>
                 <span class="dash">/</span>
@@ -44,6 +45,7 @@
                     <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/search.svg') }}" alt="">
                 </form>
             </div>
+        </div>
         </div>
         <div id="divContent">
             <div class="mobile-container">
