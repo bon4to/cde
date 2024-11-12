@@ -2248,3 +2248,33 @@ h1.subtitle {
     background-color: #346ebb; 
     border-color: #346ebb; 
 }
+
+#recent-pages-buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 500px;
+    overflow-y: scroll;
+}
+
+.recent-page-button {
+    background-color: var(--cor-destaque);
+    color: white;
+    border: none;
+    padding: 12px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    transition: all 0.3s ease-in-out;
+    font-weight: 600;
+    font-family: "Chivo Mono", monospace;
+}
+
+.recent-page-button:hover {
+    background-color: rgb(220, 220, 220);
+    color: var(--cor-destaque)
+}
+
