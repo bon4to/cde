@@ -3635,6 +3635,7 @@ def cadastrar_usuario() -> Response | str:
 @cde.verify_auth('MOV006')
 def carga_id(id_carga) -> str:
     result_local, columns_local = [], []
+    
     if request.method == 'GET':
         cod_item = request.args.get('cod_item', '')
         qtde_solic = request.args.get('qtde_solic', '')
@@ -3642,16 +3643,16 @@ def carga_id(id_carga) -> str:
         if cod_item:
             result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
 
+        # extrai o primeiro elemento de `id_carga`
         id_carga = cde.split_code_seq(id_carga)[0]
         
         fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
         all_cargas = CargaUtils.get_cargas_finalizadas()
         
-        # SEARCH DE ITENS POR CARGA
-        
-        cargas_except_query = ', '.join(map(str, all_cargas))
+        # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
+        cargas_except_query = ', '.join(str(int(carga)) for carga in all_cargas if isinstance(carga, int))
 
-        query = '''
+        query = f'''
             SELECT DISTINCT 
                 icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
                 icrg.NRO_PEDIDO                       AS NRO_PEDIDO,
@@ -3673,27 +3674,27 @@ def carga_id(id_carga) -> str:
             JOIN DB2ADMIN.GRUPOPED crg
             ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
-            WHERE icrg.CODIGO_GRUPOPED = '{a}'
-            AND icrg.CODIGO_GRUPOPED NOT IN ({b})
+            WHERE icrg.CODIGO_GRUPOPED = {id_carga}
+            AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
 
             ORDER BY COD_ITEM
 
             LIMIT 100;
-        '''.format(a=id_carga, b=cargas_except_query)
+        '''
 
+        # executa a consulta de forma segura
         dsn = 'HUGOPIET'
         result, columns = cde.db_query(query, dsn)
+        
         if columns:
             # cria lista dos itens da carga (p/ validação de necessidade no jinja)
-            cod_item_list = []
-            for row in result:
-                cod_item_list.append(row[columns.index('COD_ITEM')])
-            
-            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+            cod_item_list = [row[columns.index('COD_ITEM')] for row in result]
+            alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
             class_alert = 'success'
         else:
-            alert = f'{result[0][0]}'
+            alert = f'{result[0][0]}' if result else 'Nenhum resultado encontrado.'
             class_alert = 'error'
+
         return render_template(
             'pages/mov/mov-carga/mov-carga.html',
             result=result, columns=columns, alert=alert,
@@ -3702,9 +3703,11 @@ def carga_id(id_carga) -> str:
             result_local=result_local, columns_local=columns_local,
             fant_cliente=fant_cliente, cod_item_list=cod_item_list
         )
+    
+    # se não for uma requisição GET, renderiza a página com dados vazios
     result = []
-    return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=columns)
-        
+    return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=[])
+ 
 
 @app.route('/mov/carga/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
