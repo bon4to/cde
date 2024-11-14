@@ -448,7 +448,7 @@ function loadRecentPages() {
         recentPages.forEach(page => {
             let button = document.createElement('button'); // cria um botão para cada item
             button.classList.add('recent-page-button');
-            button.textContent = page.pageId;
+            button.textContent = page.pageId + ' | ' + page.pageName.split('(')[0];
 
             // adiciona o evento de clique para redirecionar para a página correspondente
             button.onclick = function() {
