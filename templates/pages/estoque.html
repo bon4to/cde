@@ -44,13 +44,13 @@
         </div>
         <div id="divContent" style="flex-wrap: wrap;">
             <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
-                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (AGRUPADO)" onclick="window.location.href='{{ url_for('estoque') }}';">
+                <div class="btn-fancy {% if request.endpoint == 'estoque' %}active{% endif %}" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (AGRUPADO)" onclick="window.location.href='{{ url_for('estoque') }}';">
                     <img class="svg-inv" src="{{ url_for('static', filename='svg/group.svg') }}" alt="">
                 </div>
-                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (ENDEREÇADO)" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
+                <div class="btn-fancy {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (ENDEREÇADO)" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
                     <img class="svg-inv" src="{{ url_for('static', filename='svg/land-plot.svg') }}" alt="">
                 </div>
-                <div class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (PRESET)" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
+                <div class="btn-fancy {% if request.endpoint == 'estoque_preset' %}active{% endif %}" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (PRESET)" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
                     <img class="svg-inv" src="{{ url_for('static', filename='svg/blend.svg') }}" alt="">
                 </div>
             </div>
