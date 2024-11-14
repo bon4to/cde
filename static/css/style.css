@@ -2258,6 +2258,8 @@ h1.subtitle {
 }
 
 .recent-page-button {
+    text-transform: uppercase;
+    text-wrap: nowrap;
     background-color: var(--cor-destaque);
     color: white;
     border: none;
