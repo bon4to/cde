@@ -2280,3 +2280,10 @@ h1.subtitle {
     color: var(--cor-destaque)
 }
 
+th.normal-size {
+    width: 100px;
+}
+
+th.bigger-size {
+    width: 400px;
+}
