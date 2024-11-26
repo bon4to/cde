@@ -27,6 +27,10 @@
             {% endblock brow %}
             </div>
         </div>
+        <span class="ad-container">
+            {% include "components/advert.html" %}
+        </span>
+        
         <div id="divContent" style="flex-wrap: wrap;">
             {% if 'user_grant' in session %}
                 {% if not about %}
