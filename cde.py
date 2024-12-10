@@ -192,6 +192,33 @@ class cde:
             except Exception as e:
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
+        elif dsn == 'DSN=CDE_NOE':
+            # URL do endpoint da API
+            url = "http://45.181.21.13:5000/query"
+
+            # Cabeçalhos HTTP
+            headers = {
+                "Content-Type": "application/json"
+            }
+
+            # Corpo da solicitação
+            data = {
+                "query": query
+            }
+
+            # Enviar a solicitação POST
+            try:
+                response = requests.post(url, headers=headers, json=data)
+                
+                # Verificar o status da resposta
+                if response.status_code == 200:
+                    # Exibir os dados retornados
+                    print("Resposta da API:", response.json())
+                else:
+                    # Exibir erro se o status não for 200
+                    print(f"Erro: {response.status_code} - {response.text}")
+            except Exception as e:
+                print("Erro ao enviar solicitação:", str(e))
         else:
             result = [[f'DSN desconhecida: {dsn}']]
             columns = []
