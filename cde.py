@@ -163,6 +163,29 @@ class cde:
     
     
     @staticmethod
+    # retorna o valor da chave "dsn > cargas" do arquivo "default.txt"
+    def get_dsn_cargas_value():
+        file_path = "userdata/default.txt"
+        try:
+            # Abre e lê o conteúdo do arquivo
+            with open(file_path, 'r') as file:
+                content = file.read()
+
+            # Converte o conteúdo do arquivo para um objeto Python
+            data = json.loads(content)
+
+            # Extrai o valor desejado
+            return data["dsn"]["cargas"]
+        except FileNotFoundError:
+            print("Erro: Arquivo não encontrado.")
+        except KeyError:
+            print("Erro: Chave 'dsn > cargas' não encontrada.")
+        except json.JSONDecodeError:
+            print("Erro: Conteúdo do arquivo não é um JSON válido.")
+        print("Retornando DSN HUGOPIET")
+        return "HUGOPIET"
+    
+    @staticmethod
     # conexão e consulta no banco de dados
     def db_query(query, dsn):
         dsn = f"DSN={dsn}"
