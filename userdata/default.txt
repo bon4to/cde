@@ -1,0 +1,6 @@
+{
+    "dsn": {
+        "cargas": "CDE_NOE",
+        "requests": "HUGOPIET"
+    }
+}
