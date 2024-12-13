@@ -123,12 +123,15 @@ Pressione ENTER para sair...
         
     log_directory = os.path.join(os.getcwd(), 'logs')
     rep_directory = os.path.join(os.getcwd(), 'report')
+    udt_directory = os.path.join(os.getcwd(), 'userdata')
 
     # cria os diretórios se não existirem
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
     if not os.path.exists(rep_directory):
         os.makedirs(rep_directory)
+    if not os.path.exists(udt_directory):
+        os.makedirs(udt_directory)
 
 
 class cde:
@@ -164,17 +167,17 @@ class cde:
     
     @staticmethod
     # retorna o valor da chave "dsn > cargas" do arquivo "default.txt"
-    def get_dsn_cargas_value():
+    def get_unit():
         file_path = "userdata/default.txt"
         try:
-            # Abre e lê o conteúdo do arquivo
+            # abre e lê o conteúdo do arquivo
             with open(file_path, 'r') as file:
                 content = file.read()
 
-            # Converte o conteúdo do arquivo para um objeto Python
+            # converte o conteúdo do arquivo para um objeto Python
             data = json.loads(content)
 
-            # Extrai o valor desejado
+            # extrai o valor desejado
             return data["dsn"]["cargas"]
         except FileNotFoundError:
             print("Erro: Arquivo não encontrado.")
@@ -182,8 +185,9 @@ class cde:
             print("Erro: Chave 'dsn > cargas' não encontrada.")
         except json.JSONDecodeError:
             print("Erro: Conteúdo do arquivo não é um JSON válido.")
-        print("Retornando DSN HUGOPIET")
-        return "HUGOPIET"
+        # default
+        print('Retornando HUGOPIET')
+        return 'HUGOPIET'
     
     @staticmethod
     # conexão e consulta no banco de dados
