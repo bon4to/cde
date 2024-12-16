@@ -229,6 +229,10 @@ html.dark .item h2 {
     color: #fff;
 }
 
+html.dark p.id-page {
+    color: var(--cor-destaque);
+}
+
 html.dark .svg-gray {
     filter: invert(130%) sepia(0%) saturate(0%) hue-rotate(180deg);
 }

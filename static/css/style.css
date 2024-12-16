@@ -39,6 +39,21 @@ html, body {
     color: var(--cor-destaque);
 }
 
+p.id-page {
+    color: var(--cor-destaque);
+    font-family: Reddit Mono, monospace;
+    border: 1px solid var(--cor-destaque);
+    border-radius: 6px;
+    padding: 2px 4px;
+    font-size: 10px;
+}
+
+p.id-page.white {
+    border: 1px solid white;
+    color: white !important;
+    font-weight: bold;
+}
+
 span.id-page {
     font-size: 18px;
     color: var(--cor-destaque);
@@ -1135,6 +1150,16 @@ div.user-button {
     background-color: #f1f1f1;
     font-family: 'Chivo Mono', sans-serif;
     box-shadow: inset 0 0 4px rgba(34, 34, 34, 0.65);
+}
+
+div.user-params-button {
+    gap: 0;
+    max-height: 38px;
+    margin: auto 12px;
+    padding: 4px 0;
+    background-color: var(--cor-destaque); 
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 div.user-button.bigger {
