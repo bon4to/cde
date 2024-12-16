@@ -60,6 +60,7 @@
                                     <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
                                 {% endif %}
                                 <option>HUGOPIET</option>
+                                <option>CDE_NOE</option>
                                 <option>SQLITE</option>
                             </select>
                             <button class="button-mini btn-fancy" type="submit" id="submitform">
@@ -171,7 +172,7 @@ LIMIT 15;{% endif %}</textarea>
             currentQuery = editor.getValue();
 
             schema = "";
-            if (sel_schema == "HUGOPIET") {
+            if (sel_schema == "HUGOPIET" or sel_schema == "CDE_NOE") {
                 schema = "DB2ADMIN.";
             }
 

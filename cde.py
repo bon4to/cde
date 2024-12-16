@@ -2158,6 +2158,15 @@ class misc:
         except ValueError:
             return 0.0
     
+    
+    @staticmethod
+    @app.template_filter('parse_date')
+    def parse_date(value):
+        try:
+            dt = datetime.strptime(value, "%a, %d %b %Y %H:%M:%S %Z")
+            return dt.strftime("%d/%m/%Y")
+        except Exception as e:
+            return value
 
     @staticmethod
     # VERIFICA SENHA NO BANCO DE HASH
@@ -3804,6 +3813,7 @@ def carga_id(id_carga) -> str:
             alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
             class_alert = 'success'
         else:
+            cod_item_list = []
             alert = f'{result[0][0]}' if result else 'Nenhum resultado encontrado.'
             class_alert = 'error'
 

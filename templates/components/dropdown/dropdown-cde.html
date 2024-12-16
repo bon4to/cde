@@ -149,8 +149,11 @@
                             <div style="margin: 4px; display: flex;">
                                 <hr class="vert" style="width: 0;">
                             </div>
-                            <div class="user-button" onclick=" window.location.href='{{ url_for('cde_account') }}';">
-                                {{ session.get('user_initials', '') }}
+                            <div class="user-params-button flex-row" onclick="window.location.href='{{ url_for('cde_account') }}';">
+                                <p style="margin: auto 8px; max-height: 14px" class="id-page white">{{ app_unit }}</p>
+                                <div style="margin: auto 4px auto auto;" class="user-button">
+                                    {{ session.get('user_initials', '') }}
+                                </div>
                             </div>
                         </div>
                     </div>

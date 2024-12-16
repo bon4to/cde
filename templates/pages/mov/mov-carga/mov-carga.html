@@ -88,7 +88,7 @@
                         </div>
                     {% endif %}
                 {% endif %}
-            {% if result %}
+            {% if result and columns %}
                 <div id="detailedTable" class="hidden">
                     <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                         <p>Lista Detalhada</p>
@@ -120,10 +120,10 @@
                             {% for row_cod_item, subtotal in subtotals.items() %}
                                 {% for row in items %}
                                     {% if row[columns.index('COD_ITEM')] == row_cod_item %}
-                                        <tr class="unselectable-row">
+                                        <tr class="unselectable-row" style="vertical-align: baseline;">
                                             <td class="over-row">{{ row[columns.index('NROPED_SEQ')] }}</td>
                                             <td>{{ row[columns.index('COD_ITEM')] }}</td>
-                                            <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
+                                            <td style="text-wrap: auto;">{{ row[columns.index('DESC_ITEM')] }}</td>
                                             <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
                                         </tr>
                                     {% endif %}
@@ -171,14 +171,14 @@
                             {% endfor %}
                             
                             {% for row_cod_item, item in items.items() %}
-                                <tr 
+                                <tr style="vertical-align: baseline;"
                                     class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
                                     data-cod-item="{{ row_cod_item }}"
                                     onclick="sendCodItem('carga', '{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')"
                                 >
                                     <td>{{ row_cod_item }}</td>
-                                    <td style="text-wrap: balance;">{{ item.desc }}</td>
-                                    <td>{{ item.qtde }}</td>
+                                    <td style="text-wrap: auto;">{{ item.desc }}</td>
+                                    <td style="max-width: 80px;">{{ item.qtde }}</td>
                                     <td class="subtotal-cell"></td>
                                 </tr> 
                             {% endfor %}
@@ -297,13 +297,13 @@
                                         <tbody>
                                             {% for row in result %}
                                                 {% if class_alert != 'error' %}
-                                                    <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('NRO_CARGA')] }}">
+                                                    <tr class="selectable-row js_query_selector" style="vertical-align: baseline;" data-id="{{ row[columns.index('NRO_CARGA')] }}">
                                                         <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
                                                         <td class="number">{{ row[columns.index('NRO_PEDIDO')] }}</td>
                                                         <td class="number">{{ row[columns.index('COD_CLIENTE')] }}</td>
-                                                        <td style="text-wrap: balance;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
-                                                        <td>{{ row[columns.index('DT_EMISSAO')] }}</td>
-                                                        <td>{{ row[columns.index('DT_ENTREGA')] }}</td>
+                                                        <td style="text-wrap: auto;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                                        <td>{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
+                                                        <td>{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
                                                         <td style="text-align: center">
                                                             {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
                                                                 <span title="{{ row[columns.index('OBS_CARGA')] }}">🔵</span>
