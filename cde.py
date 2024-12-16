@@ -30,6 +30,7 @@ if __name__:
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
 
     app.config['APP_VERSION'] = ['0.5.1', 'Dezembro/2024', False]
+    app.config['APP_UNIT'] = '' # preset default
     # GET nome do diretório
     dir_os = os.path.dirname(os.path.abspath(__file__)).upper()
     debug_dir = os.getenv('DEBUG_DIR').upper().split(';')
@@ -191,13 +192,12 @@ class cde:
     @staticmethod
     # conexão e consulta no banco de dados
     def db_query(query, dsn):
-        dsn = f"DSN={dsn}"
-        if dsn == 'DSN=HUGOPIET':
+        if dsn == 'HUGOPIET':
             uid_pwd = os.getenv('DB_USER').split(';')
             user = uid_pwd[0]
             password = uid_pwd[1]
             try:
-                connection = pyodbc.connect(dsn, uid=user, pwd=password)
+                connection = pyodbc.connect(f"DSN={dsn}", uid=user, pwd=password)
                 cursor = connection.cursor()
                 cursor.execute(query)
                 columns = [str(column[0]) for column in cursor.description]
@@ -206,9 +206,39 @@ class cde:
                 cursor.close()
                 connection.close()
             except Exception as e:
+                print("Erro ao enviar solicitação:", str(e))
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
-        elif dsn == 'DSN=SQLITE':
+        elif dsn == "CDE_NOE":
+            url, headers = cde.new_api_connection()
+            data = {"query": query}
+            try:
+                response = requests.post(url, headers=headers, json=data)
+                if response.status_code == 200:
+                    response_data = response.json()
+                    result = response_data.get("data", [])
+                    
+                    # retorno tabulado
+                    if isinstance(result, str):
+                        lines = result.strip().split("\n")
+                        header = lines[0].split("\t")
+                        rows = [line.split("\t") for line in lines[1:]]
+                        return rows, header
+                    
+                    # retorno JSON
+                    columns = list(result[0].keys()) if result else []
+                    rows = [list(item.values()) for item in result]
+                    return rows, columns
+                else:
+                    print(f"Erro na API: {response.status_code} - {response.text}")
+                    return [[f"Erro: {response.text}"]], []
+            except requests.exceptions.ConnectionError as e:
+                print("API offline ou inacessível:", str(e))
+                return [[f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."]], []
+            except Exception as e:
+                print("Erro de conexão com a API:", str(e))
+                return [[f"Erro: {str(e)}"]], []
+        elif dsn == 'SQLITE':
             try:
                 with sqlite3.connect(db_path) as connection:
                     cursor = connection.cursor()
@@ -216,41 +246,25 @@ class cde:
                     columns = [str(column[0]) for column in cursor.description]
                     result = cursor.fetchall()
             except Exception as e:
+                print("Erro ao enviar solicitação:", str(e))
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
-        elif dsn == 'DSN=CDE_NOE':
-            # URL do endpoint da API
-            url = "http://45.181.21.13:5000/query"
 
-            # Cabeçalhos HTTP
-            headers = {
-                "Content-Type": "application/json"
-            }
-
-            # Corpo da solicitação
-            data = {
-                "query": query
-            }
-
-            # Enviar a solicitação POST
-            try:
-                response = requests.post(url, headers=headers, json=data)
-                
-                # Verificar o status da resposta
-                if response.status_code == 200:
-                    # Exibir os dados retornados
-                    print("Resposta da API:", response.json())
-                else:
-                    # Exibir erro se o status não for 200
-                    print(f"Erro: {response.status_code} - {response.text}")
-            except Exception as e:
-                print("Erro ao enviar solicitação:", str(e))
         else:
-            result = [[f'DSN desconhecida: {dsn}']]
+            result = [[f'DSN INVÁLIDA: {dsn}']]
             columns = []
             
         return result, columns
-
+    
+    
+    @staticmethod
+    def new_api_connection():
+        noe_api = os.getenv('NOE_API')
+        url = f"http://{noe_api}/query"
+        headers = {"Content-Type": "application/json"}
+        
+        return url, headers
+    
     
     @staticmethod
     # consulta tabelas do schema
@@ -725,47 +739,87 @@ class CargaUtils:
     @staticmethod
     # retorna as cargas,
     # exceto cargas faturadas
-    def get_cargas(all_cargas=False):
+    def get_cargas(all_cargas=False, dsn='HUGOPIET'):
         if all_cargas:
-            cargas_except_query = ', '.join(map(str, all_cargas))
 
-            query = '''
-                SELECT DISTINCT 
-                    icrg.CODIGO_GRUPOPED AS NRO_CARGA,
-                    icrg.NRO_PEDIDO      AS NRO_PEDIDO,
-                    ped.CODIGO_CLIENTE   AS COD_CLIENTE,
-                    cl.FANTASIA          AS FANT_CLIENTE,
-                    crg.DATA_EMISSAO     AS DT_EMISSAO,
-                    iped.DT_ENTREGA      AS DT_ENTREGA, 
-                    crg.OBSERVACAO       AS OBS_CARGA
-
-                FROM DB2ADMIN.ITEMPED iped
-
-                JOIN DB2ADMIN.IGRUPOPE icrg
-                ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
-                AND icrg.SEQ = iped.SEQ
-
-                JOIN DB2ADMIN.PEDIDO ped
-                ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+            # define o dsn conforme default (ou usuario)
+            dsn = cde.get_unit()
+            print('DSN: ' + dsn)
+            
+            if dsn == 'HUGOPIET':
+                cargas_except_query = ', '.join(map(str, all_cargas))
                 
-                JOIN DB2ADMIN.GRUPOPED crg
-                ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+                query = '''
+                    SELECT DISTINCT 
+                        icrg.CODIGO_GRUPOPED AS NRO_CARGA,
+                        icrg.NRO_PEDIDO      AS NRO_PEDIDO,
+                        ped.CODIGO_CLIENTE   AS COD_CLIENTE,
+                        cl.FANTASIA          AS FANT_CLIENTE,
+                        crg.DATA_EMISSAO     AS DT_EMISSAO,
+                        iped.DT_ENTREGA      AS DT_ENTREGA, 
+                        crg.OBSERVACAO       AS OBS_CARGA
 
-                JOIN DB2ADMIN.CLIENTE cl
-                ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+                    FROM DB2ADMIN.ITEMPED iped
 
-                JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
-                ON i.ITEM = iped.ITEM
+                    JOIN DB2ADMIN.IGRUPOPE icrg
+                    ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+                    AND icrg.SEQ = iped.SEQ
 
-                WHERE icrg.QTDE_FATUR != 0
-                AND icrg.CODIGO_GRUPOPED NOT IN ({a})
+                    JOIN DB2ADMIN.PEDIDO ped
+                    ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+                    
+                    JOIN DB2ADMIN.GRUPOPED crg
+                    ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
-                ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-            '''.format(a=cargas_except_query)
+                    JOIN DB2ADMIN.CLIENTE cl
+                    ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+                    JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+                    ON i.ITEM = iped.ITEM
+
+                    WHERE icrg.QTDE_FATUR != 0
+                    AND icrg.CODIGO_GRUPOPED NOT IN ({a})
+
+                    ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
+                '''.format(a=cargas_except_query)
+            elif dsn == 'CDE_NOE':
+                cargas_except_query = ', '.join(map(str, all_cargas))
+
+                query = '''
+                    SELECT DISTINCT 
+                        icrg.CODIGO_GRUPOPED AS NRO_CARGA,
+                        icrg.NRO_PEDIDO      AS NRO_PEDIDO,
+                        ped.CODIGO_CLIENTE   AS COD_CLIENTE,
+                        cl.FANTASIA          AS FANT_CLIENTE,
+                        crg.DATA_EMISSAO     AS DT_EMISSAO,
+                        iped.DT_ENTREGA      AS DT_ENTREGA, 
+                        crg.OBSERVACAO       AS OBS_CARGA
+
+                    FROM DB2ADMIN.ITEMPED iped
+
+                    JOIN DB2ADMIN.IGRUPOPE icrg
+                    ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
+                    AND icrg.SEQ = iped.SEQ
+
+                    JOIN DB2ADMIN.PEDIDO ped
+                    ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+                    
+                    JOIN DB2ADMIN.GRUPOPED crg
+                    ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+                    JOIN DB2ADMIN.CLIENTE cl
+                    ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+                    JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+                    ON i.ITEM = iped.ITEM
+
+                    WHERE icrg.QTDE_FATUR != 0
+
+                    ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
+                '''
         else:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
-            
-        dsn = 'HUGOPIET'
+        
         result, columns = cde.db_query(query, dsn)
         return result, columns
 
@@ -1007,7 +1061,7 @@ class CargaUtils:
             WHERE icrg.CODIGO_GRUPOPED = {a};
         '''.format(a=id_carga)
 
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
 
         if result:
@@ -1040,7 +1094,7 @@ class CargaUtils:
             WHERE icrg.CODIGO_GRUPOPED = {a};
         '''.format(a=id_carga)
 
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
 
         if result:
@@ -1155,7 +1209,7 @@ class MovRequestUtils:
                 DOCUMENTO DESC, I.ITEM;
         '''.format(a=where_clause, b=request_except_query)
         
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
         
         return result, columns
@@ -1287,7 +1341,7 @@ class OrdemProducaoUtils:
                 DOCUMENTO DESC, L.ORDEM, I.ITEM;
         '''.format(a=where_clause)
         
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
         
         return result, columns
@@ -1436,7 +1490,7 @@ class ProdutoUtils:
                 i.ITEM IN ('EM.3577', 'EM.1074');
         '''
 
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
         return result, columns
 
@@ -2316,6 +2370,11 @@ def inject_version() -> dict:
     # INJETA VARIAVEL DE VERSÃO AO AMBIENTE
     return dict(app_version=app.config['APP_VERSION'])
 
+@app.context_processor
+def inject_unit() -> dict:
+    # INJETA VARIAVEL DE UNIDADE AO AMBIENTE
+    return dict(app_unit=app.config['APP_UNIT'])
+
 
 @app.errorhandler(403)
 def page_not_found(e) -> tuple[str, 403]:
@@ -3055,7 +3114,7 @@ def get_fant_clientes() -> Response:
         FROM DB2ADMIN.CLIENTE;
     '''
 
-    dsn = 'HUGOPIET'
+    dsn = cde.get_unit()
     result, columns = cde.db_query(query, dsn)
 
     clientes = [{'FANTASIA': '(indefinido)'}]
@@ -3736,7 +3795,7 @@ def carga_id(id_carga) -> str:
         '''
 
         # executa a consulta de forma segura
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
         
         if columns:
@@ -3922,7 +3981,7 @@ def get_req_qtde_solic():
             I.ITEM = '{b}';
     '''.format(a=id_req, b=cod_item)
     try:
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
         if result:
             qtde_solic = result[0][0]
@@ -3958,7 +4017,7 @@ def get_itens_req():
             M.DOC_ORIGEM = '{a}';
     '''.format(a=id_req)
     try:
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
         if result:
             itens = [row[0] for row in result]
@@ -4046,7 +4105,7 @@ def get_carga_qtde_solic():
             AND iped.ITEM = '{b}';
         '''.format(a=id_carga, b=cod_item)
         try:
-            dsn = 'HUGOPIET'
+            dsn = cde.get_unit()
             result, columns = cde.db_query(query, dsn)
             if result:
                 qtde_solic = result[0][0]
@@ -4073,7 +4132,7 @@ def get_itens_carga():
         WHERE icrg.CODIGO_GRUPOPED = '{a}';
     '''.format(a=id_carga)
     try:
-        dsn = 'HUGOPIET'
+        dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
         if result:
             itens = [row[0] for row in result]
