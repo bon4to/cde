@@ -440,32 +440,28 @@ class cde:
         def decorator(f):
             @wraps(f)
             def decorador(*args, **kwargs):
-                if 'logged_in' in session:
-                    id_user = session.get('id_user')
-                    session['id_page'] = f'{id_page}'
-                    if not session.get('user_grant') <= 2:
-                        user_perm = UserUtils.get_user_permissions(id_user)
-                        user_perm = [item['id_perm'] for item in user_perm]
-                        if id_page in user_perm:
-                            log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
-                            return f(*args, **kwargs)
-                        else:
-                            log(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
-                            alert_type = 'SEM PERMISSÕES'
-                            alert_msge = 'Você não tem permissão para acessar esta página.'
-                            alert_more = 'SOLUÇÕES:\n• Solicite ao seu supervisor um novo nível de acesso.'
-                            return render_template(
-                                'components/menus/alert.html', 
-                                alert_type=alert_type,
-                                alert_msge=alert_msge, 
-                                alert_more=alert_more,
-                                url_return=url_for('index')
-                            )
-                    else:
-                        log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
-                        return f(*args, **kwargs)
-                else:
+                if not 'logged_in' in session:
                     return redirect(url_for('login'))
+                id_user = session.get('id_user')
+                session['id_page'] = f'{id_page}'
+                if session.get('user_grant') <= 2:
+                    log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    app.config['APP_UNIT'] = cde.get_unit()
+                    return f(*args, **kwargs)
+                user_perm = UserUtils.get_user_permissions(id_user)
+                user_perm = [item['id_perm'] for item in user_perm]
+                if id_page in user_perm:
+                    log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    app.config['APP_UNIT'] = cde.get_unit()
+                    return f(*args, **kwargs)
+                log(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                return render_template(
+                    'components/menus/alert.html', 
+                    alert_type='SEM PERMISSÕES',
+                    alert_msge='Você não tem permissão para acessar esta página.', 
+                    alert_more='SOLUÇÕES:\n• Solicite ao seu supervisor um novo nível de acesso.',
+                    url_return=url_for('index')
+                )
             return decorador
         return decorator
     
