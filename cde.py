@@ -295,6 +295,24 @@ class cde:
     
     
     @staticmethod
+    def create_default_user():
+        data_cadastro  = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                INSERT INTO users (
+                    login_user, password_user, 
+                    nome_user, sobrenome_user, 
+                    privilege_user, data_cadastro 
+                ) VALUES (
+                    "DEFAULT", "12345", "USER",
+                    "DEFAULT", 1, ? 
+                );
+            ''',(data_cadastro,))
+        return
+    
+
+    @staticmethod
     # GERADOR DE TABELAS
     def create_tables() -> None:
         with sqlite3.connect(db_path) as connection:
