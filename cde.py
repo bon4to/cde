@@ -34,10 +34,10 @@ if __name__:
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
     app.config['APP_VERSION'] = ['0.5.2', 'Janeiro/2025', False] # 'versão', 'release-date', 'debug-mode'
     app.config['APP_UNIT'] = '' # preset default
-    # GET nome do diretório
-    dir_os = os.path.dirname(os.path.abspath(__file__)).upper()
-    debug_dir = os.getenv('DEBUG_DIR').upper().split(';')
-    main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
+    
+    current_dir = os.path.dirname(os.path.abspath(__file__)).upper() # current absolute directory
+    debug_dir   = os.getenv('DEBUG_DIR').upper().split(';')          # debug directory (evita execução sem configurar diretório)
+    default_dir = os.getenv('DEFAULT_DIR').upper()                   # default dir (executa somente no diretório de produção)
 
 
     class TAGS:
@@ -95,22 +95,21 @@ Pressione ENTER para sair...
 '''
 
 
-    if dir_os in debug_dir:
-        # Se o user for listado dev, modo_exec = debug
+    if current_dir in debug_dir: # se o diretório atende ao local 'debug', modo_exec = 'debug'
         db_path = os.getenv('DEBUG_DB_PATH')
         port, debug = 5100, True
         app.config['APP_VERSION'][2] = True
-        print(start_head)
 
-    elif main_exec_dir in dir_os:
-        # Se o diretório atende ao local para produção, modo_exec = produção.
         # logs server running info
+        print(start_head) 
+
+    elif default_dir in current_dir: # se o diretório atende ao local 'produção', modo_exec = 'produção'.
         db_path = os.getenv('DB_PATH')
         port, debug = 5005, False
-        print(exec_head, start_head)
+        
         # logs header & server running info
+        print(exec_head, start_head) 
 
-    else:
     else: # se o diretório não corresponde aos listados, não executa.
         print(error_foot)
         sys.exit(2)
