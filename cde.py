@@ -57,6 +57,44 @@ if __name__:
         print(f'{tag_1} ({timestamp}) {tag_2} | {text}')
         return
 
+    dirs = {}
+    def create_dirs() -> None:
+        path = os.getcwd()
+        dirs = {
+            'db_dir'     : os.path.join(os.getcwd(), 'db'),
+            'app_dir'    : os.path.join(os.getcwd(), 'app'),
+            'a_rout_dir' : os.path.join(os.getcwd(), 'app/routes'),
+            'a_mod_dir'  : os.path.join(os.getcwd(), 'app/models'),
+            'a_serv_dir' : os.path.join(os.getcwd(), 'app/services'),
+            'a_util_dir' : os.path.join(os.getcwd(), 'app/utils'),
+            'tests_dir'  : os.path.join(os.getcwd(), 'tests'),
+            'logs_dir'   : os.path.join(os.getcwd(), 'logs'),
+            'r_dir'      : os.path.join(os.getcwd(), 'report'),
+            'r_car_dir'  : os.path.join(os.getcwd(), 'report/cargas'),
+            'r_pcar_dir' : os.path.join(os.getcwd(), 'report/cargas_preset'),
+            'r_req_dir'  : os.path.join(os.getcwd(), 'report/requests'),
+            'r_preq_dir' : os.path.join(os.getcwd(), 'report/requests_preset'),
+            'r_pest_dir' : os.path.join(os.getcwd(), 'report/estoque_preset'),
+            'userdt_dir' : os.path.join(os.getcwd(), 'userdata'),
+        }
+        
+        total_dirs = len(dirs)
+        
+        # cria os diretórios (se não existirem)
+        for i, dir_path in enumerate(dirs.values(), start=1):
+            os.makedirs(dir_path, exist_ok=True)
+            log(
+                TAGS.SERVER,
+                None,
+                text=f'Verificando integridade dos diretórios... [{i}/{total_dirs}]'
+            )
+        log(
+            TAGS.SERVER,
+            None,
+            text=f'Vefificação finalizada. Inicializando...'
+        )
+
+    create_dirs()
 
     # logs de execução
     exec_head   = \
@@ -113,18 +151,7 @@ Pressione ENTER para sair...
     else: # se o diretório não corresponde aos listados, não executa.
         print(error_foot)
         sys.exit(2)
-        
-    log_directory = os.path.join(os.getcwd(), 'logs')
-    rep_directory = os.path.join(os.getcwd(), 'report')
-    udt_directory = os.path.join(os.getcwd(), 'userdata')
 
-    # cria os diretórios se não existirem
-    if not os.path.exists(log_directory):
-        os.makedirs(log_directory)
-    if not os.path.exists(rep_directory):
-        os.makedirs(rep_directory)
-    if not os.path.exists(udt_directory):
-        os.makedirs(udt_directory)
 
 
 class cde:
@@ -134,7 +161,7 @@ class cde:
         # nome do arquivo de log com a data atual
         user_id = session.get('id_user', 'unknown')
         log_file_name = datetime.now().strftime('%Y-%m-%d') + f'-u{user_id}' + '.log'
-        log_file_path = os.path.join(log_directory, log_file_name)
+        log_file_path = os.path.join(dirs.get('logs_dir'), log_file_name)
         try:
             with open(log_file_path, 'a') as log_file:
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
