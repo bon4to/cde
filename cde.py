@@ -23,13 +23,16 @@ from werkzeug.wrappers.response import Response
 
 
 if __name__:
-    # PARÂMETROS
+    # carrega o .env
     load_dotenv()
+    
+    # define app
     app = Flask(__name__)
+    
+    # parâmetros
     app.secret_key = os.getenv('SECRET_KEY')
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
-
-    app.config['APP_VERSION'] = ['0.5.1', 'Dezembro/2024', False]
+    app.config['APP_VERSION'] = ['0.5.2', 'Janeiro/2025', False] # 'versão', 'release-date', 'debug-mode'
     app.config['APP_UNIT'] = '' # preset default
     # GET nome do diretório
     dir_os = os.path.dirname(os.path.abspath(__file__)).upper()
@@ -66,7 +69,7 @@ if __name__:
         return
 
 
-    # STRINGS DE EXECUCAO
+    # logs de execução
     exec_head   = \
 f'''
 
@@ -112,12 +115,14 @@ Pressione ENTER para sair...
 
     elif main_exec_dir in dir_os:
         # Se o diretório atende ao local para produção, modo_exec = produção.
+        # logs server running info
         db_path = os.getenv('DB_PATH')
         port, debug = 5005, False
         print(exec_head, start_head)
+        # logs header & server running info
 
     else:
-        # Se o diretório não atende aos requisitos plenos de funcionamento, não executa.
+    else: # se o diretório não corresponde aos listados, não executa.
         print(error_foot)
         sys.exit(2)
         
@@ -138,7 +143,7 @@ class cde:
     @staticmethod
     # função para salvar logs em um arquivo com nome de data
     def save_log(log_message):
-        # Nome do arquivo de log com a data atual
+        # nome do arquivo de log com a data atual
         user_id = session.get('id_user', 'unknown')
         log_file_name = datetime.now().strftime('%Y-%m-%d') + f'-u{user_id}' + '.log'
         log_file_path = os.path.join(log_directory, log_file_name)
@@ -146,7 +151,7 @@ class cde:
             with open(log_file_path, 'a') as log_file:
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 
-                # Se o log_message for uma lista ou dicionário, converte para JSON
+                # se o log_message for uma lista ou dicionário, converte para JSON
                 if isinstance(log_message, (list, dict)):
                     log_message = json.dumps(log_message, ensure_ascii=False)
                 
@@ -188,6 +193,7 @@ class cde:
         # default
         print('Retornando HUGOPIET')
         return 'HUGOPIET'
+    
     
     @staticmethod
     # conexão e consulta no banco de dados
