@@ -39,25 +39,14 @@ if __name__:
     debug_dir = os.getenv('DEBUG_DIR').upper().split(';')
     main_exec_dir = os.getenv('MAIN_EXEC_DIR').upper()
 
-    class ANSI:
-        RESET = ""
-        BOLD = ""
-        RED = ""
-        GREEN = ""
-        YELLOW = ""
-        BLUE = ""
-        MAGENTA = ""
-        CYAN = ""
-        WHITE = ""
-
 
     class TAGS:
-        SERVIDOR = f'{ANSI.MAGENTA}[CDE]{ANSI.RESET}'
-        ERRO     = f'{ANSI.RED}[ERRO]{ANSI.RESET}'
-        INFO     = f'{ANSI.BLUE}[INFO]{ANSI.RESET}'
-        STATUS   = f'{ANSI.GREEN}[STATUS]{ANSI.RESET}'
-        DENIED   = f'{ANSI.RED}403{ANSI.RESET}'
-        GRANTED  = f'{ANSI.CYAN}200{ANSI.RESET}'
+        SERVER  = '[CDE]'
+        INFO    = '[INFO]'
+        ERROR   = '[ERROR]'
+        STATUS  = '[STATUS]'
+        DENIED  = '403'
+        GRANTED = '200'
 
 
     def log(tag_1, tag_2, text):
@@ -99,7 +88,7 @@ f'''
 '''
     error_foot  = \
 f'''
-{TAGS.ERRO} 
+{TAGS.ERROR} 
 * Impossível executar, verifique se o arquivo está alocado corretamente.
 
 Pressione ENTER para sair...
@@ -451,16 +440,16 @@ class cde:
                 id_user = session.get('id_user')
                 session['id_page'] = f'{id_page}'
                 if session.get('user_grant') <= 2:
-                    log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
                 user_perm = UserUtils.get_user_permissions(id_user)
                 user_perm = [item['id_perm'] for item in user_perm]
                 if id_page in user_perm:
-                    log(TAGS.SERVIDOR, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
-                log(TAGS.SERVIDOR, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                log(TAGS.SERVER, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type='SEM PERMISSÕES',
@@ -2381,6 +2370,7 @@ def inject_version() -> dict:
     # INJETA VARIAVEL DE VERSÃO AO AMBIENTE
     return dict(app_version=app.config['APP_VERSION'])
 
+
 @app.context_processor
 def inject_unit() -> dict:
     # INJETA VARIAVEL DE UNIDADE AO AMBIENTE
@@ -2499,10 +2489,10 @@ def log_message():
             print(f'{TAGS.INFO} Log salvo com sucesso.')
             return jsonify({"status": "success", "message": "Log salvo com sucesso."}), 200
         else:
-            print(f'{TAGS.ERRO} Não foi possível salvar o log.')
+            print(f'{TAGS.ERROR} Não foi possível salvar o log.')
             return jsonify({"status": "error", "message": "Não foi possível salvar o log."}), 500
     else:
-        print(f'{TAGS.ERRO} Nenhuma mensagem foi recebida.')
+        print(f'{TAGS.ERROR} Nenhuma mensagem foi recebida.')
         return jsonify({"status": "error", "message": "Nenhuma mensagem foi recebida."}), 400
 
 
