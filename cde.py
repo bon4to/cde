@@ -49,8 +49,8 @@ if __name__:
         GRANTED = '200'
 
 
-    def log(tag_1, tag_2, text):
-        timestamp = misc.get_timestamp()
+    def log(tag_1, tag_2, text) -> None:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if not tag_2:
             print(f'{tag_1} {text}')
             return
