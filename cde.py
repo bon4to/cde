@@ -59,7 +59,6 @@ if __name__:
 
     dirs = {}
     def create_dirs() -> None:
-        path = os.getcwd()
         dirs = {
             'db_dir'     : os.path.join(os.getcwd(), 'db'),
             'app_dir'    : os.path.join(os.getcwd(), 'app'),
