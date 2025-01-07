@@ -2466,6 +2466,9 @@ def force_503() -> None:
 @app.route('/')
 @cde.verify_auth('CDE001')
 def index() -> Response:
+    # cria as tabelas
+    cde.create_tables() # TODO: REMOVE from here
+    
     return redirect(url_for('home'))
 
 
