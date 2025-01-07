@@ -31,5 +31,5 @@ if __name__ == '__main__':
 
     port = 5005
     
-    print(f'{TAGS.STATUS} Running on: http://192.168.1.20:{port}\n')
+    print(f'{TAGS.STATUS} Running on: localhost:{port}\n')
     serve(app, host='0.0.0.0', port=port)
