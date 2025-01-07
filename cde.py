@@ -354,19 +354,18 @@ class cde:
 
             # TABELA HISTÓRICO
             cursor.execute('''
-                CREATE TABLE IF NOT EXISTS historico (
+                CREATE TABLE IF NOT EXISTS tbl_transactions (
                     id_mov     INTEGER PRIMARY KEY AUTOINCREMENT,
-                    rua_numero INTEGER(6),
                     rua_letra  VARCHAR(10),
+                    rua_numero INTEGER(6),
                     cod_item   VARCHAR(100),
                     lote_item  VARCHAR(8),
                     quantidade INTEGER,
                     operacao   VARCHAR(15),
-                    user_name  VARCHAR(30),
-                    time_mov   DATETIME,
-                    id_carga   INTEGER(6), 
+                    id_carga   INTEGER(6),
                     id_request INTEGER(6), 
-                    id_user    INTEGER
+                    id_user    INTEGER,
+                    time_mov   DATETIME
                 );
             ''')
             
@@ -383,7 +382,7 @@ class cde:
             
             # TABELA DE CARGAS PENDENTES
             cursor.execute('''
-                CREATE TABLE IF NOT EXISTS carga_incomp (
+                CREATE TABLE IF NOT EXISTS tbl_carga_incomp (
                     id_log        INTEGER PRIMARY KEY AUTOINCREMENT,
                     id_carga      INTEGER(6),
                     cod_item      VARCHAR(6),
@@ -522,7 +521,7 @@ class EstoqueUtils:
                     h.rua_numero, h.rua_letra, i.cod_item, 
                     i.desc_item, h.lote_item,
                     {a} as saldo
-                FROM historico h
+                FROM tbl_transactions h
 
                 JOIN itens i 
                 ON h.cod_item = i.cod_item
@@ -571,7 +570,7 @@ class EstoqueUtils:
                             PARTITION BY cod_item 
                             ORDER BY MAX(time_mov) DESC
                         ) as rn
-                    FROM historico h
+                    FROM tbl_transactions h
                     WHERE time_mov <= ?
                     GROUP BY cod_item
                 ) t ON i.cod_item = t.cod_item
@@ -622,7 +621,7 @@ class EstoqueUtils:
                         PARTITION BY cod_item 
                         ORDER BY MAX(time_mov) DESC
                     ) as rn
-                FROM historico h
+                FROM tbl_transactions h
                 WHERE time_mov <= ?
                 GROUP BY cod_item
             ) t ON i.cod_item = t.cod_item
@@ -673,7 +672,7 @@ class EstoqueUtils:
                     h.rua_letra, h.rua_numero, 
                     i.cod_item, i.desc_item, h.lote_item,
                     {a} as saldo
-                FROM historico h
+                FROM tbl_transactions h
                 
                 JOIN itens i 
                 ON h.cod_item = i.cod_item
@@ -708,7 +707,7 @@ class EstoqueUtils:
                     h.rua_numero, h.rua_letra, i.cod_item,
                     i.desc_item, h.lote_item, h.id_carga, 
                     h.id_request, h.quantidade, h.time_mov
-                FROM historico h
+                FROM tbl_transactions h
                 
                 JOIN itens i 
                 ON h.cod_item = i.cod_item
@@ -740,7 +739,7 @@ class EstoqueUtils:
             cursor.execute('''
                 SELECT 
                     COALESCE({a}, 0) as saldo
-                FROM historico h
+                FROM tbl_transactions h
                 WHERE 
                     rua_numero = ? AND
                     rua_letra = ? AND
@@ -848,7 +847,7 @@ class CargaUtils:
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT cod_item, count(*)
-                FROM historico
+                FROM tbl_transactions
                 WHERE id_carga = ?;
                 ''',
                 (id_carga,)
@@ -913,7 +912,7 @@ class CargaUtils:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                INSERT INTO carga_incomp (
+                INSERT INTO tbl_carga_incomp (
                     id_carga, cod_item, qtde_atual, 
                     qtde_solic, flag_pendente
                 ) VALUES (
@@ -933,7 +932,7 @@ class CargaUtils:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                UPDATE carga_incomp 
+                UPDATE tbl_carga_incomp 
                 SET flag_pendente = FALSE
                 WHERE 
                     id_carga = ?;
@@ -950,7 +949,7 @@ class CargaUtils:
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT qtde_atual
-                FROM carga_incomp 
+                FROM tbl_carga_incomp 
                 WHERE 
                     id_carga = ? AND 
                     cod_item = ?;
@@ -970,7 +969,7 @@ class CargaUtils:
                     return 'Erro: Quantidade menor do que a separada.'
                 
                 cursor.execute('''
-                    UPDATE carga_incomp 
+                    UPDATE tbl_carga_incomp 
                     SET 
                         qtde_atual = ?,
                         flag_pendente = ?
@@ -996,7 +995,7 @@ class CargaUtils:
 
         query = '''
             SELECT DISTINCT id_carga, i.cod_item, desc_item, qtde_atual, qtde_solic
-            FROM carga_incomp ci
+            FROM tbl_carga_incomp ci
             JOIN itens i
             ON ci.cod_item = i.cod_item
             {a};
@@ -1015,7 +1014,7 @@ class CargaUtils:
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT DISTINCT id_carga
-                FROM carga_incomp ci
+                FROM tbl_carga_incomp ci
                 
                 WHERE ci.flag_pendente = TRUE;
             ''')
@@ -1041,7 +1040,7 @@ class CargaUtils:
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT i.cod_item, desc_item, quantidade
-                FROM historico h
+                FROM tbl_transactions h
                 
                 JOIN itens i
                 ON h.cod_item = i.cod_item
@@ -1127,7 +1126,7 @@ class CargaUtils:
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT DISTINCT id_carga
-                FROM historico
+                FROM tbl_transactions
                 WHERE 
                     id_carga != '' AND
                     id_carga != '0'
@@ -1280,7 +1279,7 @@ class MovRequestUtils:
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT DISTINCT id_request
-                FROM historico
+                FROM tbl_transactions
                 ORDER BY id_request DESC;
             ''')
             rows = cursor.fetchall()
@@ -1374,7 +1373,7 @@ class HistoricoUtils:
                 SELECT 
                     cod_item, lote_item, 
                     COALESCE({a}, 0) as saldo
-                FROM historico
+                FROM tbl_transactions
                 WHERE 
                     rua_letra = ? AND
                     rua_numero = ?
@@ -1396,7 +1395,7 @@ class HistoricoUtils:
                 cursor = connection.cursor()
                 cursor.execute(
                     '''
-                    INSERT INTO historico (
+                    INSERT INTO tbl_transactions (
                         rua_numero, rua_letra, cod_item,
                         lote_item, quantidade, operacao,
                         time_mov, id_user, id_carga, 
@@ -1427,7 +1426,7 @@ class HistoricoUtils:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
 
-            cursor.execute('SELECT COUNT(*) FROM historico;')
+            cursor.execute('SELECT COUNT(*) FROM tbl_transactions;')
             row_count = cursor.fetchone()[0] # número total de linhas
 
             cursor.execute('''
@@ -1436,7 +1435,7 @@ class HistoricoUtils:
                     i.desc_item, h.lote_item, h.quantidade,
                     h.operacao, u.id_user||' - '||u.nome_user,
                     h.time_mov
-                FROM historico h
+                FROM tbl_transactions h
                 
                 JOIN itens i ON h.cod_item = i.cod_item
                 JOIN users u ON h.id_user = u.id_user
@@ -1466,7 +1465,7 @@ class HistoricoUtils:
                     i.desc_item, h.lote_item, h.quantidade,
                     h.operacao, u.id_user||' - '||u.nome_user, 
                     h.time_mov
-                FROM historico h
+                FROM tbl_transactions h
                 
                 JOIN itens i ON h.cod_item = i.cod_item
                 JOIN users u ON h.id_user = u.id_user
@@ -2262,7 +2261,7 @@ class misc:
                                 ORDER BY MAX(time_mov) DESC
                             ) as rn
                         FROM 
-                            historico h
+                            tbl_transactions h
                         GROUP BY 
                             cod_item
                         HAVING 
@@ -4093,7 +4092,7 @@ def get_carga_qtde_solic():
         query = '''
             SELECT DISTINCT 
                 MAX(qtde_solic) AS QTDE_SOLIC
-            FROM carga_incomp
+            FROM tbl_carga_incomp
             WHERE 
                 id_carga = '{a}' AND
                 cod_item = '{b}'
@@ -4105,7 +4104,7 @@ def get_carga_qtde_solic():
         query = '''
             SELECT 
                 qtde_solic AS QTDE_SOLIC
-            FROM carga_incomp
+            FROM tbl_carga_incomp
             WHERE 
                 id_carga = '{a}' AND
                 cod_item = '{b}' AND
