@@ -229,7 +229,7 @@ class cde:
                 print("Erro ao enviar solicitação:", str(e))
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
-        elif dsn == "CDE_NOE":
+        elif dsn == "NOE":
             url, headers = cde.new_api_connection()
             data = {"query": query}
             try:
