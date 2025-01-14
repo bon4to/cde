@@ -2855,9 +2855,8 @@ def historico() -> str:
 
     return render_template(
         'pages/mov/mov-historico.html', 
-        estoque=estoque, 
-        page=page, 
-        total_pages=total_pages, 
+        estoque=estoque, page=page, 
+        total_pages=total_pages, max=max, min=min, 
         row_count=row_count
     )
 
@@ -2902,9 +2901,9 @@ def historico_search() -> str:
             'pages/mov/mov-historico.html', 
             estoque=filtered_estoque, 
             search_term=search_term, 
-            search_row_text=search_row_text, 
-            page=0, 
-            total_pages=0
+            page = 0, max=max, min=min, 
+            total_pages=0,
+            search_row_text=search_row_text
         )
 
     # GET retorna ao histórico padrão
