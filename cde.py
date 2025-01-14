@@ -2853,8 +2853,9 @@ def historico() -> str:
 
     return render_template(
         'pages/mov/mov-historico.html', 
-        estoque=estoque, page=page, 
-        total_pages=total_pages, max=max, min=min, 
+        estoque=estoque, 
+        page=page, 
+        total_pages=total_pages, 
         row_count=row_count
     )
 
@@ -2863,9 +2864,9 @@ def historico() -> str:
 @cde.verify_auth('MOV003')
 def historico_search() -> str:
     if request.method == 'POST':
-        search_term  = request.form['search_term']
-        search_index = request.form['search_index']
-        
+        search_term = request.form.get('search_term', '').strip()
+        search_index = request.form.get('search_index', '').strip()
+
         option_texts = {
             'cod_item': 'Item (Código)',
             'desc_item': 'Item (Descrição)',
@@ -2874,31 +2875,38 @@ def historico_search() -> str:
             'quantidade': 'Quantidade',
             'cod_lote': 'Lote (Código)',
             'user_name': 'Usuário (Nome)',
-            'timestamp': 'Horário (Data/Hora)'
+            'timestamp': 'Horário (Data/Hora)',
         }
 
-        search_row_text = option_texts.get(search_index, '')
+        if not search_term or search_index not in option_texts:
+            return render_template(
+                'pages/mov/mov-historico.html', 
+                estoque=[], 
+                search_term=search_term, 
+                search_row_text="Invalid search",
+                page=0, 
+                total_pages=0
+            )
 
+        search_row_text = option_texts[search_index]
         estoque = HistoricoUtils.get_all_historico()
-        filtered_estoque = [item for item in estoque if search_term.lower() in item[search_index].lower()]
+
+        # Filtra resultados
+        filtered_estoque = [
+            item for item in estoque if search_term.lower() in item.get(search_index, '').lower()
+        ]
 
         return render_template(
             'pages/mov/mov-historico.html', 
             estoque=filtered_estoque, 
             search_term=search_term, 
-            page = 0, max=max, min=min, 
-            total_pages=0,
-            search_row_text=search_row_text
+            search_row_text=search_row_text, 
+            page=0, 
+            total_pages=0
         )
-    
-    return render_template(
-        'pages/mov/mov-historico.html', 
-        estoque=[], 
-        search_term="", 
-        page = 0, max=max, min=min, 
-        total_pages=0, 
-        search_row_text=search_row_text
-    )
+
+    # GET retorna ao histórico padrão
+    return historico()
 
 
 @app.route('/mov/carga/faturado/')
