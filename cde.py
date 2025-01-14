@@ -212,6 +212,8 @@ class cde:
     @staticmethod
     # conexão e consulta no banco de dados
     def db_query(query, dsn):
+        # TODO: criar api para consultar nas dsns (micro-services)
+        # TODO: criar métodos de mesclar consultas (ex: dadosNOE + dadosHP)
         if dsn == 'HUGOPIET':
             uid_pwd = os.getenv('DB_USER').split(';')
             user = uid_pwd[0]
@@ -811,7 +813,7 @@ class CargaUtils:
                     ON i.ITEM = iped.ITEM
 
                     WHERE icrg.QTDE_FATUR != 0
-                    AND icrg.CODIGO_GRUPOPED NOT IN ({a})
+                    -- AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
                     ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
                 '''.format(a=cargas_except_query)
