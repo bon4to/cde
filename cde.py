@@ -1521,8 +1521,13 @@ class ProdutoUtils:
                     NOT GTIN_14 = ''
             )
             OR 
-                -- copos cadastrados por extensão
-                i.ITEM IN ('EM.3577', 'EM.1074');
+                -- TODO: criar método que cria uma whitelist para estes itens específicos
+                i.ITEM IN (
+                    -- copos cadastrados por extensão
+                    'EM.3577', 'EM.1074',
+                    -- itens unitários
+                    '004111', '004112', '004113', '004114'
+                );
         '''
 
         dsn = cde.get_unit()
