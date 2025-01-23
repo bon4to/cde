@@ -174,6 +174,17 @@ class cde:
         except Exception as e:
             return False
 
+    
+    @staticmethod
+    # retorna texto do arquivo
+    def get_file_text(dir) -> str:
+        try:
+            with open(dir, 'r') as file:
+                return file.read().strip()
+        except Exception as e:
+            print(e)
+            return ''
+
 
     @staticmethod
     # logs no modo debug
@@ -1488,6 +1499,7 @@ class ProdutoUtils:
     # retorna itens do banco de dados do ERP
     # implementa o filtro para itens embalagem
     def get_itens_from_erp():
+        whitelist = cde.get_file_text('app/presets/item-whitelist.txt')
         query = '''
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
             FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
@@ -1503,14 +1515,9 @@ class ProdutoUtils:
                     NOT GTIN_14 = ''
             )
             OR 
-                -- TODO: criar método que cria uma whitelist para estes itens específicos
-                i.ITEM IN (
-                    -- copos cadastrados por extensão
-                    'EM.3577', 'EM.1074',
-                    -- itens unitários
-                    '004111', '004112', '004113', '004114'
-                );
-        '''
+                -- whitelist de itens
+                i.ITEM IN ({a});
+        '''.format(a=whitelist)
 
         dsn = cde.get_unit()
         result, columns = cde.db_query(query, dsn)
