@@ -216,16 +216,60 @@ class cde:
         except json.JSONDecodeError:
             print("Erro: Conteúdo do arquivo não é um JSON válido.")
         # default
-        print('Retornando HUGOPIET')
-        return 'HUGOPIET'
+        print('Retornando ODBC-DRIVER')
+        return 'ODBC-DRIVER'
     
     
     @staticmethod
     # conexão e consulta no banco de dados
-    def db_query(query, dsn):
+    def db_query(query, dsn, source=1):
         # TODO: criar api para consultar nas dsns (micro-services)
         # TODO: criar métodos de mesclar consultas (ex: dadosNOE + dadosHP)
-        if dsn == 'HUGOPIET':
+        if dsn == 'API':
+            url, headers = cde.new_api_connection()
+            data = {
+                "query": query,
+                "source": source
+            }
+            try:
+                response = requests.post(url, headers=headers, json=data)
+                
+                if response.status_code == 200:
+                    try:
+                        response_data = response.json()
+                        print(f"Resposta da API: {response_data} (Tipo: {type(response_data)})")
+
+                        # Verifica se a resposta possui as chaves esperadas
+                        if isinstance(response_data, dict) and "columns" in response_data and "data" in response_data:
+                            # Extrai colunas e dados
+                            columns = response_data["columns"]
+                            data = response_data["data"]
+
+                            # Converte 'data' em uma lista de listas para exibição tabular
+                            rows = [[item.get(col, "") for col in columns] for item in data]
+
+                            # Retorna as linhas e colunas
+                            return rows, columns
+                        else:
+                            cde.debug_log(f"Formato inesperado da resposta: {response_data}")
+                            return [[f"Erro: Formato inesperado da resposta da API"]], []
+
+                    except ValueError:
+                        cde.debug_log(f"Resposta inválida (não é JSON): {response.text}")
+                        return [[f"Erro: Resposta inválida da API"]], []
+                else:
+                    cde.debug_log(f"Erro na API: {response.status_code} - {response.reason}")
+                    return [[f"Erro HTTP {response.status_code}: {response.reason}"]], []
+
+            except requests.exceptions.ConnectionError as e:
+                cde.debug_log(f"API offline ou inacessível: {str(e)}")
+                return [[f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."]], []
+
+            except Exception as e:
+                cde.debug_log(f"Erro de conexão com a API: {str(e)}")
+                return [[f"Erro: {str(e)}"]], []
+
+        elif dsn == 'ODBC-DRIVER':
             uid_pwd = os.getenv('DB_USER').split(';')
             user = uid_pwd[0]
             password = uid_pwd[1]
@@ -242,36 +286,8 @@ class cde:
                 print("Erro ao enviar solicitação:", str(e))
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
-        elif dsn == "NOE":
-            url, headers = cde.new_api_connection()
-            data = {"query": query}
-            try:
-                response = requests.post(url, headers=headers, json=data)
-                if response.status_code == 200:
-                    response_data = response.json()
-                    result = response_data.get("data", [])
-                    
-                    # retorno tabulado
-                    if isinstance(result, str):
-                        lines = result.strip().split("\n")
-                        header = lines[0].split("\t")
-                        rows = [line.split("\t") for line in lines[1:]]
-                        return rows, header
-                    
-                    # retorno JSON
-                    columns = list(result[0].keys()) if result else []
-                    rows = [list(item.values()) for item in result]
-                    return rows, columns
-                else:
-                    print(f"Erro na API: {response.status_code} - {response.text}")
-                    return [[f"Erro: {response.text}"]], []
-            except requests.exceptions.ConnectionError as e:
-                print("API offline ou inacessível:", str(e))
-                return [[f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."]], []
-            except Exception as e:
-                print("Erro de conexão com a API:", str(e))
-                return [[f"Erro: {str(e)}"]], []
-        elif dsn == 'SQLITE':
+        
+        elif dsn == 'LOCAL':
             try:
                 with sqlite3.connect(db_path) as connection:
                     cursor = connection.cursor()
@@ -292,8 +308,8 @@ class cde:
     
     @staticmethod
     def new_api_connection():
-        noe_api = os.getenv('NOE_API')
-        url = f"http://{noe_api}/query"
+        db_api = os.getenv('DB_API')
+        url = f"http://{db_api}/query"
         headers = {"Content-Type": "application/json"}
         
         return url, headers
@@ -303,14 +319,21 @@ class cde:
     # consulta tabelas do schema
     def db_get_tables(dsn):
         try:
-            if dsn == 'HUGOPIET':
+            if dsn == 'ODBC-DRIVER':
                 query = '''
                     SELECT TABNAME
                     FROM SYSCAT.TABAUTH
                     WHERE GRANTEE = 'CDEADMIN'
                     AND SELECTAUTH = 'Y';
                 '''
-            elif dsn == 'SQLITE':
+            if dsn == 'API':
+                query = '''
+                    SELECT TABNAME
+                    FROM SYSCAT.TABAUTH
+                    WHERE GRANTEE = 'CDEADMIN'
+                    AND SELECTAUTH = 'Y';
+                '''
+            elif dsn == 'LOCAL':
                 query = '''
                     SELECT name 
                     FROM sqlite_master 
@@ -550,7 +573,7 @@ class EstoqueUtils:
                     h.lote_item ASC, h.rua_letra ASC,
                     h.rua_numero ASC, i.desc_item ASC;
             '''.format(a=sql_balance_calc, b=str(cod_item))
-            dsn = 'SQLITE'
+            dsn = 'LOCAL'
             result_local, columns_local = cde.db_query(query, dsn)
             return result_local, columns_local
         else:
@@ -767,14 +790,14 @@ class CargaUtils:
     @staticmethod
     # retorna as cargas,
     # exceto cargas faturadas
-    def get_cargas(all_cargas=False, dsn='HUGOPIET'):
+    def get_cargas(all_cargas=False, dsn='ODBC-DRIVER'):
         if all_cargas:
 
             # define o dsn conforme default (ou usuario)
             dsn = cde.get_unit()
             print('DSN: ' + dsn)
             
-            if dsn == 'HUGOPIET':
+            if dsn == 'ODBC-DRIVER':
                 cargas_except_query = ', '.join(map(str, all_cargas))
                 
                 query = '''
@@ -810,7 +833,7 @@ class CargaUtils:
 
                     ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
                 '''.format(a=cargas_except_query)
-            elif dsn == 'CDE_NOE':
+            elif dsn == 'API':
                 cargas_except_query = ', '.join(map(str, all_cargas))
 
                 query = '''
@@ -1014,7 +1037,7 @@ class CargaUtils:
             {a};
         '''.format(a=where_clause)
         
-        dsn = 'SQLITE'
+        dsn = 'LOCAL'
         result, columns = cde.db_query(query, dsn)
         
         return result, columns 
@@ -1981,7 +2004,7 @@ class UserUtils:
             WHERE u.id_user = {a};
         '''.format(a=id_user)
 
-        dsn = 'SQLITE'
+        dsn = 'LOCAL'
         result, columns = cde.db_query(query, dsn)
 
         if result:
@@ -2181,7 +2204,7 @@ class misc:
     def tlg_msg(msg):
         if not session.get('user_grant') == 1:
             if debug == True:
-                print('[ERRO] A mensagem não pôde ser enviada em modo debug')
+                cde.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
                 return None
             else:
                 bot_token = os.getenv('TLG_BOT_TOKEN')
@@ -2622,7 +2645,7 @@ def api() -> str:
             query = request.form['sql_query'].replace("▷", ".").replace("-- para executar, clique em '.' acima", "")
             dsn = request.form['sel_schema']
             tables = cde.db_get_tables(dsn)
-            print(f'query: {query}; dsn: {dsn}; tables: {tables}') # print(query, dsn, tables)
+            cde.debug_log(f'query: {query}; dsn: {dsn}; tables: {tables}') # print(query, dsn, tables)
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
                 result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
@@ -2712,7 +2735,7 @@ def login():
             UserUtils.get_user_initials(user_nome, user_snome)
 
         except Exception as e:
-            print(e)
+            print(f'  | ERRO: {e}')
             
         finally:
             session['id_user'] = user_id      # id
@@ -3057,7 +3080,7 @@ def moving() -> str | Response:
     
     else:
     # operacao invalida
-        print(f'[ERRO] {letra}.{numero}: ', cod_item, lote_item, quantidade, f': OPERAÇÃO INVÁLIDA ({operacao})')
+        print(f'  | [ERRO] {letra}.{numero}: ', cod_item, lote_item, quantidade, f': OPERAÇÃO INVÁLIDA ({operacao})')
 
     return redirect(url_for('mov'))
 
@@ -4160,7 +4183,7 @@ def get_carga_qtde_solic():
                 cod_item = '{b}'
             ;
         '''.format(a=id_carga, b=cod_item)
-        dsn = 'SQLITE'
+        dsn = 'LOCAL'
         result, columns = cde.db_query(query, dsn)
     else:
         query = '''
@@ -4173,7 +4196,7 @@ def get_carga_qtde_solic():
                 flag_pendente = TRUE
             ;
         '''.format(a=id_carga, b=cod_item)
-        dsn = 'SQLITE'
+        dsn = 'LOCAL'
         result, columns = cde.db_query(query, dsn)
         
     if result != []:

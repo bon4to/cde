@@ -59,9 +59,9 @@
                                 {% if dsn %}
                                     <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
                                 {% endif %}
-                                <option>HUGOPIET</option>
-                                <option>CDE_NOE</option>
-                                <option>SQLITE</option>
+                                <option>ODBC-DRIVER</option>
+                                <option>API</option>
+                                <option>LOCAL</option>
                             </select>
                             <button class="button-mini btn-fancy" type="submit" id="submitform">
                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/play.svg') }}" title="EXECUTAR">
@@ -172,7 +172,7 @@ LIMIT 15;{% endif %}</textarea>
             currentQuery = editor.getValue();
 
             schema = "";
-            if (sel_schema == "HUGOPIET" or sel_schema == "CDE_NOE") {
+            if (sel_schema == "ODBC-DRIVER" or sel_schema == "API") {
                 schema = "DB2ADMIN.";
             }
 
