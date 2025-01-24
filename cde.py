@@ -164,14 +164,12 @@ class cde:
         try:
             with open(log_file_path, 'a') as log_file:
                 timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                
-                # se o log_message for uma lista ou dicionário, converte para JSON
                 if isinstance(log_message, (list, dict)):
                     log_message = json.dumps(log_message, ensure_ascii=False)
-                
                 log_file.write(f'[{timestamp}] {log_message}\n')
                 return True
         except Exception as e:
+            print(f'{TAGS.ERROR} Erro ao salvar log: {e}')
             return False
 
     
@@ -295,7 +293,7 @@ class cde:
                     columns = [str(column[0]) for column in cursor.description]
                     result = cursor.fetchall()
             except Exception as e:
-                print("Erro ao enviar solicitação:", str(e))
+                cde.debug_log(f"Erro ao enviar solicitação: {str(e)}")
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
 
@@ -795,7 +793,7 @@ class CargaUtils:
 
             # define o dsn conforme default (ou usuario)
             dsn = cde.get_unit()
-            print('DSN: ' + dsn)
+            cde.debug_log(f'DSN: {dsn}')
             
             if dsn == 'ODBC-DRIVER':
                 cargas_except_query = ', '.join(map(str, all_cargas))
