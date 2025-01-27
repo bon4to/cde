@@ -375,6 +375,7 @@
         
         function getSeparacao() {
             return new Promise((resolve, reject) => {
+                // busca no localstorage (cache do navegador)
                 const localStorageData = localStorage.getItem(getStorageKey());
                 if (localStorageData) {
                     // TODO: function 'hasPendingItems' is not defined 
