@@ -64,6 +64,7 @@ if __name__:
             'app_dir'    : os.path.join(os.getcwd(), 'app'),
             'a_rout_dir' : os.path.join(os.getcwd(), 'app/routes'),
             'a_mod_dir'  : os.path.join(os.getcwd(), 'app/models'),
+            'a_pres_dir' : os.path.join(os.getcwd(), 'app/presets'),
             'a_serv_dir' : os.path.join(os.getcwd(), 'app/services'),
             'a_util_dir' : os.path.join(os.getcwd(), 'app/utils'),
             'tests_dir'  : os.path.join(os.getcwd(), 'tests'),
@@ -845,7 +846,7 @@ class CargaUtils:
                     ON i.ITEM = iped.ITEM
 
                     WHERE icrg.QTDE_FATUR != 0
-                    -- AND icrg.CODIGO_GRUPOPED NOT IN ({a})
+                    AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
                     ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
                 '''.format(a=cargas_except_query)
@@ -881,9 +882,10 @@ class CargaUtils:
                     ON i.ITEM = iped.ITEM
 
                     WHERE icrg.QTDE_FATUR != 0
+                    AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
                     ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-                '''
+                '''.format(a=cargas_except_query)
         else:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
         
@@ -2660,8 +2662,8 @@ def api() -> str:
         if request.method == 'POST':
             query = request.form['sql_query'].replace("▷", ".").replace("-- para executar, clique em '.' acima", "")
             dsn = request.form['sel_schema']
+            source = int(request.form.get('sel_source', 1))
             tables = cde.db_get_tables(dsn)
-            cde.debug_log(f'query: {query}; dsn: {dsn}; tables: {tables}') # print(query, dsn, tables)
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
                 result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
@@ -2669,10 +2671,11 @@ def api() -> str:
                     result=result,
                     tables=tables,
                     query=query,
-                    dsn=dsn
+                    dsn=dsn,
+                    source=source
                 )
             else:
-                result, columns = cde.db_query(query, dsn)
+                result, columns = cde.db_query(query, dsn, source)
 
                 return render_template(
                     'pages/api.html', 
@@ -2680,7 +2683,8 @@ def api() -> str:
                     columns=columns,
                     tables=tables,
                     query=query,
-                    dsn=dsn
+                    dsn=dsn,
+                    source=source
                 )
     return render_template(
         'pages/api.html'
@@ -3887,8 +3891,12 @@ def carga_id(id_carga) -> str:
         fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
         all_cargas = CargaUtils.get_cargas_finalizadas()
         
+        cde.debug_log(f'all_cargas: {all_cargas}')
+        
         # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
-        cargas_except_query = ', '.join(str(int(carga)) for carga in all_cargas if isinstance(carga, int))
+        cargas_except_query = ', '.join(str(int(carga)) for carga in all_cargas if str(carga).isdigit())
+        
+        cde.debug_log(f'cargas_except_query: {cargas_except_query}')
 
         query = f'''
             SELECT DISTINCT 

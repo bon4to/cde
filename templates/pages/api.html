@@ -53,15 +53,25 @@
                     {% if app_version[2] %}
                     <div class="split-horizontal" style="margin: 6px; align-items: center">
                         <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="cor-web subtitle">Console SQL</h1>
-                        <div class="flex-row" style="align-items: center; margin: 0 14px;">
+                        <div class="flex-row" style="align-items: center; margin: 6px 14px;">
                             <img id="undoButton" class="svg-invert" style="opacity: 0.6; display: none; cursor: pointer;" onclick="restoreLastQuery()" src="{{ url_for('static', filename='svg/undo.svg') }}" title="DESFAZER">
-                            <select id="sel_schema" name="sel_schema" class="address" required>
+                            <select title="METHOD" id="sel_schema" name="sel_schema" class="address" style="margin: 0; height: 45px" required>
                                 {% if dsn %}
                                     <option value="{{ dsn }}">{{ dsn }} (RECENTE)</option>
+                                    <hr>
                                 {% endif %}
-                                <option>ODBC-DRIVER</option>
                                 <option>API</option>
+                                <option>ODBC-DRIVER</option>
                                 <option>LOCAL</option>
+                            </select>
+                            <select title="SOURCE" id="sel_source" name="sel_source" style="margin: 0; height: 45px; width: 70px;" required>
+                                {% if source %}
+                                    <option value="{{ source }}">{{ source }}</option>
+                                    <hr>
+                                {% endif %}
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
                             </select>
                             <button class="button-mini btn-fancy" type="submit" id="submitform">
                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/play.svg') }}" title="EXECUTAR">
@@ -77,8 +87,13 @@
                         >{% if query %}{{ query }}{% else %}
 -- para executar, clique em '▷' acima
 -- query para obter os 15 primeiros itens
-SELECT ITEM, ITEM_DESCRICAO, UNIDADE_DESCRICAO, GTIN_14
-FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
+SELECT 
+   ITEM              AS COD_ITEM,
+   ITEM_DESCRICAO    AS DESC_ITEM,
+   UNIDADE_DESCRICAO AS UND_ITEM,
+   GTIN_14           AS DUN_14
+FROM 
+   DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
 WHERE GTIN_14 != ''
 LIMIT 15;{% endif %}</textarea>
                     </div>  
@@ -89,7 +104,7 @@ LIMIT 15;{% endif %}</textarea>
                     {% endif %}
                 </form>
                 <div class="tables-container" style="margin: 0; min-height: unset; max-width: 90%; width: -webkit-fill-available">
-                    <h1 class="cor-web subtitle">{{ dsn }}</h1>
+                    <h1 class="cor-web subtitle">Tabelas</h1>
                     <div style="max-height: 350px; overflow-y: scroll">
                         <table style="width: 240px">
                             <tbody>
@@ -105,7 +120,7 @@ LIMIT 15;{% endif %}</textarea>
             </div>
             {% if app_version[2] %}
             <div class="tables-container" style="min-width: 800px; max-width: 90%; width: -webkit-fill-available">
-                <h1 style="text-align: left; margin: 0; padding-left: 0" class="cor-web subtitle">API Results</h1>
+                <h1 style="text-align: left; margin: 0; padding-left: 0" class="cor-web subtitle">{{ dsn }} Results</h1>
                 {% if alert_msge %}
                     <p class="alert" id="custom-alert">{{ alert_msge }}</p>
                 {% endif %}
