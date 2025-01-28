@@ -236,7 +236,6 @@ class cde:
                 if response.status_code == 200:
                     try:
                         response_data = response.json()
-                        print(f"Resposta da API: {response_data} (Tipo: {type(response_data)})")
 
                         # Verifica se a resposta possui as chaves esperadas
                         if isinstance(response_data, dict) and "columns" in response_data and "data" in response_data:
