@@ -11,6 +11,8 @@ import io
 import re
 import os
 
+from app.models import logTexts
+
 from flask import Flask, Response, request, redirect, render_template, url_for, jsonify, session, abort
 from datetime import datetime, timezone, timedelta
 from PIL import Image, ImageDraw, ImageFont
@@ -49,14 +51,6 @@ if __name__:
         GRANTED = '200'
 
 
-    def log(tag_1, tag_2, text) -> None:
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        if not tag_2:
-            print(f'{tag_1} {text}')
-            return
-        print(f'{tag_1} ({timestamp}) {tag_2} | {text}')
-        return
-
     dirs = {}
     def create_dirs() -> None:
         dirs = {
@@ -83,75 +77,38 @@ if __name__:
         # cria os diretórios (se não existirem)
         for i, dir_path in enumerate(dirs.values(), start=1):
             os.makedirs(dir_path, exist_ok=True)
-            log(
-                TAGS.SERVER,
-                None,
-                text=f'Verificando integridade dos diretórios... [{i}/{total_dirs}]'
-            )
-        log(
-            TAGS.SERVER,
-            None,
-            text=f'Vefificação finalizada. Inicializando...'
-        )
+            
+            percent = i * 100 // total_dirs
+            sys.stdout.write(f'\r[CDE] Verificando integridade dos diretórios... [{percent}%]')
+            sys.stdout.flush()
+            
+        print("\n[CDE] Verificação finalizada. Iniciando...")
 
     create_dirs()
 
-    # logs de execução
-    exec_head   = \
-f'''
 
-          CCCCCCCCCCCCCCC   DDDDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-       CCC::::::::::::::C   D::::::::::::::DDD        E::::::::::::::::::::E
-     CC:::::::::::::::::C   D:::::::::::::::::DD      E::::::::::::::::::::E
-    C::::::CCCCCCCCCCCCCC   DDDDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
-   C:::::CC                               DD:::::D                          
-  C:::::C                                   D:::::D                         
-  C:::::C                                   D:::::D   EEEEEEEEEEEEEEEEEEEE  
-  C:::::C                                   D:::::D   E::::::::::::::::::E  
-  C:::::C                                   D:::::D   EEEEEEEEEEEEEEEEEEEE  
-  C:::::C                                   D:::::D                         
-   C:::::CC                               DD:::::D                          
-    C::::::CCCCCCCCCCCCCC   DDDDDDDDDDDDDD::::::D     EEEEEEEEEEEEEEEEEEEEEE
-     CC:::::::::::::::::C   D:::::::::::::::::DD      E::::::::::::::::::::E
-       CCC::::::::::::::C   D::::::::::::::DDD        E::::::::::::::::::::E
-          CCCCCCCCCCCCCCC   DDDDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
-
-
-'''
-    start_head  = \
-f'''
-{TAGS.INFO} CDE Version: {app.config['APP_VERSION'][0]} (beta) - {app.config['APP_VERSION'][1]}
-{TAGS.INFO} Python Version: {sys.version}
-{TAGS.STATUS} Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
-'''
-    error_foot  = \
-f'''
-{TAGS.ERROR} 
-* Impossível executar, verifique se o arquivo está alocado corretamente.
-
-Pressione ENTER para sair...
-'''
-
-
-    if current_dir in debug_dir: # se o diretório atende ao local 'debug', modo_exec = 'debug'
+    # se executado diretamente, modo_exec = 'debug'
+    if __name__ == "__main__": 
         db_path = os.getenv('DEBUG_DB_PATH')
         port, debug = 5100, True
         app.config['APP_VERSION'][2] = True
 
         # logs server running info
-        print(start_head) 
+        print(logTexts.start_header(app.config['APP_VERSION'][0], app.config['APP_VERSION'][1]))
 
-    elif default_dir in current_dir: # se o diretório atende ao local 'produção', modo_exec = 'produção'.
+    # se o diretório atende ao local 'produção', modo_exec = 'produção'.
+    elif default_dir in current_dir: 
         db_path = os.getenv('DB_PATH')
         port, debug = 5005, False
         
         # logs header & server running info
-        print(exec_head, start_head) 
+        print(logTexts.cde_header)
+        print(logTexts.start_header(app.config['APP_VERSION'][0], app.config['APP_VERSION'][1]))
 
-    else: # se o diretório não corresponde aos listados, não executa.
-        print(error_foot)
+    # se o diretório não corresponde ao listados, não executa.
+    else: 
+        print(logTexts.error_header)
         sys.exit(2)
-
 
 
 class cde:
@@ -516,16 +473,16 @@ class cde:
                 id_user = session.get('id_user')
                 session['id_page'] = f'{id_page}'
                 if session.get('user_grant') <= 2:
-                    log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    logTexts.log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
                 user_perm = UserUtils.get_user_permissions(id_user)
                 user_perm = [item['id_perm'] for item in user_perm]
                 if id_page in user_perm:
-                    log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    logTexts.log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
-                log(TAGS.SERVER, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                logTexts.log(TAGS.SERVER, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type='SEM PERMISSÕES',
@@ -3895,7 +3852,7 @@ def carga_id(id_carga) -> str:
         # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
         cargas_except_query = ', '.join(str(int(carga)) for carga in all_cargas if str(carga).isdigit())
         
-        cde.debug_log(f'cargas_except_query: {cargas_except_query}')
+        cde.debug_log(f'static_list: {static_list}')
 
         query = f'''
             SELECT DISTINCT 
