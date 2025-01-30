@@ -84,18 +84,7 @@
                             id="sql_query" 
                             name="sql_query"
                             required
-                        >{% if query %}{{ query }}{% else %}
--- para executar, clique em '▷' acima
--- query para obter os 15 primeiros itens
-SELECT 
-   ITEM              AS COD_ITEM,
-   ITEM_DESCRICAO    AS DESC_ITEM,
-   UNIDADE_DESCRICAO AS UND_ITEM,
-   GTIN_14           AS DUN_14
-FROM 
-   DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
-WHERE GTIN_14 != ''
-LIMIT 15;{% endif %}</textarea>
+                        >{% if query %}{{ query }}{% else %}{% include "pages/api/standard-query.txt" %}{% endif %}</textarea>
                     </div>  
                     {% else %}
                     <div style="margin: 50% 0; padding: 0 160px;">
@@ -105,16 +94,22 @@ LIMIT 15;{% endif %}</textarea>
                 </form>
                 <div class="tables-container" style="margin: 0; min-height: unset; max-width: 90%; width: -webkit-fill-available">
                     <h1 class="cor-web subtitle">Tabelas</h1>
-                    <div style="max-height: 350px; overflow-y: scroll">
-                        <table style="width: 240px">
-                            <tbody>
-                                {% for row in tables %}
-                                <tr class="selectable-row" onclick="addTableToQuery('{{ row[0] }}')">
-                                    <td>{{ row[0] }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div style="max-height: 350px; max-width: 300px;">
+                        {% if not tables %}
+                            <p class="disabled" style="text-wrap: auto">Faça a primeira consulta para visualizar as tabelas disponíveis.</p>
+                        {% else %}
+                            <div style="max-height: 350px; max-width: 300px; overflow-y: scroll">
+                                <table style="width: 240px">
+                                    <tbody>
+                                        {% for row in tables %}
+                                        <tr class="selectable-row" onclick="addTableToQuery('{{ row[0] }}')">
+                                            <td>{{ row[0] }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -139,7 +134,7 @@ LIMIT 15;{% endif %}</textarea>
                             </thead>
                             <tbody>
                                 {% for row in result %}
-                                    <tr class="selectable-row" style="cursor: unset">
+                                    <tr>
                                         {% for value in row %}
                                             <td {% if loop.index0 == 0 %}class="wrap"{% endif %}>{{ value }}</td>
                                         {% endfor %}
@@ -187,7 +182,7 @@ LIMIT 15;{% endif %}</textarea>
             currentQuery = editor.getValue();
 
             schema = "";
-            if (sel_schema == "ODBC-DRIVER" or sel_schema == "API") {
+            if (sel_schema == "ODBC-DRIVER" || sel_schema == "API") {
                 schema = "DB2ADMIN.";
             }
 
