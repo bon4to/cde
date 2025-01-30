@@ -143,15 +143,6 @@ class cde:
 
 
     @staticmethod
-    # logs no modo debug
-    def debug_log(text):
-        if debug == True:
-            print(f'[DEBUG] {text}')
-        else:
-            pass
-    
-    
-    @staticmethod
     # retorna o valor da chave "dsn > cargas" do arquivo "default.txt"
     def get_unit():
         file_path = "userdata/default.txt"
@@ -206,22 +197,22 @@ class cde:
                             # Retorna as linhas e colunas
                             return rows, columns
                         else:
-                            cde.debug_log(f"Formato inesperado da resposta: {response_data}")
+                            logTexts.debug_log(f"Formato inesperado da resposta: {response_data}", debug)
                             return [[f"Erro: Formato inesperado da resposta da API"]], []
 
                     except ValueError:
-                        cde.debug_log(f"Resposta inválida (não é JSON): {response.text}")
+                        logTexts.debug_log(f"Resposta inválida (não é JSON): {response.text}", debug)
                         return [[f"Erro: Resposta inválida da API"]], []
                 else:
-                    cde.debug_log(f"Erro na API: {response.status_code} - {response.reason}")
+                    logTexts.debug_log(f"Erro na API: {response.status_code} - {response.reason}", debug)
                     return [[f"Erro HTTP {response.status_code}: {response.reason}"]], []
 
             except requests.exceptions.ConnectionError as e:
-                cde.debug_log(f"API offline ou inacessível: {str(e)}")
+                logTexts.debug_log(f"API offline ou inacessível: {str(e)}", debug)
                 return [[f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."]], []
 
             except Exception as e:
-                cde.debug_log(f"Erro de conexão com a API: {str(e)}")
+                logTexts.debug_log(f"Erro de conexão com a API: {str(e)}", debug)
                 return [[f"Erro: {str(e)}"]], []
 
         elif dsn == 'ODBC-DRIVER':
@@ -250,7 +241,7 @@ class cde:
                     columns = [str(column[0]) for column in cursor.description]
                     result = cursor.fetchall()
             except Exception as e:
-                cde.debug_log(f"Erro ao enviar solicitação: {str(e)}")
+                logTexts.debug_log(f"Erro ao enviar solicitação: {str(e)}", debug)
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
 
@@ -750,7 +741,7 @@ class CargaUtils:
 
             # define o dsn conforme default (ou usuario)
             dsn = cde.get_unit()
-            cde.debug_log(f'DSN: {dsn}')
+            logTexts.debug_log(f'DSN: {dsn}', debug)
             
             if dsn == 'ODBC-DRIVER':
                 static_list = ', '.join(map(str, all_cargas))
@@ -2160,7 +2151,7 @@ class misc:
     def tlg_msg(msg):
         if not session.get('user_grant') == 1:
             if debug == True:
-                cde.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
+                logTexts.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug', debug)
                 return None
             else:
                 bot_token = os.getenv('TLG_BOT_TOKEN')
@@ -2213,6 +2204,7 @@ class misc:
             return dt.strftime("%d/%m/%Y")
         except Exception as e:
             return value
+
 
     @staticmethod
     # VERIFICA SENHA NO BANCO DE HASH
@@ -3829,12 +3821,12 @@ def carga_id(id_carga) -> str:
         fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
         all_cargas = CargaUtils.get_cargas_finalizadas()
         
-        cde.debug_log(f'all_cargas: {all_cargas}')
+        logTexts.debug_log(f'all_cargas: {all_cargas}', debug)
         
         # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
         cargas_except_query = ', '.join(str(int(carga)) for carga in all_cargas if str(carga).isdigit())
         
-        cde.debug_log(f'static_list: {static_list}')
+        logTexts.debug_log(f'static_list: {static_list}', debug)
 
         query = f'''
             SELECT DISTINCT 
