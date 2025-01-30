@@ -1,0 +1,12 @@
+-- para executar, clique em '▷' acima
+-- query para obter os 15 primeiros itens
+SELECT 
+   ITEM              AS COD_ITEM,
+   ITEM_DESCRICAO    AS DESC_ITEM,
+   UNIDADE_DESCRICAO AS UND_ITEM,
+   GTIN_14           AS DUN_14
+FROM 
+   DB2ADMIN.HUGO_PIETRO_VIEW_ITEM 
+WHERE GTIN_14 != ''
+ORDER BY COD_ITEM
+LIMIT 15;
