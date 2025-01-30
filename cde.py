@@ -753,7 +753,7 @@ class CargaUtils:
             cde.debug_log(f'DSN: {dsn}')
             
             if dsn == 'ODBC-DRIVER':
-                cargas_except_query = ', '.join(map(str, all_cargas))
+                static_list = ', '.join(map(str, all_cargas))
                 
                 query = '''
                     SELECT DISTINCT 
@@ -787,9 +787,9 @@ class CargaUtils:
                     AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
                     ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-                '''.format(a=cargas_except_query)
+                '''.format(a=static_list)
             elif dsn == 'API':
-                cargas_except_query = ', '.join(map(str, all_cargas))
+                static_list = ', '.join(map(str, all_cargas))
 
                 query = '''
                     SELECT DISTINCT 
@@ -823,7 +823,7 @@ class CargaUtils:
                     AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
                     ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-                '''.format(a=cargas_except_query)
+                '''.format(a=static_list)
         else:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
         
@@ -3859,7 +3859,7 @@ def carga_id(id_carga) -> str:
             ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
             WHERE icrg.CODIGO_GRUPOPED = {id_carga}
-            AND icrg.CODIGO_GRUPOPED NOT IN ({cargas_except_query})
+            AND icrg.CODIGO_GRUPOPED NOT IN ({static_list})
 
             ORDER BY COD_ITEM
 
