@@ -2605,7 +2605,7 @@ def api() -> str:
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
                 result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
-                    'pages/api.html', 
+                    'pages/api/api.html', 
                     result=result,
                     tables=tables,
                     query=query,
@@ -2616,7 +2616,7 @@ def api() -> str:
                 result, columns = cde.db_query(query, dsn, source)
 
                 return render_template(
-                    'pages/api.html', 
+                    'pages/api/api.html', 
                     result=result,
                     columns=columns,
                     tables=tables,
@@ -2625,7 +2625,7 @@ def api() -> str:
                     source=source
                 )
     return render_template(
-        'pages/api.html'
+        'pages/api/api.html'
     )
 
 
