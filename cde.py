@@ -4371,10 +4371,12 @@ def get_carga_table_data():
             return jsonify({'error': 'Nome do arquivo não fornecido.'}), 400
 
         data, num_files = CargaUtils.readJsonCargaSeq(filename, seq)
-        return jsonify({'data': data, 'num_files': num_files}), 200
+        
+        if data != None:
+            return jsonify({'data': data, 'num_files': num_files}), 200
     
-    except FileNotFoundError:
-        return jsonify({'error': 'FileNotFound'}), 404
+        if num_files == 0:
+            return jsonify({'error': 'FileNotFound'}), 404
     
     except Exception as e:
         return jsonify({'error': f'Erro ao carregar dados da carga: {str(e)}'}), 500
