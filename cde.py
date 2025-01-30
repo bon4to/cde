@@ -3842,7 +3842,7 @@ def carga_id(id_carga) -> str:
         logTexts.debug_log(f'all_cargas: {all_cargas}', debug)
         
         # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
-        cargas_except_query = ', '.join(str(int(carga)) for carga in all_cargas if str(carga).isdigit())
+        static_list = ', '.join(str(int(carga)) for carga in all_cargas if str(carga).isdigit())
         
         logTexts.debug_log(f'static_list: {static_list}', debug)
 
