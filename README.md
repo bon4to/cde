@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 	<body>
 		<div class="container">
-			<h1>Collaborative Developed Enviroment</h1>
+			<h1>Centralized Data Engine</h1>
 			<img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
 			<h2>Documentação do Projeto</h2>
 			<p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa implementada nas razões sociais HUGO PIETRO e TRANS LÉGUA. Aqui neste documento, descreve-se a finalidade, funcionalidades principais, requisitos de sistema e uso básico do sistema, teve seu primeiro release em janeiro de 2024 e segue sendo desenvolvido até o presente momento.</p>
