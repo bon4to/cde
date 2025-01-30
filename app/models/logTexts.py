@@ -42,6 +42,12 @@ def log(tag_1, tag_2, text) -> None:
         return
 
 
+@staticmethod
+def debug_log(text: str, debug: bool) -> None:
+    if debug:
+        print(f'[DEBUG] {text}')
+
+
 error_header = f"""
 {TAGS["ERROR"]} 
 * Impossível executar, verifique se o arquivo está alocado corretamente.
