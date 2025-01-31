@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
     <head>
-        <title>Debug | HUGO PIETRO</title>
+        <title>Debug | PRODUÇÃO</title>
         <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
 
         {% include "shared/header/hp-header.html" %}
@@ -14,7 +14,7 @@
         let docTitle = document.title;
 
         window.addEventListener("blur", () => {
-            document.title = "CDE | HUGO PIETRO";
+            document.title = "CDE | PRODUÇÃO";
         })
         window.addEventListener("focus", () => {
             document.title = docTitle;
