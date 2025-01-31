@@ -6,10 +6,10 @@
         </a>
         {% if 'user_grant' in session %}
             <a href="{{ url_for('home_hp') }}" class="nav-link">
-                <img class="svg-hover" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt=""><br>HUGO PIETRO
+                <img class="svg-hover" src="{{ url_for('static', filename='svg/hp-logo-only-w.svg') }}" alt=""><br>PRODUÇÃO
             </a>
             <a href="{{ url_for('home_tl') }}" class="nav-link">
-                <img class="svg-hover" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt=""><br>TRANSLÉGUA
+                <img class="svg-hover" src="{{ url_for('static', filename='svg/tl-logo-only-w.svg') }}" alt=""><br>LOGÍSTICA
             </a>
             {% if session['user_grant'] <= 2 %}
 
