@@ -33,9 +33,9 @@ if __name__:
     
     # parâmetros
     app.secret_key = os.getenv('SECRET_KEY')
+    app.config['APP_UNIT'] = '' # sets a default value
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
-    app.config['APP_VERSION'] = ['0.5.2', 'Janeiro/2025', False] # 'versão', 'release-date', 'debug-mode'
-    app.config['APP_UNIT'] = '' # preset default
+    app.config['APP_VERSION'] = ['0.5.3', 'Fevereiro/2025', False]   # 'versão', 'release-date', 'debug-mode'
     
     current_dir = os.path.dirname(os.path.abspath(__file__)).upper() # current absolute directory
     debug_dir   = os.getenv('DEBUG_DIR').upper().split(';')          # debug directory (evita execução sem configurar diretório)
