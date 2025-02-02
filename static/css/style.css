@@ -60,6 +60,21 @@ span.id-page {
     font-family: Reddit Mono, monospace;
 }
 
+a.id-page.filled {
+    background-color: var(--cor-destaque);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 16px;
+    color: #fff;
+    margin: 0;
+}
+
+a.id-page.filled:hover {
+    color: #fff;
+    text-decoration: none;
+
+}
+
 .container-grid .item span.id-page {
     font-size: 14px;
 }
@@ -67,6 +82,18 @@ span.id-page {
 .view-width {
     max-width: 90vw;
     padding: 0 5vw;
+}
+
+.c {
+    text-align: center;
+}
+
+.r {
+    text-align: right;
+}
+
+.l {
+    text-align: left;
 }
 
 .titles-container .id-page {
@@ -94,7 +121,7 @@ span.id-page {
 .forms-container {
     flex: 1;
     min-height: 75vh;
-    padding: 22px 36px;
+    padding: 34px;
     border-radius: 24px;
     box-sizing: border-box;
     background-color: #fff;
@@ -1324,6 +1351,10 @@ td.number {
     text-align: right;
 }
 
+td.second-plan {
+    color: #7e7e7e;
+}
+
 img.table-more {
     width: 14px;
     height: 14px;
@@ -1778,7 +1809,7 @@ div.msg-alert {
 
 .selectable-row:hover td {
     color: var(--cor-destaque);
-    background-color: #f0f0f0;
+    background-color: #e7e7e7;
 }
 
 .selectable-row.sub-total td {
