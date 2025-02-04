@@ -288,7 +288,7 @@ class cde:
     
     @staticmethod
     def create_default_user():
-        data_cadastro  = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data_cadastro = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1217,7 +1217,7 @@ class OrdemProducaoUtils:
 class HistoricoUtils:
     @staticmethod
     # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
-    def select_rua(letra, numero):
+    def select_address(letra, numero):
         sql_balance_calc = EstoqueUtils.sql_balance_calc
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -1240,7 +1240,7 @@ class HistoricoUtils:
 
     @staticmethod
     # INSERE REGISTRO NA TABELA DE HISTÓRICO
-    def insert_historico(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp, id_carga=0, id_request=0) -> bool:
+    def insert_transaction(numero, letra, cod_item, lote_item, quantidade, operacao, timestamp, id_carga=0, id_request=0) -> bool:
         id_user_mov = session['id_user']
         try:    
             with sqlite3.connect(db_path) as connection:
@@ -2069,8 +2069,8 @@ class misc:
     @app.template_filter('parse_date')
     def parse_date(value):
         try:
-            dt = datetime.strptime(value, "%a, %d %b %Y %H:%M:%S %Z")
-            return dt.strftime("%d/%m/%Y")
+            dt = datetime.fromisoformat(value)
+            return dt.strftime("%d / %m / %Y")
         except Exception as e:
             return value
 
@@ -2167,7 +2167,7 @@ class misc:
 
                 saldo_visualization = [{
                     'cod_item': row[1],
-                    'deposito': int(2),
+                    'deposito': int(5), #TODO: create a menu to config this
                     'qtde'    : row[2]
                 } for row in cursor.fetchall()]
 
@@ -2801,7 +2801,7 @@ def moving() -> str | Response:
     if is_end_completo:
     # se o modo for movimetação de endereço completo,
     # seleciona todos os itens de registro positivo
-        items = HistoricoUtils.select_rua(letra, numero)
+        items = HistoricoUtils.select_address(letra, numero)
         
         print(f'  | ENDEREÇO COMPLETO ({letra}.{numero}): {items}')
 
@@ -2844,7 +2844,7 @@ def moving() -> str | Response:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
                     # SAÍDA DO ENDEREÇO DE ORIGEM
-                    mov_ts = HistoricoUtils.insert_historico(
+                    mov_ts = HistoricoUtils.insert_transaction(
                         numero=numero, letra=letra, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao='TS', # transferencia saida
@@ -2852,7 +2852,7 @@ def moving() -> str | Response:
                         id_carga=id_carga
                     )
                     # ENTRADA NO ENDEREÇO DE DESTINO
-                    mov_te = HistoricoUtils.insert_historico(
+                    mov_te = HistoricoUtils.insert_transaction(
                         numero=destino_number, letra=destino_letter, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao='TE', # transferencia entrada 
@@ -2872,7 +2872,7 @@ def moving() -> str | Response:
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-                    sucesso = HistoricoUtils.insert_historico(
+                    sucesso = HistoricoUtils.insert_transaction(
                         numero=numero, letra=letra, 
                         cod_item=cod_item, lote_item=lote_item,
                         quantidade=quantidade, operacao=operacao, 
@@ -2886,7 +2886,7 @@ def moving() -> str | Response:
 
     elif operacao == 'E' or operacao == 'S':
     # operacao padrao (entrada 'E' ou saída 'S')
-        sucesso = HistoricoUtils.insert_historico(
+        sucesso = HistoricoUtils.insert_transaction(
             numero=numero, letra=letra, 
             cod_item=cod_item, lote_item=lote_item,
             quantidade=quantidade, operacao=operacao, 
@@ -2937,7 +2937,7 @@ def moving_req_bulk():
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             for item in sep_carga:
-                HistoricoUtils.insert_historico(
+                HistoricoUtils.insert_transaction(
                     timestamp=timestamp_out,
                     numero=item['rua_numero'],
                     letra=item['rua_letra'],
@@ -2979,7 +2979,7 @@ def moving_carga_bulk():
 
             # Logica para inserir histórico de acordo com a operação
             if operacao == 'F':
-                HistoricoUtils.insert_historico(
+                HistoricoUtils.insert_transaction(
                     timestamp=timestamp_out,
                     numero=item['rua_numero'],
                     letra=item['rua_letra'],
@@ -2990,7 +2990,7 @@ def moving_carga_bulk():
                     operacao=operacao
                 )
             elif operacao == 'S':
-                HistoricoUtils.insert_historico(
+                HistoricoUtils.insert_transaction(
                     timestamp=timestamp_out,
                     numero=item['rua_numero'],
                     letra=item['rua_letra'],
@@ -3001,7 +3001,7 @@ def moving_carga_bulk():
                 )
             elif operacao == 'T':
                 # Operação de transferência
-                HistoricoUtils.insert_historico(
+                HistoricoUtils.insert_transaction(
                     timestamp=timestamp_out,
                     numero=item['rua_numero'],
                     letra=item['rua_letra'],
@@ -3011,7 +3011,7 @@ def moving_carga_bulk():
                     operacao='TS'
                 )
                 letra_destino, numero_destino = item['endereco_destino'].split('.')
-                HistoricoUtils.insert_historico(
+                HistoricoUtils.insert_transaction(
                     timestamp=timestamp_in,
                     numero=numero_destino,
                     letra=letra_destino,
@@ -3052,7 +3052,7 @@ def get_fant_clientes() -> Response:
         for row in result:
             cliente = {columns[i]: row[i] for i in range(len(columns))}
             clientes.append(cliente)
-        alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
+        alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M:%S")}'
         class_alert = 'success'
     else:
         alert = 'Nenhum cliente encontrado.'
@@ -3099,7 +3099,7 @@ def carga_incomp_id(id_carga) -> str:
         for row in result:
             cod_item_list.append(row[columns.index('cod_item')])
         
-        alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+        alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}'
         class_alert = 'success'
     else:
         alert = f'{result[0][0]}'
@@ -3735,7 +3735,7 @@ def carga_id(id_carga) -> str:
         if columns:
             # cria lista dos itens da carga (p/ validação de necessidade no jinja)
             cod_item_list = [row[columns.index('COD_ITEM')] for row in result]
-            alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
+            alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M:%S")}'
             class_alert = 'success'
         else:
             cod_item_list = []
@@ -3765,7 +3765,7 @@ def cargas() -> str:
         result, columns = CargaUtils.get_cargas(all_cargas)
         
         if columns:
-            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}'
             class_alert = 'success'
 
         else:
@@ -3790,7 +3790,7 @@ def mov_request() -> str:
         result, columns = MovRequestUtils.get_mov_request()
         
         class_alert = 'success'
-        alert = 'A lista foi carregada com sucesso.'
+        alert = 'A lista foi atualizada com sucesso.'
         if len(result) == 1:
             class_alert = 'error'
             alert = result[0][0]
@@ -3826,7 +3826,7 @@ def mov_request_id(id_req) -> str:
             for row in result:
                 cod_item_list.append(row[columns.index('COD_ITEM')])
             
-            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}'
+            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}'
             class_alert = 'success'
         else:
             alert = f'{result[0][0]}'
@@ -3970,7 +3970,7 @@ def mov_op() -> str:
         result, columns = OrdemProducaoUtils.get_ordem_producao()
         
         class_alert = 'success'
-        alert = 'A lista foi carregada com sucesso.'
+        alert = 'A lista foi atualizada com sucesso.'
         if len(result) == 1:
             class_alert = 'error'
             alert = result[0][0]
@@ -4296,7 +4296,7 @@ def produtos() -> str:
         result, columns = ProdutoUtils.get_itens_from_erp()
 
         if columns:
-            alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M")}'
+            alert = f'Última atualização em: {datetime.now().strftime("%d/%m/%Y às %H:%M:%S")}'
             class_alert = 'success'
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
