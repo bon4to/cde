@@ -301,14 +301,16 @@
                                                 {% if class_alert != 'error' %}
                                                     <tr class="selectable-row js_query_selector" style="vertical-align: baseline;" data-id="{{ row[columns.index('NRO_CARGA')] }}">
                                                         <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
-                                                        <td class="number">{{ row[columns.index('NRO_PEDIDO')] }}</td>
-                                                        <td class="number">{{ row[columns.index('COD_CLIENTE')] }}</td>
-                                                        <td style="text-wrap: auto;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
-                                                        <td>{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
-                                                        <td>{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
-                                                        <td style="text-align: center">
+                                                        <td class="number r second-plan">{{ row[columns.index('NRO_PEDIDO')] }}</td>
+                                                        <td class="number r second-plan">{{ row[columns.index('COD_CLIENTE')] }}</td>
+                                                        <td style="text-wrap: none;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                                        <td class="second-plan c">{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
+                                                        <td class="second-plan c">{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
+                                                        <td class="c">
                                                             {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
-                                                                <span title="{{ row[columns.index('OBS_CARGA')] }}">🔵</span>
+                                                                <span title="{{ row[columns.index('OBS_CARGA')] }}">🟢</span>
+                                                            {% else %}
+                                                                <span>🔴</span>
                                                             {% endif %}
                                                         </td>
                                                     </tr>
@@ -318,14 +320,12 @@
                                     </table>
                                 {% endif %}
                             </div>
-                            <br>
-                            <div class="msg-success">
-                                <details>
-                                    <summary>A lista foi carregada com sucesso!</summary>
+                            <div class="msg-success flex-column" style="margin: 0; gap: 0">
+                                <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
+                                <span style="font-size: 12px">
                                     {{ alert | safe }}
-                                </details>
+                                </span>
                             </div>
-                            <br>
                         {% endif %}
                     {% else %}
                         <div style="display: flex; justify-content: center; height: 100%;">
