@@ -267,11 +267,11 @@
                             </details>
                         </div>
                         {% elif class_alert == 'success' %}
-                        <div class="msg-success">
-                            <details>
-                                <summary>A lista foi carregada com sucesso!</summary>
+                        <div class="msg-success flex-column" style="margin: 0; gap: 0">
+                            <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
+                            <span style="font-size: 12px">
                                 {{ alert | safe }}
-                            </details>
+                            </span>
                         </div>
                         <h1 class="subtitle">Selecione a <span class="cor-web">carga</span> para iniciar sua <span class="cor-web">separação</span>:</h1>
                         {% endif %}
