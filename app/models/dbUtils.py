@@ -8,6 +8,7 @@ load_dotenv()
 
 @staticmethod
 def get_db_path(debug: bool = False):
+    print(f'debug: {debug}')
     if debug:
         return os.getenv('DEBUG_DB_PATH')
     return os.getenv('DB_PATH')
@@ -15,7 +16,7 @@ def get_db_path(debug: bool = False):
 
 @staticmethod
 # conexão e consulta no banco de dados
-def query(query: str, method: str, source: int = 1):
+def query(query: str, method: str, source: int = 1, debug: bool = False):
     # TODO: criar métodos de mesclar consultas (ex: dadosNOE + dadosHP)
     if method == 'API':
     # busca na api configurada
@@ -84,7 +85,6 @@ def query(query: str, method: str, source: int = 1):
     elif method == 'LOCAL':
     # busca no arquivo local (.db)
         try:
-            from cde import debug
             
             with sqlite3.connect(get_db_path(debug)) as connection:
                 cursor = connection.cursor()

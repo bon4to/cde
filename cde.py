@@ -25,7 +25,6 @@ if __name__:
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
     app.config['APP_VERSION'] = ['0.5.3', 'Fevereiro/2025', False]   # 'versão', 'release-date', 'debug-mode'
     
-    debug = False
     current_dir = os.path.dirname(os.path.abspath(__file__)).upper() # current absolute directory
     debug_dir   = os.getenv('DEBUG_DIR').upper().split(';')          # debug directory (evita execução sem configurar diretório)
     default_dir = os.getenv('DEFAULT_DIR').upper()                   # default dir (executa somente no diretório de produção)
@@ -78,7 +77,7 @@ if __name__:
 
     # se o diretório atende ao local 'produção', modo_exec = 'produção'.
     elif default_dir in current_dir: 
-        port = 5005
+        port, debug = 5005, False
         db_path = dbUtils.get_db_path(debug)
         
         # logs header & server running info
@@ -250,7 +249,7 @@ class EstoqueUtils:
                     h.rua_numero ASC, i.desc_item ASC;
             '''.format(a=sql_balance_calc, b=str(cod_item))
             dsn = 'LOCAL'
-            result_local, columns_local = dbUtils.query(query, dsn)
+            result_local, columns_local = dbUtils.query(query, dsn, debug=debug)
             return result_local, columns_local
         else:
             return [], []
@@ -715,7 +714,7 @@ class CargaUtils:
         '''.format(a=where_clause)
         
         dsn = 'LOCAL'
-        result, columns = dbUtils.query(query, dsn)
+        result, columns = dbUtils.query(query, dsn, debug=debug)
         
         return result, columns 
 
@@ -1694,7 +1693,7 @@ class UserUtils:
         '''.format(a=id_user)
 
         dsn = 'LOCAL'
-        result, columns = dbUtils.query(query, dsn)
+        result, columns = dbUtils.query(query, dsn, debug=debug)
 
         if result:
             return result[0][0]
@@ -3788,7 +3787,7 @@ def get_carga_qtde_solic():
             ;
         '''.format(a=id_carga, b=cod_item)
         dsn = 'LOCAL'
-        result, columns = dbUtils.query(query, dsn)
+        result, columns = dbUtils.query(query, dsn, debug=debug)
     else:
         query = '''
             SELECT 
@@ -3801,7 +3800,7 @@ def get_carga_qtde_solic():
             ;
         '''.format(a=id_carga, b=cod_item)
         dsn = 'LOCAL'
-        result, columns = dbUtils.query(query, dsn)
+        result, columns = dbUtils.query(query, dsn, debug=debug)
         
     if result != []:
         qtde_solic = result[0][0]
