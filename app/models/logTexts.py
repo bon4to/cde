@@ -2,9 +2,10 @@ from datetime import datetime
 import sys
 
 TAGS = {
-    "INFO": "[INFO]",
-    "STATUS": "[STATUS]",
-    "ERROR": "[ERROR]"
+    1: "[CDE]",
+    2: "[INF]",
+    3: "[ERR]",
+    4: "[STATUS]"
 }
 
 cde_header = """
@@ -25,31 +26,33 @@ cde_header = """
           CCCCCCCCCCCCCCC   DDDDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
 """
 
+
 def start_header(version, release_date):
     return f"""
-{TAGS["INFO"]} CDE Version: {version} (beta) - {release_date}
-{TAGS["INFO"]} Python Version: {sys.version}
-{TAGS["STATUS"]} Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
+{TAGS.get(1)} CDE Version: {version} (beta) - {release_date}
+{TAGS.get(2)} Python Version: {sys.version}
+{TAGS.get(2)} Starting in: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
 """
 
 
-def log(tag_1, tag_2, text) -> None:
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        if not tag_2:
-            print(f'{tag_1} {text}')
-            return
-        print(f'{tag_1} ({timestamp}) {tag_2} | {text}')
+def log(tag_i: int, text: str, tag_2: str="") -> None:
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    tag = TAGS.get(tag_i, '[CDE]') 
+    
+    if not tag_2:
+        print(f'{tag} ({timestamp}) | {text}')
         return
+    print(f'{tag} ({timestamp}) {tag_2} | {text}')
+    return
 
 
 @staticmethod
 def debug_log(text: str, debug: bool) -> None:
     if debug:
-        print(f'[DEBUG] {text}')
+        print(f'[DBG] {text}')
 
 
 error_header = f"""
-{TAGS["ERROR"]} 
 * Impossível executar, verifique se o arquivo está alocado corretamente.
 
 Pressione ENTER para sair...
