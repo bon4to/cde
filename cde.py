@@ -1,15 +1,4 @@
-﻿import textwrap
-import requests
-import sqlite3
-import random
-import qrcode
-import pyodbc
-import base64
-import json
-import sys
-import io
-import re
-import os
+﻿import textwrap, requests, sqlite3, random, qrcode, pyodbc, base64, json, sys, io, re, os, time
 
 from app.models import logTexts
 
@@ -40,15 +29,6 @@ if __name__:
     current_dir = os.path.dirname(os.path.abspath(__file__)).upper() # current absolute directory
     debug_dir   = os.getenv('DEBUG_DIR').upper().split(';')          # debug directory (evita execução sem configurar diretório)
     default_dir = os.getenv('DEFAULT_DIR').upper()                   # default dir (executa somente no diretório de produção)
-
-
-    class TAGS:
-        SERVER  = '[CDE]'
-        INFO    = '[INFO]'
-        ERROR   = '[ERROR]'
-        STATUS  = '[STATUS]'
-        DENIED  = '403'
-        GRANTED = '200'
 
 
     dirs = {}
@@ -127,7 +107,7 @@ class cde:
                 log_file.write(f'[{timestamp}] {log_message}\n')
                 return True
         except Exception as e:
-            print(f'{TAGS.ERROR} Erro ao salvar log: {e}')
+            logTexts.log(1, f'Erro ao salvar log: {e}')
             return False
 
     
@@ -138,7 +118,7 @@ class cde:
             with open(dir, 'r') as file:
                 return file.read().strip()
         except Exception as e:
-            print(e)
+            logTexts.log(3, e)
             return ''
 
 
@@ -157,13 +137,13 @@ class cde:
             # extrai o valor desejado
             return data["dsn"]["cargas"]
         except FileNotFoundError:
-            print("Erro: Arquivo não encontrado.")
+            logTexts.log(3, "Arquivo não encontrado.")
         except KeyError:
-            print("Erro: Chave 'dsn > cargas' não encontrada.")
+            logTexts.log(3, "Chave 'dsn > cargas' não encontrada.")
         except json.JSONDecodeError:
-            print("Erro: Conteúdo do arquivo não é um JSON válido.")
+            logTexts.log(3, "Conteúdo do arquivo não é um JSON válido.")
         # default
-        print('Retornando ODBC-DRIVER')
+        logTexts.log(2, 'Retornando ODBC-DRIVER')
         return 'ODBC-DRIVER'
     
     
@@ -229,7 +209,7 @@ class cde:
                 cursor.close()
                 connection.close()
             except Exception as e:
-                print("Erro ao enviar solicitação:", str(e))
+                logTexts.log(3, "Erro ao enviar solicitação:", str(e))
                 result = [[f'Erro de consulta: {e}']]
                 columns = []
         
@@ -464,16 +444,16 @@ class cde:
                 id_user = session.get('id_user')
                 session['id_page'] = f'{id_page}'
                 if session.get('user_grant') <= 2:
-                    logTexts.log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    logTexts.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
                 user_perm = UserUtils.get_user_permissions(id_user)
                 user_perm = [item['id_perm'] for item in user_perm]
                 if id_page in user_perm:
-                    logTexts.log(TAGS.SERVER, TAGS.GRANTED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                    logTexts.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
-                logTexts.log(TAGS.SERVER, TAGS.DENIED, f'{id_user} - {id_page} ({inject_page()["current_page"]})')
+                logTexts.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 403)
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type='SEM PERMISSÕES',
@@ -1553,7 +1533,7 @@ class ProdutoUtils:
     def get_item_json(input_code):
         if 'EM.' not in input_code:
             input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
-        print(f'  | Código fornecido: {input_code}')
+        logTexts.log(2, f'  | Código fornecido: {input_code}')
         
         if len(input_code) == 4 or len(input_code) == 0:
             desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO OU INATIVO', '', '', ''
@@ -2554,13 +2534,13 @@ def log_message():
     data = request.json
     if 'message' in data:
         if cde.save_log(data['message']):
-            print(f'{TAGS.INFO} Log salvo com sucesso.')
+            logTexts.log(2, f'Log salvo com sucesso.')
             return jsonify({"status": "success", "message": "Log salvo com sucesso."}), 200
         else:
-            print(f'{TAGS.ERROR} Não foi possível salvar o log.')
+            logTexts.log(3, f'Não foi possível salvar o log.')
             return jsonify({"status": "error", "message": "Não foi possível salvar o log."}), 500
     else:
-        print(f'{TAGS.ERROR} Nenhuma mensagem foi recebida.')
+        logTexts.log(3, f'Nenhuma mensagem foi recebida.')
         return jsonify({"status": "error", "message": "Nenhuma mensagem foi recebida."}), 400
 
 
