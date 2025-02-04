@@ -1047,7 +1047,7 @@ class MovRequestUtils:
         
         all_requests = MovRequestUtils.get_all_requests()
         
-        request_except_query = ', '.join(map(str, all_requests))
+        request_except_query = ', '.join(map(str, all_requests)) #TODO: fix
         
         query = '''
             SELECT DISTINCT
@@ -1298,9 +1298,15 @@ class HistoricoUtils:
             ''', (per_page, offset))
 
             estoque = [{
-                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-                'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade' : row[5], 
-                'operacao'  : row[6],          'user_name' : row[7], 'timestamp'  : row[8]
+                # itera letra e numero da rua com um '.'
+                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 
+                # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                #   exemplo:
+                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                #    'A.1 ' -> ['A.1 ']
+
+                'cod_item'  : row[2], 'desc_item' : row[3], 'cod_lote'  : row[4],
+                'quantidade': row[5], 'operacao'  : row[6], 'user_name' : row[7], 'timestamp' : row[8]
             } for row in cursor.fetchall()]
         return estoque, row_count
 
@@ -1326,9 +1332,15 @@ class HistoricoUtils:
             ''')
             
             estoque = [{
-                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 'cod_item'   : row[2], 
-                'desc_item' : row[3],          'cod_lote'  : row[4], 'quantidade': row[5], 
-                'operacao'  : row[6],          'user_name' : row[7],  'timestamp'  : row[8]
+                # itera letra e numero da rua com um '.'
+                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ',
+                # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                #   exemplo:
+                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                #    'A.1 ' -> ['A.1 ']
+                
+                'cod_item'  : row[2], 'desc_item' : row[3], 'cod_lote'  : row[4], 
+                'quantidade': row[5], 'operacao'  : row[6], 'user_name' : row[7], 'timestamp' : row[8]
             } for row in cursor.fetchall()]
         return estoque
 
@@ -1381,7 +1393,7 @@ class ProdutoUtils:
 
     
     @staticmethod
-    # RETORNA TODOS OS PARÂMETROS DOS ITENS ATIVOS
+    # retorna todos os parametros dos itens ativos
     def get_active_itens():
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -1974,18 +1986,19 @@ class EtiquetaGenerator:
 
 class misc:
     @staticmethod
-    # BUSCA FRASE PARA /INDEX
+    # busca frase para /index
     def get_frase() -> str:
         with open('static/frases.txt', 'r', encoding='utf-8') as file:
             frases = file.readlines()
             frase = random.choice(frases).strip()
             if not frase:
+            # frase padrão
                 frase = 'Seja a mudança que você deseja ver no mundo.'
         return frase
 
 
     @staticmethod
-    # CONVERTE TIMESTAMP PARA FORMATO DO DATABASE
+    # converte timestamp para formato do database
     def parse_db_datetime(timestamp):
         if not timestamp:
             timestamp = datetime.now(timezone(timedelta(hours=-3)))
@@ -1997,13 +2010,13 @@ class misc:
     
 
     @staticmethod
-    # RETORNA TIMESTAMP
+    # retorna timestamp
     def get_timestamp() -> str:
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
     @staticmethod
-    # ADICIONA DIAS À DATA INFORMADA
+    # adiciona dias À data informada
     def add_days_to_datetime_str(date_str, qtde_days) -> str:
 
         date_obj = datetime.strptime(date_str, '%Y-%m-%d')
@@ -2016,7 +2029,7 @@ class misc:
 
 
     @staticmethod
-    # MENSAGEM DO TELEGRAM
+    # mensagem do telegram
     def tlg_msg(msg):
         if not session.get('user_grant') == 1:
             if debug == True:
@@ -2035,7 +2048,7 @@ class misc:
 
 
     @staticmethod
-    # CRIA QRCODE
+    # cria qrcode
     def qr_code(qr_text):
         qr = qrcode.QRCode(
             version=1,
@@ -2051,13 +2064,13 @@ class misc:
 
 
     @staticmethod
-    # HASH DA SENHA
+    # hash da senha
     def hash_key(password) -> str:
         return pbkdf2_sha256.hash(password)
 
 
     @staticmethod
-    # PARSE P/ FLOAT
+    # parse p/ float
     def parse_float(value) -> float:
         try:
             return float(value.replace(',', '.'))
@@ -2076,7 +2089,7 @@ class misc:
 
 
     @staticmethod
-    # VERIFICA SENHA NO BANCO DE HASH
+    # verifica senha no banco de hash
     def password_check(id_user, password) -> bool:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -2095,14 +2108,14 @@ class misc:
 
 
     @staticmethod
-    # VERIFICA SENHA NO BANCO DE HASH
+    # verifica senha no banco de hash
     def check_key(hashed_pwd, pwd) -> bool:
         return pbkdf2_sha256.verify(pwd, hashed_pwd)
 
 
     class CSVUtils:
         @staticmethod
-        # CSV PARA INTEGRAÇÃO ERP
+        # csv para integraçÃo erp
         def iterate_csv_data_erp(data) -> str:
             csv_data = ''
             for item in data:
@@ -2112,7 +2125,7 @@ class misc:
 
 
         @staticmethod
-        # CORPO CSV PADRAO
+        # corpo csv padrao
         def iterate_csv_data(data) -> str:
             csv_data = ''
             for item in data:
@@ -2122,7 +2135,7 @@ class misc:
 
 
         @staticmethod
-        # ADICIONA CABECALHO PARA CSV
+        # adiciona cabecalho para csv
         def add_headers(data):
             if data and len(data) > 0:
                 headers = ';'.join(data[0].keys())
@@ -2131,7 +2144,7 @@ class misc:
 
         
         @staticmethod    
-        # RETORNA TABELA DE SALDO
+        # retorna tabela de saldo
         def get_export_promob():
             sql_balance_calc = EstoqueUtils.sql_balance_calc
             with sqlite3.connect(db_path) as connection:
@@ -2175,7 +2188,7 @@ class misc:
 
         
         @staticmethod
-        # CONSTRUTOR DE CSV
+        # construtor de csv
         def export_csv(data, filename, include_headers=True):
             if data and len(data) > 0:
                 csv_data = ''
@@ -2210,7 +2223,7 @@ class misc:
 # 
 @app.before_request
 def renew_session() -> None:
-    # RENOVA A SESSÃO DE USUÁRIO
+    # renova a sessÃo de usuário
     session.modified = True
     return None
 
@@ -2242,7 +2255,7 @@ def check_session_expiry() -> None | Response:
 
 @app.before_request
 def check_ip() -> None:
-    # CHECA LISTA DE IPS (MODO DEBUG)
+    # checa lista de ips (modo debug)
     client_ip = request.remote_addr
     
     temp_password = os.getenv('TEMP_PASSWORD')
@@ -2273,7 +2286,7 @@ def check_ip() -> None:
 
 @app.context_processor
 def inject_page() -> dict:
-    # RETORNA URL ACESSADA PELO USER
+    # retorna url acessada pelo user
     current_page  = request.path
     if 'logged_in' in session:
         user_name = session.get('user_name')
@@ -2283,13 +2296,13 @@ def inject_page() -> dict:
 
 @app.context_processor
 def inject_version() -> dict:
-    # INJETA VARIAVEL DE VERSÃO AO AMBIENTE
+    # injeta variavel de versão ao ambiente
     return dict(app_version=app.config['APP_VERSION'])
 
 
 @app.context_processor
 def inject_unit() -> dict:
-    # INJETA VARIAVEL DE UNIDADE AO AMBIENTE
+    # injeta variavel de unidade ao ambiente
     return dict(app_unit=app.config['APP_UNIT'])
 
 
@@ -2335,7 +2348,7 @@ def force_503() -> None:
     return None
 
 
-# ROTAS DE ACESSO | URL
+# rotas de acesso | url
 #
 @app.route('/')
 @cde.verify_auth('CDE001')
@@ -2454,7 +2467,7 @@ def permissions_id(id_perm) -> str:
     )
 
 
-# ROTA DE DATABASE MANAGER
+# rota de database manager
 @app.route('/database/', methods=['GET', 'POST'])
 @cde.verify_auth('DEV000')
 def api() -> str:
@@ -2491,7 +2504,6 @@ def api() -> str:
     )
 
 
-# ROTA PAGINA DE LOGIN
 @app.route('/login/', methods=['GET'])
 def pagina_login() -> Response | str:
     if session.get('logged_in'):
@@ -2509,7 +2521,6 @@ def cde_account() -> str | None:
     return None
 
 
-# ROTA DE SESSÃO LOGIN
 @app.route('/login/', methods=['POST'])
 def login():
     # TODO: método auxiliar
@@ -2599,14 +2610,12 @@ def login():
                 ) 
 
 
-# ROTA DE SAÍDA DO USUÁRIO
 @app.route('/logout/')
 def logout() -> Response:
     session.clear()
     return redirect(url_for('login'))
 
 
-# ROTA DE ALTERAÇÃO DE SENHA
 @app.route('/change-password/', methods=['GET', 'POST'])
 def change_password() -> str | Response:
     if request.method == 'GET':
@@ -2670,7 +2679,7 @@ def get_item() -> Response:
     return result_json
 
 
-# ROTA DE MOVIMENTAÇÃO NO ESTOQUE (/mov)
+# rota de movimentação no estoque (/mov)
 @app.route('/mov/')
 @cde.verify_auth('MOV002')
 def mov() -> str:
@@ -2758,7 +2767,7 @@ def faturado() -> str:
     )
 
 
-# ROTA DE MOVIENTAÇÃO NO ESTOQUE (/mov/MOVING)
+# rota de movientação no estoque (/mov/moving)
 @app.route('/mov/moving/', methods=['POST'])
 @cde.verify_auth('MOV002')
 def moving() -> str | Response:
@@ -2843,7 +2852,7 @@ def moving() -> str | Response:
             for item in items:
                 cod_item, lote_item, quantidade = item
                 if quantidade > 0:
-                    # SAÍDA DO ENDEREÇO DE ORIGEM
+                    # saída do endereço de origem
                     mov_ts = HistoricoUtils.insert_transaction(
                         numero=numero, letra=letra, 
                         cod_item=cod_item, lote_item=lote_item,
@@ -2851,7 +2860,7 @@ def moving() -> str | Response:
                         timestamp=timestamp_out, 
                         id_carga=id_carga
                     )
-                    # ENTRADA NO ENDEREÇO DE DESTINO
+                    # entrada no endereço de destino
                     mov_te = HistoricoUtils.insert_transaction(
                         numero=destino_number, letra=destino_letter, 
                         cod_item=cod_item, lote_item=lote_item,
@@ -2924,7 +2933,7 @@ def moving_req_bulk():
     
     try:
         for item in sep_carga:
-            # VERIFICA SE O ITEM E LOTE (NO ENDEREÇO) AINDA TEM ESTOQUE SUFICIENTE
+            # verifica se o item e lote (no endereço) ainda tem estoque suficiente
             haveItem = EstoqueUtils.get_saldo_item(
                 item['rua_numero'],
                 item['rua_letra'],
@@ -2964,10 +2973,10 @@ def moving_carga_bulk():
     
     try:
         for item in sep_carga:
-            # Define o valor padrão 'F' para 'operacao' caso não esteja presente
+            # define o valor padrão 'F' para 'operacao' caso não esteja presente
             operacao = item.get('operacao', 'F')
 
-            # Verifica a quantidade em estoque
+            # verifica a quantidade em estoque
             haveItem = EstoqueUtils.get_saldo_item(
                 item['rua_numero'],
                 item['rua_letra'],
@@ -2977,7 +2986,7 @@ def moving_carga_bulk():
             if haveItem < item['qtde_sep']:
                 return jsonify({'success': False, 'error': f'Estoque insuficiente para o item {item["cod_item"]} no lote {item["lote_item"]}.'}), 400
 
-            # Logica para inserir histórico de acordo com a operação
+            # logica para inserir histórico de acordo com a operação
             if operacao == 'F':
                 HistoricoUtils.insert_transaction(
                     timestamp=timestamp_out,
@@ -3000,7 +3009,7 @@ def moving_carga_bulk():
                     operacao=operacao
                 )
             elif operacao == 'T':
-                # Operação de transferência
+                # operação de transferência
                 HistoricoUtils.insert_transaction(
                     timestamp=timestamp_out,
                     numero=item['rua_numero'],
@@ -4355,8 +4364,8 @@ def rotulo() -> Response | str:
         diametro_minimo     = misc.parse_float(request.form['diametro_minimo'])
         espessura_papelao   = misc.parse_float(request.form['espessura_papelao'])
         compr_rotulo        = misc.parse_float(request.form['compr_rotulo'])
-        comprimento_total   = 0 # INICIALIZA
-        num_voltas          = 0 # INICIALIZA
+        comprimento_total   = 0 # inicializa variavel
+        num_voltas          = 0 # inicializa variavel
 
         if espessura_fita != 0:
 
@@ -4517,7 +4526,7 @@ def cargas_preset() -> str:
 @app.route('/export_csv/<tipo>/', methods=['GET'])
 @cde.verify_auth('CDE017')
 def export_csv_tipo(tipo) -> str | Response:
-    # EXPORT .csv
+    # export .csv reports
     header = True
     if tipo == 'historico':
         data =  HistoricoUtils.get_all_historico()
@@ -4561,6 +4570,6 @@ def export_csv_tipo(tipo) -> str | Response:
     return misc.CSVUtils.export_csv(data, filename, header)
 
 
-# __MAIN__
+# __main__
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port, debug=debug)
