@@ -1,4 +1,4 @@
-﻿import requests, sqlite3, random, pyodbc, json, sys, re, os, time
+﻿import requests, sqlite3, random, json, sys, re, os, time
 
 from app.models import logTexts, dbUtils, stickerUtils
 
@@ -25,6 +25,7 @@ if __name__:
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
     app.config['APP_VERSION'] = ['0.5.3', 'Fevereiro/2025', False]   # 'versão', 'release-date', 'debug-mode'
     
+    debug = False
     current_dir = os.path.dirname(os.path.abspath(__file__)).upper() # current absolute directory
     debug_dir   = os.getenv('DEBUG_DIR').upper().split(';')          # debug directory (evita execução sem configurar diretório)
     default_dir = os.getenv('DEFAULT_DIR').upper()                   # default dir (executa somente no diretório de produção)
@@ -68,8 +69,8 @@ if __name__:
 
     # se executado diretamente, modo_exec = 'debug'
     if __name__ == "__main__": 
-        db_path = os.getenv('DEBUG_DB_PATH')
         port, debug = 5100, True
+        db_path = dbUtils.get_db_path(debug)
         app.config['APP_VERSION'][2] = True
 
         # logs server running info
@@ -77,8 +78,8 @@ if __name__:
 
     # se o diretório atende ao local 'produção', modo_exec = 'produção'.
     elif default_dir in current_dir: 
-        db_path = os.getenv('DB_PATH')
-        port, debug = 5005, False
+        port = 5005
+        db_path = dbUtils.get_db_path(debug)
         
         # logs header & server running info
         print(logTexts.cde_header)
@@ -145,145 +146,7 @@ class cde:
         logTexts.log(2, 'Retornando ODBC-DRIVER')
         return 'ODBC-DRIVER'
     
-    
-    @staticmethod
-    # conexão e consulta no banco de dados
-    def db_query(query: str, method: str, source: int = 1):
-        # TODO: criar métodos de mesclar consultas (ex: dadosNOE + dadosHP)
-        if method == 'API':
-        # busca na api configurada
-            url, headers = cde.new_api_connection()
-            data = {
-                "query": query,
-                "source": source
-            }
-            try:
-                response = requests.post(url, headers=headers, json=data)
-                
-                if response.status_code == 200:
-                    try:
-                        response_data = response.json()
 
-                        # Verifica se a resposta possui as chaves esperadas
-                        if isinstance(response_data, dict) and "columns" in response_data and "data" in response_data:
-                            # Extrai colunas e dados
-                            columns = response_data["columns"]
-                            data = response_data["data"]
-
-                            # Converte 'data' em uma lista de listas para exibição tabular
-                            rows = [[item.get(col, "") for col in columns] for item in data]
-
-                            # Retorna as linhas e colunas
-                            return rows, columns
-                        else:
-                            logTexts.debug_log(f"Formato inesperado da resposta: {response_data}", debug)
-                            return [[f"Erro: Formato inesperado da resposta da API"]], []
-
-                    except ValueError:
-                        logTexts.debug_log(f"Resposta inválida (não é JSON): {response.text}", debug)
-                        return [[f"Erro: Resposta inválida da API"]], []
-                else:
-                    logTexts.debug_log(f"Erro na API: {response.status_code} - {response.reason}", debug)
-                    return [[f"Erro HTTP {response.status_code}: {response.reason}"]], []
-
-            except requests.exceptions.ConnectionError as e:
-                logTexts.debug_log(f"API offline ou inacessível: {str(e)}", debug)
-                return [[f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."]], []
-
-            except Exception as e:
-                logTexts.debug_log(f"Erro de conexão com a API: {str(e)}", debug)
-                return [[f"Erro: {str(e)}"]], []
-
-        elif method == 'ODBC-DRIVER':
-        # busca nas DSNs configuradas (Fonte de Dados ODBC)
-            # get user credentials
-            user, password = cde.get_odbc_user_credentials()
-            
-            dsn = source #TODO: criar metodo que busca dns no .env conforme source
-            try:
-                connection = pyodbc.connect(f"DSN={dsn}", uid=user, pwd=password)
-                cursor = connection.cursor()
-                cursor.execute(query)
-                columns = [str(column[0]) for column in cursor.description]
-                result = cursor.fetchall()
-
-                cursor.close()
-                connection.close()
-            except Exception as e:
-                logTexts.log(3, "Erro ao enviar solicitação:", str(e))
-                result = [[f'Erro de consulta: {e}']]
-                columns = []
-        
-        elif method == 'LOCAL':
-        # busca no arquivo local (.db)
-            try:
-                with sqlite3.connect(db_path) as connection:
-                    cursor = connection.cursor()
-                    cursor.execute(query)
-                    columns = [str(column[0]) for column in cursor.description]
-                    result = cursor.fetchall()
-            except Exception as e:
-                logTexts.debug_log(f"Erro ao enviar solicitação: {str(e)}", debug)
-                result = [[f'Erro de consulta: {e}']]
-                columns = []
-
-        else:
-            result = [[f'MÉTODO INVÁLIDO: {method}']]
-            columns = []
-            
-        return result, columns
-    
-    
-    @staticmethod
-    def new_api_connection():
-        db_api = os.getenv('DB_API')
-        url = f"http://{db_api}/query"
-        headers = {"Content-Type": "application/json"}
-        
-        return url, headers
-    
-    
-    @staticmethod
-    def get_odbc_user_credentials():
-        uid_pwd = os.getenv('DB_USER').split(';')
-        return uid_pwd[0], uid_pwd[1]
-    
-    
-    @staticmethod
-    # consulta tabelas do schema
-    def db_get_tables(dsn):
-        try:
-            if dsn == 'ODBC-DRIVER':
-                query = '''
-                    SELECT TABNAME
-                    FROM SYSCAT.TABAUTH
-                    WHERE GRANTEE = 'CDEADMIN'
-                    AND SELECTAUTH = 'Y';
-                '''
-            if dsn == 'API':
-                query = '''
-                    SELECT TABNAME
-                    FROM SYSCAT.TABAUTH
-                    WHERE GRANTEE = 'CDEADMIN'
-                    AND SELECTAUTH = 'Y';
-                '''
-            elif dsn == 'LOCAL':
-                query = '''
-                    SELECT name 
-                    FROM sqlite_master 
-                    WHERE type = 'table' 
-                        AND name NOT LIKE 'sqlite_%'
-                    ORDER BY name;
-                '''
-            else:
-                return [[f'DSN desconhecida: {dsn}']]
-            
-        except Exception as e:
-            return [[f'Erro de consulta: {e}']]
-        
-        return cde.db_query(query, dsn)[0]
-    
-    
     @staticmethod
     def create_default_user():
         data_cadastro = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -387,7 +250,7 @@ class EstoqueUtils:
                     h.rua_numero ASC, i.desc_item ASC;
             '''.format(a=sql_balance_calc, b=str(cod_item))
             dsn = 'LOCAL'
-            result_local, columns_local = cde.db_query(query, dsn)
+            result_local, columns_local = dbUtils.query(query, dsn)
             return result_local, columns_local
         else:
             return [], []
@@ -608,7 +471,7 @@ class CargaUtils:
 
             # define o dsn conforme default (ou usuario)
             dsn = cde.get_unit()
-            logTexts.debug_log(f'DSN: {dsn}', debug)
+            logTexts.debug_log(f'DSN: {dsn}')
             
             if dsn == 'ODBC-DRIVER':
                 static_list = ', '.join(map(str, all_cargas))
@@ -685,7 +548,7 @@ class CargaUtils:
         else:
             query = '''SELECT 'SEM CARGAS' AS MSG;'''
         
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         return result, columns
 
     
@@ -852,7 +715,7 @@ class CargaUtils:
         '''.format(a=where_clause)
         
         dsn = 'LOCAL'
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         
         return result, columns 
 
@@ -927,7 +790,7 @@ class CargaUtils:
         '''.format(a=id_carga)
 
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
 
         if result:
             return result[0][0]
@@ -960,7 +823,7 @@ class CargaUtils:
         '''.format(a=id_carga)
 
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
 
         if result:
             return result[0][0]
@@ -1075,7 +938,7 @@ class MovRequestUtils:
         '''.format(a=where_clause, b=request_except_query)
         
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         
         return result, columns
 
@@ -1207,7 +1070,7 @@ class OrdemProducaoUtils:
         '''.format(a=where_clause)
         
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         
         return result, columns
 
@@ -1369,7 +1232,7 @@ class ProdutoUtils:
         '''.format(a=whitelist)
 
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         return result, columns
 
     
@@ -1831,7 +1694,7 @@ class UserUtils:
         '''.format(a=id_user)
 
         dsn = 'LOCAL'
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
 
         if result:
             return result[0][0]
@@ -1957,7 +1820,7 @@ class misc:
     def tlg_msg(msg):
         if not session.get('user_grant') == 1:
             if debug == True:
-                logTexts.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug', debug)
+                logTexts.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
                 return None
             else:
                 bot_token = os.getenv('TLG_BOT_TOKEN')
@@ -2384,7 +2247,7 @@ def api() -> str:
             query = request.form['sql_query'].replace("▷", ".").replace("-- para executar, clique em '.' acima", "")
             dsn = request.form['sel_schema']
             source = int(request.form.get('sel_source', 1))
-            tables = cde.db_get_tables(dsn)
+            tables = dbUtils.db_get_tables(dsn)
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
                 result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
@@ -2396,7 +2259,7 @@ def api() -> str:
                     source=source
                 )
             else:
-                result, columns = cde.db_query(query, dsn, source)
+                result, columns = dbUtils.query(query, dsn, source)
 
                 return render_template(
                     'pages/api/api.html', 
@@ -2962,7 +2825,7 @@ def get_fant_clientes() -> Response:
     '''
 
     dsn = cde.get_unit()
-    result, columns = cde.db_query(query, dsn)
+    result, columns = dbUtils.query(query, dsn)
 
     clientes = [{'FANTASIA': '(indefinido)'}]
     if result:
@@ -3608,12 +3471,12 @@ def carga_id(id_carga) -> str:
         fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
         all_cargas = CargaUtils.get_cargas_finalizadas()
         
-        logTexts.debug_log(f'all_cargas: {all_cargas}', debug)
+        logTexts.debug_log(f'all_cargas: {all_cargas}')
         
         # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
         static_list = ', '.join(str(int(carga)) for carga in all_cargas if str(carga).isdigit())
         
-        logTexts.debug_log(f'static_list: {static_list}', debug)
+        logTexts.debug_log(f'static_list: {static_list}')
 
         query = f'''
             SELECT DISTINCT 
@@ -3647,7 +3510,7 @@ def carga_id(id_carga) -> str:
 
         # executa a consulta de forma segura
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         
         if columns:
             # cria lista dos itens da carga (p/ validação de necessidade no jinja)
@@ -3834,7 +3697,7 @@ def get_req_qtde_solic():
     '''.format(a=id_req, b=cod_item)
     try:
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         if result:
             qtde_solic = result[0][0]
         else:
@@ -3870,7 +3733,7 @@ def get_itens_req():
     '''.format(a=id_req)
     try:
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         if result:
             itens = [row[0] for row in result]
         else:
@@ -3925,7 +3788,7 @@ def get_carga_qtde_solic():
             ;
         '''.format(a=id_carga, b=cod_item)
         dsn = 'LOCAL'
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
     else:
         query = '''
             SELECT 
@@ -3938,7 +3801,7 @@ def get_carga_qtde_solic():
             ;
         '''.format(a=id_carga, b=cod_item)
         dsn = 'LOCAL'
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         
     if result != []:
         qtde_solic = result[0][0]
@@ -3958,7 +3821,7 @@ def get_carga_qtde_solic():
         '''.format(a=id_carga, b=cod_item)
         try:
             dsn = cde.get_unit()
-            result, columns = cde.db_query(query, dsn)
+            result, columns = dbUtils.query(query, dsn)
             if result:
                 qtde_solic = result[0][0]
             else:
@@ -3985,7 +3848,7 @@ def get_itens_carga():
     '''.format(a=id_carga)
     try:
         dsn = cde.get_unit()
-        result, columns = cde.db_query(query, dsn)
+        result, columns = dbUtils.query(query, dsn)
         if result:
             itens = [row[0] for row in result]
         else:

@@ -47,7 +47,8 @@ def log(tag_i: int, text: str, tag_2: str="") -> None:
 
 
 @staticmethod
-def debug_log(text: str, debug: bool) -> None:
+def debug_log(text: str) -> None:
+    from cde import debug
     if debug:
         print(f'[DBG] {text}')
 

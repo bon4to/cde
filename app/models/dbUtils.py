@@ -1,4 +1,122 @@
-import sqlite3
+import sqlite3, os, requests, pyodbc
+from dotenv import load_dotenv
+
+from app.models import logTexts
+
+# carrega o .env
+load_dotenv()
+
+@staticmethod
+def get_db_path(debug: bool = False):
+    if debug:
+        return os.getenv('DEBUG_DB_PATH')
+    return os.getenv('DB_PATH')
+    
+
+@staticmethod
+# conexão e consulta no banco de dados
+def query(query: str, method: str, source: int = 1):
+    # TODO: criar métodos de mesclar consultas (ex: dadosNOE + dadosHP)
+    if method == 'API':
+    # busca na api configurada
+        url, headers = new_api_connection()
+        data = {
+            "query": query,
+            "source": source
+        }
+        try:
+            response = requests.post(url, headers=headers, json=data)
+            
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+
+                    # Verifica se a resposta possui as chaves esperadas
+                    if isinstance(response_data, dict) and "columns" in response_data and "data" in response_data:
+                        # Extrai colunas e dados
+                        columns = response_data["columns"]
+                        data = response_data["data"]
+
+                        # Converte 'data' em uma lista de listas para exibição tabular
+                        rows = [[item.get(col, "") for col in columns] for item in data]
+
+                        # Retorna as linhas e colunas
+                        return rows, columns
+                    else:
+                        logTexts.debug_log(f"Formato inesperado da resposta: {response_data}")
+                        return [[f"Erro: Formato inesperado da resposta da API"]], []
+
+                except ValueError:
+                    logTexts.debug_log(f"Resposta inválida (não é JSON): {response.text}")
+                    return [[f"Erro: Resposta inválida da API"]], []
+            else:
+                logTexts.debug_log(f"Erro na API: {response.status_code} - {response.reason}")
+                return [[f"Erro HTTP {response.status_code}: {response.reason}"]], []
+
+        except requests.exceptions.ConnectionError as e:
+            logTexts.debug_log(f"API offline ou inacessível: {str(e)}")
+            return [[f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."]], []
+
+        except Exception as e:
+            logTexts.debug_log(f"Erro de conexão com a API: {str(e)}")
+            return [[f"Erro: {str(e)}"]], []
+
+    elif method == 'ODBC-DRIVER':
+    # busca nas DSNs configuradas (Fonte de Dados ODBC)
+        # get user credentials
+        user, password = get_odbc_user_credentials()
+        
+        dsn = source #TODO: criar metodo que busca dns no .env conforme source
+        try:
+            connection = pyodbc.connect(f"DSN={dsn}", uid=user, pwd=password)
+            cursor = connection.cursor()
+            cursor.execute(query)
+            columns = [str(column[0]) for column in cursor.description]
+            result = cursor.fetchall()
+
+            cursor.close()
+            connection.close()
+        except Exception as e:
+            logTexts.log(3, "Erro ao enviar solicitação:", str(e))
+            result = [[f'Erro de consulta: {e}']]
+            columns = []
+    
+    elif method == 'LOCAL':
+    # busca no arquivo local (.db)
+        try:
+            from cde import debug
+            
+            with sqlite3.connect(get_db_path(debug)) as connection:
+                cursor = connection.cursor()
+                cursor.execute(query)
+                columns = [str(column[0]) for column in cursor.description]
+                result = cursor.fetchall()
+        except Exception as e:
+            logTexts.debug_log(f"Erro ao enviar solicitação: {str(e)}")
+            result = [[f'Erro de consulta: {e}']]
+            columns = []
+
+    else:
+        result = [[f'MÉTODO INVÁLIDO: {method}']]
+        columns = []
+        
+    return result, columns
+
+
+@staticmethod
+def new_api_connection():
+    db_api = os.getenv('DB_API')
+    url = f"http://{db_api}/query"
+    headers = {"Content-Type": "application/json"}
+    
+    return url, headers
+
+
+@staticmethod
+def get_odbc_user_credentials():
+    uid_pwd = os.getenv('DB_USER').split(';')
+    return uid_pwd[0], uid_pwd[1]
+
 
 @staticmethod
 # GERADOR DE TABELAS
@@ -137,3 +255,39 @@ def create_tables(database) -> None:
 
         connection.commit()
     return None
+
+
+@staticmethod
+# consulta tabelas do schema
+def db_get_tables(dsn):
+    try:
+        if dsn == 'ODBC-DRIVER':
+            query_str = '''
+                SELECT TABNAME
+                FROM SYSCAT.TABAUTH
+                WHERE GRANTEE = 'CDEADMIN'
+                AND SELECTAUTH = 'Y';
+            '''
+        if dsn == 'API':
+            query_str = '''
+                SELECT TABNAME
+                FROM SYSCAT.TABAUTH
+                WHERE GRANTEE = 'CDEADMIN'
+                AND SELECTAUTH = 'Y';
+            '''
+        elif dsn == 'LOCAL':
+            query_str = '''
+                SELECT name 
+                FROM sqlite_master 
+                WHERE type = 'table' 
+                    AND name NOT LIKE 'sqlite_%'
+                ORDER BY name;
+            '''
+        else:
+            return [[f'DSN desconhecida: {dsn}']]
+        
+    except Exception as e:
+        return [[f'Erro de consulta: {e}']]
+    
+    return query(query_str, dsn)[0]
+
