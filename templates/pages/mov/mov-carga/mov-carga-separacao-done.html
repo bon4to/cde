@@ -44,13 +44,14 @@
         <option style="color: var(--cor-destaque);" value="{{ seq }}">{{ id_carga }}-{{ seq }}</option>
     </select>
     {% if seq != 0 %}
+    <div style="background-color: var(--cor-destaque); pointer-events: all; cursor: pointer; border-radius: 20px; height: 40px; width: 40px;">
         <img 
-            alt=""
+            alt="RESET"
             class="svg-invert" 
-            style="pointer-events: all; cursor: pointer; box-shadow: 0 0 10px var(--cor-destaque); border-radius: 20px;"
             src="{{ url_for('static', filename='svg/eraser.svg') }}" 
             onclick="window.location.href='/mov/carga/separacao/f/{{ id_carga }}';"
         >
+    </div>
     {% endif %}
 {% endblock switch %}
 
