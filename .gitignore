@@ -1,15 +1,16 @@
-cde_database.db
-translegua.db
-translegua_.db
-translegua__.db
-dbg_translegua.db
-dbg_translegua_.db
-dbg_translegua__.db
+# databases
+cde.db
+dbg_cde.db
+
+# dirs
+/old/
+/logs/
+/report/
+
+# others
 __pycache__
 .history
 .vscode
-report
 .idea
-venv
 .env
-logs
+venv
