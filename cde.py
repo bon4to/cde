@@ -112,6 +112,11 @@ class cde:
 
     
     @staticmethod
+    def format_three_no(number:int) -> str: 
+        return str(number).zfill(3)
+    
+    
+    @staticmethod
     # retorna texto do arquivo
     def get_file_text(dir) -> str:
         try:
@@ -173,7 +178,7 @@ class cde:
             def decorador(*args, **kwargs):
                 if not 'logged_in' in session:
                     return redirect(url_for('login'))
-                id_user = session.get('id_user')
+                id_user = cde.format_three_no(session.get('id_user'))
                 session['id_page'] = f'{id_page}'
                 if session.get('user_grant') <= 2:
                     logTexts.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
