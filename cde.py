@@ -213,49 +213,22 @@ class cde:
 
 
 class EstoqueUtils:
-    # DEFINE A QUERY SQL DE SALDO
-    sql_balance_calc = '''
-        SUM( 
-            CASE 
-            WHEN operacao = 'E' OR operacao = 'TE' 
-            THEN quantidade 
-            
-            WHEN operacao = 'S' OR operacao = 'TS' OR operacao = 'F' 
-            THEN (quantidade * -1)
-            
-            ELSE (quantidade * 0)
-            END
-        )
-    '''
+    # define a query que calcula o saldo
+    sql_balance_calc = dbUtils.QueryManager.get(query_id=1)
     
     @staticmethod
     # retorna saldo do item
     def estoque_address_with_item(cod_item=False):
         if cod_item:
-            sql_balance_calc = EstoqueUtils.sql_balance_calc
-            query = '''
-                SELECT  
-                    h.rua_numero, h.rua_letra, i.cod_item, 
-                    i.desc_item, h.lote_item,
-                    {a} as saldo
-                FROM tbl_transactions h
-
-                JOIN itens i 
-                ON h.cod_item = i.cod_item
-
-                WHERE i.cod_item = "{b}"
-                
-                GROUP BY  
-                    h.rua_numero, h.rua_letra, 
-                    h.cod_item, h.lote_item
-                HAVING saldo != 0
-
-                ORDER BY 
-                    h.lote_item ASC, h.rua_letra ASC,
-                    h.rua_numero ASC, i.desc_item ASC;
-            '''.format(a=sql_balance_calc, b=str(cod_item))
+            query = dbUtils.QueryManager.get(
+                query_id = 2,
+                calc = EstoqueUtils.sql_balance_calc,
+                b = str(cod_item)
+            )
+            
             dsn = 'LOCAL'
             result_local, columns_local = dbUtils.query(query, dsn)
+            print(result_local)
             return result_local, columns_local
         else:
             return [], []
@@ -2350,7 +2323,7 @@ def login():
             session['logged_in'] = True       # logado
             
             # grava log no telegram
-            msg = f'[LOG-IN]\n{user_id} - {user_nome} {user_snome}\n{request.remote_addr}'
+            msg = f'[LOG-IN]\n{cde.format_three_no(user_id)} - {user_nome} {user_snome}\n{request.remote_addr}'
             misc.tlg_msg(msg)
 
             # senha temporária
