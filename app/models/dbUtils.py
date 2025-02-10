@@ -1,3 +1,4 @@
+import re
 import sqlite3, os, requests, pyodbc
 from dotenv import load_dotenv
 
@@ -12,6 +13,83 @@ def get_db_path(debug: bool = False):
         return os.getenv('DEBUG_DB_PATH')
     return os.getenv('DB_PATH')
     
+class QueryManager:
+    """
+    Classe responsável por carregar e manipular queries SQL dinâmicas.
+    """
+
+    # Dicionário onde as queries serão armazenadas
+    QUERIES = {}
+
+    @classmethod
+    def load_queries(cls, file_path: str):
+        """
+        Carrega as queries do arquivo para o dicionário QUERIES, permitindo múltiplas linhas.
+
+        Parâmetros:
+            file_path (str): Caminho do arquivo contendo as queries.
+        """
+        with open(file_path, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+
+        queries = {}
+        current_id = None
+        current_query = []
+
+        for line in lines:
+            line = line.strip()
+
+            if not line:  # Ignora linhas vazias
+                continue
+
+            if re.match(r"^\d+\s*=", line):  # Nova query encontrada
+                if current_id is not None:  # Salva a query anterior antes de iniciar uma nova
+                    queries[current_id] = " ".join(current_query).strip()
+
+                parts = line.split("=", 1)
+                current_id = int(parts[0].strip())  # Pega o ID
+                current_query = [parts[1].strip()]  # Começa uma nova query
+
+            else:
+                if current_id is not None:  # Continua a query anterior
+                    current_query.append(line)
+
+        if current_id is not None:  # Salva a última query
+            queries[current_id] = " ".join(current_query).strip()
+
+        cls.QUERIES = queries
+
+
+    @staticmethod
+    def get(query_id: int, **variables) -> str:
+        """
+        Retorna uma query SQL formatada dinamicamente com os valores fornecidos.
+
+        Parâmetros:
+            query_id (int): O identificador da query armazenada no dicionário QUERIES.
+            **variables: Argumentos nomeados que representam os valores a serem inseridos na query (passar conforme o nome definido dentro da query).
+
+        Retorno:
+            str: A query SQL formatada com os valores substituídos.
+
+        Exceções:
+            ValueError: Se o 'query_id' não existir no dicionário QUERIES.
+        """
+        QueryManager.load_queries("db/queries/queries.txt")
+        
+        query = QueryManager.QUERIES.get(query_id)
+        
+        if not query:
+            raise ValueError(f"Query ID {query_id} not found")
+
+        if "{" in query and variables:
+            return query.format(**{
+                k: v
+                for k, v in variables.items()
+            })
+            
+        return query
+
 
 @staticmethod
 # conexão e consulta no banco de dados
