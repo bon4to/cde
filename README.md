@@ -4,11 +4,10 @@
 		<div class="container">
 			<h1>Centralized Data Engine</h1>
 			<img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
-			<h2>Documentação do Projeto</h2>
-			<p>Este documento fornece uma visão geral do projeto CDE, uma plataforma colaborativa desenvolvida com o intuito de facilitar atividades do meio empresarial. Neste documentação, descreve-se a finalidade, funcionalidades principais, uso básico e requisitos do sistema.
-			O sistema CDE teve seu primeiro release em janeiro de 2024 e segue com seu desenvolvimento até o presente momento.</p>
+			<p>O projeto CDE é uma plataforma colaborativa desenvolvida com o intuito de facilitar atividades do meio empresarial. Aqui você pode entender a finalidade, funcionalidades principais, uso básico e requisitos do sistema.
+			O sistema teve seu primeiro release em janeiro de 2024.</p>
 			<h2>Objetivo</h2>
-			<p>Com uma abordagem centralizada no usuário, busca-se melhorar a produtividade, bem como a centralização de atividades da empresa, promovendo soluções e evolução contínua da plataforma à serviço da empresa.</p>
+			<p>Com uma abordagem centralizada no usuário, busca-se melhorar a produtividade, bem como a centralização de atividades, promovendo soluções e evolução contínua da plataforma à serviço da empresa.</p>
 			<h2>Ferramentas desenvolvidas</h2>
 			<ul>
 				<li>Endereçamento de Estoque</li>
@@ -54,10 +53,6 @@
 				</li>
 				<li>Acesse a aplicação no navegador:<br>
 					<code>http://localhost:5005/</code>
-					<br>
-					ou (com instalação via setup.py):
-					<br>
-					<code>http://cde.com:5005/</code>
 				</li>
 			</ol>
 			<h2>Uso Básico</h2>
