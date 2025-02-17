@@ -1,7 +1,10 @@
-﻿import requests, sqlite3, random, json, sys, re, os, time
+﻿# cde.py #TODO: após o decoupling, nomear para main.py
+import requests, sqlite3, random, json, sys, re, os, time
 
+# local imports
 from app.models import logTexts, dbUtils, stickerUtils
 
+# imported dependecies
 from flask import Flask, Response, request, redirect, render_template, url_for, jsonify, session, abort
 from datetime import datetime, timezone, timedelta
 from passlib.hash import pbkdf2_sha256
@@ -9,13 +12,11 @@ from dotenv import load_dotenv
 from functools import wraps
 from math import pi, ceil
 
+# wsgi
 from werkzeug.wrappers.response import Response
 
 
-if __name__:
-    # carrega o .env
-    load_dotenv()
-    
+def config_app():
     # define app
     app = Flask(__name__)
     
@@ -24,6 +25,16 @@ if __name__:
     app.config['APP_UNIT'] = '' # sets a default value
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
     app.config['APP_VERSION'] = ['0.5.3', 'Fevereiro/2025', False]   # 'versão', 'release-date', 'debug-mode'
+    
+    return app, None
+
+if __name__:
+    # carrega o .env
+    load_dotenv()
+    
+    app, err = config_app()
+    if err != None:
+        sys.exit()
     
     debug = False
     current_dir = os.path.dirname(os.path.abspath(__file__)).upper() # current absolute directory
@@ -809,7 +820,7 @@ class CargaUtils:
 
 
     @staticmethod
-    # Retorna todos os IDs de cargas faturadas,
+    # retorna todos os IDs de cargas faturadas,
     # incluindo as cargas 'implantados', sem duplicatas.
     def get_all_cargas():
         cargas_preset = CargaUtils.get_preset_cargas(1)
@@ -1452,6 +1463,7 @@ class UserUtils:
     @staticmethod
     def get_user_key(login_user):
         with sqlite3.connect(db_path) as connection:
+            print(db_path)
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT 
@@ -2011,7 +2023,7 @@ def check_ip() -> None:
     provided_password = request.args.get('password')
     
     if not debug == True:
-        blacklist = os.getenv('BLACKLIST')
+        blacklist = os.getenv('IP_BLACKLIST')
         if client_ip in blacklist:
             msg = f'{client_ip} na Blacklist.'
             misc.tlg_msg(msg)

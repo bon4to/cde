@@ -7,6 +7,14 @@ from app.models import logTexts
 # carrega o .env
 load_dotenv()
 
+def get_file_text(dir) -> str:
+    try:
+        with open(dir, 'r') as file:
+            return file.read().strip()
+    except Exception as e:
+        logTexts.log(3, e)
+        return ''
+
 @staticmethod
 def get_db_path(debug: bool = False):
     if debug:
