@@ -1,3 +1,7 @@
+import requests, random, sqlite3, json, sys, re, os, time
+
+from datetime import datetime
+
 class cde:
     @staticmethod
     # função para salvar logs em um arquivo com nome de data
