@@ -50,11 +50,11 @@ class QueryManager:
             if not line:  # Ignora linhas vazias
                 continue
 
-            if re.match(r"^\d+\s*=", line):  # Nova query encontrada
+            if re.match(r"^\d+\s*:", line):  # Nova query encontrada
                 if current_id is not None:  # Salva a query anterior antes de iniciar uma nova
                     queries[current_id] = " ".join(current_query).strip()
 
-                parts = line.split("=", 1)
+                parts = line.split(":", 1)
                 current_id = int(parts[0].strip())  # Pega o ID
                 current_query = [parts[1].strip()]  # Começa uma nova query
 

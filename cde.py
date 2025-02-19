@@ -41,11 +41,11 @@ if __name__:
     debug_dir   = os.getenv('DEBUG_DIR').upper().split(';')          # debug directory (evita execução sem configurar diretório)
     default_dir = os.getenv('DEFAULT_DIR').upper()                   # default dir (executa somente no diretório de produção)
 
-
     dirs = {}
     def create_dirs() -> None:
         dirs = {
             'db_dir'     : os.path.join(os.getcwd(), 'db'),
+            'db_queries' : os.path.join(os.getcwd(), 'db/queries'),
             'app_dir'    : os.path.join(os.getcwd(), 'app'),
             'a_rout_dir' : os.path.join(os.getcwd(), 'app/routes'),
             'a_mod_dir'  : os.path.join(os.getcwd(), 'app/models'),
