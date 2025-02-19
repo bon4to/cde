@@ -14,3 +14,6 @@ __pycache__
 .idea
 .env
 venv
+
+# macOS folder cfg file
+.DS_Store
