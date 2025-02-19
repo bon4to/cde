@@ -7,6 +7,9 @@ dbg_cde.db
 /logs/
 /report/
 
+# sensitive files
+/db/queries/queries.txt
+
 # others
 __pycache__
 .history
