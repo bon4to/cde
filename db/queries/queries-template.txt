@@ -1,0 +1,13 @@
+# preencha conforme os exemplos abaixo.
+# identifique com o numero da query
+
+# IMPORTANTE: salve o arquivo como queries.txt
+
+
+1: SELECT  *
+    FROM table
+    ORDER BY column;
+
+2: SELECT  *
+    FROM table
+    ORDER BY column;
