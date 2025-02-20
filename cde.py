@@ -24,7 +24,7 @@ def config_app():
     app.secret_key = os.getenv('SECRET_KEY')
     app.config['APP_UNIT'] = '' # sets a default value
     app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
-    app.config['APP_VERSION'] = ['0.5.3', 'Fevereiro/2025', False]   # 'versão', 'release-date', 'debug-mode'
+    app.config['APP_VERSION'] = ['0.5.4', 'Fevereiro/2025', False]   # 'versão', 'release-date', 'debug-mode'
     
     return app, None
 

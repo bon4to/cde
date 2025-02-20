@@ -15,15 +15,11 @@
                 <div class="version-info">CDE | v{{ app_version[0] }} (beta)</div>
             </div>
             <div style="display: flex; justify-content: center; width: 260px;">
-                {% if 'user_grant' in session %}
-                    <div class="version-info" id="userInfo" onclick="window.location.href='{{ url_for('cde_account') }}';">
+                <div class="version-info" id="userInfo" onclick="window.location.href='{{ url_for('cde_account') }}';">
+                    {% if 'user_grant' in session %}
                         {{ session.get('id_user', '') }} - {{ session.get('user_name', '') }}
-                    </div>
-                {% else %}
-                    <div class="version-info" onclick="window.location.href='{{ url_for('cde_account') }}';">
-                        (faça login!)
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
             <div style="display: flex; justify-content: flex-end; width: 260px;">
                 {% if app_version[2] %}
