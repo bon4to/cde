@@ -17,13 +17,14 @@
         <option value=0>Endereço</option>
         <option value=2>Item (Descrição)</option>
         <option value=3>Lote (Código)</option>
+        <option value=4>Validade (Dias)</option>
     {% endblock filter_options %}
 
     {% block table %}
         <div class="split-horizontal">
             <span>
                 <h1 class="subtitle">Estoque</h1>
-                <p>Visualização de Estoque (Endereçado)</p>
+                <p class="cor-web">Visualização de Estoque (Endereçado)</p>
             </span>
             <div class="table-filter" style="display: none;">
                 <div>
@@ -54,6 +55,7 @@
                         <th>Item (Código)</th>
                         <th>Item (Descrição)</th>
                         <th>Lote (Código)</th>
+                        <th>Validade (Dias)</th>
                         <th>QTDE (Efetiva)</th>
                     </tr>
                 </thead>
@@ -63,6 +65,7 @@
                             <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
                             <td class="number">{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
+                            <td>{{ item['cod_lote'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
                             <td class="number">{{ item['saldo'] }},0</td>
                         </tr>
