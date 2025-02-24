@@ -19,6 +19,7 @@ function logOnServer(logMessage) {
 // CAMPOS DE TRANSFERENCIA
 function toggleFields() {
     var operacao = document.getElementById('operacao').value;
+
     const svgImage = document.getElementById('svg-image');
     const svgCfg = document.getElementById('svg-cfg');
     
@@ -28,13 +29,16 @@ function toggleFields() {
     var destinoNumeroInput = document.getElementById('destino_end_number');
     
     var cargaFields = document.getElementById('cargaFields');
+    var dateFields = document.getElementById('dateFields');
     var cargaNumeroInput = document.getElementById('id_carga');
 
-    destinoNumeroInput.removeAttribute('required');
+    dateFields.removeAttribute('required');
     cargaNumeroInput.removeAttribute('required');
+    destinoNumeroInput.removeAttribute('required');
 
-    destinoFields.style.display = operacao === 'T' ? 'contents' : 'none';
+    dateFields.style.display = operacao === 'E' ? 'contents' : 'none';
     cargaFields.style.display = operacao === 'F' ? 'contents' : 'none';
+    destinoFields.style.display = operacao === 'T' ? 'contents' : 'none';
 
     const svgPaths = {
         'E' : "/static/svg/arrow-down-to-dot.svg",
@@ -51,7 +55,10 @@ function toggleFields() {
     } else if (operacao === 'F') {
         cargaNumeroInput.required = true;
         svgCfg.style.display = 'flex';
-    } else {
+    } else { // `E` and `S`
+        if (operacao === 'E') {
+            dateFields.required = true;
+        }
         cargaNumeroInput.required = false;
         destinoNumeroInput.required = false;
         svgCfg.style.display = 'none';
