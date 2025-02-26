@@ -2456,7 +2456,7 @@ def mov() -> str:
 @cde.verify_auth('MOV003')
 def historico() -> str:
     page = request.args.get('page', 1, type=int)
-    per_page = 20
+    per_page = 14
     estoque, row_count = HistoricoUtils.get_historico(page, per_page)
     total_pages = ceil(row_count / per_page)
 
