@@ -2,6 +2,7 @@
 import requests, sqlite3, random, json, sys, re, os, time
 
 # local imports
+from app.utils import cdeapp
 from app.models import logTexts, dbUtils, stickerUtils
 
 # imported dependecies
@@ -16,23 +17,11 @@ from math import pi, ceil
 from werkzeug.wrappers.response import Response
 
 
-def config_app():
-    # define app
-    app = Flask(__name__)
-    
-    # parâmetros
-    app.secret_key = os.getenv('SECRET_KEY')
-    app.config['APP_UNIT'] = '' # sets a default value
-    app.config['CDE_SESSION_LIFETIME'] = timedelta(minutes=90)
-    app.config['APP_VERSION'] = ['0.5.4', 'Fevereiro/2025', False]   # 'versão', 'release-date', 'debug-mode'
-    
-    return app, None
-
 if __name__:
     # carrega o .env
     load_dotenv()
     
-    app, err = config_app()
+    app, err = cdeapp.config.set(__name__)
     if err != None:
         sys.exit()
     
@@ -78,10 +67,10 @@ if __name__:
     create_dirs()
 
 
+    db_path = cdeapp.config.get_db_path()
     # se executado diretamente, modo_exec = 'debug'
     if __name__ == "__main__": 
-        port, debug = 5100, True
-        db_path = dbUtils.get_db_path(debug)
+        port, debug = 5100, cdeapp.config.set_debug(True)
         app.config['APP_VERSION'][2] = True
 
         # logs server running info
@@ -90,7 +79,6 @@ if __name__:
     # se o diretório atende ao local 'produção', modo_exec = 'produção'.
     elif default_dir in current_dir: 
         port = 5005
-        db_path = dbUtils.get_db_path(debug)
         
         # logs header & server running info
         print(logTexts.cde_header)
@@ -226,6 +214,30 @@ class cde:
 class EstoqueUtils:
     # define a query que calcula o saldo
     sql_balance_calc = dbUtils.QueryManager.get(query_id=1)
+    
+    @staticmethod
+    def get_first_mov(cod_item, cod_lote):
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                SELECT 
+                    i.cod_item, i.desc_item, 
+                    COALESCE(t.saldo, 0) as saldo,
+                    COALESCE(t.time_mov, "-") as time_mov
+                FROM itens i
+                LEFT JOIN (
+                    SELECT 
+                        cod_item, cod_lote, 
+                        SUM(qtde_mov) as saldo, 
+                        MIN(time_mov) as time_mov
+                    FROM movimentos
+                    WHERE cod_item = ? AND cod_lote = ?
+                    GROUP BY cod_item, cod_lote
+                ) t ON i.cod_item = t.cod_item 
+                WHERE i.cod_item = ? AND i.cod_lote = ?;
+            ''', (cod_item, cod_lote, cod_item, cod_lote))
+            return cursor.fetchall()
+        
     
     @staticmethod
     # retorna saldo do item
@@ -2232,7 +2244,7 @@ def permissions_id(id_perm) -> str:
 @app.route('/database/', methods=['GET', 'POST'])
 @cde.verify_auth('DEV000')
 def api() -> str:
-    if debug:
+    try:
         if request.method == 'POST':
             query = request.form['sql_query'].replace("▷", ".").replace("-- para executar, clique em '.' acima", "")
             dsn = request.form['sel_schema']
@@ -2249,7 +2261,12 @@ def api() -> str:
                     source=source
                 )
             else:
-                result, columns = dbUtils.query(query, dsn, source)
+                try:
+                    result, columns = dbUtils.query(query, dsn, source)
+                except Exception as e:
+                    print("Erro na query:", e)
+                    result = [["Erro ao executar a consulta:", str(e)]]
+                    columns = []
 
                 return render_template(
                     'pages/api/api.html', 
@@ -2260,6 +2277,8 @@ def api() -> str:
                     dsn=dsn,
                     source=source
                 )
+    except Exception as e:
+        print("Erro na rota /database:", e)
     return render_template(
         'pages/api/api.html'
     )
@@ -2557,7 +2576,24 @@ def moving() -> str | Response:
             alert_more=alert_more, 
             url_return=url_for('mov')
         )
-        
+    if operacao == 'E':
+        date_fab = request.form['date_fab']
+
+        try:
+            date_obj = datetime.strptime(date_fab, '%Y-%m-%d')
+            print("Data válida:", date_obj)
+        except ValueError:
+            print("Data inválida!")
+        try:
+            date_obj = datetime.strptime(date_fab, '%Y-%m-%d')
+            if date_obj > datetime.today():
+                print("Erro: A data não pode ser no futuro.")
+            else:
+                print("Data válida!")
+        except ValueError:
+            print("Erro: Formato de data inválido.")
+            
+    
     is_end_completo = bool(request.form.get('is_end_completo'))
     id_carga        = str(request.form.get('id_carga', 0))
     id_request      = str(request.form.get('id_req', 0))
