@@ -2,6 +2,7 @@ import re
 import sqlite3, os, requests, pyodbc
 from dotenv import load_dotenv
 
+from app.utils import cdeapp
 from app.models import logTexts
 
 # carrega o .env
@@ -15,11 +16,6 @@ def get_file_text(dir) -> str:
         logTexts.log(3, e)
         return ''
 
-@staticmethod
-def get_db_path(debug: bool = False):
-    if debug:
-        return os.getenv('DEBUG_DB_PATH')
-    return os.getenv('DB_PATH')
     
 class QueryManager:
     """
@@ -169,10 +165,8 @@ def query(query: str, method: str, source: int = 1):
     
     elif method == 'LOCAL':
     # busca no arquivo local (.db)
-        try:
-            from cde import debug
-            
-            with sqlite3.connect(get_db_path(debug)) as connection:
+        try:            
+            with sqlite3.connect(cdeapp.config.get_db_path()) as connection:
                 cursor = connection.cursor()
                 cursor.execute(query)
                 columns = [str(column[0]) for column in cursor.description]

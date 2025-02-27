@@ -1,6 +1,8 @@
 from datetime import datetime
 import sys
 
+from app.utils import cdeapp
+
 TAGS = {
     1: "[CDE]",
     2: "[INF]",
@@ -48,7 +50,7 @@ def log(tag_i: int, text: str, tag_2: str="") -> None:
 
 @staticmethod
 def debug_log(text: str) -> None:
-    from cde import debug
+    debug = cdeapp.config.get_debug()
     if debug:
         print(f'[DBG] {text}')
 
