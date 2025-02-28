@@ -384,7 +384,16 @@ class EstoqueUtils:
                 SELECT  
                     h.rua_letra, h.rua_numero, 
                     i.cod_item, i.desc_item, h.lote_item,
-                    {a} as saldo
+                    {a} as saldo,
+                    (
+                        SELECT time_mov
+                        FROM tbl_transactions
+                        WHERE cod_item = i.cod_item
+                        AND lote_item = h.lote_item
+                        ORDER BY time_mov ASC
+                        LIMIT 1
+                    ) as first_mov,
+                    i.validade
                 FROM tbl_transactions h
                 
                 JOIN itens i 
@@ -405,7 +414,8 @@ class EstoqueUtils:
             result = [{
                 'letra'   : row[0], 'numero'   : row[1], 
                 'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                'saldo'   : row[5]
+                'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
+                'validade': misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[2])
             } for row in cursor.fetchall()]
         return result
 
@@ -1214,7 +1224,7 @@ class ProdutoUtils:
     def get_itens_from_erp():
         whitelist = cde.get_file_text('app/presets/item-whitelist.txt')
         query = '''
-            SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14
+            SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14, i.NARRATIVA_10
             FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
             WHERE (
                 (
@@ -1267,7 +1277,7 @@ class ProdutoUtils:
             ''')
 
             itens = [{
-                'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2]
+                'cod_item': row[0], 'desc_item': row[1], 'dun14': row[2], 'validade': row[4]
             } for row in cursor.fetchall()]
         return itens
 
@@ -1774,6 +1784,23 @@ class Schedule:
 
 
 class misc:
+    @staticmethod
+    def days_to_expire(date_fab: str, months: int, cod_lote: str) -> int:
+        if months == '':
+            return 0
+        months = int(months)
+        if months <= 0 or 'CS' in cod_lote:
+            return 0
+        date_fab = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
+        data_vencimento = date_fab.replace(
+            month=(date_fab.month + months - 1) % 12 + 1,
+            year=date_fab.year + (date_fab.month + months - 1) // 12
+        )
+        remaining = (data_vencimento - datetime.today()).days
+        print(cod_lote, remaining)
+        return remaining
+        
+    
     @staticmethod
     # busca frase para /index
     def get_frase() -> str:
@@ -4114,9 +4141,9 @@ def produtos() -> str:
                 cursor.execute('DELETE FROM itens;')
 
                 cursor.executemany('''
-                    INSERT INTO itens (cod_item, desc_item, dun14, flag_ativo)
-                    VALUES (?,?,?,1);
-                ''', [(item[0], item[1], item[2]) for item in result])
+                    INSERT INTO itens (cod_item, desc_item, dun14, validade, flag_ativo)
+                    VALUES (?,?,?,?,1);
+                ''', [(item[0], item[1], item[2], item[3]) for item in result])
 
                 cursor.executemany('''
                     UPDATE itens SET flag_ativo = 0 WHERE cod_item = ?;

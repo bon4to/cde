@@ -34,6 +34,7 @@
                     <option value="0">Item (Código)</option>
                     <option value="1">Item (Descrição)</option>
                     <option value="2">Código de Barras (DUN-14)</option>
+                    <option value="3">Validade (Meses)</option>
                 </select>
             </div>
         </div>
@@ -97,12 +98,14 @@
                                 <th>Item (Código)</th>
                                 <th>Item (Descrição)</th>
                                 <th>Código de Barras (DUN-14)</th>
+                                <th>Validade (Meses)</th>
                             </tr>
                             {% for item in itens %}
                                 <tr>
                                     <td>{{ item['cod_item'] }}</td>
                                     <td>{{ item['desc_item'] }}</td>
                                     <td>{{ item['dun14'] }}</td>
+                                    <td>{{ item['validade'] }}</td>
                                 </tr>
                             {% endfor %}
                         </table>
