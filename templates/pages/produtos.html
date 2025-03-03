@@ -110,9 +110,7 @@
                             {% endfor %}
                         </table>
                     </div>
-                <a href="{{ url_for('export_csv_tipo', tipo='produtos') }}">
-                    Baixar tabela...
-                </a>
+                    <p>{{ itens|length }} itens cadastrados |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_tipo', tipo='produtos') }}">Exportar para CSV</a></p>
             </div>
         </div>
 
