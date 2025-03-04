@@ -251,8 +251,25 @@ class EstoqueUtils:
             
             dsn = 'LOCAL'
             result_local, columns_local = dbUtils.query(query, dsn)
-            print(result_local)
-            return result_local, columns_local
+            
+            result = []
+            for row in result_local:
+                validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
+                if err != None:
+                    validade = err
+                result.append({
+                    # itera letra e numero da rua com um '.'
+                    'address': f'{row[0]}.{row[1]} ', 
+                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                    #   exemplo:
+                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                    #    'A.1 ' -> ['A.1 ']
+                    'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
+                    'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
+                    'validade': validade
+                })
+            
+            return result, columns_local
         else:
             return [], []
 
@@ -411,12 +428,22 @@ class EstoqueUtils:
                 ;'''.format(a=sql_balance_calc),(timestamp,)
             )
 
-            result = [{
-                'letra'   : row[0], 'numero'   : row[1], 
-                'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                'validade': misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[2])
-            } for row in cursor.fetchall()]
+            result = []
+            for row in cursor.fetchall():
+                validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
+                if err != None:
+                    validade = err
+                result.append({
+                    # itera letra e numero da rua com um '.'
+                    'address': f'{row[0]}.{row[1]} ', 
+                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                    #   exemplo:
+                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                    #    'A.1 ' -> ['A.1 ']
+                    'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
+                    'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
+                    'validade': validade
+                })
         return result
 
 
@@ -427,7 +454,7 @@ class EstoqueUtils:
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT  
-                    h.rua_numero, h.rua_letra, i.cod_item,
+                    h.rua_letra, h.rua_numero, i.cod_item,
                     i.desc_item, h.lote_item, h.id_carga, 
                     h.id_request, h.quantidade, h.time_mov
                 FROM tbl_transactions h
@@ -446,7 +473,13 @@ class EstoqueUtils:
             ''')
 
             result = [{
-                'numero'   : row[0], 'letra'   : row[1], 'cod_item': row[2],
+                # itera letra e numero da rua com um '.'
+                'address': f'{row[0]}.{row[1]} ',
+                # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                #   exemplo:
+                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                #    'A.1 ' -> ['A.1 ']
+                'cod_item' : row[2],
                 'desc_item': row[3], 'cod_lote': row[4], 'saldo'   : row[7],
                 'id_carga' : row[5], 'id_req'  : row[6], 'time_mov': row[8]
             } for row in cursor.fetchall()]
@@ -1155,7 +1188,7 @@ class HistoricoUtils:
 
             cursor.execute('''
                 SELECT  
-                    h.rua_numero, h.rua_letra, h.cod_item,
+                    h.rua_letra, h.rua_numero, h.cod_item,
                     i.desc_item, h.lote_item, h.quantidade,
                     h.operacao, u.id_user||' - '||u.nome_user,
                     h.time_mov
@@ -1171,12 +1204,11 @@ class HistoricoUtils:
 
             estoque = [{
                 # itera letra e numero da rua com um '.'
-                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ', 
+                'address': f'{row[0]}.{row[1]} ',
                 # adiciona espaço vazio no final para melhorar busca de resultados exatos
                 #   exemplo:
                 #    'A.1'  -> ['A.1', 'A.10', 'A.100']
                 #    'A.1 ' -> ['A.1 ']
-
                 'cod_item'  : row[2], 'desc_item' : row[3], 'cod_lote'  : row[4],
                 'quantidade': row[5], 'operacao'  : row[6], 'user_name' : row[7], 'timestamp' : row[8]
             } for row in cursor.fetchall()]
