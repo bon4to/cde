@@ -236,20 +236,24 @@
                                             <th>Endereço</th>
                                             <th>Item (Código)</th>
                                             <th>Lote (Código)</th>
+                                            <th>Validade (Dias)</th>
                                             <th>QTDE (Efetiva)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for row in result_local %}
+                                        {% set qtde_solic = request.args.get('qtde_solic') %}
                                             <tr class="selectable-row" onclick="pushItemIntoSeparacao(
-                                                '{{ row[columns_local.index('saldo')] }}', '{{ request.args.get('qtde_solic') }}',
-                                                '{{ row[columns_local.index('rua_letra')] }}', '{{ row[columns_local.index('rua_numero')] }}',
-                                                '{{ row[columns_local.index('lote_item')] }}'
+                                                '{{ row['saldo'] }}', '{{ qtde_solic }}',
+                                                '{{ row['address'] }}', '{{ row['cod_lote'] }}'
                                             )">
-                                                <td>{{ row[columns_local.index('rua_letra')] }}.{{ row[columns_local.index('rua_numero')] }}</td>
-                                                <td>{{ row[columns_local.index('cod_item')] }}</td>
-                                                <td>{{ row[columns_local.index('lote_item')] }}</td>
-                                                <td {% if qtde_solic|int <= row[columns_local.index('saldo')] %} style="color: green"{% else %} style="color: red"{% endif %}>{{ row[columns_local.index('saldo')] }}</td>    
+                                                <td>{{ row['address'] }}</td>
+                                                <td>{{ row['cod_item'] }}</td>
+                                                <td>{{ row['cod_lote'] }}</td>
+                                                <td title="Data Fab.: {{ row['date_fab'] }}">{{ row['validade'] }}</td>
+                                                <td {% if qtde_solic|int <= row['saldo'] %} style="color: green"{% else %} style="color: red"{% endif %}>
+                                                    {{ row['saldo'] }}
+                                                </td>   
                                             </tr>
                                         {% endfor %}
                                     </tbody>
