@@ -385,6 +385,21 @@ class EstoqueUtils:
             itens = []
         return itens
 
+    
+    @staticmethod
+    def get_first_mov(cod_item: str, cod_lote: str):
+        query = f'''
+            SELECT time_mov
+            FROM tbl_transactions
+            WHERE cod_item = '{cod_item}'
+            AND lote_item = '{cod_lote}'
+            ORDER BY time_mov ASC
+            LIMIT 1;
+        '''
+        dsn = 'LOCAL'
+        result, _ = dbUtils.query(query, dsn)
+        return result
+
 
     @staticmethod
     # RETORNA ENDEREÇAMENTO POR LOTES
@@ -1817,20 +1832,18 @@ class Schedule:
 
 class misc:
     @staticmethod
-    def days_to_expire(date_fab: str, months: int, cod_lote: str) -> int:
-        if months == '':
-            return 0
+    def days_to_expire(date_fab: str, months: int, cod_lote: str) -> int | str:
+        if not months or not cod_lote or 'CS' not in cod_lote:
+            return 0, "N/A" # sem prazo de validade, ou não informado
         months = int(months)
-        if months <= 0 or 'CS' in cod_lote:
-            return 0
         date_fab = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
         data_vencimento = date_fab.replace(
             month=(date_fab.month + months - 1) % 12 + 1,
             year=date_fab.year + (date_fab.month + months - 1) // 12
         )
         remaining = (data_vencimento - datetime.today()).days
-        print(cod_lote, remaining)
-        return remaining
+        return remaining, None
+        
         
     
     @staticmethod
