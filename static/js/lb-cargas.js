@@ -708,7 +708,8 @@ function getQtdeItemEnderecoLS(storageKey, cod_item, nroCarga, lote_item, rua_le
 }
 
 
-function pushItemIntoSeparacao(maxEstoque, qtdeSolic, rua_letra, rua_numero, lote_item) {
+function pushItemIntoSeparacao(maxEstoque, qtdeSolic, address, lote_item) {
+    const [rua_letra, rua_numero] = address.split('.');
     var this_qtde_separada = getQtdeItemEnderecoLS(getStorageKey(), codItem, nroCarga, lote_item, rua_letra, rua_numero);
     showQuantityPopup(qtdeSolic, maxEstoque, this_qtde_separada, function(value) {
         showLoading();
