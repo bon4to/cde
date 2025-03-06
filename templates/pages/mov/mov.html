@@ -92,7 +92,15 @@
                                                 <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                             </label>
                                             <br>
-                                            <input class="address-three" pattern="[A-Z0-9]{6}" maxlength="6" id="lote_item" type="text" name="cod_lote" value="{{ json_cod_lote }}" required readonly placeholder="Ex.: CS0000">
+                                            <input 
+                                                required readonly 
+                                                class="address-three" 
+                                                pattern="[A-Z0-9]{6}" maxlength="6" type="text" 
+                                                id="lote_item" name="cod_lote" 
+                                                value="{{ json_cod_lote }}" 
+                                                placeholder="Ex.: CS0000" 
+                                                onchange="getItemFirstMov()"
+                                            >
                                         </div>
                                         <div>
                                             <label for="operacao">Operação</label><br>
@@ -200,10 +208,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="dateFields" style="display: none;">
+                            <div id="dateFields" style="display: flex;">
                                 <div class="flex-column" style="gap: 0">
-                                    <label for="id_carga">Data de Fabricação</label>
-                                    <input type="date" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three">
+                                    <label for="date_fab">Data de Fabricação</label>
+                                    <input type="date" id="date_fab" name="date_fab" class="address-two" required="true">
+                                    <input type="hidden" name="data_locked" id="data_locked" value="false">
+                                    <!-- TODO: se colocar um lote já conhecido, puxa a data da primeira movimentacao --> 
                                 </div>
                             </div>
                         </div>
@@ -227,7 +237,7 @@
                         </tr>
                         {% for item in saldo_atual %}
                             <tr id="row-{{ loop.index }}">   
-                                <td>{{ item['letra'] }}.{{ item['numero'] }} </td>
+                                <td>{{ item['address'] }}</td>
                                 <td class="number">{{ item['cod_item'] }}</td>
                                 <td>{{ item['desc_item'] }}</td>
                                 <td>{{ item['cod_lote'] }}</td>

@@ -27,12 +27,13 @@ function toggleFields() {
 
     var destinoFields = document.getElementById('destinoFields');
     var destinoNumeroInput = document.getElementById('destino_end_number');
+
+    var dateFields = document.getElementById('dateFields');
+    var dateFabInput = document.getElementById('date_fab');
     
     var cargaFields = document.getElementById('cargaFields');
-    var dateFields = document.getElementById('dateFields');
     var cargaNumeroInput = document.getElementById('id_carga');
 
-    dateFields.removeAttribute('required');
     cargaNumeroInput.removeAttribute('required');
     destinoNumeroInput.removeAttribute('required');
 
@@ -49,6 +50,11 @@ function toggleFields() {
 
     svgImage.src = svgPaths[operacao];
     
+    if (operacao != "E") {
+        dateFabInput.removeAttribute('required');
+        dateFabInput.value = '';
+    }
+
     if (operacao === 'T') {
         destinoNumeroInput.required = true;
         svgCfg.style.display = 'flex';
@@ -56,8 +62,8 @@ function toggleFields() {
         cargaNumeroInput.required = true;
         svgCfg.style.display = 'flex';
     } else { // `E` and `S`
-        if (operacao === 'E') {
-            dateFields.required = true;
+        if (operacao === "E") {
+            dateFabInput.setAttribute('required', 'true');
         }
         cargaNumeroInput.required = false;
         destinoNumeroInput.required = false;
