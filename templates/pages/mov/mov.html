@@ -392,6 +392,36 @@
                 document.getElementById("submitform").disabled = true;
             });
             
+            function getItemFirstMov() {
+                const selectedItem = document.getElementById("cod_item").value;
+                const loteItem = document.getElementById("lote_item").value;
+                const dataFabInput = document.getElementById("date_fab");
+                const dataLockedInput = document.getElementById("data_locked");
+                
+                // impede datas futuras na data de fabricação
+                dataFabInput.max = new Date().toISOString().split('T')[0];
+            
+                fetch(`/api/get_item_first_mov?cod_item=${selectedItem}&cod_lote=${loteItem}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.first_mov) {
+                            dataFabInput.value = data.first_mov;
+                            dataFabInput.setAttribute('readonly', true);
+                            dataLockedInput.value = true;
+                            dataFabInput.onclick = function() {
+                                alert("O lote deste item foi registrado pela primeira vez em " + data.first_mov);
+                            }
+                        } else {
+                            dataFabInput.value = '';
+                            dataFabInput.removeAttribute('readonly');
+                            dataLockedInput.value = false;
+                            dataFabInput.onclick = ''
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao obter data de fabricação:', error);
+                    });
+            }
         </script>
 
     {% include 'shared/footer.html' %}
