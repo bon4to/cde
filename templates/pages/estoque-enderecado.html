@@ -82,5 +82,5 @@
                 </tbody>
             </table>
         </div>
-        <a href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Baixar tabela...</a>
+        <p>{{ saldo_atual|length }} registros |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Exportar (CSV)</a></p>
     {% endblock table %}
