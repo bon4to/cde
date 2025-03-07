@@ -90,10 +90,6 @@
                     {% endfor %}
                 </table>
             </div>
-            
-            <a href="{{ url_for('export_csv_tipo', tipo='historico') }}">
-                Baixar tabela...
-            </a>
                 
             <div class="pagination">
                 {% if page > 1 %}
@@ -119,7 +115,7 @@
                 {% endif %}
             </div>
             {% if row_count %}
-                <p>{{ row_count }} registros</p>
+                <p>{{ row_count }} registros |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_tipo', tipo='historico') }}">Exportar (CSV)</a></p>
             {% endif %}
         </div>
     </div>

@@ -108,10 +108,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="split-horizontal">
-                        <a href="{{ url_for('export_csv_tipo', tipo='estoque') }}">Baixar tabela...</a>
-                        <a href="{{ url_for('export_csv_tipo', tipo='export_promob') }}">Exportar para PROMOB (ESM009)...</a>
-                    </div>
+                    <p>{{ saldo_visualization|length }} registros |<a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_tipo', tipo='estoque') }}">Exportar (CSV)</a>|<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_tipo', tipo='export_promob') }}">Exportar (CSV - Promob)</a></p>
                 {% endblock table %}
             </div>
         </div>
