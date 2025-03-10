@@ -33,7 +33,7 @@
             </div>
             <div id="filterBreak" style="justify-content: flex-end">
                 <div id="table-filter" style="display: none" >
-                    <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
+                    <input type="text" class="filterInput address" id="filterInput" name="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
                     <select class="address" id="filterSelect" onchange="updateFilterIndex()">
                         <option value=1>Item (Código)</option>
                         <option value=0>Endereço</option>
@@ -370,6 +370,10 @@
                             response.json_cod_item.forEach(function(item) {
                                 $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
                             });
+                            if (response.json_cod_item && response.json_cod_item.length > 0) {
+                                $("#filterInput").val(response.json_cod_item[0]);
+                                filterTable();
+                            }
                         } else {
                             $("#cod_item").append("<option value=''></option>");
                         }
