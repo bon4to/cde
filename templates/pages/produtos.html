@@ -86,10 +86,9 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    <div class="msg-info">
-                        <details><summary>A lista pode estar desatualizada.</summary>
-                            Considere fazer a atualização da lista, caso tenha dúvidas. A atualização é solicitada no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}">, acima.
-                        </details>
+                    <div class="msg-info flex-column" style="margin: 0; gap: 0">
+                        <span style="font-weight: 600">Esta lista pode estar desatualizada.</span>
+                        <span style="font-size: 12px">Caso necessário, inative itens sem movimentação prévia.</span>
                     </div>
                 {% endif %}
                     <div style="max-height: 600px; overflow-y: auto;">
