@@ -1252,7 +1252,7 @@ class HistoricoUtils:
             
             estoque = [{
                 # itera letra e numero da rua com um '.'
-                'endereco'  : str(row[1]) + '.' + str(row[0]) + ' ',
+                'address'  : str(row[1]) + '.' + str(row[0]) + ' ',
                 # adiciona espaço vazio no final para melhorar busca de resultados exatos
                 #   exemplo:
                 #    'A.1'  -> ['A.1', 'A.10', 'A.100']
