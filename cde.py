@@ -216,30 +216,6 @@ class EstoqueUtils:
     sql_balance_calc = dbUtils.QueryManager.get(query_id=1)
     
     @staticmethod
-    def get_first_mov(cod_item, cod_lote):
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT 
-                    i.cod_item, i.desc_item, 
-                    COALESCE(t.saldo, 0) as saldo,
-                    COALESCE(t.time_mov, "-") as time_mov
-                FROM itens i
-                LEFT JOIN (
-                    SELECT 
-                        cod_item, cod_lote, 
-                        SUM(qtde_mov) as saldo, 
-                        MIN(time_mov) as time_mov
-                    FROM movimentos
-                    WHERE cod_item = ? AND cod_lote = ?
-                    GROUP BY cod_item, cod_lote
-                ) t ON i.cod_item = t.cod_item 
-                WHERE i.cod_item = ? AND i.cod_lote = ?;
-            ''', (cod_item, cod_lote, cod_item, cod_lote))
-            return cursor.fetchall()
-        
-    
-    @staticmethod
     # retorna saldo do item
     def estoque_address_with_item(cod_item=False):
         if cod_item:
