@@ -1506,9 +1506,8 @@ class UserUtils:
 
 
     @staticmethod
-    def get_user_key(login_user):
+    def get_user_key(login_user) -> str:
         with sqlite3.connect(db_path) as connection:
-            print(db_path)
             cursor = connection.cursor()
             cursor.execute('''
                 SELECT 
@@ -1812,6 +1811,10 @@ class misc:
         if not months or not cod_lote or 'CS' not in cod_lote:
             return 0, "N/A" # sem prazo de validade, ou não informado
         months = int(months)
+        
+        if '-' in date_fab:
+            date_fab = date_fab.replace('-', '/')
+        
         date_fab = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
         data_vencimento = date_fab.replace(
             month=(date_fab.month + months - 1) % 12 + 1,
@@ -1821,6 +1824,11 @@ class misc:
         return remaining, None
         
         
+    @staticmethod
+    def parse_date_to_html_input(date: str) -> str:
+        date, _ = date.split(' ')
+        return date.replace('/', '-')
+    
     
     @staticmethod
     # busca frase para /index
@@ -2301,7 +2309,7 @@ def api() -> str:
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
                 result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
-                    'pages/api/api.html', 
+                    'pages/cde/db-cfg/data-fetcher.html', 
                     result=result,
                     tables=tables,
                     query=query,
@@ -2317,7 +2325,7 @@ def api() -> str:
                     columns = []
 
                 return render_template(
-                    'pages/api/api.html', 
+                    'pages/cde/db-cfg/data-fetcher.html', 
                     result=result,
                     columns=columns,
                     tables=tables,
@@ -2328,7 +2336,7 @@ def api() -> str:
     except Exception as e:
         print("Erro na rota /database:", e)
     return render_template(
-        'pages/api/api.html'
+        'pages/cde/db-cfg/data-fetcher.html'
     )
 
 
@@ -3545,12 +3553,8 @@ def carga_id(id_carga) -> str:
         fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
         all_cargas = CargaUtils.get_cargas_finalizadas()
         
-        logTexts.debug_log(f'all_cargas: {all_cargas}')
-        
         # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
         static_list = ', '.join(str(int(carga)) for carga in all_cargas if str(carga).isdigit())
-        
-        logTexts.debug_log(f'static_list: {static_list}')
 
         query = f'''
             SELECT DISTINCT 
@@ -4145,7 +4149,7 @@ def produtos_flag() -> str:
 @app.route('/produtos/', methods=['GET', 'POST'])
 @cde.verify_auth('ITE005')
 def produtos() -> str:
-    itens = ProdutoUtils.get_active_itens()
+    itens = ProdutoUtils.get_active_itens() # salva os itens ativos
     if request.method == 'POST':
         result, columns = ProdutoUtils.get_itens_from_erp()
 
@@ -4417,4 +4421,4 @@ def export_csv_tipo(tipo) -> str | Response:
 
 # __main__
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    app.run(host='0.0.0.0', port=port, debug=True)
