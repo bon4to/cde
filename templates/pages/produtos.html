@@ -13,7 +13,7 @@
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-todo.svg') }}" title="STATUS" onclick="window.location.href='{{ url_for('produtos_flag') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-todo.svg') }}" title="STATUS DO ITEM" onclick="window.location.href='{{ url_for('produtos_flag') }}';">
                 <hr class="vert">
                 <form action="{{ url_for('produtos') }}" method="post">
                     <button type="submit" style="all: unset">
