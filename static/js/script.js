@@ -74,6 +74,41 @@ function toggleFields() {
     }
 }
 
+document.addEventListener("mouseover", (e) => {
+    let title = e.target.getAttribute("title");
+    if (!title) return;
+
+    e.target.setAttribute("data-title", title);
+    e.target.removeAttribute("title");
+
+    let tooltip = document.createElement("div");
+    tooltip.textContent = title;
+    tooltip.style.position = "absolute";
+    tooltip.style.background = "black";
+    tooltip.style.color = "white";
+    tooltip.style.padding = "5px";
+    tooltip.style.borderRadius = "4px";
+    tooltip.style.fontSize = "12px";
+    tooltip.style.whiteSpace = "nowrap";
+    tooltip.style.pointerEvents = "none";
+    document.body.appendChild(tooltip);
+
+    const moveTooltip = (event) => {
+        tooltip.style.left = event.pageX + 10 + "px";
+        tooltip.style.top = event.pageY + 10 + "px";
+    };
+
+    moveTooltip(e);
+    document.addEventListener("mousemove", moveTooltip);
+
+    e.target.addEventListener("mouseleave", () => {
+        e.target.setAttribute("title", e.target.getAttribute("data-title"));
+        e.target.removeAttribute("data-title");
+        tooltip.remove();
+        document.removeEventListener("mousemove", moveTooltip);
+    }, { once: true });
+});
+
 
 function handleCheckChange() {
     const busca        = document.getElementById('formBuscarItens');
