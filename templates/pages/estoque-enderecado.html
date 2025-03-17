@@ -65,14 +65,15 @@
                             <td>{{ item['address'] }} </td>
                             <td class="number">{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
-                            <td>{{ item['cod_lote'] }}</td>
+                            <td title="Data Fab.: {{ item['date_fab'] }}">{{ item['cod_lote'] }}</td>
                             <td 
                                 {% if '/' in item['validade']|string %}
                                     style="color:rgb(113, 113, 113);"
                                 {% else %}
+                                    {% set validade_meses = item['validade'] | int / 30  %}
+                                    title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
                                     style="color: var(--cor-cde); font-weight: bold"
                                 {% endif %}
-                                title="Data Fab.: {{ item['date_fab'] }}"
                             >
                                 {{ item['validade'] }}
                             </td>
