@@ -2,28 +2,12 @@
 <html lang="pt-br">
     <head>
         {% block title %}
-            <title>Página Inicial | CDE</title>
-            <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
-
-            {% include 'shared/header/cde-header.html' %}
+            
         {% endblock title %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
             <div class="titles-container flex-row title-centerer">
             {% block brow %}
-                <h1>
-                    <a class="id-page filled" href="/home">CDE</a>
-                    <span style="margin: 0 8px;"></span>
-                    <span>HOME</span>
-                    <span class="id-page">{{session['id_page']}}</span>
-                </h1>
-                <div class="aux-buttons">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIO" alt="" onclick="window.location.href='{{ url_for('cde_account') }}';">
-                    <hr class="vert">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
-                    <hr class="vert">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/exit.svg') }}" title="SAIR" alt="" onclick="confirmLogout()">
-                </div>
+                
             {% endblock brow %}
             </div>
         </div>
@@ -37,9 +21,7 @@
                     <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
                         <div class="flex-row" style="min-width: 100%; gap: 30px">
                             {% block side_banner %}  
-                                <div class="side-banner" style="background-color: var(--cor-destaque)">
-                                    <img class="side-banner" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
-                                </div>
+                               
                             {% endblock side_banner %}
                     
                             <div style="display: flex; flex-direction: column; justify-content: space-between">
