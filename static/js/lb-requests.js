@@ -727,7 +727,7 @@ async function concludeSeparacao() {
             return;
         }
     
-        fetch('/mov/request/moving/bulk', {
+        fetch('/logi/req/moving/bulk', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

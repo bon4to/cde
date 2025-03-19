@@ -47,7 +47,7 @@ async function concludeBundle() {
         };
     });
 
-    fetch('/mov/carga/moving/bulk', {
+    fetch('/logi/cargas/moving/bulk', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

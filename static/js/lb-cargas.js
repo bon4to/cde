@@ -64,7 +64,7 @@ function listSeparationsLocalStorage(routePage) {
     const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
 
     // Verifica se a URL da página corresponde à rota "/mov/carga/incompleta"
-    if (window.location.pathname == '/mov/carga/incompleta/') {
+    if (window.location.pathname == '/logi/cargas/incompleta/') {
         return;
     }
     allSeparationsTable.innerHTML = '';
@@ -933,7 +933,7 @@ async function concludeSeparacao() {
             return;
         }
     
-        fetch('/mov/carga/moving/bulk', {
+        fetch('/logi/cargas/moving/bulk', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
