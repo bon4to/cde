@@ -10,7 +10,7 @@
     {% block brow %}
         <h1>
             <a class="id-page filled" href="/home">CDE</a>
-            <span style="margin: 0 8px;"></span> (HOME)
+            <span style="margin: 0 8px;"></span> MENU INICIAL
             <span class="id-page">{{session['id_page']}}</span>
         </h1>
         <div class="aux-buttons">
@@ -24,7 +24,7 @@
     {% endblock brow %}
 
     {% block grid_buttons %}
-        <div class="item featured" onclick="window.location.href='{{ url_for('home_hp') }}';">
+        <div class="item featured" onclick="window.location.href='{{ url_for('home_prod') }}';">
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
                     <h2 class="text-default">Produção</h2>
@@ -46,7 +46,7 @@
                 </a>
             </div>
         </div>
-        <div class="item featured" onclick="window.location.href='{{ url_for('home_tl') }}';" >
+        <div class="item featured" onclick="window.location.href='{{ url_for('home_logi') }}';" >
             <div class="split-horizontal algn-cntr">
                 <div style="text-align: left">
                     <h2 class="text-default">Logística</h2>
