@@ -3821,28 +3821,30 @@ def get_itens_req():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mov/op/', methods=['GET', 'POST'])
+@app.route('/logi/mov/op/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def mov_op() -> str:
-    if request.method == 'POST':
-        result, columns = OrdemProducaoUtils.get_ordem_producao()
+    if debug:
+        if request.method == 'POST':
+            result, columns = OrdemProducaoUtils.get_ordem_producao()
+            
+            class_alert = 'success'
+            alert = 'A lista foi atualizada com sucesso.'
+            if len(result) == 1:
+                class_alert = 'error'
+                alert = result[0][0]
         
-        class_alert = 'success'
-        alert = 'A lista foi atualizada com sucesso.'
-        if len(result) == 1:
-            class_alert = 'error'
-            alert = result[0][0]
-    
+            return render_template(
+                'pages/mov/mov-op.html',
+                result=result,
+                columns=columns,
+                alert=alert,
+                class_alert=class_alert
+            )
         return render_template(
-            'pages/mov/mov-op.html',
-            result=result,
-            columns=columns,
-            alert=alert,
-            class_alert=class_alert
+            'pages/mov/mov-op.html'
         )
-    return render_template(
-        'pages/mov/mov-op.html'
-    )
+    return force_error(503)
 
 
 @app.route('/api/carga/qtde_solic/', methods=['GET'])
