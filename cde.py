@@ -2204,18 +2204,18 @@ def home() -> str:
     )
 
 
-@app.route('/home/tl/')
+@app.route('/logi/')
 @cde.verify_auth('CDE001')
-def home_tl() -> str:
+def home_logi() -> str:
     return render_template(
         'pages/index/tl-index.html', 
         frase=misc.get_frase()
     )
 
 
-@app.route('/home/hp/')
+@app.route('/prod/')
 @cde.verify_auth('CDE001')
-def home_hp() -> str:
+def home_prod() -> str:
     return render_template(
         'pages/index/hp-index.html', 
         frase=misc.get_frase()
@@ -2516,7 +2516,7 @@ def get_item() -> Response:
 
 
 # rota de movimentação no estoque (/mov)
-@app.route('/mov/')
+@app.route('/logi/mov/')
 @cde.verify_auth('MOV002')
 def mov() -> str:
     result = EstoqueUtils.get_address_lote()
@@ -2527,7 +2527,7 @@ def mov() -> str:
     )
 
 
-@app.route('/mov/historico/')
+@app.route('/logi/mov/historico/')
 @cde.verify_auth('MOV003')
 def historico() -> str:
     page = request.args.get('page', 1, type=int)
@@ -2543,7 +2543,7 @@ def historico() -> str:
     )
 
 
-@app.route('/mov/historico/search/', methods=['GET', 'POST'])
+@app.route('/logi/mov/historico/search/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV003')
 def historico_search() -> str:
     if request.method == 'POST':
@@ -2592,7 +2592,7 @@ def historico_search() -> str:
     return historico()
 
 
-@app.route('/mov/carga/faturado/')
+@app.route('/logi/mov/faturado/')
 @cde.verify_auth('MOV005')
 def faturado() -> str:
     saldo_atual = EstoqueUtils.get_address_lote_fat()
@@ -2604,7 +2604,7 @@ def faturado() -> str:
 
 
 # rota de movientação no estoque (/mov/moving)
-@app.route('/mov/moving/', methods=['POST'])
+@app.route('/logi/mov/moving/', methods=['POST'])
 @cde.verify_auth('MOV002')
 def moving() -> str | Response:
     try:
@@ -2767,17 +2767,17 @@ def moving() -> str | Response:
     return redirect(url_for('mov'))
 
 
-@app.route('/mov/map/')
+@app.route('/logi/mov/map/')
 @cde.verify_auth('MOV008')
 def stock_map() -> str:
     if debug:
         return render_template(
             'pages/stock-map.html'
         )
-    return force_503()
+    return force_error(503)
 
 
-@app.route('/mov/request/moving/bulk/', methods=['POST'])
+@app.route('/logi/req/moving/bulk/', methods=['POST'])
 @cde.verify_auth('MOV007')
 def moving_req_bulk():
     sep_carga     = request.json
@@ -2816,7 +2816,7 @@ def moving_req_bulk():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@app.route('/mov/carga/moving/bulk/', methods=['POST'])
+@app.route('/logi/cargas/moving/bulk/', methods=['POST'])
 @cde.verify_auth('MOV002')
 def moving_carga_bulk():
     sep_carga     = request.json
@@ -2929,7 +2929,7 @@ def get_fant_clientes() -> Response:
     return jsonify(response)
 
 
-@app.route('/mov/carga/incompleta/', methods=['GET'])
+@app.route('/logi/cargas/incompletas/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def carga_incomp():
     result, columns = CargaUtils.get_carga_incomp()
@@ -2943,7 +2943,7 @@ def carga_incomp():
     )
 
 
-@app.route('/mov/carga/incompleta/<string:id_carga>/', methods=['GET'])
+@app.route('/logi/cargas/incompletas/<string:id_carga>/', methods=['GET'])
 @cde.verify_auth('MOV006')
 def carga_incomp_id(id_carga) -> str:
     id_carga = cde.split_code_seq(id_carga)[0]
@@ -3535,7 +3535,7 @@ def cadastrar_usuario() -> Response | str:
     return render_template('pages/users/users.html')
 
 
-@app.route('/mov/carga/<string:id_carga>/', methods=['GET', 'POST'])
+@app.route('/logi/cargas/<string:id_carga>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_id(id_carga) -> str:
     result_local, columns_local = [], []
@@ -3614,7 +3614,7 @@ def carga_id(id_carga) -> str:
     return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=[])
  
 
-@app.route('/mov/carga/', methods=['GET', 'POST'])
+@app.route('/logi/cargas/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def cargas() -> str:
     if request.method == 'POST':
@@ -3641,7 +3641,7 @@ def cargas() -> str:
     )
 
 
-@app.route('/mov/requisicao/', methods=['GET', 'POST'])
+@app.route('/logi/req/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def mov_request() -> str:
     if request.method == 'POST':
@@ -3665,7 +3665,7 @@ def mov_request() -> str:
     )
 
 
-@app.route('/mov/requisicao/<int:id_req>/', methods=['GET', 'POST'])
+@app.route('/logi/req/<int:id_req>/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def mov_request_id(id_req) -> str:
     result_local, columns_local = [], []
@@ -3708,7 +3708,7 @@ def mov_request_id(id_req) -> str:
     )
 
 
-@app.route('/mov/requisicao/separacao/p/<string:id_req>', methods=['GET', 'POST'])
+@app.route('/logi/req/separacao/p/<string:id_req>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def req_sep_pend(id_req) -> str:
     id_req = id_req.split('-')[0]
@@ -3725,7 +3725,7 @@ def req_sep_pend(id_req) -> str:
     )
 
 
-@app.route('/mov/requisicao/separacao/f/<string:id_req>', methods=['GET', 'POST'])
+@app.route('/logi/req/separacao/f/<string:id_req>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV007')
 def req_sep_done(id_req) -> str:
     # se houver sequencia, usa, senão usa 0 (código padrao)
@@ -3936,7 +3936,7 @@ def get_itens_carga():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mov/carga/separacao/p/<string:id_carga>', methods=['GET', 'POST'])
+@app.route('/logi/cargas/separacao/p/<string:id_carga>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_pend(id_carga) -> str:
     id_carga = cde.split_code_seq(id_carga)[0]
@@ -3955,7 +3955,7 @@ def carga_sep_pend(id_carga) -> str:
     )
 
 
-@app.route('/mov/carga/separacao/f/<string:id_carga>', methods=['GET', 'POST'])
+@app.route('/logi/cargas/separacao/f/<string:id_carga>', methods=['GET', 'POST'])
 @cde.verify_auth('MOV006')
 def carga_sep_done(id_carga) -> str:
     if '-' in id_carga:
