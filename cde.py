@@ -2171,9 +2171,10 @@ def page_not_found(e) -> tuple[str, 503]:
     ), 503
 
 
-@app.route('/force_503/')
-def force_503() -> None:
-    abort(503)
+@app.route('/force_error/<int:error_code>/')
+def force_error(error_code) -> None:
+    if debug:
+        abort(error_code)
     return None
 
 
