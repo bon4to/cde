@@ -424,6 +424,13 @@ class EstoqueUtils:
                 validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
                 if err != None:
                     validade = err
+                
+                validade_str = ''
+                validade_perc_str = 0
+                if type(validade) == int:
+                    validade_str = f"{(float(validade) / 30):.1f} / {row[7]} meses"
+                    validade_perc_str = float(f"{(float(validade) / 30 / row[7] * 100):.1f}")
+                
                 result.append({
                     # itera letra e numero da rua com um '.'
                     'address': f'{row[0]}.{row[1]} ', 
@@ -433,7 +440,7 @@ class EstoqueUtils:
                     #    'A.1 ' -> ['A.1 ']
                     'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
                     'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                    'validade': validade
+                    'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str
                 })
         return result
 
