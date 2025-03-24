@@ -1174,7 +1174,11 @@ class HistoricoUtils:
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
 
-            cursor.execute('SELECT COUNT(*) FROM tbl_transactions;')
+            cursor.execute('''
+                SELECT COUNT(*) 
+                FROM tbl_transactions
+                WHERE quantidade != 0;
+            ''')
             row_count = cursor.fetchone()[0] # número total de linhas
 
             cursor.execute('''
@@ -1187,6 +1191,7 @@ class HistoricoUtils:
                 
                 JOIN itens i ON h.cod_item = i.cod_item
                 JOIN users u ON h.id_user = u.id_user
+                WHERE h.quantidade != 0
                 
                 ORDER BY h.time_mov DESC
                 
