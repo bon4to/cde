@@ -32,6 +32,7 @@ if __name__:
 
     dirs = {}
     def create_dirs() -> None:
+        global dirs
         dirs = {
             'db_dir'     : os.path.join(os.getcwd(), 'db'),
             'db_queries' : os.path.join(os.getcwd(), 'db/queries'),
