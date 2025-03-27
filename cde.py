@@ -32,6 +32,7 @@ if __name__:
 
     dirs = {}
     def create_dirs() -> None:
+        global dirs
         dirs = {
             'db_dir'     : os.path.join(os.getcwd(), 'db'),
             'db_queries' : os.path.join(os.getcwd(), 'db/queries'),
@@ -424,6 +425,13 @@ class EstoqueUtils:
                 validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
                 if err != None:
                     validade = err
+                
+                validade_str = ''
+                validade_perc_str = 0
+                if type(validade) == int:
+                    validade_str = f"{(float(validade) / 30):.1f} / {row[7]} meses"
+                    validade_perc_str = float(f"{(float(validade) / 30 / row[7] * 100):.1f}")
+                
                 result.append({
                     # itera letra e numero da rua com um '.'
                     'address': f'{row[0]}.{row[1]} ', 
@@ -433,7 +441,7 @@ class EstoqueUtils:
                     #    'A.1 ' -> ['A.1 ']
                     'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
                     'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                    'validade': validade
+                    'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str
                 })
         return result
 
@@ -2638,31 +2646,48 @@ def moving() -> str | Response:
             alert_more=alert_more, 
             url_return=url_for('mov')
         )
+    
+    logTexts.debug_log(f'  | NUMERO: {numero}')
+    logTexts.debug_log(f'  | LETRA: {letra}')
+    logTexts.debug_log(f'  | OPERACAO: {operacao}')
+    
     if operacao == 'E':
         date_fab = request.form['date_fab']
+        # evita que uma movimentaçao seja realizada com a data de fabricacão
+        # caso a data seja preenchida automaticamente (já existia uma entrada no lote)
+        data_locked = request.form['data_locked'].lower() == "true"
+        
+        logTexts.debug_log(f'  | DATA FABRICACAO: {date_fab}')  
+        logTexts.debug_log(f'  | DATA LOCKED: {data_locked}')
 
         try:
-            date_obj = datetime.strptime(date_fab, '%Y-%m-%d')
-            print("Data válida:", date_obj)
-        except ValueError:
-            print("Data inválida!")
-        try:
-            date_obj = datetime.strptime(date_fab, '%Y-%m-%d')
-            if date_obj > datetime.today():
+            # date_fab = '2025-03-03'
+            date_fab = date_fab.replace('-', '/')
+            logTexts.debug_log(f'  | DATA FABRICACAO: {date_fab}')
+            
+            if len(date_fab) == 10:  # 'YYYY/MM/DD' 
+                date_fab += ' 00:00:00' # 'YYYY/MM/DD HH:MM:SS'
+            logTexts.debug_log(f'  | DATA FABRICACAO: {date_fab}')
+                
+            timestamp_br = datetime.strptime(date_fab, '%Y/%m/%d %H:%M:%S')
+            if timestamp_br > datetime.today():
                 print("Erro: A data não pode ser no futuro.")
             else:
                 print("Data válida!")
         except ValueError:
             print("Erro: Formato de data inválido.")
             
+        logTexts.debug_log(f'  | TIMESTAMP OUT: {timestamp_br}')
     
     is_end_completo = bool(request.form.get('is_end_completo'))
     id_carga        = str(request.form.get('id_carga', 0))
     id_request      = str(request.form.get('id_req', 0))
 
-    timestamp_br    = datetime.now(timezone(timedelta(hours=-3)))
-    timestamp_out   = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
-    timestamp_in    = (timestamp_br + timedelta(seconds=1)).strftime('%Y/%m/%d %H:%M:%S')
+    if operacao != 'E' or data_locked:
+        timestamp_br  = datetime.now(timezone(timedelta(hours=-3)))
+        
+    timestamp_out = timestamp_br.strftime('%Y/%m/%d %H:%M:%S')
+    timestamp_in  = (timestamp_br + timedelta(seconds=1)).strftime('%Y/%m/%d %H:%M:%S')
 
     print(f'  | OPERAÇÃO: {operacao}')
 
