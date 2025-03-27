@@ -2255,7 +2255,18 @@ def users() -> str:
         users=users,
         user_perm=user_perm
     )
+    
+@app.route('/api/get_item_first_mov', methods=['GET'])
+def api_get_first_mov_item():
+    cod_item = request.args.get('cod_item')
+    cod_lote = request.args.get('cod_lote')
 
+    first_mov = EstoqueUtils.get_first_mov(cod_item, cod_lote)
+    if first_mov != []:
+        first_mov = misc.parse_date_to_html_input(first_mov[0][0])
+    else:
+        first_mov = ''
+    return jsonify({'first_mov': first_mov})
 
 @app.route('/api/log/', methods=['POST'])
 def log_message():
