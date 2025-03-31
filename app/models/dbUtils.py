@@ -169,8 +169,14 @@ def query(query: str, method: str, source: int = 1):
             with sqlite3.connect(cdeapp.config.get_db_path()) as connection:
                 cursor = connection.cursor()
                 cursor.execute(query)
-                columns = [str(column[0]) for column in cursor.description]
-                result = cursor.fetchall()
+
+                # só pega os nomes das colunas se forem SELECTs
+                if cursor.description:
+                    columns = [str(column[0]) for column in cursor.description]
+                    result = cursor.fetchall()
+                else:
+                    columns = []
+                    result = [["Query executada com sucesso"]]  # Para INSERTs, UPDATEs, DELETEs
         except Exception as e:
             logTexts.debug_log(f"Erro ao enviar solicitação: {str(e)}")
             result = [[f'Erro de consulta: {e}']]
