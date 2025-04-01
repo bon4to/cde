@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Notificações | CDE</title>
+        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+
+        {% include 'shared/header/cde-header.html' %}
+        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+            <div class="titles-container flex-row title-centerer">
+                <h1>
+                    <a class="id-page filled" href="/home">CDE</a>
+                    <span style="margin: 0 8px;"></span>
+                    <span>NOTIFICAÇÕES</span>
+                    <span class="id-page">{{session['id_page']}}</span>
+                </h1>
+                <div class="aux-buttons">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIO" alt="" onclick="window.location.href='{{ url_for('cde_account') }}';">
+                    <hr class="vert">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
+                    <hr class="vert">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/exit.svg') }}" title="SAIR" alt="" onclick="confirmLogout()">
+                </div>
+            </div>
+        </div>
+        <div id="divContent" style="flex-wrap: wrap; flex-direction: row">
+            <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
+                <form id="formSetNotification" method="post" style="display: block; height: unset">
+                    <div>
+                        <div class="split-horizontal">
+                            <input class="address-one" type="text" id="title" maxlength="180" name="title" required placeholder="Título...">
+                            <input class="address-four" type="number" id="userid" max="999" name="userid" placeholder="ID...">
+                        </div>
+                        <textarea class="address-observ" id="message" maxlength="180" name="message" required placeholder="Mensagem..."></textarea>
+                        <button type="submit" class="btn-fancy">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="Enviar">
+                        </button>
+                    </div>  
+                </form>
+            </div>
+            <div class="tables-container" style="flex: 0; display: flex; justify-content: flex-start; min-width: 40vw;">
+                <div style="width: 100%">
+                    {% for notification in notifications %}
+                        <hr class="complete">
+                        <div class="split-horizontal" style="padding: 8px; width: unset;{% if notification['flag_read'] %}background-color: rgba(147, 147, 147, 0.1);{% endif %}">
+                            <div>
+                                <h2>{{ notification['title'] }}</h2>
+                                <p style="justify-content: flex-start">{{ notification['message'] }}</p>
+                            </div>
+                            <div class="flex-center-all">
+                                {% if not notification['flag_read'] %}🔵{% endif %}
+                            </div>
+                        </div>
+                        <p class="disabled" style="justify-content: flex-end; margin: 0">{{ notification['date'] }}</p>
+                        <hr class="complete">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+{% include 'shared/footer.html' %}
+
+<script>
+    document.getElementById('formSetNotification').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        let iduser = document.getElementById('userid').value;
+        let title = document.getElementById('title').value;
+        let message = document.getElementById('message').value;
+
+        fetch('/api/set/notification/', {
+            method: 'POST',
+            body: JSON.stringify({ iduser, title, message }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            alert('Notificação enviada com sucesso!');
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar notificação.');
+        });
+    });
+</script>
