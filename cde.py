@@ -4,6 +4,7 @@ import requests, sqlite3, random, json, sys, re, os, time
 # local imports
 from app.utils import cdeapp
 from app.models import logTexts, dbUtils, stickerUtils
+from app.services import NotificationManager as nm
 
 # imported dependecies
 from flask import Flask, Response, request, redirect, render_template, url_for, jsonify, session, abort
@@ -2380,6 +2381,41 @@ def cde_account() -> str | None:
     if session.get('logged_in'):
         return render_template('pages/account.html')
     return None
+
+
+@app.route('/cde/notifications/', methods=['GET'])
+@cde.verify_auth('CDE001')
+def cde_notifications():
+    userid = session.get('id_user', 0)
+    
+    nm.createNotificationsTable()
+    notifications, _ = nm.getNotifications(userid)
+    
+    return render_template(
+        'components/menus/notifications.html',
+        notifications=notifications
+    )
+
+
+@app.route('/api/set/notification/', methods=['POST'])
+def set_notification():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    iduser = data.get('iduser')
+    title = data.get('title')
+    message = data.get('message')
+    
+    if not all([iduser, title, message]):
+        return jsonify({"error": "Missing fields"}), 400
+
+    _, err = nm.setNotification(iduser, title, message)
+    if err != None:
+        print(f"Error saving notification: {err}")
+    print(f"Notification received: User={iduser}, Title={title}, Message={message}")
+
+    return jsonify({"success": True, "message": "Notification saved!"})
 
 
 @app.route('/login/', methods=['POST'])
