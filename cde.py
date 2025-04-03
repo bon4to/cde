@@ -2366,6 +2366,15 @@ def api() -> str:
     )
 
 
+@app.route('/cde/query-list/', methods=['GET'])
+@cde.verify_auth('DEV000')
+def cde_query_list() -> str:
+    
+    return render_template(
+        'pages/cde/db-cfg/queries/query-list.html',
+        q_list = dbUtils.QueryManager.get_all_queries()
+    )
+
 @app.route('/login/', methods=['GET'])
 def pagina_login() -> Response | str:
     if session.get('logged_in'):
