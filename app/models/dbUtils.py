@@ -63,6 +63,11 @@ class QueryManager:
 
         cls.QUERIES = queries
 
+    
+    @staticmethod
+    def get_all_queries() -> dict:
+        return QueryManager.QUERIES
+    
 
     @staticmethod
     def get(query_id: int, **variables) -> str:
