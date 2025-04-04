@@ -2210,7 +2210,7 @@ def debug_page() -> str:
     return render_template('pages/debug-page.html')
 
 
-@app.route('/home/')
+@app.route('/cde/home/')
 @cde.verify_auth('CDE001')
 def home() -> str:
     return render_template(
@@ -2219,7 +2219,7 @@ def home() -> str:
     )
 
 
-@app.route('/logi/')
+@app.route('/logi/home/')
 @cde.verify_auth('CDE001')
 def home_logi() -> str:
     return render_template(
@@ -2228,7 +2228,7 @@ def home_logi() -> str:
     )
 
 
-@app.route('/prod/')
+@app.route('/prod/home/')
 @cde.verify_auth('CDE001')
 def home_prod() -> str:
     return render_template(
