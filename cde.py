@@ -2210,7 +2210,7 @@ def debug_page() -> str:
     return render_template('pages/debug-page.html')
 
 
-@app.route('/home/')
+@app.route('/cde/home/')
 @cde.verify_auth('CDE001')
 def home() -> str:
     return render_template(
@@ -2219,7 +2219,7 @@ def home() -> str:
     )
 
 
-@app.route('/logi/')
+@app.route('/logi/home/')
 @cde.verify_auth('CDE001')
 def home_logi() -> str:
     return render_template(
@@ -2228,7 +2228,7 @@ def home_logi() -> str:
     )
 
 
-@app.route('/prod/')
+@app.route('/prod/home/')
 @cde.verify_auth('CDE001')
 def home_prod() -> str:
     return render_template(
@@ -2363,6 +2363,14 @@ def api() -> str:
         print("Erro na rota /database:", e)
     return render_template(
         'pages/cde/db-cfg/data-fetcher.html'
+    )
+
+
+@app.route('/cde/settings/', methods=['GET'])
+@cde.verify_auth('CDE001')
+def cde_cfg() -> str:
+    return render_template(
+        'pages/cde/cfg-index.html'
     )
 
 

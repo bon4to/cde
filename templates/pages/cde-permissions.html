@@ -8,13 +8,13 @@
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
             <div class="titles-container flex-row title-centerer">
             <h1>
-                <a class="id-page filled" href="/home">CDE</a>
+                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
                 <span>PERMISSÕES</span>
                 <span class="id-page">{{session['id_page']}}</span>
             </h1>
             <div class="aux-buttons">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="CONFIGURAÇÕES" alt="" onclick="window.location.href='{{ url_for('in_dev') }}';">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="AJUSTES" alt="" onclick="window.location.href='{{ url_for('cde_cfg') }}';">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIO" alt="" onclick="window.location.href='{{ url_for('cde_account') }}';">
                 <hr class="vert">
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
