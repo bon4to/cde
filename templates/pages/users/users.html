@@ -10,7 +10,7 @@
     <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
             <div class="titles-container flex-row title-centerer">
         <h1>
-            <a class="id-page filled" href="/home">CDE</a>
+            <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
             <span style="margin: 0 8px;"></span>
             <span>USUARIOS</span>
             <span class="id-page">{{session['id_page']}}</span>
@@ -31,7 +31,8 @@
             {% if 'CDE014' in user_perm or session['user_grant'] <= 2 %}
                 <div class="split-horizontal">
                     <div>
-                        <h2 style="justify-content: flex-start">Cadastrar Usuário</h2>
+                        <h2>Cadastrar Usuário</h2>
+                        <hr>
                         <form action="/users/inserting" method="post">
                             <label for="login_user">Login: <span style="color: red">*</span></label>
                             <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
@@ -94,6 +95,7 @@
                                     <td style="text-align: right">{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
                                     <td class="td-more hidden-button" data-toggle="tooltip" style="background-color: transparent">
                                         <img 
+                                            title="EDITAR USUÁRIO"
                                             alt=""
                                             class="svg-link table-more" 
                                             onclick="redirectToEdit('{{ item['cod_user'] }}')" 
