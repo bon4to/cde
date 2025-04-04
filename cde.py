@@ -2366,6 +2366,14 @@ def api() -> str:
     )
 
 
+@app.route('/cde/settings/', methods=['GET'])
+@cde.verify_auth('CDE001')
+def cde_cfg() -> str:
+    return render_template(
+        'pages/cde/cfg-index.html'
+    )
+
+
 @app.route('/cde/query-list/', methods=['GET'])
 @cde.verify_auth('DEV000')
 def cde_query_list() -> str:
