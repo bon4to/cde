@@ -124,25 +124,24 @@
                                     <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
                                 </button>
                                 <div class="dropdown-content" style="right: 0; left:unset">
-                                    {% if session['user_grant'] == 1 %}
-                                        <div class="submenu">
-                                            <a class="submenu-title" href="#">
-                                                <div class="split-horizontal" style="align-items: center;">
-                                                    <span>FERRAMENTAS</span>
-                                                    <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
-                                                </div>
-                                            </a>
-                                            <div class="submenu-content" style="left: unset; right: 100%; border-left: unset; border-right: 6px solid var(--dark-or-white);">
-                                                <a href="{{ url_for('api') }}">DEV000 | DATABASE</a>
-                                                <a href="{{ url_for('permissions') }}">CDE018 | PERMISSÕES</a>
+                                    <div class="submenu">
+                                        <a class="submenu-title" href="{{ url_for('cde_cfg') }}">
+                                            <div class="split-horizontal" style="align-items: center;">
+                                                <span>AJUSTES</span>
+                                                <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
+                                        </a>
+                                        <div class="submenu-content" style="left: unset; right: 100%; border-left: unset; border-right: 6px solid var(--dark-or-white);">
+                                            {% if session['user_grant'] <= 2 %}
+                                                <a href="{{ url_for('permissions') }}">CDE018 | PERMISSÕES</a>
+                                            {% endif %}
+                                            <a href="{{ url_for('api') }}">DEV000 | DATABASE</a>
+                                            <a href="{{ url_for('cde_query_list') }}">DEV000 | QUERIES</a>
+                                            <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
                                         </div>
-                                    {% endif %}
-                                    {% if session['user_grant'] <= 2 %}
-                                        <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
-                                    {% endif %}
-                                    <a href="{{ url_for('in_dev') }}">CONFIGURAÇÕES</a>
-                                    <a href="{{ url_for('in_dev') }}">AJUDA</a>
+                                    </div>
+                                    <a href="{{ url_for('cde_account') }}">MINHA CONTA</a>
+                                    <a href="{{ url_for('about') }}">AJUDA</a>
                                     <a href="{{ url_for('logout') }}">SAIR</a>
                                 </div>
                             </div>
