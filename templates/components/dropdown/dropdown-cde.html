@@ -119,9 +119,17 @@
                                 <img id="toggle-theme" style="height: 16px; width: 16px; cursor: pointer;" onclick="toggleTheme()" class="svg-inv" src="{{ url_for('static', filename='svg/moon.svg') }}" alt="">
                             </div>
                             <div class="dropdown">
+                                <button class="dropbtn" style="cursor: pointer;" onclick="window.location.href='{{ url_for('cde_notifications') }}';">
+                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/bell.svg') }}" alt="">
+                                </button>
+                                <div class="dropdown-content" id="notifications-container" style="right: 0; left:unset">
+                                    <!-- notifications will be automatically added here -->
+                                </div>
+                            </div>
+                            <div class="dropdown">
                                 <button class="dropbtn">
                                     <span>SISTEMA</span>
-                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                    <img style="height: 15px; width: 15px; padding: 0" class="chevron svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
                                 </button>
                                 <div class="dropdown-content" style="right: 0; left:unset">
                                     <div class="submenu">

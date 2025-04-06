@@ -27,6 +27,7 @@
             <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
                 <form id="formSetNotification" method="post" style="display: block; height: unset">
                     <div>
+                        <h2>Nova Notificação</h2>
                         <div class="split-horizontal">
                             <input class="address-one" type="text" id="title" maxlength="180" name="title" required placeholder="Título...">
                             <input class="address-four" type="number" id="userid" max="999" name="userid" placeholder="ID...">
@@ -41,7 +42,6 @@
             <div class="tables-container" style="flex: 0; display: flex; justify-content: flex-start; min-width: 40vw;">
                 <div style="width: 100%">
                     {% for notification in notifications %}
-                        <hr class="complete">
                         <div class="split-horizontal" style="padding: 8px; width: unset;{% if notification['flag_read'] %}background-color: rgba(147, 147, 147, 0.1);{% endif %}">
                             <div>
                                 <h2>{{ notification['title'] }}</h2>
