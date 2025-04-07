@@ -113,7 +113,7 @@
                             
                             {% for row in result %}
                                 {% set cod_item   = row[columns.index('COD_ITEM')] %}
-                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] | int %}
                                 {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
                                 {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
                                 {% set items      = items.append(row) or items %}

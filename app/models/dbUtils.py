@@ -118,17 +118,23 @@ def query(query: str, method: str, source: int = 1):
                 try:
                     response_data = response.json()
 
-                    # Verifica se a resposta possui as chaves esperadas
+                    # verifica se a resposta possui as chaves esperadas
                     if isinstance(response_data, dict) and "columns" in response_data and "data" in response_data:
-                        # Extrai colunas e dados
+                        # extrai colunas e dados
                         columns = response_data["columns"]
                         data = response_data["data"]
 
-                        # Converte 'data' em uma lista de listas para exibição tabular
-                        rows = [[item.get(col, "") for col in columns] for item in data]
+                        # converte 'data' em uma lista de listas para exibição tabular
+                        result = [[item.get(col, "") for col in columns] for item in data]
+                        
+                        # sanitiza a lista result
+                        result = [
+                            [str(item).strip() if item is not None else '' for item in row]
+                            for row in result
+                        ]
 
-                        # Retorna as linhas e colunas
-                        return rows, columns
+                        # retorna as linhas e colunas
+                        return result, columns
                     else:
                         logTexts.debug_log(f"Formato inesperado da resposta: {response_data}")
                         return [[f"Erro: Formato inesperado da resposta da API"]], []
