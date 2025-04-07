@@ -481,6 +481,38 @@ function visualDelay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function loadNotifications() {
+// carrega notificacoes do backend
+    fetch('/api/notifications')
+        .then(response => response.json())
+        .then(data => {
+            // exibe as notificacoes
+            const notificationsContainer = document.getElementById('notifications-container');
+            notificationsContainer.innerHTML = ''; // limpa antes de inserir
+            data.forEach(notification => {
+                const notificationElement = document.createElement('div');
+                notificationElement.classList.add('dropdown-notification');
+                notificationElement.innerHTML = `
+                    <h1>${notification.title}</h1>
+                    <p>${notification.message}</p>
+                    <p style="justify-content: flex-end; margin: 0; font-size: 9px">${notification.date}</p>
+                    <hr>
+                `;
+                notificationsContainer.appendChild(notificationElement);
+            })
+            const moreElement = document.createElement('div');
+            moreElement.innerHTML = `
+                <div class="dropdown-notification">
+                    <a href="/cde/notifications">Ver tudo... (${data.length})</a>
+                </div>
+            `;
+            notificationsContainer.appendChild(moreElement);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar notificacoes:', error);
+        });
+}
+
 
 function loadRecentPages() {
     // recupera o histórico do localStorage
@@ -627,12 +659,17 @@ window.onload = function () {
     try {
         updateFilterIndex();
     } catch (error) {
-        console.log('[INFO] lb-filter: A rota não contém filtros!');
+        console.log('[INFO] lb-filter: A rota não contém filtros.');
     }
     try {
         toggleContainer();
     } catch (error) {
-        console.log('[INFO] lb-float: A rota não contém float-container!');
+        console.log('[INFO] lb-float: A rota não contém float-container.');
+    }
+    try {
+        loadNotifications();
+    } catch (error) {
+        console.log('[INFO] A rota não contém dropdown de notificação.');
     }
     hideLoading();
 };
