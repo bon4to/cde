@@ -2414,6 +2414,16 @@ def cde_notifications():
     )
 
 
+@app.route('/api/notifications/', methods=['GET'])
+def api_notifications():
+    userid = session.get('id_user', 0)
+    
+    nm.createNotificationsTable()
+    notifications, _ = nm.getNotifications(userid)
+    
+    return notifications
+
+
 @app.route('/api/set/notification/', methods=['POST'])
 def set_notification():
     data = request.get_json()
