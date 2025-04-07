@@ -142,7 +142,7 @@
                                         <tr 
                                             class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
                                             data-cod-item="{{ row_cod_item }}"
-                                            onclick="sendCodItem('carga/incompleta', '{{ row_cod_item }}', '{{ item.priv_id_carga }}', '{{ item.qtde }}')"
+                                            onclick="sendCodItem('cargas/incompletas', '{{ row_cod_item }}', '{{ item.priv_id_carga }}', '{{ item.qtde }}')"
                                         >
                                             {% if not id_carga %}
                                                 <td>{{ item.priv_id_carga }}</td>
@@ -255,7 +255,7 @@
                                     </tr>
                                 {% else %}
                                     {% for row in carga_list %}
-                                        <tr class="selectable-row" onclick="window.location.href='/logi/cargas/incompleta/{{ row }}'">
+                                        <tr class="selectable-row" onclick="window.location.href='/logi/cargas/incompletas/{{ row }}'">
                                             <td>{{ row }}</td>
                                         </tr>
                                     {% endfor %}
