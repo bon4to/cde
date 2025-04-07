@@ -113,7 +113,7 @@
                             
                             {% for row in result %}
                                 {% set cod_item   = row[columns.index('COD_ITEM')] %}
-                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] | int %}
                                 {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
                                 {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
                                 {% set items      = items.append(row) or items %}
@@ -132,7 +132,7 @@
                                 {% endfor %}
                                 <tr 
                                     class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}"
-                                    onclick="sendCodItem('carga', '{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')"
+                                    onclick="sendCodItem('cargas', '{{ row_cod_item }}', '{{ id_carga }}', '{{ subtotal }}')"
                                 >
                                     <td colspan="3" style="text-align: right;">{{ row_cod_item }}</td>
                                     <td>{{ subtotal }}</td>
@@ -176,7 +176,7 @@
                                 <tr style="vertical-align: baseline;"
                                     class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
                                     data-cod-item="{{ row_cod_item }}"
-                                    onclick="sendCodItem('carga', '{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')"
+                                    onclick="sendCodItem('cargas', '{{ row_cod_item }}', '{{ id_carga }}', '{{ item.qtde }}')"
                                 >
                                     <td>{{ row_cod_item }}</td>
                                     <td style="text-wrap: auto;">{{ item.desc }}</td>

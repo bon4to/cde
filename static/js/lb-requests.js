@@ -410,7 +410,7 @@ function listSeparationsFromServer(routePage, reportDir='requests') {
                 } 
         
                 row.addEventListener('click', function() {
-                    window.location.href = `/mov/${routePage}/${reqNumber}`;
+                    window.location.href = `/logi/${routePage}/${reqNumber}`;
                 });
             });
         
@@ -795,7 +795,7 @@ function sendCodItem(routePage, cod_item, id_req, qtde_solic) {
     document.getElementById('id_req_input').value = id_req;
     document.getElementById('qtde_item_input').value = qtde_solic;
     var form = document.getElementById('cod_item_form');
-    form.action = `/mov/${routePage}/${id_req}`;
+    form.action = `/logi/${routePage}/${id_req}`;
     form.submit();
 }
 
