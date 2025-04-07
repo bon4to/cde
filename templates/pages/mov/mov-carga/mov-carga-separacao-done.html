@@ -12,7 +12,7 @@
 
 
 {% block aux_buttons %}
-    <form onsubmit="routeMovRedirect('carga/separacao/f'); return false;">
+    <form onsubmit="routeMovRedirect('cargas/separacao/f'); return false;">
         <div class="flex-row" style="margin: 8px 0; width: 100%;">
             <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="{{ id_carga }}">
             <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
@@ -291,7 +291,7 @@
                         <div class="msg-error">
                             <details>
                                 <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/carga">separação da carga</a> para realizar o faturamento.
+                                Inicie a <a class="hyperlink" style="font-size: unset" href="/logi/cargas">separação da carga</a> para realizar o faturamento.
                             </details>
                         </div>
                     `;
@@ -309,7 +309,7 @@
         async function reloadTables() {
             renderItems();
             renderCartSubtotals();
-            listSeparationsFromServer('carga/separacao/f', 'cargas');
+            listSeparationsFromServer('cargas/separacao/f', 'cargas');
         }
 
         

@@ -12,7 +12,7 @@
 
 
 {% block aux_buttons %}
-    <form onsubmit="routeMovRedirect('requisicao/separacao/f'); return false;">
+    <form onsubmit="routeMovRedirect('logi/req/separacao/f'); return false;">
         <div class="flex-row" style="margin: 8px 0; width: 100%;">
             <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Requisição...">
             <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA REQUISIÇÃO..." >
@@ -208,7 +208,7 @@
                         <div class="msg-error">
                             <details>
                                 <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
-                                Inicie a <a class="hyperlink" style="font-size: unset" href="/mov/req">separação da requisição</a> para realizar o faturamento.
+                                Inicie a <a class="hyperlink" style="font-size: unset" href="/logi/req">separação da requisição</a> para realizar o faturamento.
                             </details>
                         </div>
                     `;
@@ -226,7 +226,7 @@
         async function reloadTables() {
             renderItems();
             renderCartSubtotals();
-            listSeparationsFromServer('requisicao/separacao/f', 'requests');
+            listSeparationsFromServer('logi/req/separacao/f', 'requests');
         }
 
         

@@ -64,7 +64,7 @@ function listSeparationsLocalStorage(routePage) {
     const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
 
     // Verifica se a URL da página corresponde à rota "/mov/carga/incompleta"
-    if (window.location.pathname == '/logi/cargas/incompleta/') {
+    if (window.location.pathname == '/logi/cargas/incompletas/') {
         return;
     }
     allSeparationsTable.innerHTML = '';
@@ -424,7 +424,7 @@ function listSeparationsFromServer(routePage, reportDir='cargas') {
                 } 
 
                 row.addEventListener('click', function() {
-                    window.location.href = `/mov/${routePage}/${cargaNumber}`;
+                    window.location.href = `/logi/${routePage}/${cargaNumber}`;
                 });
             });
             if (activeRow && nroCarga != '0') {
@@ -1067,7 +1067,7 @@ function sendCodItem(routePage, cod_item, carga_id, qtde_solic) {
     document.getElementById('carga_id_input').value = carga_id;
     document.getElementById('qtde_item_input').value = qtde_solic;
     var form = document.getElementById('cod_item_form');
-    form.action = `/mov/${routePage}/${carga_id}`;
+    form.action = `/logi/${routePage}/${carga_id}`;
     form.submit();
 }
 
