@@ -5,59 +5,49 @@
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/tl-header.html' %}
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
-            <h1>
-                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                <span style="margin: 0 8px;"></span>
-                <a href="{{ url_for('home_logi') }}"title="LOGISTICA">LOGI</a>
-                <span class="dash">/</span>
-                <a href="{{ url_for('mov') }}">MOV</a>
-                <span class="dash">/</span>
-                <span>ESTOQUE</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <a class="aux-button">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
-                </a>
-                <a class="aux-button active">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
-                </a>
-                    <a class="aux-button">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
-                </a>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-            </div>
+        <div class="titles-ruler">
+            
+            {% from 'components/title-route.html' import title_container %}
+            {{ title_container(
+                title='ESTOQUE',
+                id_page=session['id_page'],
+                breadcrumbs=[
+                    {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                    {'text': 'MOV', 'url': 'mov', 'title': 'MOVIMENTAR'},
+                    {'text': 'ESTOQUE'}
+                ],
+                aux_buttons=[
+                    {'type': 'link', 'url': 'mov', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR'},
+                    {'type': 'link', 'url': 'estoque', 'icon': 'svg/boxes.svg', 'title': 'ESTOQUE', 'active': True},
+                    {'type': 'link', 'url': 'historico', 'icon': 'svg/history.svg', 'title': 'HISTÓRICO'},
+                    {'type': 'divider'},
+                    {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                    {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+                ]
+            ) }}
+
+            {% from 'components/filter-container.html' import filter_container %}
+            {{ filter_container(
+                filter_options=[
+                    {'value': 0, 'text': 'Item (Código)'},
+                    {'value': 1, 'text': 'Item (Descrição)'},
+                    {'value': 2, 'text': 'QTDE (Efetiva)'},
+                    {'value': 3, 'text': 'Últ. Movimen. (Data/Hora)'}
+                ],
+                type="default"
+            ) }}
         </div>
-        <div id="filterBreak" style="justify-content: flex-end">
-            <div id="table-filter" style="display: none">
-                <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
-                <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                {% block filter_options %}
-                    <option value=0>Item (Código)</option>
-                    <option value=1>Item (Descrição)</option>
-                    <option value=2>QTDE (Efetiva)</option>
-                    <option value=3>Últ. Movimen. (Data/Hora)</option>
-                {% endblock filter_options %}
-                </select>
-            </div>
-        </div>
-        </div>
+
+        
         <div id="divContent" style="flex-wrap: wrap;">
-            <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
-                <div class="btn-fancy {% if request.endpoint == 'estoque' %}active{% endif %}" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (AGRUPADO)" onclick="window.location.href='{{ url_for('estoque') }}';">
-                    <img class="svg-inv" src="{{ url_for('static', filename='svg/group.svg') }}" alt="">
-                </div>
-                <div class="btn-fancy {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (ENDEREÇADO)" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
-                    <img class="svg-inv" src="{{ url_for('static', filename='svg/land-plot.svg') }}" alt="">
-                </div>
-                <div class="btn-fancy {% if request.endpoint == 'estoque_preset' %}active{% endif %}" style="height: 60px; width: 60px; margin: 8px" title="ESTOQUE (PRESET)" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
-                    <img class="svg-inv" src="{{ url_for('static', filename='svg/blend.svg') }}" alt="">
-                </div>
-            </div>
+            
+            {% from 'components/sidebar.html' import sidebar %}
+            {{ sidebar([
+                {'url': 'estoque', 'icon': 'svg/group.svg', 'title': 'ESTOQUE (AGRUPADO)', 'active': request.endpoint == 'estoque'},
+                {'url': 'estoque_enderecado', 'icon': 'svg/land-plot.svg', 'title': 'ESTOQUE (ENDEREÇADO)', 'active': request.endpoint == 'estoque_enderecado'},
+                {'url': 'estoque_preset', 'icon': 'svg/blend.svg', 'title': 'ESTOQUE (PRESET)', 'active': request.endpoint == 'estoque_preset'}
+            ]) }}
+
             <div class="tables-container" style="max-width: 100vw;">
                 {% block table %}
                     <div class="split-horizontal">
@@ -65,18 +55,16 @@
                             <h1 class="subtitle">Estoque</h1>
                             <p class="cor-web">Visualização de Estoque (Agrupado)</p>
                         </span>
-                        <div class="table-filter" style="display: none">
-                            <div>
-                                <form action="/estoque" method="post">
-                                    <div class="flex-row">
-                                        <input type="date" class="address" id="date" name="date" value="{{ search_term }}">
-                                        <button class="button-mini btn-fancy" type="submit">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-search.svg') }}" title="CARREGAR ESTOQUE NO DIA">
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+
+                        {% from 'components/filter-container.html' import filter_container %}
+                        {{ filter_container(
+                            type="date",
+                            date_value=search_term,
+                            date_action="/estoque",
+                            date_button_title="CARREGAR ESTOQUE NO DIA",
+                            date_button_icon="calendar-search.svg"
+                        ) }}
+
                     </div>
                     {% if search_term %}
                         <div class="split-horizontal">
@@ -108,9 +96,12 @@
                             </tbody>
                         </table>
                     </div>
-                    <p>{{ saldo_visualization|length }} registros |<a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_tipo', tipo='estoque') }}">Exportar (CSV)</a>|<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_tipo', tipo='export_promob') }}">Exportar (CSV - Promob)</a></p>
+                    <p>{{ saldo_visualization|length }} registros |<a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_tipo', tipo='estoque') }}">Exportar (CSV)</a></p>
                 {% endblock table %}
             </div>
         </div>
 
         {% include 'shared/footer.html' %}
+        <script src="{{ url_for('static', filename='js/filter.js') }}"></script>
+    </body>
+</html>
