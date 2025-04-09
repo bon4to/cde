@@ -1,0 +1,35 @@
+{% macro title_container(title, id_page, breadcrumbs, aux_buttons=None) %}
+<div class="titles-container flex-row title-centerer" style="margin: 0 0 8px 0;">
+    <h1>
+        <a class="id-page filled" style="margin: 0 16px 0 0;" href="{{ url_for('home') }}">CDE</a>
+        {% for crumb in breadcrumbs %}
+            {% if crumb.url %}
+                <a href="{{ url_for(crumb.url) }}" {% if crumb.title %}title="{{ crumb.title }}"{% endif %}>{{ crumb.text }}</a>
+            {% else %}
+                <span>{{ crumb.text }}</span>
+            {% endif %}
+            {% if not loop.last %}
+                <span class="dash">/</span>
+            {% endif %}
+        {% endfor %}
+        {% if id_page %}
+            <span class="id-page">{{ id_page }}</span>
+        {% endif %}
+    </h1>
+    {% if aux_buttons %}
+    <div class="aux-buttons" style="margin: 0;">
+        {% for button in aux_buttons %}
+            {% if button.type == 'link' %}
+                <a class="aux-button {% if button.active %}active{% endif %}" href="{{ url_for(button.url) }}">
+                    <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="">
+                </a>
+            {% elif button.type == 'divider' %}
+                <hr class="vert">
+            {% elif button.type == 'action' %}
+                <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="" onclick="{{ button.onclick }}">
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
