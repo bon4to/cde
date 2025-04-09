@@ -3,7 +3,7 @@ import requests, sqlite3, random, json, sys, re, os, time
 
 # local imports
 from app.utils import cdeapp
-from app.models import logTexts, dbUtils, stickerUtils
+from app.models import dbUtils, stickerUtils, logTexts as lt
 from app.services import NotificationManager as nm
 
 # imported dependecies
@@ -76,19 +76,19 @@ if __name__:
         app.config['APP_VERSION'][2] = True
 
         # logs server running info
-        print(logTexts.start_header(app.config['APP_VERSION'][0], app.config['APP_VERSION'][1]))
+        print(lt.start_header(app.config['APP_VERSION'][0], app.config['APP_VERSION'][1]))
 
     # se o diretório atende ao local 'produção', modo_exec = 'produção'.
     elif default_dir in current_dir: 
         port = 5005
         
         # logs header & server running info
-        print(logTexts.cde_header)
-        print(logTexts.start_header(app.config['APP_VERSION'][0], app.config['APP_VERSION'][1]))
+        print(lt.cde_header)
+        print(lt.start_header(app.config['APP_VERSION'][0], app.config['APP_VERSION'][1]))
 
     # se o diretório não corresponde ao listados, não executa.
     else: 
-        print(logTexts.error_header)
+        print(lt.error_header)
         sys.exit(2)
 
 
@@ -108,7 +108,7 @@ class cde:
                 log_file.write(f'[{timestamp}] {log_message}\n')
                 return True
         except Exception as e:
-            logTexts.log(1, f'Erro ao salvar log: {e}')
+            lt.log(1, f'Erro ao salvar log: {e}')
             return False
 
     
@@ -124,7 +124,7 @@ class cde:
             with open(dir, 'r') as file:
                 return file.read().strip()
         except Exception as e:
-            logTexts.log(3, e)
+            lt.log(3, e)
             return ''
 
 
@@ -143,13 +143,13 @@ class cde:
             # extrai o valor desejado
             return data["dsn"]["cargas"]
         except FileNotFoundError:
-            logTexts.log(3, "Arquivo não encontrado.")
+            lt.log(3, "Arquivo não encontrado.")
         except KeyError:
-            logTexts.log(3, "Chave 'dsn > cargas' não encontrada.")
+            lt.log(3, "Chave 'dsn > cargas' não encontrada.")
         except json.JSONDecodeError:
-            logTexts.log(3, "Conteúdo do arquivo não é um JSON válido.")
+            lt.log(3, "Conteúdo do arquivo não é um JSON válido.")
         # default
-        logTexts.log(2, 'Retornando ODBC-DRIVER')
+        lt.log(2, 'Retornando ODBC-DRIVER')
         return 'ODBC-DRIVER'
     
 
@@ -182,16 +182,16 @@ class cde:
                 id_user = cde.format_three_no(session.get('id_user'))
                 session['id_page'] = f'{id_page}'
                 if session.get('user_grant') <= 2:
-                    logTexts.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
+                    lt.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
                 user_perm = UserUtils.get_user_permissions(id_user)
                 user_perm = [item['id_perm'] for item in user_perm]
                 if id_page in user_perm:
-                    logTexts.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
+                    lt.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
-                logTexts.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 403)
+                lt.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 403)
                 return render_template(
                     'components/menus/alert.html', 
                     alert_type='SEM PERMISSÕES',
@@ -515,7 +515,7 @@ class CargaUtils:
 
             # define o dsn conforme default (ou usuario)
             dsn = cde.get_unit()
-            logTexts.debug_log(f'DSN: {dsn}')
+            lt.debug_log(f'DSN: {dsn}')
             
             if dsn == 'ODBC-DRIVER':
                 static_list = ', '.join(map(str, all_cargas))
@@ -1325,7 +1325,7 @@ class ProdutoUtils:
     def get_item_json(input_code):
         if 'EM.' not in input_code:
             input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
-        logTexts.log(2, f'  | Código fornecido: {input_code}')
+        lt.log(2, f'  | Código fornecido: {input_code}')
         
         if len(input_code) == 4 or len(input_code) == 0:
             desc_item, cod_item, cod_lote, cod_linha = 'ITEM NÃO CADASTRADO OU INATIVO', '', '', ''
@@ -1892,7 +1892,7 @@ class misc:
     def tlg_msg(msg):
         if not session.get('user_grant') == 1:
             if debug == True:
-                logTexts.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
+                lt.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
                 return None
             else:
                 bot_token = os.getenv('TLG_BOT_TOKEN')
@@ -2274,13 +2274,13 @@ def log_message():
     data = request.json
     if 'message' in data:
         if cde.save_log(data['message']):
-            logTexts.log(2, f'Log salvo com sucesso.')
+            lt.log(2, f'Log salvo com sucesso.')
             return jsonify({"status": "success", "message": "Log salvo com sucesso."}), 200
         else:
-            logTexts.log(3, f'Não foi possível salvar o log.')
+            lt.log(3, f'Não foi possível salvar o log.')
             return jsonify({"status": "error", "message": "Não foi possível salvar o log."}), 500
     else:
-        logTexts.log(3, f'Nenhuma mensagem foi recebida.')
+        lt.log(3, f'Nenhuma mensagem foi recebida.')
         return jsonify({"status": "error", "message": "Nenhuma mensagem foi recebida."}), 400
 
 
@@ -2721,9 +2721,9 @@ def moving() -> str | Response:
             url_return=url_for('mov')
         )
     
-    logTexts.debug_log(f'  | NUMERO: {numero}')
-    logTexts.debug_log(f'  | LETRA: {letra}')
-    logTexts.debug_log(f'  | OPERACAO: {operacao}')
+    lt.debug_log(f'  | NUMERO: {numero}')
+    lt.debug_log(f'  | LETRA: {letra}')
+    lt.debug_log(f'  | OPERACAO: {operacao}')
     
     if operacao == 'E':
         date_fab = request.form['date_fab']
@@ -2731,27 +2731,25 @@ def moving() -> str | Response:
         # caso a data seja preenchida automaticamente (já existia uma entrada no lote)
         data_locked = request.form['data_locked'].lower() == "true"
         
-        logTexts.debug_log(f'  | DATA FABRICACAO: {date_fab}')  
-        logTexts.debug_log(f'  | DATA LOCKED: {data_locked}')
+        lt.debug_log(f'  | DATA FABRICACAO: {date_fab}')  
+        lt.debug_log(f'  | DATA LOCKED: {data_locked}')
 
         try:
             # date_fab = '2025-03-03'
             date_fab = date_fab.replace('-', '/')
-            logTexts.debug_log(f'  | DATA FABRICACAO: {date_fab}')
+            lt.debug_log(f'  | DATA FABRICACAO: {date_fab}')
             
             if len(date_fab) == 10:  # 'YYYY/MM/DD' 
                 date_fab += ' 00:00:00' # 'YYYY/MM/DD HH:MM:SS'
-            logTexts.debug_log(f'  | DATA FABRICACAO: {date_fab}')
+            lt.debug_log(f'  | DATA FABRICACAO: {date_fab}')
                 
             timestamp_br = datetime.strptime(date_fab, '%Y/%m/%d %H:%M:%S')
             if timestamp_br > datetime.today():
-                print("Erro: A data não pode ser no futuro.")
-            else:
-                print("Data válida!")
+                lt.debug_log("Erro: A data não pode ser no futuro.")
         except ValueError:
-            print("Erro: Formato de data inválido.")
+            lt.debug_log("Erro: Formato de data inválido.")
             
-        logTexts.debug_log(f'  | TIMESTAMP OUT: {timestamp_br}')
+        lt.debug_log(f'  | TIMESTAMP OUT: {timestamp_br}')
     
     is_end_completo = bool(request.form.get('is_end_completo'))
     id_carga        = str(request.form.get('id_carga', 0))
