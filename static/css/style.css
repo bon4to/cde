@@ -297,7 +297,14 @@ a.id-page.filled:hover {
     padding: 0 5vw;
 }
 
-
+.titles-ruler {
+    all: unset;
+    display: flex; 
+    min-width: 100%; 
+    flex-wrap: wrap; 
+    gap: 8px; 
+    margin: 0 0 8px 0;
+}
 
 .titles-container .id-page {
     margin-left: 12px;
