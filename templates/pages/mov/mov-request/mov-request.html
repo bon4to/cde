@@ -6,7 +6,7 @@
 
         {% include 'shared/header/tl-header.html' %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                     <span style="margin: 0 8px;"></span>
@@ -17,7 +17,7 @@
             </h1>
             <div class="aux-buttons">
                 <form onsubmit="routeMovRedirect('requisicao'); return false;">
-                    <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                    <div class="flex-h" style="margin: 8px 0; width: 100%;">
                         <input class="address-three" style="margin: 0; height: 14px" type="number" id="idInputBrow" min="1" placeholder="Requisição...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA REQUISIÇÃO..." >
                             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
@@ -46,10 +46,10 @@
         <div id="divContent" style="flex-wrap: wrap;">
             {% if id_req %}
                 <div class="tables-container" style="max-width: 55%; min-width: 55%;">
-                    <div class="flex-column">
-                        <div class="split-horizontal">
+                    <div class="flex-v">
+                        <div class="split-h">
                             <h1 style="margin-bottom: 8px">Número de Requisição <input id="idCargaContainer" class="cor-web" value="{{ id_req }}"></h1>
-                            <div class="flex-row" style="gap: 30px">
+                            <div class="flex-h" style="gap: 30px">
                                 <div class="cart-container" style="display: none">
                                     <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
                                     <div class="cart-dropdown hidden" id="cart-dropdown">
@@ -98,7 +98,7 @@
                                     
                                     {% for row in result %}
                                         {% set cod_item   = row[columns.index('COD_ITEM')] %}
-                                        {% set qtde_solic = row[columns.index('QTDE')] %}
+                                        {% set qtde_solic = row[columns.index('QTDE')] | int %}
                                         {% set subtotal   = subtotals.get(cod_item, 0) + qtde_solic %}
                                         {% set subtotals  = subtotals.update({cod_item: subtotal}) or subtotals %}
                                         {% set items      = items.append(row) or items %}
@@ -111,7 +111,7 @@
                                                     <td class="over-row">{{ row[columns.index('LOG_PROMOB')] }}</td>
                                                     <td>{{ row[columns.index('COD_ITEM')] }}</td>
                                                     <td style="text-wrap: balance;">{{ row[columns.index('DESC_ITEM')] }}</td>
-                                                    <td>{{ row[columns.index('QTDE')] }}</td>
+                                                    <td>{{ row[columns.index('QTDE')] | int }}</td>
                                                 </tr>
                                             {% endif %}
                                         {% endfor %}
@@ -148,7 +148,7 @@
                                     {% for row in result %}
                                         {% set row_cod_item = row[columns.index('COD_ITEM')] %}
                                         {% set desc_item = row[columns.index('DESC_ITEM')] %}
-                                        {% set qtde_solic = row[columns.index('QTDE')] %}
+                                        {% set qtde_solic = row[columns.index('QTDE')] | int %}
                                         
                                         {% if row_cod_item in items %}
                                             {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
@@ -257,7 +257,7 @@
                             </details>
                         </div>
                         {% elif class_alert == 'success' %}
-                        <div class="msg-success flex-column" style="margin: 0; gap: 0">
+                        <div class="msg-success flex-v" style="margin: 0; gap: 0">
                             <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
                             <span style="font-size: 12px">
                                 {{ alert | safe }}
@@ -309,7 +309,7 @@
                                                         <td>{{ row[columns.index('DOC_ORIGEM')] }}</td>
                                                         <td style="text-align: right">{{ row[columns.index('COD_ITEM')] }}</td>
                                                         <td>{{ row[columns.index('DESC_ITEM')] }}</td>
-                                                        <td style="text-align: right">{{ row[columns.index('QTDE')] }}</td>
+                                                        <td style="text-align: right">{{ row[columns.index('QTDE')] | int }}</td>
                                                     </tr>
                                                 {% endfor %}
                                                 <tr class="unselectable-row sub-total">
@@ -338,7 +338,7 @@
                 {% endblock all_separation_status %}
                 <div class="table-overflow" style="max-height: 700px">
                     <form onsubmit="routeMovRedirect('requisicao');">
-                        <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                        <div class="flex-h" style="margin: 8px 0; width: 100%;">
                             <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Requisição...">
                             <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA REQUISIÇÃO..." >
                                 <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">

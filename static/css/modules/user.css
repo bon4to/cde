@@ -1,0 +1,65 @@
+/* User styles */
+div.user-logger {
+    display: flex;
+    font-size: 18px;
+    margin-top: -6px;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+    pointer-events: auto;
+    align-items: flex-end;
+    transition: ease all 0.5s;
+    justify-content: flex-end;
+    text-shadow: 0 0 14px rgba(0, 0, 0, 0.6);
+}
+
+div.user-logger.scrolled {
+    margin-top: 2px;
+    font-size: 20px;
+    transition: ease all 0.5s;
+}
+
+div.user-button {
+    width: 42px;
+    height: 42px;
+    z-index: 1100;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+    color: #888888ab;
+    text-align: center;
+    border-radius: 20%;
+    pointer-events: all;
+    transition: ease all 0.5s;
+    background-color: #f1f1f1;
+    font-family: 'Chivo Mono', sans-serif;
+    box-shadow: inset 0 0 4px rgba(34, 34, 34, 0.65);
+}
+
+div.user-params-button {
+    gap: 0;
+    max-height: 38px;
+    margin: auto 12px;
+    padding: 4px 0;
+    background-color: var(--cor-destaque); 
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+div.logged-header {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    z-index: 1100;
+    position: fixed;
+}
+
+div.logged-header a {
+    color: var(--cor-destaque); 
+    pointer-events: auto; 
+    font-size: 16px;
+    text-shadow: 20px #fff;
+    margin-top: 0;
+} 

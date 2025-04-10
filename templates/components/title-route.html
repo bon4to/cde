@@ -1,5 +1,5 @@
 {% macro title_container(title, id_page, breadcrumbs, aux_buttons=None) %}
-<div class="titles-container flex-row title-centerer" style="margin: 0 0 8px 0;">
+<div class="titles-container flex-h title-centerer" style="margin: 0 0 8px 0;">
     <h1>
         <a class="id-page filled" style="margin: 0 16px 0 0;" href="{{ url_for('home') }}">CDE</a>
         {% for crumb in breadcrumbs %}

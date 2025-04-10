@@ -6,7 +6,7 @@
 
         {% include 'shared/header/cde-header.html' %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
@@ -32,14 +32,14 @@
                                 <h1 class="subtitle">Editando: <span class="cor-web">''{{ id_perm_data[0]['desc_perm'] }}''</span></h1>
                                 <br>
                                 <form style="height: unset; align-items: flex-start;" action="{{ url_for('permissions_id', id_perm=id_perm_data[0]['id_perm']) }}" method="post">
-                                    <div class="flex-row" style="gap: 20px">
-                                        <div class="flex-column">
+                                    <div class="flex-h" style="gap: 20px">
+                                        <div class="flex-v">
                                             <label for="id_perm">ID (Página):</label>
                                             <input class="address-three" style="margin: 0" type="text" name="id_perm" min="6" max="6" value="{{ id_perm_data[0]['id_perm'] }}" placeholder="{{ id_perm_data[0]['id_perm'] }}">
                                         </div>
-                                        <div class="flex-column">
+                                        <div class="flex-v">
                                             <label for="desc_perm">Descrição (Página):</label>
-                                            <div class="flex-row">
+                                            <div class="flex-h">
                                                 <input class="address-two" style="margin: 0" type="text" name="desc_perm" max="32" value="{{ id_perm_data[0]['desc_perm'] }}" placeholder="{{ id_perm_data[0]['desc_perm'] }}">
                                                 <button class="button-mini btn-fancy" type="submit" id="submitform">
                                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/pen-line.svg') }}" title="EXECUTAR">
@@ -54,14 +54,14 @@
                                 <h1 class="subtitle">Ou selecione uma permissão</h1>
                                 <br>
                                 <form style="align-items: flex-start;" action="{{ url_for('permissions') }}" method="post">
-                                    <div class="flex-row" style="gap: 20px">
-                                        <div class="flex-column">
+                                    <div class="flex-h" style="gap: 20px">
+                                        <div class="flex-v">
                                             <label for="id_perm">ID (Página):</label>
                                             <input class="address-three" style="margin: 0" type="text" name="id_perm_add" min="6" max="6" placeholder="ID...">
                                         </div>
-                                        <div class="flex-column">
+                                        <div class="flex-v">
                                             <label for="desc_perm">Descrição (Página):</label>
-                                            <div class="flex-row">
+                                            <div class="flex-h">
                                                 <input class="address-two" style="margin: 0" type="text" name="desc_perm_add" max="32" placeholder="Descrição...">
                                                 <button class="button-mini btn-fancy" type="submit" id="submitform">
                                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-plus.svg') }}" title="ADICIONAR">

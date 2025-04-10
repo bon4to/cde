@@ -1,0 +1,47 @@
+/* toast */
+.toast-container {
+    position: fixed;
+    bottom: 42px;
+    right: 24px;
+    z-index: 9999;
+}
+
+.toast {
+    opacity: 0;
+    display: flex;
+    color: white;
+    font-size: 16px;
+    min-width: 320px;
+    margin-top: 10px;
+    border-radius: 5px;
+    align-items: center;
+    flex-direction: column;
+    background-color: #333;
+    padding: 18px 24px 0 24px;
+    justify-content: space-between;
+    transition: opacity 0.5s ease-in-out;
+    font-family: 'Trebuchet MS', sans-serif;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.toast.hide {
+    opacity: 0;
+}
+
+.toast-timer {
+    width: 100%;
+    height: 4px;
+    margin-top: 15px;
+    transition: width 0 linear;
+}
+
+.toast-close {
+    display: none;
+    font-size: 20px;
+    line-height: 20px;
+    color: white;
+    cursor: pointer;
+}

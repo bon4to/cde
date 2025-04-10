@@ -1,4 +1,4 @@
-<div class="ad-banner flex-column">
+<div class="ad-banner flex-v">
     <!-- Fechar o banner -->
     <span class="close-banner" onclick="this.parentElement.style.display='none';">
         <img class="svg-inv" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="Fechar">
@@ -7,7 +7,7 @@
     <!-- Conteúdo do banner -->
     <div class="banner-content">
         <h1 class="banner-title">SISTEMA ATUALIZADO!</h2>
-        <div class="split-horizontal">
+        <div class="split-h">
             <p class="banner-text">v{{ app_version[0] }} (beta)</p>
             <a href="/last-version/" class="banner-button">O que há de novo?</a>
         </div>

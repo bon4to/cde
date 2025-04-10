@@ -1,0 +1,29 @@
+:root {
+    --cor-hp: rgb(154, 45, 45);
+    --cor-tl: #ea5a26;
+    --cor-cde: #3e5ea6;
+    --cor-hp-rgb: 154, 45, 45;
+    --cor-tl-rgb: 234, 90, 38;
+    --cor-cde-rgb: 62, 94, 166;
+    --alt-color-1: 255, 172, 160;
+    --alt-color-2: 181, 229, 140;
+    --alt-color-3: 165, 165, 255;
+    --alt-color-4: 255, 165, 080;
+    --alt-color-5: 165, 235, 255;
+    --alt-color-6: 255, 165, 225;
+    --alt-color-7: 255, 220, 165;
+    --strong-dark-h: #222222;
+    --strong-dark-m: #252525;
+    --strong-dark-l: #303030;
+    --medium-dark-h: #3a3a3a;
+    --light-white-h: #e7e7e7;
+    --light-white-m: #f7f7f7;
+    --light-white-l: #ffffff;
+    --light-text: #f7f7f7;
+    --dark-or-white: var(--light-white-m);
+    --white-or-dark: var(--medium-dark-h);
+}
+
+.cor-web {
+    color: var(--cor-destaque);
+} 

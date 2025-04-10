@@ -18,7 +18,7 @@
 <div class="filter-container" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
     <div class="table-filter" style="display: none">
         <form action="{{ date_action }}" method="post">
-            <div class="flex-row">
+            <div class="flex-h">
                 <input type="date" class="address" id="date" name="date" value="{{ date_value }}">
                 <button class="button-mini btn-fancy" type="submit">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/' + date_button_icon) }}" title="{{ date_button_title }}">

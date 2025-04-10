@@ -13,7 +13,7 @@
 
 {% block aux_buttons %}
     <form onsubmit="routeMovRedirect('logi/req/separacao/f'); return false;">
-        <div class="flex-row" style="margin: 8px 0; width: 100%;">
+        <div class="flex-h" style="margin: 8px 0; width: 100%;">
             <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Requisição...">
             <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA REQUISIÇÃO..." >
                 <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
@@ -25,7 +25,7 @@
 
 
 {% block separation_buttons %}
-    <div class="flex-row">
+    <div class="flex-h">
         <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
             <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
         </div>

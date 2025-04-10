@@ -6,7 +6,7 @@
 
         {% include 'shared/header/tl-header.html' %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
@@ -17,7 +17,7 @@
             </h1>
             <div class="aux-buttons">
                 <form onsubmit="routeMovRedirect('carga'); return false;">
-                    <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                    <div class="flex-h" style="margin: 8px 0; width: 100%;">
                         <input class="address-three" style="margin: 0; height: 14px" type="number" id="idInputBrow" min="1" placeholder="Carga...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
                             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
@@ -52,10 +52,10 @@
         <div id="divContent" style="flex-wrap: wrap;">
             {% if id_carga %}
             <div id="cargaContainer" class="tables-container" style="max-width: 55%; min-width: 55%;">
-                <div class="flex-column">
-                    <div class="split-horizontal">
+                <div class="flex-v">
+                    <div class="split-h">
                         <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="cor-web" value="{{ id_carga }}"></h1>
-                        <div class="flex-row" style="gap: 30px">
+                        <div class="flex-h" style="gap: 30px">
                             <div class="cart-container" style="display: none">
                                 <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
                                 <div class="cart-dropdown hidden" id="cart-dropdown">
@@ -126,7 +126,7 @@
                                             <td class="over-row">{{ row[columns.index('NROPED_SEQ')] }}</td>
                                             <td>{{ row[columns.index('COD_ITEM')] }}</td>
                                             <td style="text-wrap: auto;">{{ row[columns.index('DESC_ITEM')] }}</td>
-                                            <td>{{ row[columns.index('QTDE_SOLIC')] }}</td>
+                                            <td>{{ row[columns.index('QTDE_SOLIC')] | int }}</td>
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
@@ -163,7 +163,7 @@
                             {% for row in result %}
                                 {% set row_cod_item = row[columns.index('COD_ITEM')] %}
                                 {% set desc_item = row[columns.index('DESC_ITEM')] %}
-                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] %}
+                                {% set qtde_solic = row[columns.index('QTDE_SOLIC')] | int %}
                                 
                                 {% if row_cod_item in items %}
                                     {% set items = items.update({row_cod_item: {'desc': desc_item, 'qtde': items[row_cod_item]['qtde'] + qtde_solic}}) or items %}
@@ -189,8 +189,8 @@
                 </div>
                 <br>
                 {% if id_carga %}
-                <div class="split-horizontal">
-                    <div class="flex-row">
+                <div class="split-h">
+                    <div class="flex-h">
                         <div class="button-mini btn-fancy" onclick="excludeCarga()" title="APAGAR CARGA">
                             <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
                         </div>
@@ -324,7 +324,7 @@
                                     </table>
                                 {% endif %}
                             </div>
-                            <div class="msg-success flex-column" style="margin: 0; gap: 0">
+                            <div class="msg-success flex-v" style="margin: 0; gap: 0">
                                 <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
                                 <span style="font-size: 12px">
                                     {{ alert | safe }}
@@ -352,7 +352,7 @@
                     {% endblock all_separation_status %}
                     <div class="table-overflow" style="max-height: 700px">
                         <form onsubmit="routeMovRedirect('carga'); return false;">
-                            <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                            <div class="flex-h" style="margin: 8px 0; width: 100%;">
                                 <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Carga...">
                                 <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
                                     <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">

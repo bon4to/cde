@@ -1,0 +1,273 @@
+/* ============================== */
+/*           ELEMENTS             */
+/* ============================== */
+
+
+/* inline alerts */
+
+
+div.msg-error {
+    margin: 8px;
+    padding: 12px;
+    color: maroon;
+    border: 1px solid rgba(255, 0, 0, 0.6);
+    background-color: rgba(240, 128, 128, 0.5);
+}
+
+div.msg-success {
+    margin: 8px;
+    padding: 12px;
+    color: rgb(0, 128, 21);
+    border: 1px solid rgba(11, 192, 11, 0.6);
+    background-color: rgba(128, 240, 143, 0.5);
+}
+
+div.msg-info {
+    margin: 8px;
+    padding: 12px;
+    color: rgb(0, 51, 128);
+    border: 1px solid rgba(0, 68, 255, 0.6);
+    background-color: rgba(128, 180, 240, 0.5);
+}
+
+div.msg-alert {
+    margin: 8px;
+    padding: 12px;
+    color: rgb(212, 129, 5);
+    border: 1px solid rgba(255, 145, 0, 0.6);
+    background-color: rgba(240, 204, 128, 0.5);
+}
+
+/* ID Page styles */
+p.id-page {
+    color: var(--cor-destaque);
+    font-family: Reddit Mono, monospace;
+    border: 1px solid var(--cor-destaque);
+    border-radius: 6px;
+    padding: 2px 4px;
+    font-size: 10px;
+}
+
+p.id-page.white {
+    border: 1px solid white;
+    color: white !important;
+    font-weight: bold;
+}
+
+span.id-page {
+    font-size: 18px;
+    color: var(--cor-destaque);
+    font-family: Reddit Mono, monospace;
+}
+
+a.id-page.filled {
+    background-color: var(--cor-destaque);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 16px;
+    color: #fff;
+    margin: 0;
+}
+
+a.id-page.filled:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.container-grid .item span.id-page {
+    font-size: 14px;
+}
+
+.session-container {
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    border: 1px solid #fff;
+}
+
+.tooltip {
+    position: absolute;
+    background: black;
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    display: none;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.session-container .tooltiptext {
+    left: 50%;
+    opacity: 0;
+    bottom: 125%;
+    padding: 5px;
+    z-index: 1100;
+    min-width: 120px;
+    visibility: hidden;
+    text-align: center;
+    border-radius: 4px;
+    position: absolute;
+    transition: opacity 0.3s;
+    background-color: #333;
+    transform: translateX(-50%);
+}
+
+.session-container:hover .tooltiptext {
+    opacity: 1;
+    visibility: visible;
+}
+
+.td-more .tooltiptext {
+    left: 50%;
+    opacity: 0;
+    width: 70px;
+    bottom: 30%;
+    padding: 5px;
+    z-index: 1100;
+    overflow: auto;
+    text-wrap: wrap;
+    color: #ffffff;
+    max-width: 120px;
+    visibility: hidden;
+    text-align: center;
+    border-radius: 4px;
+    position: absolute;
+    pointer-events: none;
+    background-color: #333;
+    transition: opacity 0.3s;
+    transform: translateX(-75%);
+}
+
+.td-more:hover .tooltiptext {
+    opacity: 1;
+    visibility: visible;
+} 
+
+
+/* Recent pages */
+#recent-pages-table td {
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    font-family: 'Chivo Mono', monospace;
+    text-align: right;
+}
+
+#recent-pages-table .selectable-row {
+    border-left: 4px solid transparent;
+    transition: all 0.1s ease-in-out;
+}
+
+#recent-pages-table .selectable-row:hover {
+    border-left: 4px solid var(--cor-destaque);
+    transition: all 0.1s ease-in-out;
+}
+
+#recent-pages-container.tables-container {
+    max-height: unset;
+}
+
+#recent-pages-buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 500px;
+    overflow-y: scroll;
+}
+
+.recent-page-button {
+    text-transform: uppercase;
+    text-wrap: nowrap;
+    background-color: var(--cor-destaque);
+    color: white;
+    border: none;
+    padding: 12px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    transition: all 0.3s ease-in-out;
+    font-weight: 600;
+    font-family: "Chivo Mono", monospace;
+}
+
+.recent-page-button:hover {
+    background-color: rgb(220, 220, 220);
+    color: var(--cor-destaque)
+}
+
+
+/* Advertisement banner */
+.ad-container {
+    min-width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.ad-banner {
+    min-width: -webkit-fill-available;
+    position: relative;
+    background: linear-gradient(90deg, #5f77ff, #7ba9fe);
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin: 0 0 15px 0;
+    max-width: 600px;
+    text-align: center;
+}
+
+.ad-banner .close-banner {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.ad-banner .close-banner:hover {
+    opacity: 1;
+}
+
+.ad-banner .banner-content {
+    text-align: left;
+    min-width: 100%;
+}
+
+.ad-banner .banner-image {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.ad-banner .banner-title {
+    color: #ffffff;
+    font-size: 28px;
+    margin: 0;
+    font-weight: bold;
+}
+
+.ad-banner .banner-text {
+    color: #ffffff;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.ad-banner .banner-button {
+    font-family: "Inter", sans-serif;
+    background-color: #fff;
+    color: #7ba9fe;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 700;
+    align-content: center;
+}
+

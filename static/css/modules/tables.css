@@ -1,0 +1,152 @@
+/* Table styles */
+table {
+    width: 100%;
+    margin-top: 4px;
+    border-collapse: collapse;
+}
+
+th, td {
+    height: 18px;
+    padding: 10px;
+    font-size: 11px;
+    overflow: hidden;
+    max-width: 300px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border: 1px solid rgb(221, 221, 221);
+    font-variant-numeric: tabular-nums;
+}
+
+th {
+    color: #fff;
+    position: sticky;
+    font-weight: bold;
+    font-family: 'Calibri Light';
+    background-color: rgba(52, 49, 50, 1);
+    border-bottom: 4px solid var(--cor-destaque);
+}
+
+td {
+    background-color: rgb(243, 243, 243);
+    font-family: Reddit Mono;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.table-overflow {
+    text-wrap: wrap;
+    overflow-y: auto;
+    max-height: 600px;
+    overflow-x: hidden;
+}
+
+.selectable-row {
+    cursor: pointer;
+}
+
+.selectable-row:hover td {
+    color: var(--cor-destaque);
+    background-color: #e7e7e7;
+}
+
+.selectable-row.active td {
+    opacity: 0.9;
+    color: white;
+    background-color: var(--cor-destaque);
+}
+
+.unselectable-row {
+    cursor: not-allowed;
+}
+
+.selectable-row.sub-total td {
+    color: rgb(27, 26, 26);
+    transition: 0.1s ease-in-out all;
+    background-color: rgba(52, 49, 50, 0.1);
+    border-bottom: 4px solid var(--cor-destaque);
+}
+
+.selectable-row.sub-total:hover td {
+    color: rgb(27, 26, 26);
+    transition: 0.1s ease-in-out all;
+    background-color: rgba(52, 49, 50, 0.1);
+}
+
+.selectable-row.sub-total.active td {
+    color: white;
+    background-color: var(--cor-destaque);
+}
+
+th.normal-size {
+    width: 100px;
+}
+
+th.bigger-size {
+    width: 400px;
+} 
+
+
+th.normal-size {
+    width: 100px;
+}
+
+th.bigger-size {
+    width: 400px;
+}
+
+.td-more {
+    width: 10px;
+    padding: 5px;
+    border: 0 solid #ddd;
+    background-color: transparent;
+}
+
+.number {
+    font-family: Reddit Mono;
+}
+
+
+
+
+
+
+
+/* Calendar table */
+
+table.calendar {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th.calendar, td.calendar {
+    width: 80px;
+    height: 40px;
+    vertical-align: top;
+}
+
+
+td.number {
+    text-align: right;
+}
+
+td.second-plan {
+    color: #7e7e7e;
+}
+
+th.calendar, td.calendar {
+    width: 80px;
+    height: 40px;
+    vertical-align: top;
+}
+
+th.calendar {
+    background-color: #fafafa
+}
+
+.weekday {
+    background-color: #fafafa
+}
+
+.weekend {
+    background-color: #f0f0f0;
+}

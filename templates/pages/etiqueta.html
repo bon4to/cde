@@ -7,7 +7,7 @@
         {% include 'shared/header/cde-header.html' %}
 
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
@@ -30,13 +30,13 @@
         </div>
         <div id="divContent">
             <div draggable="false" style="display: flex; align-items: center;" class="form-login">
-                <div class="flex-row">
+                <div class="flex-h">
                     <div class="log">
                         <div style="max-width: 400px; justify-content: flex-start; margin: auto">
                             <div>
                                 <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
                                     <label for="input_code"></label>
-                                    <div class="split-horizontal">
+                                    <div class="split-h">
                                         <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o código aqui...">
                                         <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
                                     </div>
@@ -88,7 +88,7 @@
                                     </div>
                                 </div>
                                 <br>
-                                <div class="flex-row" style="gap: 0; min-width: 100%;">
+                                <div class="flex-h" style="gap: 0; min-width: 100%;">
                                     <input class="btn-fancy" type="submit" value="GERAR">
                                     <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px" onclick="toggleCheckbox('imgCheckbox','imgDownload')" >
                                         <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" alt="">

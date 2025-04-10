@@ -1,0 +1,56 @@
+/* Global styles and resets */
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    line-height: 1.5;
+    background-color: #f1f1f1;
+    font-family: 'Calibri', sans-serif;
+}
+
+img {
+    user-select: none;
+}
+
+a {
+    cursor: pointer;
+    margin: 4px 0;
+    font-size: 12px;
+    color: #3a77e8;
+    font-weight: bold;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+}
+
+a:hover {
+    color: rgba(58, 119, 232, 0.8);
+}
+
+a.aux-link {
+    width: 100%;
+    margin: 0 auto;
+    font-size: 16px;
+    color: #3a77e8;
+    text-decoration: none;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    border: 3px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+} 

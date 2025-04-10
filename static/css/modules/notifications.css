@@ -1,0 +1,55 @@
+
+/* Notifications */
+.notification-container {
+    border-radius: 8px; 
+    margin-bottom: 10px; 
+    transition: background-color 0.3s;
+    border: 1px solid var(--cor-destaque);
+}
+
+.notification-container.read {
+    background-color: var(--light-white-h);
+    border: 1px solid #ccc;
+}
+
+.notification-title {
+    margin: 4px 0;
+    font-size: 1.1em;
+    color: var(--strong-dark-h);
+}
+
+.notification-title.read {
+    color: var(--medium-dark-h);
+}
+
+.notification-message {
+    justify-content: flex-start;
+    text-align: left;
+    width: 100%;
+    margin: 6px 0;
+    color: var(--strong-dark-h);
+}
+
+.notification-message.read {
+    color: var(--medium-dark-h);
+}
+
+.notification-date {
+    justify-content: flex-end;
+    margin: 0 8px 8px 0;
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+.notification-icons {
+    align-items: flex-end;
+    display: flex;
+    height: 20px;
+    gap: 8px;
+}
+
+.notification-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}

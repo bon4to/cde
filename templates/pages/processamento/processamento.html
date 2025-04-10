@@ -6,7 +6,7 @@
 
         {% include "shared/header/hp-header.html" %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <span>PROCESSAMENTO</span>
                 <span class="id-page">{{session['id_page']}}</span>
@@ -22,7 +22,7 @@
             </div>
         </div>
         <div>
-            <div style="display: none;" class="flex-row" id="table-filter">
+            <div style="display: none;" class="flex-h" id="table-filter">
                 <input type="date" class="address" id="filterDate1" onchange="filterByDate()">
                 <div id="period-date" style="display: contents">
                     <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
@@ -131,7 +131,7 @@
                             <div class="back-modal" onclick="toggleFilter()"></div>
                                 <div class="form-filter generic" style="">
                                     <div style="padding: 5px;display: flex;max-height: 40px;align-items: center;justify-content: center;">
-                                        <div class="split-horizontal" style="align-items: center">
+                                        <div class="split-h" style="align-items: center">
                                             <h3 style="font-size: 24px">Filtros</h3>
                                             <div style="scale: 0.7">
                                                 <div class="pin" id="fix-move-btn" onclick="toggleFilter()">
@@ -172,7 +172,7 @@
                     </div>
                     -->
                 {% for linha_indice in range(1, 6) %}
-                    <div class="table-overflow section-linhas programmed-l{{ linha_indice }}" id="linha{{ linha_indice }}_table">
+                    <div class="table-overflow section-linhas alt-color-{{ linha_indice }}" id="linha{{ linha_indice }}_table">
                         <h4>Linha {{ linha_indice }}</h4>
                         <table id="filterTable">
                             <tr>

@@ -12,7 +12,7 @@
 
         {% if 'logged_in' in session %}
             <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
                 <h1>
                     <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                     <span style="margin: 0 8px;"></span>
@@ -47,7 +47,7 @@
                             </div>
                             <a style="font-size: 14px; text-align: center" class="hyperlink" onclick="window.location.href='/change-password'">EDITAR SENHA</a>
                             <div class="form-login-input">
-                                <div class="flex-row" style="display: flex;width: 100%;">
+                                <div class="flex-h" style="display: flex;width: 100%;">
                                     <a class="btn-fancy" href="{{ url_for('logout') }}">
                                         <img class="svg-invert" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
                                     </a>

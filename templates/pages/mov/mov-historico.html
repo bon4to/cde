@@ -6,7 +6,7 @@
 
         {% include 'shared/header/tl-header.html' %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
@@ -55,7 +55,7 @@
             <div class="mobile-container">
                 <div style="justify-content: flex-end">
                 {% if search_term %}
-                <div class="split-horizontal">
+                <div class="split-h">
                     <h1 style="font-size: 22px">Critério de pesquisa: <span class="cor-web">"{{ search_term }}"</span> em <span class="cor-web">{{ search_row_text }}</span>.</h1>
                     <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
                         <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">

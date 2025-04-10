@@ -10,7 +10,7 @@
 
     {% include 'shared/header/tl-header.html' %}
     <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
@@ -26,7 +26,7 @@
         <div class="aux-buttons">
             {% block aux_buttons %}
                 <form onsubmit="routeMovRedirect('requisicao/separacao/f'); return false;">
-                    <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                    <div class="flex-h" style="margin: 8px 0; width: 100%;">
                         <input class="address-three" style="margin: 0; height: 14px" id="idInputBrow" min="1" placeholder="Carga...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
                             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
@@ -56,8 +56,8 @@
         <div id="divContent" style="flex-wrap: wrap;">
         <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
             <div style="{% if id_req == '0' %}display: none;{% endif %}">
-                <div class="split-horizontal">
-                    <div class="flex-column">
+                <div class="split-h">
+                    <div class="flex-v">
                         <h1>Número de Requisição <input id="idCargaContainer" class="cor-web" value="{{ id_req }}"></span></h1>
                         {% if result %}
                             <h1 class="subtitle">Responsável: <span class="cor-web">{{ result[0][columns.index('USUARIO')] }}</span></h1>
@@ -82,7 +82,7 @@
                         </div>
                     {% endif %}
                 {% endif %}
-                <div class="split-horizontal">
+                <div class="split-h">
                     <p style="justify-content: flex-start">
                         Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span>
                     </p>
@@ -108,7 +108,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="split-horizontal flex-row" style="margin: 8px 0">
+                    <div class="split-h flex-h" style="margin: 8px 0">
                         {% block separation_buttons %}
                             
                         {% endblock separation_buttons %}
@@ -128,7 +128,7 @@
             {% endblock all_separation_status %}
             <div class="table-overflow" style="max-height: 700px">
                 <form onsubmit="routeMovRedirect('requisicao/separacao/{{ status }}'); return false">
-                    <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                    <div class="flex-h" style="margin: 8px 0; width: 100%;">
                         <input class="address-one" style="margin: 0; height: 32px; width: 100%" type="number" id="idInput" min="1" placeholder="Requisição...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA REQUISIÇÃO..." >
                             <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">

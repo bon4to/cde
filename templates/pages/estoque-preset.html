@@ -20,7 +20,7 @@
     {% endblock filter_options %}
 
     {% block table %}
-        <div class="split-horizontal">
+        <div class="split-h">
             <span>
                 <h1 class="subtitle">Estoque</h1>
                 <p class="cor-web">Visualização de Estoque (Preset)</p>
@@ -28,7 +28,7 @@
             <div class="table-filter" style="display: none;">
                 <div>
                     <form action="/estoque/presets" method="post">
-                        <div class="flex-row">
+                        <div class="flex-h">
                             <select class="address" id="preset_id" name="preset_id" value="{{ search_term }}">
                                 <option value="1">FILTRO 01</option>
                                 <option value="2">FILTRO 02</option>
@@ -42,7 +42,7 @@
             </div>
         </div>
         {% if search_term %}
-            <div class="split-horizontal">
+            <div class="split-h">
                 <p style="font-size: 12px">Predefinição: <span class="cor-web"> FILTRO {{ search_term }}</span>.</p>
                 <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
