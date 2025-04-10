@@ -5,7 +5,7 @@
 }
 
 .checked {
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 .centralizado {
@@ -24,22 +24,6 @@
 
 .readonly {
     color: #818181;
-}
-
-/* Glow effects */
-.glow-cde {
-    background-color: #3e5ea640;
-    border: 1px solid var(--cor-cde);
-}
-
-.glow-tl {
-    background-color: #ea5a2640;
-    border: 1px solid var(--cor-tl);
-}
-
-.glow-hp {
-    background-color: #8f794340;
-    border: 1px solid var(--cor-hp);
 }
 
 /* Message styles */

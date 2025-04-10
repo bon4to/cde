@@ -67,7 +67,7 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-    border-bottom: 2px solid var(--cor-destaque);
+    border-bottom: 2px solid var(--main-color);
     transition: border-color 0.2s ease-out;
     box-shadow: 0 0px 8px rgba(0, 0, 0, 0.3);
 }
@@ -88,7 +88,7 @@ input:focus, select:focus, textarea:focus {
 
 .item:hover {
     transform: translateY(-2px);
-    border: 1px solid var(--cor-destaque);
+    border: 1px solid var(--main-color);
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
 }
 

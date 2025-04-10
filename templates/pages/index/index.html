@@ -83,16 +83,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="side-banner" style="background-color: var(--cor-destaque); filter: brightness(0.95)">
+                        <div class="side-banner" style="background-color: var(--main-color); filter: brightness(0.95)">
                             <img class="side-banner" src="{{ url_for('static', filename='img/cde-about.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
                         </div>
                     </div>
                 {% endif %}
             {% endif %}
             {% if not about %}
-                <div id="recent-pages-container" class="tables-container" style="max-width: 30%; min-width: 16%; min-height: -webkit-fill-available; border: 1px solid var(--cor-destaque); border-radius: 44px; padding: 24px;">
+                <div id="recent-pages-container" class="tables-container" style="max-width: 30%; min-width: 16%; min-height: -webkit-fill-available; border: 1px solid var(--main-color); border-radius: 44px; padding: 24px;">
                     <div id="recent-pages">
-                        <h1 class="cor-web" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
+                        <h1 class="text-main-color" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
                         <hr style="margin-right: 4px; width: 20%;">
                         <div id="recent-pages-buttons-container">
                             <!-- Os botões serão inseridos aqui -->
@@ -116,7 +116,7 @@
                 }
                 return saudacao;
             }
-            let salute = getSaudacao() + "<span class='cor-web'>{{ session.get('user_name') }}</span>!";
+            let salute = getSaudacao() + "<span class='text-main-color'>{{ session.get('user_name') }}</span>!";
             document.getElementById("saudacao").innerHTML = salute;
 
         </script>

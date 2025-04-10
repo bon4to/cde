@@ -177,7 +177,7 @@ function addToBundle(rowIndex) {
                     padding: 0px 5px;
                     margin-left: 5px;
                     border-radius: 4px;
-                    background-color: var(--cor-destaque);
+                    background-color: var(--main-color);
                 ">
                 max
             </button>
@@ -190,7 +190,7 @@ function addToBundle(rowIndex) {
                     text-align: right;
                     margin-right: 4px; 
                     padding-right: 2px; 
-                    border: 1px solid var(--cor-destaque); 
+                    border: 1px solid var(--main-color); 
                     font-family: 'Reddit Mono', sans-serif;
                 " 
                 min="1" 

@@ -23,7 +23,7 @@ th {
     font-weight: bold;
     font-family: 'Calibri Light';
     background-color: rgba(52, 49, 50, 1);
-    border-bottom: 4px solid var(--cor-destaque);
+    border-bottom: 4px solid var(--main-color);
 }
 
 td {
@@ -45,14 +45,14 @@ td {
 }
 
 .selectable-row:hover td {
-    color: var(--cor-destaque);
+    color: var(--main-color);
     background-color: #e7e7e7;
 }
 
 .selectable-row.active td {
     opacity: 0.9;
     color: white;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 .unselectable-row {
@@ -63,7 +63,7 @@ td {
     color: rgb(27, 26, 26);
     transition: 0.1s ease-in-out all;
     background-color: rgba(52, 49, 50, 0.1);
-    border-bottom: 4px solid var(--cor-destaque);
+    border-bottom: 4px solid var(--main-color);
 }
 
 .selectable-row.sub-total:hover td {
@@ -74,7 +74,7 @@ td {
 
 .selectable-row.sub-total.active td {
     color: white;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 th.normal-size {
@@ -83,22 +83,65 @@ th.normal-size {
 
 th.bigger-size {
     width: 400px;
-} 
-
-
-th.normal-size {
-    width: 100px;
 }
 
-th.bigger-size {
-    width: 400px;
+.action-cell {
+    cursor: pointer; 
+    display: none;
+    max-width: 100px; 
+    text-align: center; 
+    color: white; 
+    font-weight: 500;
+    padding: 0;
+}
+
+.action-cell.red {
+    background-color: #d72828; 
+    border-color: #d72828; 
+}
+
+.action-cell.green {
+    background-color: #34bb34; 
+    border-color: #34bb34; 
+}
+
+.action-cell.blue {
+    background-color: #346ebb; 
+    border-color: #346ebb; 
 }
 
 .td-more {
+    position: relative;
     width: 10px;
     padding: 5px;
     border: 0 solid #ddd;
     background-color: transparent;
+}
+
+.td-more .tooltiptext {
+    left: 50%;
+    opacity: 0;
+    width: 70px;
+    bottom: 30%;
+    padding: 5px;
+    z-index: 1100;
+    overflow: auto;
+    text-wrap: wrap;
+    color: #ffffff;
+    max-width: 120px;
+    visibility: hidden;
+    text-align: center;
+    border-radius: 4px;
+    position: absolute;
+    pointer-events: none;
+    background-color: #333;
+    transition: opacity 0.3s;
+    transform: translateX(-75%);
+}
+
+.td-more:hover .tooltiptext {
+    opacity: 1;
+    visibility: visible;
 }
 
 .number {

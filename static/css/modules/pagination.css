@@ -23,7 +23,7 @@
 .pagination a.active {
     color: white;
     border-radius: 6px;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 .pagination a:hover:not(.active) {

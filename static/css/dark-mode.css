@@ -37,7 +37,7 @@ html.dark select {
 html.dark select:focus,
 html.dark textarea:focus,
 html.dark input:focus {
-    border-bottom: 2px solid var(--cor-destaque);
+    border-bottom: 2px solid var(--main-color);
     transition: border-color 0.2s ease-out;
 }
 
@@ -46,11 +46,11 @@ html.dark .inline-input:focus {
     box-shadow: none;
 }
 
-html.dark .cor-web {
-    color: var(--cor-destaque);
+html.dark .text-main-color {
+    color: var(--main-color);
 }
 
-html.dark div.glow-tl {
+html.dark div.glow-logi {
     background-color: #ea5a2640;
 }
 
@@ -115,7 +115,7 @@ html.dark .selectable-row.sub-total td {
 html.dark .sub-total td {
     color: var(--dark-text);
     background-color: #313131;
-    border-bottom: 4px solid var(--cor-destaque);
+    border-bottom: 4px solid var(--main-color);
 }
 
 html.dark .selectable-row.sub-total:hover td {
@@ -124,7 +124,7 @@ html.dark .selectable-row.sub-total:hover td {
 }
 
 html.dark .selectable-row:hover td {
-    color: var(--cor-destaque);
+    color: var(--main-color);
     background-color: #1d1d1d;
 }
 
@@ -139,7 +139,7 @@ html.dark .item {
 }
 
 html.dark .item:hover {
-    border-color: var(--cor-destaque);
+    border-color: var(--main-color);
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.6);
 }
 
@@ -178,7 +178,7 @@ html.dark .btn-fancy-sober  {
 }
 
 html.dark .btn-fancy:hover {
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 html.dark .btn-fancy.safe:hover {
@@ -197,7 +197,7 @@ html.dark .btn-fancy.featured:hover {
 }
 
 html.dark button.checked {
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 html.dark .btn-fancy .svg {
@@ -217,7 +217,7 @@ html.dark .btn-fancy .svg-invert {
 }
 
 html.dark .btn-fancy.active {
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 html.dark .side-banner {
@@ -230,7 +230,7 @@ html.dark .item h2 {
 }
 
 html.dark p.id-page {
-    color: var(--cor-destaque);
+    color: var(--main-color);
 }
 
 html.dark .svg-gray {
@@ -247,7 +247,7 @@ html.dark th, html.dark td {
 
 html.dark, html.dark th {
     background-color: #141414;
-    border-bottom: 4px solid var(--cor-destaque);
+    border-bottom: 4px solid var(--main-color);
 }
 
 html.dark, html.dark td {
@@ -267,7 +267,7 @@ html.dark ::-webkit-scrollbar-track {
 }
 
 html.dark #sepListContainer {
-    border: 1px solid var(--cor-destaque);
+    border: 1px solid var(--main-color);
 }
 
 

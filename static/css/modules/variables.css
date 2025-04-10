@@ -1,10 +1,15 @@
 :root {
-    --cor-hp: rgb(154, 45, 45);
-    --cor-tl: #ea5a26;
-    --cor-cde: #3e5ea6;
-    --cor-hp-rgb: 154, 45, 45;
-    --cor-tl-rgb: 234, 90, 38;
-    --cor-cde-rgb: 62, 94, 166;
+    /* main colors */
+    --cde-color: #3e5ea6;
+    --prod-color: #9a2d2d;
+    --logi-color: #ea5a26;
+    
+    /* rgb main colors */
+    --cde-color-rgb: 62, 94, 166;
+    --prod-color-rgb: 154, 45, 45;
+    --logi-color-rgb: 234, 90, 38;
+
+    /* alternative colors */
     --alt-color-1: 255, 172, 160;
     --alt-color-2: 181, 229, 140;
     --alt-color-3: 165, 165, 255;
@@ -12,18 +17,64 @@
     --alt-color-5: 165, 235, 255;
     --alt-color-6: 255, 165, 225;
     --alt-color-7: 255, 220, 165;
+
+    /* strong dark colors */
     --strong-dark-h: #222222;
     --strong-dark-m: #252525;
     --strong-dark-l: #303030;
+
+    /* medium dark colors */
     --medium-dark-h: #3a3a3a;
+    --medium-dark-m: #404040;
+    --medium-dark-l: #454545;
+
+    /* light dark colors */
+    --light-dark-h: #505050;
+    --light-dark-m: #555555;
+    --light-dark-l: #606060;
+
+    /* strong white colors */
+    --strong-white-h: #e7e7e7;
+    --strong-white-m: #f7f7f7;
+    --strong-white-l: #ffffff;
+
+    /* medium white colors */
+    --medium-white-h: #e7e7e7;
+    --medium-white-m: #f7f7f7;
+    --medium-white-l: #ffffff;
+
+    /* light white colors */
     --light-white-h: #e7e7e7;
     --light-white-m: #f7f7f7;
     --light-white-l: #ffffff;
+
+    /* light text color */
     --light-text: #f7f7f7;
+
+    /* dark or white colors */
     --dark-or-white: var(--light-white-m);
     --white-or-dark: var(--medium-dark-h);
 }
 
-.cor-web {
-    color: var(--cor-destaque);
-} 
+.text-main-color {
+    color: var(--main-color);
+}
+
+.tag-main-color {
+    background-color: var(--main-color);
+}
+
+.glow-cde {
+    background-color: #3e5ea640;
+    border: 1px solid var(--cde-color);
+}
+
+.glow-logi {
+    background-color: #ea5a2640;
+    border: 1px solid var(--logi-color);
+}
+
+.glow-prod {
+    background-color: #8f794340;
+    border: 1px solid var(--prod-color);
+}
