@@ -2639,14 +2639,14 @@ def historico_search() -> str:
         search_index = request.form.get('search_index', '').strip()
 
         option_texts = {
-            'cod_item': 'Item (Código)',
-            'desc_item': 'Item (Descrição)',
-            'endereco': 'Endereço',
-            'operacao': 'Operação (Descrição)',
+            'cod_item':   'Item (Código)',
+            'desc_item':  'Item (Descrição)',
+            'address':    'Endereço',
+            'operacao':   'Operação (Descrição)',
             'quantidade': 'Quantidade',
-            'cod_lote': 'Lote (Código)',
-            'user_name': 'Usuário (Nome)',
-            'timestamp': 'Horário (Data/Hora)',
+            'cod_lote':   'Lote (Código)',
+            'user_name':  'Usuário (Nome)',
+            'timestamp':  'Horário (Data/Hora)',
         }
 
         if not search_term or search_index not in option_texts:
@@ -2654,17 +2654,19 @@ def historico_search() -> str:
                 'pages/mov/mov-historico.html', 
                 estoque=[], 
                 search_term=search_term, 
-                search_row_text="Invalid search",
+                search_row_text=f"coluna inválida ({search_index})",
                 page=0, 
-                total_pages=0
+                total_pages=0,
+                max=max,
+                min=min
             )
 
         search_row_text = option_texts[search_index]
         estoque = HistoricoUtils.get_all_historico()
-
+        
         # Filtra resultados
         filtered_estoque = [
-            item for item in estoque if search_term.lower() in item.get(search_index, '').lower()
+            item for item in estoque if search_term.lower() in str(item.get(search_index, '')).lower()
         ]
 
         return render_template(
