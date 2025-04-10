@@ -4,7 +4,7 @@
     border-radius: 8px; 
     margin-bottom: 10px; 
     transition: background-color 0.3s;
-    border: 1px solid var(--cor-destaque);
+    border: 1px solid var(--main-color);
 }
 
 .notification-container.read {

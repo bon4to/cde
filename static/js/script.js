@@ -207,10 +207,10 @@ function alterarCor() {
     var elemento = document.getElementById("elemento");
     var estilo   = getComputedStyle(elemento);
   
-    var corAtual = estilo.getPropertyValue("--cor-destaque");
+    var corAtual = estilo.getPropertyValue("--main-color");
   
     var novaCor  = "#2688ea";
-    document.documentElement.style.setProperty("--cor-destaque", novaCor);
+    document.documentElement.style.setProperty("--main-color", novaCor);
 }
 
 
@@ -391,7 +391,7 @@ function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit)
     var qtde_separada = parseInt(getQtdeItemLS(getStorageKey(), codItem), 10);
     var qtde_faltante = parseInt(qtde_solic, 10) - qtde_separada;
 
-    msge.innerHTML = `<span class="cor-web">${qtde_separada}</span> / ${qtde_solic}`;
+    msge.innerHTML = `<span class="text-main-color">${qtde_separada}</span> / ${qtde_solic}`;
     info.textContent = `(${qtde_faltante} faltante)`;
     obsv.textContent = `${maxEstoque} em estoque (${this_qtde_separada} utilizado)`;
 
@@ -449,9 +449,9 @@ function toggleTheme() {
 
     if (document.documentElement.classList.contains('dark')) {
         localStorage.setItem('theme', 'dark');
-        //root.style.setProperty('--cor-cde-rgb', '53, 80, 141');
-        //root.style.setProperty('--cor-tl-rgb', '206, 80, 34');
-        //root.style.setProperty('--cor-hp-rgb', '123, 104, 57');
+        //root.style.setProperty('--cde-color-rgb', '53, 80, 141');
+        //root.style.setProperty('--logi-color-rgb', '206, 80, 34');
+        //root.style.setProperty('--prod-color-rgb', '123, 104, 57');
         
         root.style.setProperty('--alt-color-1', '155, 072, 060');
         root.style.setProperty('--alt-color-2', '081, 129, 040');
@@ -462,9 +462,9 @@ function toggleTheme() {
         root.style.setProperty('--alt-color-7', '155, 120, 065');
     } else {
         localStorage.setItem('theme', 'light');
-        //root.style.setProperty('--cor-cde-rgb', '62, 94, 166');
-        //root.style.setProperty('--cor-tl-rgb', '234, 90, 38');
-        //root.style.setProperty('--cor-hp-rgb', '143, 121, 67');
+        //root.style.setProperty('--cde-color-rgb', '62, 94, 166');
+        //root.style.setProperty('--logi-color-rgb', '234, 90, 38');
+        //root.style.setProperty('--prod-color-rgb', '143, 121, 67');
         
         root.style.setProperty('--alt-color-1', ' 255, 172, 160');
         root.style.setProperty('--alt-color-2', ' 181, 229, 140');

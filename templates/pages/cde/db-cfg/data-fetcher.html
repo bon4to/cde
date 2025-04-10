@@ -52,7 +52,7 @@
                 <form id="query-field" action="/database" class="tables-container" style="padding: 2px 0; margin: 0; min-height: unset" method="post" onsubmit="showLoading()">
                     {% if app_version[2] %}
                     <div class="split-h" style="margin: 6px; align-items: center">
-                        <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="cor-web subtitle">Console SQL</h1>
+                        <h1 style="text-align: left; margin: 0 14px; padding-left: 0" class="text-main-color subtitle">Console SQL</h1>
                         <div class="flex-h" style="align-items: center; margin: 6px 14px;">
                             <img id="undoButton" class="svg-invert" style="opacity: 0.6; display: none; cursor: pointer;" onclick="restoreLastQuery()" src="{{ url_for('static', filename='svg/undo.svg') }}" title="DESFAZER">
                             <select title="METHOD" id="sel_schema" name="sel_schema" class="address" style="margin: 0; height: 45px" required>
@@ -93,7 +93,7 @@
                     {% endif %}
                 </form>
                 <div class="tables-container" style="margin: 0; min-height: unset; max-width: 90%; width: -webkit-fill-available">
-                    <h1 class="cor-web subtitle">Tabelas</h1>
+                    <h1 class="text-main-color subtitle">Tabelas</h1>
                     <div style="max-height: 350px; max-width: 300px;">
                         {% if not tables %}
                             <p class="disabled" style="text-wrap: auto">Faça a primeira consulta para visualizar as tabelas disponíveis.</p>
@@ -115,13 +115,13 @@
             </div>
             {% if app_version[2] %}
             <div class="tables-container" style="min-width: 800px; max-width: 90%; width: -webkit-fill-available">
-                <h1 style="text-align: left; margin: 0; padding-left: 0" class="cor-web subtitle">{{ dsn }} Results</h1>
+                <h1 style="text-align: left; margin: 0; padding-left: 0" class="text-main-color subtitle">{{ dsn }} Results</h1>
                 {% if alert_msge %}
                     <p class="alert" id="custom-alert">{{ alert_msge }}</p>
                 {% endif %}
                 {% if result %}
                     {% set row_count = result|length %}
-                    <div>Total de Resultados: <span style="color: var(--cor-destaque); font-weight: bold">{{ row_count }}</span></div>
+                    <div>Total de Resultados: <span style="color: var(--main-color); font-weight: bold">{{ row_count }}</span></div>
                     {% if columns %}
                     <div style="max-height: 600px; overflow: auto; max-width: 70vw;">
                         <table>

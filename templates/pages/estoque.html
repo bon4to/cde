@@ -53,7 +53,7 @@
                     <div class="split-h">
                         <span>
                             <h1 class="subtitle">Estoque</h1>
-                            <p class="cor-web">Visualização de Estoque (Agrupado)</p>
+                            <p class="text-main-color">Visualização de Estoque (Agrupado)</p>
                         </span>
 
                         {% from 'components/filter-container.html' import filter_container %}
@@ -68,7 +68,7 @@
                     </div>
                     {% if search_term %}
                         <div class="split-h">
-                            <h1 style="font-size: 22px">Estoque na data <span class="cor-web">{{ search_term }}</span>.</h1>
+                            <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
                             <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                             </a>

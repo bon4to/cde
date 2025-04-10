@@ -56,7 +56,7 @@
                 <div style="justify-content: flex-end">
                 {% if search_term %}
                 <div class="split-h">
-                    <h1 style="font-size: 22px">Critério de pesquisa: <span class="cor-web">"{{ search_term }}"</span> em <span class="cor-web">{{ search_row_text }}</span>.</h1>
+                    <h1 style="font-size: 22px">Critério de pesquisa: <span class="text-main-color">"{{ search_term }}"</span> em <span class="text-main-color">{{ search_row_text }}</span>.</h1>
                     <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
                         <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                     </a>

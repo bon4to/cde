@@ -586,7 +586,7 @@ function renderCartSubtotals() {
             listItem.classList.add('cart-item');
             listItem.innerHTML = `
                 <span class="item-name">${cod_item} |</span>
-                <span class="item-quantity cor-web">${subtotal}</span>
+                <span class="item-quantity text-main-color">${subtotal}</span>
             `;
             cartItemsContainer.appendChild(listItem);
             itemCount += 1;

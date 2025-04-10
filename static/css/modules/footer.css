@@ -12,8 +12,8 @@
     align-items: center;
     pointer-events: none;
     justify-content: space-between;
-    background-color: var(--cor-destaque);
-    border-top: 2px solid var(--cor-destaque);
+    background-color: var(--main-color);
+    border-top: 2px solid var(--main-color);
 }
 
 #pre-footer img {
@@ -64,7 +64,7 @@
 }
 
 #footer a:hover {
-    color: var(--cor-destaque);
+    color: var(--main-color);
 }
 
 #footer img {

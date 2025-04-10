@@ -28,7 +28,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     margin: 4px;
     cursor: pointer;
     height: 40px;

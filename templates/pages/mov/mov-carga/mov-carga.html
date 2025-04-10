@@ -54,7 +54,7 @@
             <div id="cargaContainer" class="tables-container" style="max-width: 55%; min-width: 55%;">
                 <div class="flex-v">
                     <div class="split-h">
-                        <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="cor-web" value="{{ id_carga }}"></h1>
+                        <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}"></h1>
                         <div class="flex-h" style="gap: 30px">
                             <div class="cart-container" style="display: none">
                                 <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
@@ -76,7 +76,7 @@
                             </div>
                         </div>
                     </div>
-                    <h1 class="subtitle">Cliente: <span class="cor-web">{{ fant_cliente }}</span></h1>
+                    <h1 class="subtitle">Cliente: <span class="text-main-color">{{ fant_cliente }}</span></h1>
                 </div>
                 <div class="hidden" id="alert-message"></div>
                 {% if result and 'OBS_CARGA' in columns %}
@@ -217,9 +217,9 @@
         {% if 'user_grant' in session %}
             {% if id_carga %}
                 {% if cod_item and cod_item in cod_item_list %}
-                    <div id="stockTable" class="tables-container glow-tl">
+                    <div id="stockTable" class="tables-container glow-logi">
                         <span>
-                            <h1>Item <span class="cor-web">{{ cod_item }}</span> em Estoque:</h1>
+                            <h1>Item <span class="text-main-color">{{ cod_item }}</span> em Estoque:</h1>
                         </span>
                         {% if result %}
                             <table>
@@ -285,7 +285,7 @@
                                 </details>
                             </div>
                         {% elif class_alert == 'success' %}
-                            <h1 class="subtitle">Selecione a <span class="cor-web">carga</span> para iniciar a <span class="cor-web">separação</span>:</h1>
+                            <h1 class="subtitle">Selecione a <span class="text-main-color">carga</span> para iniciar a <span class="text-main-color">separação</span>:</h1>
                             <div style="max-height: 540px; overflow-y: auto; width: 100%;">
                                 {% if result %}
                                     <table>
@@ -343,8 +343,8 @@
                 {% if not cod_item %}
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
                     <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
-                    <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
-                        <option style="color: var(--cor-destaque);">Pendentes</option>
+                    <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
+                        <option style="color: var(--main-color);">Pendentes</option>
                         <option style="color: green;">Finalizadas</option>
                     </select>
                     {% block all_separation_status %}
@@ -359,7 +359,7 @@
                                 </button>
                             </div>
                         </form>
-                        <table id="allSeparationsTable" style="border-top: 4px solid var(--cor-destaque)">
+                        <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
                             <tbody>
                                 <!-- executa listCargasLocalStorage(); -->
                             </tbody>

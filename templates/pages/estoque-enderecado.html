@@ -24,7 +24,7 @@
         <div class="split-h">
             <span>
                 <h1 class="subtitle">Estoque</h1>
-                <p class="cor-web">Visualização de Estoque (Endereçado)</p>
+                <p class="text-main-color">Visualização de Estoque (Endereçado)</p>
             </span>
             <div class="table-filter" style="display: none;">
                 <div>
@@ -41,7 +41,7 @@
         </div>
         {% if search_term %}
             <div class="split-h">
-                <h1 style="font-size: 22px">Estoque na data <span class="cor-web">{{ search_term }}</span>.</h1>
+                <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
                 <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';" title="Limpar">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>
@@ -90,7 +90,7 @@
                                 <td 
                                     {% set validade_meses = item['validade'] | int / 30  %}
                                     title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
-                                    style="color: var(--cor-cde); font-weight: bold"
+                                    style="color: var(--cde-color); font-weight: bold"
                                 >
                                     {{ item['validade'] }}
                                 </td>

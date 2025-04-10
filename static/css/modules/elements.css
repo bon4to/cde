@@ -40,9 +40,9 @@ div.msg-alert {
 
 /* ID Page styles */
 p.id-page {
-    color: var(--cor-destaque);
+    color: var(--main-color);
     font-family: Reddit Mono, monospace;
-    border: 1px solid var(--cor-destaque);
+    border: 1px solid var(--main-color);
     border-radius: 6px;
     padding: 2px 4px;
     font-size: 10px;
@@ -56,12 +56,12 @@ p.id-page.white {
 
 span.id-page {
     font-size: 18px;
-    color: var(--cor-destaque);
+    color: var(--main-color);
     font-family: Reddit Mono, monospace;
 }
 
 a.id-page.filled {
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     border-radius: 6px;
     padding: 2px 6px;
     font-size: 16px;
@@ -117,33 +117,6 @@ a.id-page.filled:hover {
     visibility: visible;
 }
 
-.td-more .tooltiptext {
-    left: 50%;
-    opacity: 0;
-    width: 70px;
-    bottom: 30%;
-    padding: 5px;
-    z-index: 1100;
-    overflow: auto;
-    text-wrap: wrap;
-    color: #ffffff;
-    max-width: 120px;
-    visibility: hidden;
-    text-align: center;
-    border-radius: 4px;
-    position: absolute;
-    pointer-events: none;
-    background-color: #333;
-    transition: opacity 0.3s;
-    transform: translateX(-75%);
-}
-
-.td-more:hover .tooltiptext {
-    opacity: 1;
-    visibility: visible;
-} 
-
-
 /* Recent pages */
 #recent-pages-table td {
     font-size: 16px;
@@ -159,7 +132,7 @@ a.id-page.filled:hover {
 }
 
 #recent-pages-table .selectable-row:hover {
-    border-left: 4px solid var(--cor-destaque);
+    border-left: 4px solid var(--main-color);
     transition: all 0.1s ease-in-out;
 }
 
@@ -175,10 +148,34 @@ a.id-page.filled:hover {
     overflow-y: scroll;
 }
 
+#scroll-to-top-button {
+    right: 24px;
+    bottom: 32px;
+    opacity: 0.5;
+    z-index: 1000;
+    position: fixed;
+    transition: opacity 0.3s ease;
+}
+
+#scroll-to-top-button:hover {
+    opacity: 1;
+}
+
+#scroll-to-top-button button {
+    border: none;
+    color: #fff;
+    padding: 12px;
+    display: block;
+    cursor: pointer;
+    border-radius: 18px;
+    transition: opacity 0.3s ease;
+    background-color: var(--main-color);
+}
+
 .recent-page-button {
     text-transform: uppercase;
     text-wrap: nowrap;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     color: white;
     border: none;
     padding: 12px;
@@ -195,7 +192,7 @@ a.id-page.filled:hover {
 
 .recent-page-button:hover {
     background-color: rgb(220, 220, 220);
-    color: var(--cor-destaque)
+    color: var(--main-color)
 }
 
 
