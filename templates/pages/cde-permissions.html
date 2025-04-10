@@ -28,8 +28,8 @@
                     {% if session['user_grant'] == 1 %}
                         {% if permissions %}
                             {% if id_perm_data %}
-                                <h1>Código da Página <span class="cor-web">[{{ id_perm_data[0]['id_perm'] }}]</span></h1>
-                                <h1 class="subtitle">Editando: <span class="cor-web">''{{ id_perm_data[0]['desc_perm'] }}''</span></h1>
+                                <h1>Código da Página <span class="text-main-color">[{{ id_perm_data[0]['id_perm'] }}]</span></h1>
+                                <h1 class="subtitle">Editando: <span class="text-main-color">''{{ id_perm_data[0]['desc_perm'] }}''</span></h1>
                                 <br>
                                 <form style="height: unset; align-items: flex-start;" action="{{ url_for('permissions_id', id_perm=id_perm_data[0]['id_perm']) }}" method="post">
                                     <div class="flex-h" style="gap: 20px">
@@ -50,7 +50,7 @@
                                 </form>
                                 <a class="hyperlink" style="font-size: 1.2em; margin-top: 14px" href="{{ url_for('permissions') }}">CANCELAR</a>
                             {% else %}
-                                <h1><span style="color: var(--cor-destaque);">Adicione o ID da Página</span></h1>
+                                <h1><span style="color: var(--main-color);">Adicione o ID da Página</span></h1>
                                 <h1 class="subtitle">Ou selecione uma permissão</h1>
                                 <br>
                                 <form style="align-items: flex-start;" action="{{ url_for('permissions') }}" method="post">
@@ -84,7 +84,7 @@
                     {% endblock all_separation_status %}
                     <div class="table-overflow" style="max-height: 700px">
                         {% if permissions %}
-                            <table style="border-top: 4px solid var(--cor-destaque)">
+                            <table style="border-top: 4px solid var(--main-color)">
                                 <tbody>
                                     {% for row in permissions %}
                                         <tr class="selectable-row js_query_selector" onclick="window.location.href='/cde/permissions/{{ row['id_perm'] }}'">

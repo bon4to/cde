@@ -23,7 +23,7 @@
         <div class="split-h">
             <span>
                 <h1 class="subtitle">Estoque</h1>
-                <p class="cor-web">Visualização de Estoque (Preset)</p>
+                <p class="text-main-color">Visualização de Estoque (Preset)</p>
             </span>
             <div class="table-filter" style="display: none;">
                 <div>
@@ -43,7 +43,7 @@
         </div>
         {% if search_term %}
             <div class="split-h">
-                <p style="font-size: 12px">Predefinição: <span class="cor-web"> FILTRO {{ search_term }}</span>.</p>
+                <p style="font-size: 12px">Predefinição: <span class="text-main-color"> FILTRO {{ search_term }}</span>.</p>
                 <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>

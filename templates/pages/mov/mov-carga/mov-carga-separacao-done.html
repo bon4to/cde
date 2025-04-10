@@ -39,12 +39,12 @@
 {% endblock aux_buttons %}
 
 {% block switch %}
-    <input id="idCargaContainer" class="cor-web" value="{{ id_carga }}">
+    <input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}">
     <select id="idCargaContainerSelect" style="display: none;">
-        <option style="color: var(--cor-destaque);" value="{{ seq }}">{{ id_carga }}-{{ seq }}</option>
+        <option style="color: var(--main-color);" value="{{ seq }}">{{ id_carga }}-{{ seq }}</option>
     </select>
     {% if seq != 0 %}
-    <div style="background-color: var(--cor-destaque); pointer-events: all; cursor: pointer; border-radius: 20px; height: 40px; width: 40px;">
+    <div style="background-color: var(--main-color); pointer-events: all; cursor: pointer; border-radius: 20px; height: 40px; width: 40px;">
         <img 
             alt="RESET"
             class="svg-invert" 
@@ -70,7 +70,7 @@
 {% block all_separation_status %}
     <select class="address-three inline-input" style="color: green; font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/p/{{ id_carga }}'">
         <option style="color: green;">Finalizadas</option>
-        <option style="color: var(--cor-destaque);">Pendentes</option>
+        <option style="color: var(--main-color);">Pendentes</option>
     </select>
 {% endblock all_separation_status %}
 
@@ -237,7 +237,7 @@
 
                     const cell1 = subtotalRow.insertCell(3);
                     cell1.textContent = 'Subtotal:';
-                    subtotalRow.insertCell(4).innerHTML = `<span class="cor-web">${subtotal}</span> / ${qtde_solic}`;
+                    subtotalRow.insertCell(4).innerHTML = `<span class="text-main-color">${subtotal}</span> / ${qtde_solic}`;
         
                     subtotalRow.classList.add('sub-total');
                 }
@@ -258,7 +258,7 @@
                         cell1.textContent = 'Subtotal:';
 
                         const qtde_solic = await fetchQtdeSolic(nroCarga, item);
-                        subtotalRow.insertCell(4).innerHTML = '<span class="cor-web">0</span> / ' + qtde_solic;
+                        subtotalRow.insertCell(4).innerHTML = '<span class="text-main-color">0</span> / ' + qtde_solic;
 
                         subtotalRow.classList.add('sub-total');
                         

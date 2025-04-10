@@ -17,7 +17,7 @@
     padding: 8px 36px;
     max-height: 84px;
     border-radius: 24px 24px 0 0;
-    border-bottom: 4px inset var(--cor-destaque);
+    border-bottom: 4px inset var(--main-color);
     transition: width 0.3s ease-out;
     max-width: -webkit-fill-available;
 }
@@ -38,16 +38,16 @@
     margin: unset;
     font-size: unset;
     pointer-events: all;
-    color: var(--cor-destaque)
+    color: var(--main-color)
 }
 
 .titles-container .dash {
     margin: 0 10px 0 10px;
-    color: var(--cor-destaque);
+    color: var(--main-color);
 }
 
 .titles-container a:hover {
-    color: var(--cor-destaque);
+    color: var(--main-color);
     text-decoration: underline;
 }
 

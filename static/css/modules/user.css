@@ -42,7 +42,7 @@ div.user-params-button {
     max-height: 38px;
     margin: auto 12px;
     padding: 4px 0;
-    background-color: var(--cor-destaque); 
+    background-color: var(--main-color); 
     border-radius: 8px;
     cursor: pointer;
 }
@@ -57,7 +57,7 @@ div.logged-header {
 }
 
 div.logged-header a {
-    color: var(--cor-destaque); 
+    color: var(--main-color); 
     pointer-events: auto; 
     font-size: 16px;
     text-shadow: 20px #fff;

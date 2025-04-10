@@ -1,3 +1,9 @@
+.navigation-bar {
+    display: flex;
+    padding: 0 36px;
+    justify-content: left;
+    background-color: #323232;
+}
 
 .navigation-bar .user-button {
     padding: 0;
@@ -23,7 +29,7 @@
     min-width: 220px;
     transition: none;
     position: absolute;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 .dropdown-content hr {
@@ -46,7 +52,7 @@
     padding: 14px 16px;
     text-decoration: none;
     font-family: 'Chivo Mono', monospace;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }
 
 .dropdown-content a:hover {
@@ -80,7 +86,7 @@
     padding: 14px 16px 0px 16px;
     text-decoration: none;
     font-family: 'Chivo Mono', monospace;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     font-size: 14px;
 }
 
@@ -128,7 +134,7 @@
     display: none;
     min-width: 200px;
     position: absolute;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     border-left: 6px solid var(--dark-or-white);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
@@ -169,11 +175,11 @@
 
 .submenu:hover .dropbtn, 
 .submenu-content:hover .dropbtn {
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     color: #fff;
 }
 
 .dropdown:hover .dropbtn {
     color: #fff;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
 }

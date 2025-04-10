@@ -8,7 +8,7 @@
 
         <div style="display: flex;min-width: 100%; margin: 0 auto; align-items: center; justify-content: center;">
             <div class="form-login" style="padding: 30px">
-                <h1 style="color: var(--cor-destaque)">{{ alert_type | safe }}</h1>
+                <h1 style="color: var(--main-color)">{{ alert_type | safe }}</h1>
                 <h1 style="display: block" class="alert-message">Preencha o campo abaixo.</h1>
                 <p style="display: block" class="alert-more">{{ alert_msge | safe }}</p>
                 <form style="display: flex;" id="form-field" method="post" action="{{ alert_more }}">

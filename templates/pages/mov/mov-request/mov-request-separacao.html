@@ -58,9 +58,9 @@
             <div style="{% if id_req == '0' %}display: none;{% endif %}">
                 <div class="split-h">
                     <div class="flex-v">
-                        <h1>Número de Requisição <input id="idCargaContainer" class="cor-web" value="{{ id_req }}"></span></h1>
+                        <h1>Número de Requisição <input id="idCargaContainer" class="text-main-color" value="{{ id_req }}"></span></h1>
                         {% if result %}
-                            <h1 class="subtitle">Responsável: <span class="cor-web">{{ result[0][columns.index('USUARIO')] }}</span></h1>
+                            <h1 class="subtitle">Responsável: <span class="text-main-color">{{ result[0][columns.index('USUARIO')] }}</span></h1>
                         {% endif %}
                     </div>
                     <div class="cart-container">
@@ -84,10 +84,10 @@
                 {% endif %}
                 <div class="split-h">
                     <p style="justify-content: flex-start">
-                        Status:<span class="separation_status" style="color: var(--cor-tl); margin-left: 4px">Pendente</span>
+                        Status:<span class="separation_status" style="color: var(--logi-color); margin-left: 4px">Pendente</span>
                     </p>
                     <p style="justify-content: flex-start">
-                        Separador: <span id="separador-info" style="color: var(--cor-tl); margin-left: 4px">carregando...</span>
+                        Separador: <span id="separador-info" style="color: var(--logi-color); margin-left: 4px">carregando...</span>
                     </p>
                 </div>
                 <div class="hidden" id="alert-message"></div>
@@ -135,7 +135,7 @@
                         </button>
                     </div>
                 </form>
-                <table id="allSeparationsTable" style="border-top: 4px solid var(--cor-destaque)">
+                <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
                     <tbody>
                         <!-- executa listSeparationsLocalStorage(); -->
                     </tbody>

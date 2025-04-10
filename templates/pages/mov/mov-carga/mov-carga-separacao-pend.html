@@ -60,8 +60,8 @@
 
 
 {% block all_separation_status %}
-    <select class="address-three inline-input" style="color: var(--cor-destaque); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga }}'">
-        <option style="color: var(--cor-destaque);">Pendentes</option>
+    <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga }}'">
+        <option style="color: var(--main-color);">Pendentes</option>
         <option style="color: green;">Finalizadas</option>
     </select>
 {% endblock all_separation_status %}
@@ -177,7 +177,7 @@
 
                     const cell1 = subtotalRow.insertCell(3);
                     cell1.textContent = 'Subtotal:';
-                    subtotalRow.insertCell(4).innerHTML = `<span class="cor-web">${subtotal}</span> / ${qtde_solic}`;
+                    subtotalRow.insertCell(4).innerHTML = `<span class="text-main-color">${subtotal}</span> / ${qtde_solic}`;
         
                     subtotalRow.classList.add('sub-total');
                 }
@@ -198,7 +198,7 @@
                         cell1.textContent = 'Subtotal:';
 
                         const qtde_solic = await fetchQtdeSolic(nroCarga, item);
-                        subtotalRow.insertCell(4).innerHTML = '<span class="cor-web">0</span> / ' + qtde_solic;
+                        subtotalRow.insertCell(4).innerHTML = '<span class="text-main-color">0</span> / ' + qtde_solic;
 
                         subtotalRow.classList.add('sub-total');
                     }

@@ -24,7 +24,7 @@
 
 
 .svg-gray:hover, .svg-gray:focus {
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg);
 }
 
@@ -34,7 +34,7 @@
     height: 16px;
     user-select: none;
     border-radius: 100%;
-    background-color: var(--cor-destaque);
+    background-color: var(--main-color);
     filter: invert(100%) sepia(0%) saturate(0%);
 }
 
