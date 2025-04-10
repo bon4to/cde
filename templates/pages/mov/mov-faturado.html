@@ -7,7 +7,7 @@
         {% include "shared/header/tl-header.html" %}
 
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
@@ -20,7 +20,7 @@
             </h1>
             <div class="aux-buttons">
                 <form onsubmit="routeMovRedirect('cargas/separacao/f'); return false;">
-                    <div class="flex-row" style="margin: 8px 0; width: 100%;">
+                    <div class="flex-h" style="margin: 8px 0; width: 100%;">
                         <input class="address-three" style="margin: 0; height: 14px" type="number" id="idInputBrow" min="1" placeholder="Carga...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
                             <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">

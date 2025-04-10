@@ -1,0 +1,82 @@
+/* Typography styles */
+.c { text-align: center; }
+.r { text-align: right; }
+.l { text-align: left; }
+
+p {
+    top: auto;
+    bottom: auto;
+    display: flex;
+    font-size: 14px;
+    color: #333333;
+    text-align: center;
+    font-weight: normal;
+    align-items: center;
+    justify-content: center;
+    font-family: Poppins, sans-serif;
+}
+
+h1 {
+    margin: 0;
+    color: #2f2f2f;
+    font-weight: bold;
+    pointer-events: none;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+h2 {
+    margin: 0;
+    display: flex;
+    font-size: 28px;
+    color: #333333;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+h3 {
+    margin: 0;
+    padding: 4px;
+    font-size: 28px;
+    color: #333333;
+    font-weight: bold;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+h4 {
+    margin: 0;
+    padding: 4px;
+    font-size: 16px;
+    font-weight: normal;
+    font-family: 'Poppins', sans-serif;
+}
+
+p.alert {
+    color: red;
+    margin-left: auto;
+    text-align: center;
+    margin-right: auto;
+}
+
+h1.title {
+    width: 100%;
+    text-align: center;
+}
+
+.bold {
+    font-weight: normal;
+} 
+
+h1.subtitle {
+    margin-top: 0;
+    font-size: 22px;
+    color: #353535;
+}
+
+h1.sub-label {
+    font-size: 18px;
+    color: #353535;
+    padding-left: 18px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+}

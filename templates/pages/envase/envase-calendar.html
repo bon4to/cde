@@ -6,7 +6,7 @@
 
         {% include 'shared/header/hp-header.html' %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a href="{{ url_for('envase') }}">ENVASE</a>
                 <span class="dash">/</span>
@@ -24,14 +24,14 @@
                 <div id="calendar-container"></div>
                 <div>
                     <div class="legenda-container">
-                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l1), 1);">1</div>
-                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l2), 1);">2</div>
-                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l3), 1);">3</div>
-                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l4), 1);">4</div>
-                        <div class="legenda-item" style="background-color: rgba(var(--programmed-l5), 1);">5</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--alt-color-1), 1);">1</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--alt-color-2), 1);">2</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--alt-color-3), 1);">3</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--alt-color-4), 1);">4</div>
+                        <div class="legenda-item" style="background-color: rgba(var(--alt-color-5), 1);">5</div>
                         <!-- INATIVOS
-                            <div class="legenda-item" style="background-color: rgba(var(--programmed-l6), 1);">6</div>
-                            <div class="legenda-item" style="background-color: rgba(var(--programmed-l7), 1);">7</div>
+                            <div class="legenda-item" style="background-color: rgba(var(--alt-color-6), 1);">6</div>
+                            <div class="legenda-item" style="background-color: rgba(var(--alt-color-7), 1);">7</div>
                         -->
                     </div>
                 </div>
@@ -125,12 +125,12 @@
             if (linha7) linhasComEvento.push('7');
 
             const flexContainer = document.createElement('div');
-            flexContainer.classList.add('flex-container');
+            flexContainer.classList.add('flex');
 
             linhasComEvento.forEach(linhaClass => {
                 const sessionContainer = document.createElement('div');
-                sessionContainer.classList.add('session-container', 'programmed-l' + linhaClass);
-                sessionContainer.style.border = '1px solid rgba(var(--programmed-l' + linhaClass + '), 1)';
+                sessionContainer.classList.add('session-container', 'alt-color-' + linhaClass);
+                sessionContainer.style.border = '1px solid rgba(var(--alt-color-' + linhaClass + '), 1)';
 
                 const items = envase.filter(item => item.linha === parseInt(linhaClass) && item.data_envase === data);
                 console.log(items);
@@ -145,7 +145,7 @@
                         tooltip.appendChild(itemTooltip);
                     });
 
-                    tooltip.style.color = 'rgba(var(--programmed-l' + linhaClass + '), 1)';
+                    tooltip.style.color = 'rgba(var(--alt-color-' + linhaClass + '), 1)';
                     sessionContainer.appendChild(tooltip);
                 }
 

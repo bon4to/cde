@@ -1,0 +1,75 @@
+.svg-label {
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    user-select: none;
+    filter: invert(45%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+.svg-gray {
+    width: 26px;
+    height: 26px;
+    padding: 6px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 20%;
+    transition: 0.2s ease all;
+    filter: invert(30%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+.svg-link {
+    cursor: pointer;
+    user-select: none;
+}
+
+
+.svg-gray:hover, .svg-gray:focus {
+    background-color: var(--cor-destaque);
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg);
+}
+
+.svg-orange {
+    width: 16px;
+    padding: 6px;
+    height: 16px;
+    user-select: none;
+    border-radius: 100%;
+    background-color: var(--cor-destaque);
+    filter: invert(100%) sepia(0%) saturate(0%);
+}
+
+.svg-invert, .svg-invert-hover {
+    width: 26px;
+    height: 26px;
+    padding: 6px;
+    user-select: none;
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+.svg-inv {
+    fill: white;
+    transition: rotate 0.1s ease-in-out;
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(180deg);
+}
+
+.svg-invert-hover:hover, .svg-invert-hover:focus  {
+    border-radius: 20%;
+    background-color: rgba(255, 255, 255, 0.94);
+    filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(30deg);
+}
+
+.svg {
+    width: auto;
+    height: 26px;
+    padding: 6px;
+    user-select: none;
+    background-color: transparent;
+}
+
+.msg-svg {
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    margin: 0 4px;
+}

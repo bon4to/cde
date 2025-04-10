@@ -1,0 +1,39 @@
+/* Pagination styles */
+.pagination {
+    display: flex;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.pagination a, .pagination span {
+    margin-top: 0;
+    font-size: 16px;
+    color: #1d1d1d;
+    padding: 8px 12px;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.pagination a {
+    min-width: 40px;
+    box-sizing: border-box;
+}
+
+.pagination a.active {
+    color: white;
+    border-radius: 6px;
+    background-color: var(--cor-destaque);
+}
+
+.pagination a:hover:not(.active) {
+    border-radius: 6px;
+    background-color: #ddd;
+}
+
+.pagination span {
+    cursor: default;
+    min-width: 40px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+} 

@@ -1,0 +1,11 @@
+/* Tooltip styles */
+.tooltip {
+    position: absolute;
+    background: black;
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    display: none;
+    font-size: 12px;
+    white-space: nowrap;
+}

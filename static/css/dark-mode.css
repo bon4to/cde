@@ -1,12 +1,12 @@
 
 html.dark {
-    --programmed-l1: 155, 072, 060;
-    --programmed-l2: 081, 129, 040;
-    --programmed-l3: 065, 065, 155;
-    --programmed-l4: 155, 065, -20;
-    --programmed-l5: 065, 135, 155;
-    --programmed-l6: 155, 065, 125;
-    --programmed-l7: 155, 120, 065;
+    --alt-color-1: 155, 072, 060;
+    --alt-color-2: 081, 129, 040;
+    --alt-color-3: 065, 065, 155;
+    --alt-color-4: 155, 065, -20;
+    --alt-color-5: 065, 135, 155;
+    --alt-color-6: 155, 065, 125;
+    --alt-color-7: 155, 120, 065;
 }
 
 html.dark {

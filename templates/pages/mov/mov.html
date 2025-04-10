@@ -7,7 +7,7 @@
         {% include "shared/header/tl-header.html" %}
 
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
                 <h1>
                     <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                     <span style="margin: 0 8px;"></span>
@@ -61,7 +61,7 @@
                     <form id="formBuscarItens" method="post" onsubmit="showLockLabel()" style="display: block; height: unset">
                         <div>
                             <label for="input_code"></label>
-                            <div class="split-horizontal">
+                            <div class="split-h">
                                 <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou o Código de Barras...">
                                 <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
                             </div>
@@ -69,17 +69,17 @@
                         </div>
                     </form>
 
-                    <form class="split-vertical" style="display: flex; height: unset" id="form-field" method="post" action="/logi/mov/moving">
-                        <div class="flex-column" style="align-items: center;">
+                    <form class="split-v" style="display: flex; height: unset" id="form-field" method="post" action="/logi/mov/moving">
+                        <div class="flex-v" style="align-items: center;">
                             <div id="produtoField">
-                                <div class="flex-column">
+                                <div class="flex-v">
                                     <div>
                                         <label for="desc_item">Produto
                                             <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br>
                                         </label>
                                         <input class="address-one" name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Descrição do item..." onclick="maximizeText(this)">
                                     </div>
-                                    <div class="split-horizontal">
+                                    <div class="split-h">
                                         <div>
                                             <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
                                                 <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
@@ -118,7 +118,7 @@
                                 </div>
                             </div>
                             <div style="display: flex;">
-                                <div class="flex-row">
+                                <div class="flex-h">
                                     <div style="display: flex; align-items: center">
                                         <img id="svg-image" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
                                     </div>
@@ -129,7 +129,7 @@
                                 <div id="popup-field" style="display: none; right: 25px">
                                     <div class="back-modal" onclick="togglePopUp()"></div>
                                     <div class="form-filter generic">
-                                        <div class="split-horizontal" style="background-color: var(--strong-dark-m); border-radius: 12px 12px 0 0">
+                                        <div class="split-h" style="background-color: var(--strong-dark-m); border-radius: 12px 12px 0 0">
                                             <h1 style="text-align: left; margin: auto 14px; padding-left: 0; color: var(--light-text)" class="subtitle">Configurações de Operação</h1>
                                             <div style="scale: 1">
                                                 <div class="svg-inv" style="padding: 8px" onclick="togglePopUp()">
@@ -209,7 +209,7 @@
                                 </div>
                             </div>
                             <div id="dateFields" style="display: flex;">
-                                <div class="flex-column" style="gap: 0">
+                                <div class="flex-v" style="gap: 0">
                                     <label for="date_fab">Data de Fabricação</label>
                                     <input type="date" id="date_fab" name="date_fab" class="address-two" required="true">
                                     <input type="hidden" name="data_locked" id="data_locked" value="false">
@@ -217,7 +217,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-row" style="gap: 0; min-width: 100%;">
+                        <div class="flex-h" style="gap: 0; min-width: 100%;">
                             <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
                         </div>
                     </form>
@@ -276,7 +276,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="split-horizontal">
+                    <div class="split-h">
                         <div style="display: flex;">
                             <select style="height: 40px" name="operacao" id="bundleOperation" class="address-four" onchange="toggleBundleEndereco()">
                                 <option value="S">S</option>

@@ -8,7 +8,7 @@
 
     <!-- TABELA -->
     <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
         <h1>
             <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
             <span style="margin: 0 8px;"></span>
@@ -29,7 +29,7 @@
         <div id="divContent">
         <div class="forms-container" style="padding: 12px 30px; display: unset; max-height: 550px; min-height: unset;">
             {% if 'CDE014' in user_perm or session['user_grant'] <= 2 %}
-                <div class="split-horizontal">
+                <div class="split-h">
                     <div>
                         <h2>Cadastrar Usuário</h2>
                         <hr>
@@ -40,7 +40,7 @@
                                 <label for="password_user">Senha: <span style="color: red">*</span></label><label class="cor-web" style="text-align: right;" id="password_strength"></label>
                                 <input class="disabled" id="password_user" name="password_user" placeholder="Senha de usuário..." value="12345" disabled required>
                             </div>
-                            <div class="split-horizontal">
+                            <div class="split-h">
                                 <div>
                                     <label for="nome_user">Nome: <span style="color: red">*</span></label><br>
                                     <input class="address" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
@@ -77,7 +77,7 @@
         </div>
         <div draggable="false" class="tables-container" style="width: 600px">
             <h1>Usuários do Sistema</h1>
-            <div class="split-horizontal">
+            <div class="split-h">
                 <div style="width: 100%;">
                     <div class="table-overflow" style="max-height: 620px;">
                         <table id="filterTable">

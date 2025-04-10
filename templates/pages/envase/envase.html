@@ -6,7 +6,7 @@
 
         {% include "shared/header/hp-header.html" %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <span>ENVASE</span>
                 <span class="id-page">{{session['id_page']}}</span>
@@ -21,7 +21,7 @@
             </div>
         </div>
         <div>
-            <div style="display: none;" class="flex-row" id="table-filter">
+            <div style="display: none;" class="flex-h" id="table-filter">
                 <input type="date" class="address" id="filterDate1" onchange="filterByDate()">
                 <div id="period-date" style="display: contents">
                     <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
@@ -46,7 +46,7 @@
                         <div>
                             <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
                                 <label for="input_code"></label>
-                                <div class="split-horizontal">
+                                <div class="split-h">
                                     <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="DUN-14 ou código do item...">
                                     <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px; transform: rotate(90deg);" type="image" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
                                 </div>
@@ -115,7 +115,7 @@
                             <div class="back-modal" onclick="toggleFilter()"></div>
                                 <div class="form-filter generic" style="">
                                     <div style="padding: 5px;display: flex;max-height: 40px;align-items: center;justify-content: center;">
-                                        <div class="split-horizontal" style="align-items: center">
+                                        <div class="split-h" style="align-items: center">
                                             <h3 style="font-size: 24px">Filtros</h3>
                                             <div style="scale: 0.7">
                                                 <div class="pin" id="fix-move-btn" onclick="toggleFilter()">
@@ -156,7 +156,7 @@
                     </div>
                     -->
                 {% for linha_indice in range(1, 6) %}
-                    <div class="table-overflow section-linhas programmed-l{{ linha_indice }}" id="linha{{ linha_indice }}_table">
+                    <div class="table-overflow section-linhas alt-color-{{ linha_indice }}" id="linha{{ linha_indice }}_table">
                         <h4>Linha {{ linha_indice }}</h4>
                         <table id="filterTable">
                             <tr>
