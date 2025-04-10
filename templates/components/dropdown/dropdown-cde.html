@@ -7,7 +7,7 @@
                 </div>
                 
                 {% if 'user_grant' in session %}
-                    <div class="split-horizontal">
+                    <div class="split-h">
                         <div style="display: flex;flex-wrap: nowrap;">
                             <div class="dropdown">
                                 <button class="dropbtn" onclick="window.location.href='{{ url_for('home_logi') }}';">
@@ -17,7 +17,7 @@
                                 <div class="dropdown-content">
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('mov') }}">
-                                            <div class="split-horizontal" style="align-items: center;">
+                                            <div class="split-h" style="align-items: center;">
                                                 <span>MOV002 | MOVIMENTAR</span>
                                                 <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
@@ -29,7 +29,7 @@
                                     </div>
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('estoque') }}">
-                                            <div class="split-horizontal" style="align-items: center;">
+                                            <div class="split-h" style="align-items: center;">
                                                 <span>MOV004 | ESTOQUE</span>
                                                 <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
@@ -43,7 +43,7 @@
                                     <hr>
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('cargas') }}">
-                                            <div class="split-horizontal" style="align-items: center;">
+                                            <div class="split-h" style="align-items: center;">
                                                 <span>MOV006 | CARGAS</span>
                                                 <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
@@ -58,7 +58,7 @@
                                     <hr>
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('mov_request') }}">
-                                            <div class="split-horizontal" style="align-items: center;">
+                                            <div class="split-h" style="align-items: center;">
                                                 <span>MOV007 | REQUISIÇÕES</span>
                                                 <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
@@ -78,7 +78,7 @@
                                 <div class="dropdown-content">
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('producao') }}">
-                                            <div class="split-horizontal" style="align-items: center;">
+                                            <div class="split-h" style="align-items: center;">
                                                 <span>PRC010 | PROCESSAMENTO</span>
                                                 <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
@@ -90,7 +90,7 @@
                                     </div>
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('envase') }}">
-                                            <div class="split-horizontal" style="align-items: center;">
+                                            <div class="split-h" style="align-items: center;">
                                                 <span>ENV006 | ENVASE</span>
                                                 <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
@@ -114,7 +114,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-row" style="gap: 0">
+                        <div class="flex-h" style="gap: 0">
                             <div style="display: flex; justify-content: center; align-items: center; height: 48px; width: 48px;">
                                 <img id="toggle-theme" style="height: 16px; width: 16px; cursor: pointer;" onclick="toggleTheme()" class="svg-inv" src="{{ url_for('static', filename='svg/moon.svg') }}" alt="">
                             </div>
@@ -134,7 +134,7 @@
                                 <div class="dropdown-content" style="right: 0; left:unset">
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('cde_cfg') }}">
-                                            <div class="split-horizontal" style="align-items: center;">
+                                            <div class="split-h" style="align-items: center;">
                                                 <span>AJUSTES</span>
                                                 <img style="height: 12px; width: 11px; padding: 0;" class="svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
                                             </div>
@@ -156,7 +156,7 @@
                             <div style="margin: 4px; display: flex;">
                                 <hr class="vert" style="width: 0;">
                             </div>
-                            <div class="user-params-button flex-row" onclick="window.location.href='{{ url_for('cde_account') }}';">
+                            <div class="user-params-button flex-h" onclick="window.location.href='{{ url_for('cde_account') }}';">
                                 <p style="margin: auto 8px; max-height: 14px" class="id-page white">{{ app_unit }}</p>
                                 <div style="margin: auto 4px auto auto;" class="user-button">
                                     {{ session.get('user_initials', '') }}

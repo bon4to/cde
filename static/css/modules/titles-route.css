@@ -1,0 +1,72 @@
+
+.titles-ruler {
+    all: unset;
+    display: flex; 
+    min-width: 100%; 
+    flex-wrap: wrap; 
+    gap: 8px; 
+    margin: 0 0 8px 0;
+}
+
+.titles-container {
+    flex: 1;
+    box-sizing: border-box;
+    background-color: #fff;
+    box-shadow: 0 0 22px rgba(0, 0, 0, 0.2);
+    min-height: 80px;
+    padding: 8px 36px;
+    max-height: 84px;
+    border-radius: 24px 24px 0 0;
+    border-bottom: 4px inset var(--cor-destaque);
+    transition: width 0.3s ease-out;
+    max-width: -webkit-fill-available;
+}
+
+.titles-container h1 {
+    height: 100%;
+    display: flex;
+    margin: 10px 0;
+    color: #181818;
+    align-items: center;
+    font-family: "Inter";
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.titles-container a {
+    margin: unset;
+    font-size: unset;
+    pointer-events: all;
+    color: var(--cor-destaque)
+}
+
+.titles-container .dash {
+    margin: 0 10px 0 10px;
+    color: var(--cor-destaque);
+}
+
+.titles-container a:hover {
+    color: var(--cor-destaque);
+    text-decoration: underline;
+}
+
+.title-centerer {
+    align-items: center;
+    justify-content: space-between; 
+}
+
+.titles-container .button-mini {
+    max-height: 26px;
+    max-width: 26px;
+    min-height: 26px;
+    min-width: 26px;
+}
+
+.titles-container .id-page {
+    margin-left: 12px;
+    border: 1px solid;
+    border-radius: 6px;
+    padding: 2px 4px;
+    font-size: 10px;
+}

@@ -453,26 +453,26 @@ function toggleTheme() {
         //root.style.setProperty('--cor-tl-rgb', '206, 80, 34');
         //root.style.setProperty('--cor-hp-rgb', '123, 104, 57');
         
-        root.style.setProperty('--programmed-l1', '155, 072, 060');
-        root.style.setProperty('--programmed-l2', '081, 129, 040');
-        root.style.setProperty('--programmed-l3', '065, 065, 155');
-        root.style.setProperty('--programmed-l4', '155, 065, -20');
-        root.style.setProperty('--programmed-l5', '065, 135, 155');
-        root.style.setProperty('--programmed-l6', '155, 065, 125');
-        root.style.setProperty('--programmed-l7', '155, 120, 065');
+        root.style.setProperty('--alt-color-1', '155, 072, 060');
+        root.style.setProperty('--alt-color-2', '081, 129, 040');
+        root.style.setProperty('--alt-color-3', '065, 065, 155');
+        root.style.setProperty('--alt-color-4', '155, 065, -20');
+        root.style.setProperty('--alt-color-5', '065, 135, 155');
+        root.style.setProperty('--alt-color-6', '155, 065, 125');
+        root.style.setProperty('--alt-color-7', '155, 120, 065');
     } else {
         localStorage.setItem('theme', 'light');
         //root.style.setProperty('--cor-cde-rgb', '62, 94, 166');
         //root.style.setProperty('--cor-tl-rgb', '234, 90, 38');
         //root.style.setProperty('--cor-hp-rgb', '143, 121, 67');
         
-        root.style.setProperty('--programmed-l1', ' 255, 172, 160');
-        root.style.setProperty('--programmed-l2', ' 181, 229, 140');
-        root.style.setProperty('--programmed-l3', ' 165, 165, 255');
-        root.style.setProperty('--programmed-l4', ' 255, 165, 080');
-        root.style.setProperty('--programmed-l5', ' 165, 235, 255');
-        root.style.setProperty('--programmed-l6', ' 255, 165, 225');
-        root.style.setProperty('--programmed-l7', ' 255, 220, 165');
+        root.style.setProperty('--alt-color-1', ' 255, 172, 160');
+        root.style.setProperty('--alt-color-2', ' 181, 229, 140');
+        root.style.setProperty('--alt-color-3', ' 165, 165, 255');
+        root.style.setProperty('--alt-color-4', ' 255, 165, 080');
+        root.style.setProperty('--alt-color-5', ' 165, 235, 255');
+        root.style.setProperty('--alt-color-6', ' 255, 165, 225');
+        root.style.setProperty('--alt-color-7', ' 255, 220, 165');
     }
 }
 
@@ -604,7 +604,7 @@ function showToast(message, type = 0, duration = 5) {
     
     // Cria o conteúdo do toast
     toast.innerHTML = `
-        <div class="split-horizontal">
+        <div class="split-h">
             <span style="display: flex; align-items: center;">${message}</span>
             <span style="margin-left: 10px; display: flex; align-items: center;">${icon}</span>
             <span class="toast-close" style="margin-left: auto; cursor: pointer;">&times;</span>

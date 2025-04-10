@@ -7,7 +7,7 @@
         {% include 'shared/header/cde-header.html' %}
 
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
                 <span style="margin: 0 8px;"></span>
@@ -30,7 +30,7 @@
         </div>
         <div id="divContent">
             <div draggable="false" style="display: flex; align-items: center;" class="form-login">
-                <div class="flex-row">
+                <div class="flex-h">
                     <div class="log">
                         <div style="max-width: 400px; justify-content: flex-start; margin: auto">
                             <form style="max-width: 400px; justify-content: flex-start; margin: auto" id="form-field" method="post" action="{{ url_for('rotulo') }}">
@@ -105,7 +105,7 @@
                                 <hr>
                                 <h3 id="resposta1" class="alert">Calculadora</h3>
                                 <p id="resposta2">Digite os parâmetros...</p>
-                                <div style="display: none" class="split-horizontal">
+                                <div style="display: none" class="split-h">
                                     <input class="btn-fancy" type="submit" value="Calcular...">
                                 </div>
                             </form>

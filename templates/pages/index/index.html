@@ -5,7 +5,7 @@
             
         {% endblock title %}
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             {% block brow %}
                 
             {% endblock brow %}
@@ -18,8 +18,8 @@
         <div id="divContent" style="flex-wrap: wrap;">
             {% if 'user_grant' in session %}
                 {% if not about %}
-                    <div class="tables-container flex-column" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
-                        <div class="flex-row" style="min-width: 100%; gap: 30px">
+                    <div class="tables-container flex-v" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
+                        <div class="flex-h" style="min-width: 100%; gap: 30px">
                             {% block side_banner %}  
                                
                             {% endblock side_banner %}
@@ -39,7 +39,7 @@
                                         
                                     {% endblock grid_buttons %}
                                 </div>
-                                <div class="split-horizontal" style="padding: 0; width: auto;">
+                                <div class="split-h" style="padding: 0; width: auto;">
                                     <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
                                         <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
                                     </a>
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                 {% else %}
-                    <div class="flex-row" style="margin: 0 80px; gap: 40px">
+                    <div class="flex-h" style="margin: 0 80px; gap: 40px">
                         <div style="height: 100%; display: flex; flex-direction: column; justify-content: space-between">
                             <div>
                                 <div class="salute-text">
@@ -61,7 +61,7 @@
                                 </div>
                                 <hr style="margin-left: 20px; width: 20%;">
                                 <div>
-                                    <p class="flex-column" style="align-items: start; gap: 0; margin-left: 20px; text-align: left; font-size: 16px">
+                                    <p class="flex-v" style="align-items: start; gap: 0; margin-left: 20px; text-align: left; font-size: 16px">
                                         <span>O software CDE tem sua abordagem centralizada no usuário, melhorando a produtividade, bem como a centralização de atividades da empresa, promovendo soluções objetivas e evolução contínua da plataforma à serviço da empresa.</span>
                                         <span style="margin-bottom: 10px;">O mesmo teve seu primeiro release em <span style="font-weight: 550;">janeiro de 2024</span> e segue com seu desenvolvimento até o presente momento.</span>
                                         <span style="font-weight: 550; color: #ee7e7e">O sistema está em fase beta!</span>
@@ -69,13 +69,13 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="split-horizontal">
-                                <p class="flex-column" style="gap: 0; align-items: flex-start; text-align: left; font-size: 14px; padding: 0; margin: 0; justify-content: flex-start;">
+                            <div class="split-h">
+                                <p class="flex-v" style="gap: 0; align-items: flex-start; text-align: left; font-size: 14px; padding: 0; margin: 0; justify-content: flex-start;">
                                     <span>Released under the MIT License.</span>
                                     <span style="font-weight: 550">Copyright © 2025 Lucas G. Bonato</span>
                                 </p>
                                 <div style="align-items: end;">
-                                    <div class="flex-row" style="gap: 12px; border-radius: 8px; margin-top: 0">
+                                    <div class="flex-h" style="gap: 12px; border-radius: 8px; margin-top: 0">
                                         <a style="margin-top: 0" href="https://linkedin.com/in/lucas-bonato/" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/linkedin.svg') }}" alt="LinkedIn"></a>
                                         <a style="margin-top: 0" href="https://github.com/bon4to" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/github.svg') }}" alt="GitHub"></a>
                                         <a style="margin-top: 0" href="mailto:bon4to@icloud.com" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/inbox.svg') }}" alt="E-Mail"></a>

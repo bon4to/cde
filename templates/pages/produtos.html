@@ -7,7 +7,7 @@
         {% include 'shared/header/hp-header.html' %}
 
         <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-row title-centerer">
+            <div class="titles-container flex-h title-centerer">
             <h1>
                 <span>PRODUTOS</span>
                 <span class="id-page">{{session['id_page']}}</span>
@@ -51,7 +51,7 @@
                                         <label for="desc_item">Item (Descrição)</label>
                                         <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
                                     </div>
-                                    <div class="split-horizontal">
+                                    <div class="split-h">
                                         <div>
                                             <label for="cod_item">Código (SKU)</label>
                                             <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" type="text" name="cod_item" placeholder="SKU..." required>
@@ -78,7 +78,7 @@
                             </details>
                         </div>
                     {% elif class_alert == 'success' %}
-                        <div class="msg-success flex-column" style="margin: 0; gap: 0">
+                        <div class="msg-success flex-v" style="margin: 0; gap: 0">
                             <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
                             <span style="font-size: 12px">
                                 {{ alert | safe }}
@@ -86,7 +86,7 @@
                         </div>
                     {% endif %}
                 {% else %}
-                    <div class="msg-info flex-column" style="margin: 0; gap: 0">
+                    <div class="msg-info flex-v" style="margin: 0; gap: 0">
                         <span style="font-weight: 600">Esta lista pode estar desatualizada.</span>
                         <span style="font-size: 12px">Caso necessário, inative itens sem movimentação prévia.</span>
                     </div>
