@@ -21,27 +21,63 @@ def createNotificationsTable() -> tuple[None, str]:
 
 def setNotification(userid: int, title: str, message: str) -> tuple[None, str]:
     try:
-        query = f'''
-            INSERT INTO tbl_notifications (
-                id_user, title, message, date
-            ) VALUES (
-                {userid}, "{title}", "{message}", datetime('now', '-3 hours')
-            );
-        '''
-        dsn = 'LOCAL'
-        db.query(query, dsn)
+        title = title.strip().upper()
+        message = message.strip().capitalize()
     except Exception as e:
         return None, str(e)
-    return None, None
+    
+    # pega todos os usuários e cria um registro para cada um caso o id_user seja 0
+    users = []
+    userid = int(userid)
+    
+    if userid != 0:
+        users.append(userid)
+    else:
+        try:
+            query = f'''
+                SELECT id_user
+                FROM users
+                ORDER BY id_user ASC;
+            '''
+            dsn = 'LOCAL'
+            result, _ = db.query(query, dsn)
+            
+            for row in result:
+                users.append(row[0])
+        except Exception as e:
+            return None, str(e)
+    
+    for user in users:
+        try:
+            query = f'''
+                INSERT INTO tbl_notifications (
+                    id_user, title, message, date
+                ) VALUES (
+                    {user}, "{title}", "{message}", datetime('now', '-3 hours')
+                );
+            '''
+            dsn = 'LOCAL'
+            db.query(query, dsn)
+        except Exception as e:
+            return None, str(e)
+    return None, ""
 
 
-def getNotifications(userid: int) -> tuple[list | None, str]:
+def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None, str]:
     try:
-        query = f'''
-            SELECT id, title, message, date, flag_read
-            FROM tbl_notifications
-            WHERE id_user = {userid}
-            ORDER BY date DESC
+        if id_notification != 0:
+            query = f'''
+                SELECT id, title, message, date, flag_read
+                FROM tbl_notifications
+                WHERE id_user = {userid} 
+                AND id = {id_notification};
+            '''
+        else:
+            query = f'''
+                SELECT id, title, message, date, flag_read
+                FROM tbl_notifications
+                WHERE id_user = {userid} 
+                ORDER BY date DESC;
         '''
         dsn = 'LOCAL'
         result, _ = db.query(query, dsn)
@@ -60,7 +96,18 @@ def getNotifications(userid: int) -> tuple[list | None, str]:
 
 
 def clearNotification(userid: int, id: int):
-    pass
+    try:
+        query = f'''
+            UPDATE tbl_notifications
+            SET flag_read = 1
+            WHERE id_user = {userid}
+            AND id = {id};
+        '''
+        dsn = 'LOCAL'
+        result, _ = db.query(query, dsn)
+        return result, None
+    except Exception as e:
+        return None, str(e)
 
 
 def clearAllNotifications(userid: int):
