@@ -2402,7 +2402,7 @@ def cde_account() -> str | None:
 
 @app.route('/cde/notifications/', methods=['GET'])
 @cde.verify_auth('CDE001')
-def cde_notifications():
+def cde_notifications() -> str:
     userid = session.get('id_user', 0)
     
     nm.createNotificationsTable()
@@ -2411,6 +2411,22 @@ def cde_notifications():
     return render_template(
         'components/menus/notifications.html',
         notifications=notifications
+    )
+
+
+@app.route('/cde/notifications/<int:id_notification>/', methods=['GET'])
+@cde.verify_auth('CDE001')
+def cde_notifications_id(id_notification) -> str:
+    userid = session.get('id_user', 0)
+    
+    nm.createNotificationsTable()
+    notifications, _ = nm.getNotifications(userid)
+    notification, _ = nm.getNotifications(userid, id_notification)
+    
+    return render_template(
+        'components/menus/notifications.html',
+        notifications=notifications,
+        notification=notification
     )
 
 
@@ -2424,7 +2440,7 @@ def api_notifications():
     return notifications
 
 
-@app.route('/api/set/notification/', methods=['POST'])
+@app.route('/api/notification/set/', methods=['POST'])
 def set_notification():
     data = request.get_json()
     if not data:
@@ -2443,6 +2459,25 @@ def set_notification():
     print(f"Notification received: User={iduser}, Title={title}, Message={message}")
 
     return jsonify({"success": True, "message": "Notification saved!"})
+
+
+@app.route('/api/notification/clear/', methods=['POST'])
+def clear_notification():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    iduser = data.get('iduser')
+    id = data.get('id')
+    
+    if not all([iduser, id]):
+        return jsonify({"error": "Missing fields"}), 400
+
+    _, err = nm.clearNotification(iduser, id)
+    if err != None:
+        print(f"Error clearing notification: {err}")
+
+    return jsonify({"success": True, "message": "Notification cleared!"})
 
 
 @app.route('/login/', methods=['POST'])
