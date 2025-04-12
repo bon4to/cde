@@ -35,10 +35,12 @@
 }
 
 .notification-date {
+    align-items: flex-end;
     justify-content: flex-end;
     margin: 0 8px 8px 0;
     font-size: 0.9em;
     color: #aaa;
+    text-wrap: nowrap;
 }
 
 .notification-icons {
