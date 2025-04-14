@@ -1,15 +1,16 @@
 
 /* Notifications */
 .notification-container {
-    border-radius: 8px; 
+    border-radius: 8px;
     margin-bottom: 10px; 
     transition: background-color 0.3s;
-    border: 1px solid var(--main-color);
+    border: 1px solid #ccc;
+    margin-right: 10px;
+    max-height: 126px;
 }
 
 .notification-container.read {
     background-color: var(--light-white-h);
-    border: 1px solid #ccc;
 }
 
 .notification-title {
@@ -35,6 +36,7 @@
 }
 
 .notification-date {
+    text-align: left;
     align-items: flex-end;
     justify-content: flex-end;
     margin: 0 8px 8px 0;
