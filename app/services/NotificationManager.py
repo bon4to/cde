@@ -108,6 +108,21 @@ def clearNotification(userid: int, id: int):
         return result, None
     except Exception as e:
         return None, str(e)
+    
+    
+def unclearNotification(userid: int, id: int):
+    try:
+        query = f'''
+            UPDATE tbl_notifications
+            SET flag_read = 0
+            WHERE id_user = {userid}
+            AND id = {id};
+        '''
+        dsn = 'LOCAL'
+        result, _ = db.query(query, dsn)
+        return result, None
+    except Exception as e:
+        return None, str(e)
 
 
 def clearAllNotifications(userid: int):
