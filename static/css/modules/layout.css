@@ -26,7 +26,8 @@
 .split-v {
     height: 100%;
     display: flex;
-    justify-content: space-between;
+    align-content: space-between;
+    flex-wrap: wrap;
 }
 
 .view-width {
