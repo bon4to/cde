@@ -2257,6 +2257,13 @@ def users() -> str:
         user_perm=user_perm
     )
     
+    
+@app.route('/api/users/get/', methods=['GET'])
+def get_users():
+    users = UserUtils.get_users()
+    return jsonify(users)
+    
+    
 @app.route('/api/get_item_first_mov', methods=['GET'])
 def api_get_first_mov_item():
     cod_item = request.args.get('cod_item')
@@ -2430,7 +2437,7 @@ def cde_notifications_id(id_notification) -> str:
     )
 
 
-@app.route('/api/notifications/', methods=['GET'])
+@app.route('/api/notification/get/', methods=['GET'])
 def api_notifications():
     userid = session.get('id_user', 0)
     
@@ -2479,6 +2486,25 @@ def clear_notification():
 
     return jsonify({"success": True, "message": "Notification cleared!"})
 
+
+@app.route('/api/notification/unclear/', methods=['POST'])
+def unclear_notification():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    iduser = data.get('iduser')
+    id = data.get('id')
+    
+    if not all([iduser, id]):
+        return jsonify({"error": "Missing fields"}), 400
+
+    _, err = nm.unclearNotification(iduser, id) 
+    if err != None:
+        print(f"Error un-clearing notification: {err}")
+
+    return jsonify({"success": True, "message": "Notification un-cleared!"})
+    
 
 @app.route('/login/', methods=['POST'])
 def login():

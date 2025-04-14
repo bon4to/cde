@@ -483,7 +483,7 @@ function visualDelay(ms) {
 
 function loadNotifications() {
 // carrega notificacoes do backend
-    fetch('/api/notifications')
+    fetch('/api/notification/get')
         .then(response => response.json())
         .then(data => {
             // exibe as notificacoes
