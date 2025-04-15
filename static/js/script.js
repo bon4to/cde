@@ -489,21 +489,44 @@ function loadNotifications() {
             // exibe as notificacoes
             const notificationsContainer = document.getElementById('notifications-container');
             notificationsContainer.innerHTML = ''; // limpa antes de inserir
-            data.forEach(notification => {
+            
+            let unreadNotifications = 0;
+            for (let i = 0; i < data.length; i++) {
+                const notification = data[i];
+
+                // limita a exibicao de 5 notificacoes
+                if (unreadNotifications >= 5) {
+                    break;
+                }
+
+                // ignora as notificacoes lidas
+                if (notification.flag_read) {
+                    continue;
+                }
+
+                unreadNotifications++;
+
+                // altera o icone da notificacao
+                svgNotification = document.getElementById('svg-notification');
+                svgNotification.src = '/static/svg/bell-dot.svg';
+
+                // cria o elemento da notificacao
                 const notificationElement = document.createElement('div');
                 notificationElement.classList.add('dropdown-notification');
                 notificationElement.innerHTML = `
-                    <h1>${notification.title}</h1>
-                    <p>${notification.message}</p>
-                    <p style="justify-content: flex-end; margin: 0; font-size: 9px">${notification.date}</p>
-                    <hr>
+                    <div class="flex-v" style="gap: 2px; cursor: pointer; border-bottom: 1px solid var(--light-white-h);" onclick="window.location.href='/cde/notifications/${notification.id}'">
+                        <h1 class="dropdown-notification-title" style="height: 16px;">${notification.title}</h1>
+                        <p class="dropdown-notification-message" style="height: 12px; margin-bottom: 4px;">${notification.message}</p>
+                        <p class="dropdown-notification-date">${notification.date}</p>
+                    </div>
                 `;
                 notificationsContainer.appendChild(notificationElement);
-            })
+            }
+            
             const moreElement = document.createElement('div');
             moreElement.innerHTML = `
                 <div class="dropdown-notification">
-                    <a href="/cde/notifications">Ver tudo... (${data.length})</a>
+                    <a style="font-family: 'Calibri', sans-serif;" href="/cde/notifications">Ver todas... (${unreadNotifications} não lidas)</a>
                 </div>
             `;
             notificationsContainer.appendChild(moreElement);
