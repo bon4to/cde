@@ -120,9 +120,9 @@
                             </div>
                             <div class="dropdown">
                                 <button class="dropbtn" style="cursor: pointer;" onclick="window.location.href='{{ url_for('cde_notifications') }}';">
-                                    <img style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/bell.svg') }}" alt="">
+                                    <img id="svg-notification" style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/bell.svg') }}" alt="">
                                 </button>
-                                <div class="dropdown-content" id="notifications-container" style="right: 0; left:unset">
+                                <div class="dropdown-content" id="notifications-container" style="right: 0; left: unset; background-color: var(--light-white-m); ">
                                     <!-- notifications will be automatically added here -->
                                 </div>
                             </div>
