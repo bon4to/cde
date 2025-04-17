@@ -268,3 +268,47 @@ a.id-page.filled:hover {
     align-content: center;
 }
 
+.qr-grid {
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    width: 280px;
+    gap: 8px;
+}
+.qr-item.featured {
+    grid-column: span 2; 
+    grid-row: span 2;
+}
+
+.qr-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--main-color);
+    border: 4px solid var(--main-color); 
+    border-radius: 8px; 
+}
+
+.qr-item.featured img {
+    max-width: 400px; 
+    max-height: 400px; 
+    min-width: 400px; 
+    min-height: 400px;
+}
+
+.qr-item.featured img:hover {
+    opacity: 1;
+}
+
+.qr-item img {
+    border-radius: 4px;
+    width: 100%; 
+    max-width: 140px; 
+    max-height: 140px;
+    min-width: 140px;
+    min-height: 140px;
+}
+
+.qr-item img:hover {
+    opacity: 0.5;
+    cursor: pointer;
+}
