@@ -1,5 +1,5 @@
 /* Tooltip styles */
-.tooltip {
+div.tooltip {
     position: absolute;
     background: black;
     color: white;

@@ -85,17 +85,6 @@ a.id-page.filled:hover {
     border: 1px solid #fff;
 }
 
-.tooltip {
-    position: absolute;
-    background: black;
-    color: white;
-    padding: 5px;
-    border-radius: 4px;
-    display: none;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
 .session-container .tooltiptext {
     left: 50%;
     opacity: 0;

@@ -1,23 +1,22 @@
-/* Import all modules */
-@import 'modules/variables.css';
+
 @import 'modules/base.css';
-@import 'modules/typography.css';
-@import 'modules/layout.css';
 @import 'modules/components.css';
-@import 'modules/navigation.css';
-@import 'modules/tables.css';
-@import 'modules/utilities.css';
-@import 'modules/footer.css';
-@import 'modules/pagination.css';
-@import 'modules/map.css';
-@import 'modules/tooltips.css';
-@import 'modules/user.css';
-@import 'modules/toast.css';
-@import 'modules/elements.css';
-@import 'modules/titles-route.css';
-@import 'modules/notifications.css';
-@import 'modules/svg.css';
 @import 'modules/dropdown.css';
+@import 'modules/elements.css';
+@import 'modules/footer.css';
+@import 'modules/layout.css';
+@import 'modules/map.css';
+@import 'modules/notifications.css';
+@import 'modules/pagination.css';
+@import 'modules/svg.css';
+@import 'modules/tables.css';
+@import 'modules/titles-route.css';
+@import 'modules/toast.css';
+@import 'modules/tooltips.css';
+@import 'modules/typography.css';
+@import 'modules/user.css';
+@import 'modules/utilities.css';
+@import 'modules/variables.css';
 
 
 /* misc styles that need categorization */
@@ -379,13 +378,6 @@ div.back-modal {
 .tables-container {
     max-height: 130%;
     transition: width 0.3s ease-out;
-}
-
-.forms-container {
-    display: flex;
-    max-width: 450px;
-    flex-direction: column;
-    align-items: flex-start;
 }
 
 .table-overflow {
