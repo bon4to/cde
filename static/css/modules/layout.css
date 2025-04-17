@@ -66,6 +66,13 @@
     box-shadow: 0 0 22px rgba(0, 0, 0, 0.2);
 }
 
+.forms-container {
+    display: flex;
+    max-width: 400px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 .flex-center-all {
     display: flex;
     align-items: center;
