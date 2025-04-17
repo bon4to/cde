@@ -6,105 +6,131 @@
 
         {% include 'shared/header/cde-header.html' %}
 
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                <span style="margin: 0 8px;"></span>
-                <a href="{{ url_for('home') }}">OUTROS</a>
-                <span class="dash">/</span>
-                <span>ETIQUETA</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <a class="aux-button {% if request.endpoint == 'etiqueta' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/sticky-note.svg') }}" title="ETIQUETA" alt="" onclick="window.location.href='{{ url_for('etiqueta') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'rotulo' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/roll.svg') }}" title="RÓTULO" alt="" onclick="window.location.href='{{ url_for('rotulo') }}';">
-                </a>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-            </div>
+        <div class="titles-ruler">
+
+            {% from 'components/title-route.html' import title_container %}
+            {{ title_container(
+                title='ETIQUETA',
+                id_page=session['id_page'],
+                breadcrumbs=[
+                    {'text': 'OUTROS', 'url': 'home', 'title': 'OUTROS'},
+                    {'text': 'ETIQUETA'}
+                ],
+                aux_buttons=[
+                    {'type': 'link', 'url': 'etiqueta', 'icon': 'svg/sticky-note.svg', 'title': 'ETIQUETA', 'active': True},
+                    {'type': 'link', 'url': 'rotulo', 'icon': 'svg/roll.svg', 'title': 'RÓTULO'},
+                    {'type': 'divider'},
+                    {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                    {'type': 'divider'},
+                    {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+                ]
+            ) }}
+
         </div>
-        </div>
+        
         <div id="divContent">
-            <div draggable="false" style="display: flex; align-items: center;" class="form-login">
-                <div class="flex-h">
-                    <div class="log">
-                        <div style="max-width: 400px; justify-content: flex-start; margin: auto">
+            <div class="forms-container" id="floating-container" draggable="false" style="position: relative; max-width: max-content">
+                    <div style="max-width: 400px; justify-content: flex-start; margin: auto">
+                        <div>
+                            <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
+                                <label for="input_code"></label>
+                                <div class="split-h">
+                                    <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o código aqui...">
+                                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                                </div>
+                                <hr>
+                            </form>
+                        </div>
+                        <form style="display: flex; justify-content: flex-start" id="form-field" method="post" action="{{ url_for('etiqueta') }}">
                             <div>
-                                <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
-                                    <label for="input_code"></label>
-                                    <div class="split-h">
-                                        <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o código aqui...">
-                                        <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
-                                    </div>
-                                    <hr>
-                                </form>
+                                <label for="desc_item">Produto
+                                    <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                </label>
+                                <br>
+                                <input 
+                                    id="desc_item" 
+                                    name="desc_item" 
+                                    type="text" 
+                                    value="{{ json_desc_item }}" 
+                                    onclick="maximizeText(this)" 
+                                    required 
+                                    readonly 
+                                    placeholder="Produto..."
+                                >
                             </div>
-                            <form style="display: flex; justify-content: flex-start" id="form-field" method="post" action="{{ url_for('etiqueta') }}">
+                            <div class="two-split">
                                 <div>
-                                    <label for="desc_item">Produto
-                                        <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                    <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
+                                        <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+                                    </label>
+                                    <br>
+                                    <select class="address" id="cod_item" name="cod_item" required onchange="showLockLabel()"></select>
+                                </div>
+                                <div>
+                                    <label for="lote_item">Lote
+                                        <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
                                     </label>
                                     <br>
                                     <input 
-                                        id="desc_item" 
-                                        name="desc_item" 
+                                        id="lote_item" 
+                                        name="cod_lote" 
+                                        class="address" 
+                                        pattern="[A-Z0-9]{6}" 
+                                        maxlength="6" 
                                         type="text" 
-                                        value="{{ json_desc_item }}" 
-                                        onclick="maximizeText(this)" 
+                                        value="{{ json_cod_lote }}" 
                                         required 
                                         readonly 
-                                        placeholder="Produto..."
+                                        placeholder="Lote..."
                                     >
                                 </div>
-                                <div class="two-split">
-                                    <div>
-                                        <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
-                                            <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                        </label>
-                                        <br>
-                                        <select class="address" id="cod_item" name="cod_item" required onchange="showLockLabel()"></select>
-                                    </div>
-                                    <div>
-                                        <label for="lote_item">Lote
-                                            <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                        </label>
-                                        <br>
-                                        <input 
-                                            id="lote_item" 
-                                            name="cod_lote" 
-                                            class="address" 
-                                            pattern="[A-Z0-9]{6}" 
-                                            maxlength="6" 
-                                            type="text" 
-                                            value="{{ json_cod_lote }}" 
-                                            required 
-                                            readonly 
-                                            placeholder="Lote..."
-                                        >
-                                    </div>
-                                </div>
-                                <br>
-                                <div class="flex-h" style="gap: 0; min-width: 100%;">
-                                    <input class="btn-fancy" type="submit" value="GERAR">
-                                    <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px" onclick="toggleCheckbox('imgCheckbox','imgDownload')" >
-                                        <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" alt="">
-                                    </button>
-                                </div>
-                                <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">
-                            </form>
-                        </div>
-                    </div>
-                    <div id="tables-container" style="margin: 40px;">
-                        <div class="centralizado">
-                            <div class="centralizado" style="background-color: var(--main-color); border-radius: 20px; width: 450px; height: 450px;">
-                                <img id="qrCodeImage" style="border-radius: 10px;" src="" alt="">
                             </div>
+                            <br>
+                            <div class="flex-h" style="gap: 0; min-width: 100%;">
+                                <input class="btn-fancy" type="submit" value="GERAR">
+                                <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px" onclick="toggleCheckbox('imgCheckbox','imgDownload')" >
+                                    <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" alt="">
+                                </button>
+                            </div>
+                            <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">
+                        </form>
+                </div>
+            </div>
+            <div class="tables-container" style="max-height: 600px">
+                <div class="centralizado">
+                    <div class="qr-item featured">
+                        <img id="qrCodeImage" title="Última etiqueta gerada" src="" alt="">
+                    </div>
+                </div>
+                <p id="label-success" style="font-weight: 500; color: var(--main-color);">Aguardando dados...</p>
+            </div>
+            <div id="tables-container" class="tables-container glow-cde" style="max-height: 600px">
+                <div class="centralizado">
+                    <div id="qr-grid" class="qr-grid">
+                        <div class="qr-item">
+                            <img id="qrCodeImage2" src="">
                         </div>
-                        <p id="label-success" style="font-weight: 500; color: var(--main-color);">Aguardando dados...</p>
+                        <div class="qr-item">
+                            <img id="qrCodeImage3" src="">
+                        </div>
+                        <div class="qr-item">
+                            <img id="qrCodeImage4" src="">
+                        </div>
+                        <div class="qr-item">
+                            <img id="qrCodeImage5" src="">
+                        </div>
+                        <div class="qr-item">
+                            <img id="qrCodeImage6" src="">
+                        </div>
+                        <div class="qr-item">
+                            <img id="qrCodeImage7" src="">
+                        </div>
+                        <div class="qr-item">
+                            <img id="qrCodeImage8" src="">
+                        </div>
+                        <div class="qr-item">
+                            <img id="qrCodeImage9" src="">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,8 +140,66 @@
         <script>
 
             let ultimoCodigo = '';
+            let qrHistory = [];
+
+            function isDuplicateQRCode(qr_text) {
+                return qrHistory.some(item => item.text === qr_text);
+            }
+
+            function addToQRHistory(qr_text, src) {
+                // Remove existing QR code with same text if it exists
+                qrHistory = qrHistory.filter(item => item.text !== qr_text);
+                
+                // Add new QR code to the beginning
+                qrHistory.unshift({
+                    src: src,
+                    text: qr_text
+                });
+                
+                // Keep only the last 9 QR codes
+                if (qrHistory.length > 9) {
+                    qrHistory.pop();
+                }
+            }
+
+            function moveToFeatured(index) {
+                if (index > 0 && index < qrHistory.length) {
+                    // Get the QR code at the clicked position
+                    const qrCode = qrHistory[index];
+                    
+                    // Remove it from its current position
+                    qrHistory.splice(index, 1);
+                    
+                    // Add it to the beginning
+                    qrHistory.unshift(qrCode);
+                    
+                    // Update all images
+                    updateQRImages();
+                }
+            }
+
+            function updateQRImages() {
+                // Update featured QR code (current)
+                $("#qrCodeImage").attr("src", qrHistory[0].src);
+                
+                // Update grid QR codes (previous)
+                for (let i = 1; i < 9; i++) {
+                    if (qrHistory[i]) {
+                        $(`#qrCodeImage${i+1}`).attr("src", qrHistory[i].src);
+                    } else {
+                        $(`#qrCodeImage${i+1}`).attr("src", "");
+                    }
+                }
+            }
 
             $(function() {
+                // Add click handlers to historical QR codes
+                for (let i = 1; i <= 8; i++) {
+                    $(`#qrCodeImage${i+1}`).click(function() {
+                        moveToFeatured(i);
+                    });
+                }
+
                 $("#formBuscarItens").submit(function(event) {
                     event.preventDefault();
                     var codigo = $("#input_code").val();
@@ -196,9 +280,16 @@
                         data: { qr_text: qr_text, desc_item: desc_item, lote_item: lote_item, cod_item: cod_item, check: check },
                         success: function(response) {
                             var labelStatus = document.getElementById("label-success");
+                            
+                            // Add to history with duplicate check
+                            addToQRHistory(qr_text, "data:image/img;base64," + response);
+                            
+                            // Update all images
+                            updateQRImages();
 
                             if (check === false) {
                                 $("#qrCodeImage").attr("src", "data:image/img;base64," + response);
+                                
                             }
                             else {
                                 $("#qrCodeImage").attr("src", "data:image/img;base64," + response);
@@ -210,14 +301,12 @@
                                 link.click();
                                 document.body.removeChild(link);
                             }
-                            labelStatus.innerHTML = 'A etiqueta foi gerada com sucesso!';
-                            labelStatus.style.color = '#33b333';
+                            labelStatus.innerHTML = '<div class="msg-success" style="width: 100%;">Etiqueta gerada com sucesso!</div>';
                         },
                         error: function(error) {
                             var labelStatus = document.getElementById("label-success");
 
-                            labelStatus.innerHTML = 'A etiqueta não pôde ser gerada!';
-                            labelStatus.style.color = '#b33333';
+                            labelStatus.innerHTML = '<div class="msg-error" style="width: 100%;">A etiqueta não pôde ser gerada!</div>';
 
                             console.error("Erro ao exibir QR Code:", error);
                         }
