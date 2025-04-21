@@ -2400,8 +2400,8 @@ def pagina_login() -> Response | str:
     return render_template('pages/login.html')
 
 
-@app.route('/cde/minha-conta/', methods=['GET'])
-def cde_account() -> str | None:
+@app.route('/cde/profile/', methods=['GET'])
+def cde_profile() -> str | None:
     if session.get('logged_in'):
         return render_template('pages/account.html')
     return None
@@ -2601,12 +2601,12 @@ def logout() -> Response:
     return redirect(url_for('login'))
 
 
-@app.route('/change-password/', methods=['GET', 'POST'])
+@app.route('/cde/profile/change-password/', methods=['GET', 'POST'])
 def change_password() -> str | Response:
     if request.method == 'GET':
         alert_type = 'QUAL A SENHA ATUAL?'
         alert_msge = 'Primeiramente, informe sua senha.'
-        alert_more = '/change-password'
+        alert_more = '/cde/profile/change-password'
         url_return = 'Informe sua senha atual...'
         return render_template(
             'components/menus/alert-input.html', 

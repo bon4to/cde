@@ -20,21 +20,21 @@ div.user-logger.scrolled {
 }
 
 div.user-button {
-    width: 42px;
-    height: 42px;
-    z-index: 1100;
-    font-size: 18px;
-    cursor: pointer;
+    padding: 0;
+    width: 102px;
+    height: 102px;
+    font-size: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: bold;
-    user-select: none;
     color: #888888ab;
     text-align: center;
     border-radius: 20%;
-    pointer-events: all;
-    transition: ease all 0.5s;
+    user-select: none;
     background-color: #f1f1f1;
     font-family: 'Chivo Mono', sans-serif;
-    box-shadow: inset 0 0 4px rgba(34, 34, 34, 0.65);
+    box-shadow: inset 0 0 12px rgba(34, 34, 34, 0.65);
 }
 
 div.user-params-button {
