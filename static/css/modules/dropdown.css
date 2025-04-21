@@ -6,15 +6,12 @@
 }
 
 .navigation-bar .user-button {
-    padding: 0;
     width: 28px;
     height: 28px;
-    display: flex;
     font-size: 14px;
-    margin: 10px 12px;
-    border-radius: 20%;
-    align-items: center;
-    justify-content: center;
+    margin: auto 4px auto auto;
+    cursor: pointer;
+    box-shadow: inset 0 0 6px rgba(34, 34, 34, 0.65);
 }
 
 .dropdown {

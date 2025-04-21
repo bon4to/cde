@@ -148,7 +148,7 @@
                                             <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
                                         </div>
                                     </div>
-                                    <a href="{{ url_for('cde_account') }}">MINHA CONTA</a>
+                                    <a href="{{ url_for('cde_profile') }}">PERFIL</a>
                                     <a href="{{ url_for('about') }}">AJUDA</a>
                                     <a href="{{ url_for('logout') }}">SAIR</a>
                                 </div>
@@ -156,7 +156,7 @@
                             <div style="margin: 4px; display: flex;">
                                 <hr class="vert" style="width: 0;">
                             </div>
-                            <div class="user-params-button flex-h" onclick="window.location.href='{{ url_for('cde_account') }}';">
+                            <div class="user-params-button flex-h" onclick="window.location.href='{{ url_for('cde_profile') }}';">
                                 <p style="margin: auto 8px; max-height: 14px" class="id-page white">{{ app_unit }}</p>
                                 <div style="margin: auto 4px auto auto;" class="user-button">
                                     {{ session.get('user_initials', '') }}
