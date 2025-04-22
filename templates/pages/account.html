@@ -1,68 +1,54 @@
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
-    {% if 'logged_in' not in session %}
-        <title>Login | CDE</title>
-    {% else %}
-        <title>Usuário | CDE</title>
-    {% endif %}
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+    <title>Perfil | CDE</title>
+    <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/cde-header.html' %}
+        <div class="titles-ruler">
 
-        {% if 'logged_in' in session %}
-            <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-                <h1>
-                    <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                    <span style="margin: 0 8px;"></span>
-                    <span>MINHA CONTA</span>
-                    <span class="id-page">CDE003</span>
-                </h1>
-                <div class="aux-buttons">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
-                    <hr class="vert">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-                </div>
-            </div>
-        {% endif %}
+            {% from 'components/title-route.html' import title_container %}
+            {{ title_container(
+                title='PERFIL',
+                id_page='CDE003',
+                breadcrumbs=[
+                    {'text': 'PERFIL'}
+                ],
+                aux_buttons=[
+                    {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                    {'type': 'divider'},
+                    {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+                ]
+            ) }}
+
         </div>
+
         <div id="divContent">
-            <div style="display: flex; min-width: 100%; margin: 0 auto;align-items: start;justify-content: center;">
+            <div class="centralizado" style="width: 100%;">
                 <div class="form-login" style="padding: 20px">
-                    <div class="two-split" style="grid-gap: 30px">
+                    <div class="split-h" style="grid-gap: 30px">
                         <div class="side-banner" style="width: 450px; height: 450px; border-radius: 20px; margin-left: unset;" id="tables-container">
                             <img class="side-banner" style="width: 450px; height: 450px; border-radius: 20px; margin-left: unset;" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
                         </div>
-                        <div class="log" style="width: 100%; justify-content:space-between;">
-                            <h1 style="font-size: 46px; margin-bottom: 10px" class="text-main-color title">Usuário</h1>
+                        <div class="log">
+                            <h1 class="text-main-color title">MEUS DADOS</h1>
                             <div>
                                 <div style="margin-bottom: 10px; margin-top: 8px;" class="centralizado">
-                                    <div class="user-button bigger">
+                                    <div class="user-button">
                                         {{ session.get('user_initials', '?') }}
                                     </div>
                                 </div>
                                 <h3>{{ session.get('user_name') }}</h3>
-                                <h4 style="margin: 0; text-align: center">{{ 'Administrador' if session.get('user_grant') <= 2 else 'Usuário Padrão' }}</h4>
+                                <h4 class="c">{{ 'Administrador' if session.get('user_grant') <= 2 else 'Usuário Padrão' }}</h4>
                             </div>
-                            <a style="font-size: 14px; text-align: center" class="hyperlink" onclick="window.location.href='/change-password'">EDITAR SENHA</a>
-                            <div class="form-login-input">
-                                <div class="flex-h" style="display: flex;width: 100%;">
-                                    <a class="btn-fancy" href="{{ url_for('logout') }}">
-                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
-                                    </a>
-                                </div>
-                            </div>
+                            <a class="hyperlink" onclick="window.location.href='/cde/profile/change-password'">EDITAR SENHA</a>
+                            <a class="btn-fancy" href="{{ url_for('logout') }}">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <script>
-            document.getElementById("form-field").addEventListener("submit", function() {
-                document.getElementById("submitform").disabled = true;
-            });
-        </script>
 
         {% include 'shared/footer.html' %}
