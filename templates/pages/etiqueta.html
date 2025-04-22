@@ -41,12 +41,11 @@
                                 <hr>
                             </form>
                         </div>
-                        <form style="display: flex; justify-content: flex-start" id="form-field" method="post" action="{{ url_for('etiqueta') }}">
+                        <form id="form-field" method="post" action="{{ url_for('etiqueta') }}">
                             <div>
-                                <label for="desc_item">Produto
-                                    <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                </label>
-                                <br>
+                                {% from 'components/lock-label.html' import lock_label %}
+                                {{ lock_label('Produto', 'desc_item') }}
+
                                 <input 
                                     id="desc_item" 
                                     name="desc_item" 
@@ -58,19 +57,18 @@
                                     placeholder="Produto..."
                                 >
                             </div>
+
                             <div class="two-split">
                                 <div>
-                                    <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
-                                        <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                    </label>
-                                    <br>
+                                    {% from 'components/lock-label.html' import lock_label %}
+                                    {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_cod_item_ocurr"></span>' | safe) }}
+                                    
                                     <select class="address" id="cod_item" name="cod_item" required onchange="showLockLabel()"></select>
                                 </div>
                                 <div>
-                                    <label for="lote_item">Lote
-                                        <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                    </label>
-                                    <br>
+                                    {% from 'components/lock-label.html' import lock_label %}
+                                    {{ lock_label('Lote', 'cod_lote') }}
+
                                     <input 
                                         id="lote_item" 
                                         name="cod_lote" 
