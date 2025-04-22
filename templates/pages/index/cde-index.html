@@ -15,7 +15,7 @@
         </h1>
         <div class="aux-buttons">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="AJUSTES" alt="" onclick="window.location.href='{{ url_for('cde_cfg') }}';">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="USUÁRIO" alt="" onclick="window.location.href='{{ url_for('cde_account') }}';">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="PERFIL" alt="" onclick="window.location.href='{{ url_for('cde_profile') }}';">
             <hr class="vert">
             <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
             <hr class="vert">
@@ -35,10 +35,10 @@
                 </a>
             </div>
         </div>
-        <div class="item" onclick="window.location.href='{{ url_for('cde_account') }}';">
+        <div class="item" onclick="window.location.href='{{ url_for('cde_profile') }}';">
             <div class="split-h algn-cntr">
                 <div style="text-align: left">
-                    <h2 class="text-default">Conta</h2>
+                    <h2 class="text-default">Perfil</h2>
                     <p class="text-default bold"><span class="id-page">CDE003</span></p>
                 </div>
                 <a class="btn-fancy button-mini">
