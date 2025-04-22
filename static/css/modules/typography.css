@@ -13,7 +13,7 @@ p {
     font-weight: normal;
     align-items: center;
     justify-content: center;
-    font-family: Poppins, sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 h1 {
@@ -21,7 +21,7 @@ h1 {
     color: #2f2f2f;
     font-weight: bold;
     pointer-events: none;
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 h2 {
@@ -31,6 +31,7 @@ h2 {
     color: #333333;
     align-items: center;
     justify-content: flex-start;
+    font-family: 'Inter', sans-serif;
 }
 
 h3 {

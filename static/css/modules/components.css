@@ -92,6 +92,15 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
 }
 
+.item h2 {
+    font-size: 22px;
+}
+
+.item p {
+    font-size: 14px;
+}
+
+
 /* Toast styles */
 .toast-container {
     position: fixed;
