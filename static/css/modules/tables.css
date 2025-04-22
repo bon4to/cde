@@ -20,8 +20,9 @@ th, td {
 th {
     color: #fff;
     position: sticky;
-    font-weight: bold;
-    font-family: 'Calibri Light';
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    font-family: 'Inter', sans-serif;
     background-color: rgba(52, 49, 50, 1);
     border-bottom: 4px solid var(--main-color);
 }

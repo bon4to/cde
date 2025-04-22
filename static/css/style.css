@@ -118,7 +118,6 @@ label {
     font-size: 13px;
     font-weight: bold;
     user-select: none;
-    margin-bottom: 6px;
     font-family: "Inter", sans-serif;
 }
 
@@ -547,10 +546,11 @@ a.aux-button.active .svg-gray {
 }
 
 div.log {
-    width: 540px;
+    width: 450px;
     display: flex;
     flex-direction: column;
     align-content: flex-end;
+    justify-content: space-between;
 }
 
 .version-info {
@@ -619,25 +619,6 @@ div.user-params-button {
     letter-spacing: 3px;
     background-color: var(--main-color);
     box-shadow: 0 0 6px var(--main-color);
-}
-
-.item {
-    display: flex;
-    padding: 14px;
-    cursor: pointer;
-    user-select: none;
-    padding-left: 20px;
-    border-radius: 5px;
-    align-items: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #f0f0f0;
-    background-color: #f3f3f3;
-}
-
-.item:hover {
-    transform: translateY(-2px);
-    border: 1px solid var(--main-color);
-    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2);
 }
 
 .featured {
