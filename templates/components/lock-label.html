@@ -1,0 +1,9 @@
+{% macro lock_label(label_text, label_id, extra=None) %}
+<label for="{{ label_id }}">
+    {{ label_text }}
+    {% if extra %}
+        {{ extra }}
+    {% endif %}
+    <img id="label-{{ label_id }}" class="svg-label" title="Campo bloqueado." src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
+</label>
+{% endmacro %}
