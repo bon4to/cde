@@ -2,9 +2,16 @@
 <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 8px;">
     {% for button in buttons %}
         <div class="btn-fancy {% if button.active %}active{% endif %}" 
+             {% if button.id %}
+             id="{{ button.id }}"
+             {% endif %}
              style="height: 60px; width: 60px; margin: 8px" 
              title="{{ button.title }}" 
-             onclick="window.location.href='{{ url_for(button.url) }}';">
+             {% if button.onclick %}
+             onclick="{{ button.onclick }}"
+             {% else %}
+             onclick="window.location.href='{{ url_for(button.url) }}';"
+             {% endif %}>
             <img class="svg-inv" src="{{ url_for('static', filename=button.icon) }}" alt="">
         </div>
     {% endfor %}
