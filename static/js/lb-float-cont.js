@@ -75,7 +75,7 @@ function toggleFixMove() {
         container.style.transition = 'scale 0.2s ease';
 
         container.style.position = 'relative';
-        container.style.zIndex = '998';
+        container.style.zIndex = '10';
 
         fixMoveBtn.style.transform = 'scaleX(-1)';
         //// console.log(suplementstat_fc + "O container foi bloqueado para movimento.");
@@ -90,7 +90,7 @@ function toggleFixMove() {
         container.style.transition = 'scale 0.2s ease';
 
         container.style.position = 'absolute';
-        container.style.zIndex = '1099';
+        container.style.zIndex = '999';
 
         fixMoveBtn.style.transform = 'scaleX(1)';
         //// console.log(suplementstat_fc + "O container foi liberado para movimento.");
