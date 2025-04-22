@@ -5,113 +5,125 @@
         <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
 
         {% include "shared/header/tl-header.html" %}
+        <div class="titles-ruler">
+            
+            {% from 'components/title-route.html' import title_container %}
+            {{ title_container(
+                title='MOVIMENTAR',
+                id_page=session['id_page'],
+                breadcrumbs=[
+                    {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                    {'text': 'MOVIMENTAR'}
+                ],
+                aux_buttons=[
+                    {'type': 'link', 'url': 'mov', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR', 'active': True},
+                    {'type': 'link', 'url': 'estoque', 'icon': 'svg/boxes.svg', 'title': 'ESTOQUE'},
+                    {'type': 'link', 'url': 'historico', 'icon': 'svg/history.svg', 'title': 'HISTÓRICO'},
+                    {'type': 'divider'},
+                    {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                    {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+                ]
+            ) }}
 
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-                <h1>
-                    <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                    <span style="margin: 0 8px;"></span>
-                    <a href="{{ url_for('home_logi') }}"title="LOGISTICA">LOGI</a>
-                    <span class="dash">/</span>
-                    <span>MOVIMENTAR</span>
-                    <span class="id-page">{{session['id_page']}}</span>
-                </h1>
-                <div class="aux-buttons">
-                    <a class="aux-button {% if request.endpoint == 'mov' %}active{% endif %}" onclick="window.location.href='{{ url_for('mov') }}';">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="">
-                    </a>
-                    <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}" onclick="window.location.href='{{ url_for('estoque') }}';">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="">
-                    </a>
-                    <a class="aux-button {% if request.endpoint == 'historico' %}active{% endif %}" onclick="window.location.href='{{ url_for('historico') }}';">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="">
-                    </a>
-                    <hr class="vert">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" title="VOLTAR" onclick="goBack()">
-                </div>
-            </div>
-            <div id="filterBreak" style="justify-content: flex-end">
-                <div id="table-filter" style="display: none" >
-                    <input type="text" class="filterInput address" id="filterInput" name="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
-                    <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                        <option value=1>Item (Código)</option>
-                        <option value=0>Endereço</option>
-                        <option value=2>Item (Descrição)</option>
-                        <option value=3>Lote (Código)</option>
-                    </select>
-                </div>
-            </div>
+            {% from 'components/filter-container.html' import filter_container %}
+            {{ filter_container(
+                filter_options=[
+                    {'value': 1, 'text': 'Item (Código)'},
+                    {'value': 0, 'text': 'Endereço'},
+                    {'value': 2, 'text': 'Item (Descrição)'},
+                    {'value': 3, 'text': 'Lote (Código)'}
+                ],
+                type="default"
+            ) }}
         </div>
-        <div id="divContent" style="flex-wrap: wrap; flex-direction: row">
-            <div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 16px;">
-                <div id="move-btn" class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (UNITÁRIO)" onclick="toggleContainer()">
-                    <img class="svg-inv" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" alt="">
-                </div>
-                <div id="bundle-btn" class="btn-fancy" style="height: 60px; width: 60px; margin: 8px" title="MOVIMENTAR (PACOTE)" onclick="toggleBundleContainer()">
-                    <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
-                </div>
-            </div>
+        
+        <div id="divContent" style="flex-wrap: wrap;">
 
-            <div id="floating-container" draggable="false" class="forms-container" style="position: relative; max-width: max-content">
+            {% from 'components/sidebar.html' import sidebar %}
+            {{ sidebar([
+                {'id': 'move-btn', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR (UNITÁRIO)', 'onclick': 'toggleContainer()'},
+                {'id': 'bundle-btn', 'icon': 'svg/bag.svg', 'title': 'MOVIMENTAR (PACOTE)', 'onclick': 'toggleBundleContainer()'}
+            ]) }}
+
+            <div id="floating-container" draggable="false" class="forms-container" style="position: relative;">
+                <!--
                 <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
                     <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
                 </button>
+                -->
                 <div>
+                    <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
                     <form id="formBuscarItens" method="post" onsubmit="showLockLabel()" style="display: block; height: unset">
-                        <div>
-                            <label for="input_code"></label>
-                            <div class="split-h">
-                                <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou o Código de Barras...">
-                                <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
-                            </div>
-                            <hr>
+                        <label for="input_code"></label>
+                        <div class="split-h">
+                            <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou o Código de Barras...">
+                            <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
                         </div>
+                        <hr>
                     </form>
 
-                    <form class="split-v" style="display: flex; height: unset" id="form-field" method="post" action="/logi/mov/moving">
+                    <form id="form-field" class="split-v" method="post" action="/logi/mov/moving">
                         <div class="flex-v" style="align-items: center;">
                             <div id="produtoField">
                                 <div class="flex-v">
                                     <div>
-                                        <label for="desc_item">Produto
-                                            <img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br>
-                                        </label>
-                                        <input class="address-one" name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Descrição do item..." onclick="maximizeText(this)">
+                                        {% from 'components/lock-label.html' import lock_label %}
+                                        {{ lock_label('Produto', 'desc_item') }}
+                                        <input 
+                                            id="desc_item" 
+                                            name="desc_item" 
+                                            class="address-one" 
+                                            type="text" 
+                                            required readonly 
+                                            placeholder="Descrição do item..." 
+                                            onclick="maximizeText(this)"
+                                            value="{{ json_desc_item }}"
+                                        >
                                     </div>
                                     <div class="split-h">
                                         <div>
-                                            <label for="cod_item">Código <span style="color: red" id="json_cod_item_ocurr"></span>
-                                                <img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                            </label>
-                                            <br>
-                                            <select class="address-three" id="cod_item" name="cod_item" required onchange="showLockLabel()"></select>
+                                            {% from 'components/lock-label.html' import lock_label %}
+                                            {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_item_no"></span>' | safe) }}
+                                            <select 
+                                                id="cod_item" 
+                                                name="cod_item" 
+                                                class="address-three" 
+                                                placeholder="Código do item..."
+                                                title="Ex.: 000123"
+                                                onchange="showLockLabel()"
+                                                required 
+                                            >
+                                            <option value="">Selecione...</option>
+                                            <hr>
+                                            <!-- itens preenchidos dinamicamente -->
+                                            </select>
                                         </div>
                                         <div>
-                                            <label for="lote_item">Lote
-                                                <img id="label-cod_lote" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt="">
-                                            </label>
-                                            <br>
+                                            {% from 'components/lock-label.html' import lock_label %}
+                                            {{ lock_label('Lote', 'cod_lote') }}
                                             <input 
+                                                id="lote_item" 
+                                                name="cod_lote" 
                                                 required readonly 
                                                 class="address-three" 
                                                 pattern="[A-Z0-9]{6}" maxlength="6" type="text" 
-                                                id="lote_item" name="cod_lote" 
                                                 value="{{ json_cod_lote }}" 
                                                 placeholder="Ex.: CS0000" 
                                                 onchange="getItemFirstMov()"
                                             >
                                         </div>
                                         <div>
-                                            <label for="operacao">Operação</label><br>
-                                            <select name="operacao" id="operacao" class="address-four" onchange="toggleFields()">
+                                            <label for="operacao">Operação</label>
+                                            <select 
+                                                id="operacao" 
+                                                name="operacao" 
+                                                class="address-four" 
+                                                onchange="toggleFields()" 
+                                                title="E = Entrada, S = Saída, T = Transferência"
+                                            >
                                                 <option value="E">E</option>
                                                 <option value="S">S</option>
                                                 <option value="T">T</option>
-                                                <!-- 
-                                                # uso foi substituido por /mov/carga/ 
-                                                <option value="F">F</option> 
-                                                -->
                                             </select>
                                         </div>
                                     </div>
@@ -120,7 +132,7 @@
                             <div style="display: flex;">
                                 <div class="flex-h">
                                     <div style="display: flex; align-items: center">
-                                        <img id="svg-image" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
+                                        <img id="svg-operation" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
                                     </div>
                                     <div style="display: flex; align-items: center">
                                         <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
@@ -151,40 +163,48 @@
                                 </div>
                             </div>
                             <div style="display: flex;">
-                                <div id="quantField">
-                                    <label for="quantidade">Quantidade</label><br>
-                                    <input class="address-two" type="number" id="quantidade" name="quantidade" min="1" placeholder="Quantidade..." required>
+                                <div id="quantField" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                    <label for="quantidade">Quantidade</label>
+                                    <input 
+                                        id="quantidade" 
+                                        class="address-two" 
+                                        type="number" 
+                                        name="quantidade" 
+                                        min="1" 
+                                        placeholder="Quantidade..." 
+                                        required
+                                    >
                                 </div>
                             </div>
-                            <div style="display: flex;">
+                            <div style="display: flex; align-items: flex-end">
                                 <div>
-                                    <label for="end_letra">Endereço</label><br>
-                                    <div class="endereco-container">
+                                    <label for="end_letra">Endereço</label>
+                                    <div style="display: flex; flex-direction: column; justify-content: flex-end;">
                                         <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
                                             {% include "shared/elements/address-select.html" %}
                                         </select>
                                     </div>
                                 </div>
-                                <div>
-                                    <div id="end_number_container">
-                                        <label for="end_number"> </label><br>
-                                        <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
-                                    </div>
-                                </div>
+                                <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
                             </div>
                             <div id="destinoFields" style="display: none;">
                                 <div style="text-align: center;">
                                     <img class="svg-orange" src="{{ url_for('static', filename='svg/square-arrow-down.svg') }}" alt="">
                                 </div>
-                                <div style="display: flex">
-                                    <div class="endereco-container">
-                                        <label for="destino_end_letra">End. de Destino</label><br>
-                                        <select class="address-three" id="destino_end_letra" name="destino_end_letra" onchange="toggleEndNumber()">
+                                <div style="display: flex; align-items: flex-end;">
+                                    <div style="display: flex; flex-direction: column; justify-content: flex-end;">
+                                        <label for="destino_end_letra">End. de Destino</label>
+                                        <select 
+                                            class="address-three" 
+                                            id="destino_end_letra" 
+                                            name="destino_end_letra" 
+                                            onchange="toggleEndNumber()"
+                                        >
                                             {% include "shared/elements/address-select.html" %}
                                         </select>
                                     </div>
                                     <div>
-                                        <label for="destino_end_number"> </label><br>
+                                        <label for="destino_end_number"> </label>
                                         <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="999" placeholder="Número...">
                                     </div>
                                 </div>
@@ -195,11 +215,11 @@
                                 </div>
                                 <div style="display: flex;">
                                     <div>
-                                        <label for="id_carga">Número de Carga</label><br>
+                                        <label for="id_carga">Número de Carga</label>
                                         <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
                                     </div>
                                     <div>
-                                        <label for="id_carga_seq"> </label><br>
+                                        <label for="id_carga_seq"> </label>
                                         <select class="address-three" type="number" id="id_carga_seq" name="id_carga_seq" step="any">
                                             {% for index in range(0, 10) %}
                                                 <option value="{{ index }}">- {{ index }}</option>
@@ -224,7 +244,9 @@
                 </div>
             </div>
 
+
             <div id="tables-container" class="tables-container" style="max-height: 600px">
+
                 <div class="table-overflow">
                     <table id="filterTable" style="max-height: revert-layer;">
                         <tr>
@@ -249,6 +271,7 @@
                         {% endfor %}
                     </table>
                 </div>
+
             </div>
             
             <div id="bundle-container" class="tables-container glow-logi" style="display: none; max-width: -webkit-fill-available; min-width: 800px;">
@@ -353,17 +376,21 @@
                     url: "/get/item",
                     data: { input_code: codigo },
                     success: function(response) {
+                        // descrição do item
                         $("#desc_item").val(response.json_desc_item);
+
                         $("#cod_item").empty();
-                        if (response.json_cod_item_ocurr) {
-                            $("#json_cod_item_ocurr").text('( ' + response.json_cod_item_ocurr + ' )');
+                        // número de ocorrência de código de item
+                        if (response.json_cod_item.length != 1) {
+                            $("#json_item_no").text('( ' + response.json_cod_item.length + ' )');
                         } else {
-                            $("#json_cod_item_ocurr").text('');
+                            $("#json_item_no").text('');
                         }
 
+                        // se houver mais de um código de item, esconde o lock-label de código de item
                         if (response.json_cod_item.length > 1) {
                             hideLockLabel("label-cod_item");
-                            ultimoCodigo = codigo
+                            ultimoCodigo = codigo;
                         }
 
                         if (response.json_cod_item) {
