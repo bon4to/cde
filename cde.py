@@ -6,7 +6,7 @@ from app.utils import cdeapp
 from app.models import dbUtils, stickerUtils, logTexts as lt
 from app.services import NotificationManager as nm
 
-# imported dependecies
+# imported dependencies
 from flask import Flask, Response, request, redirect, render_template, url_for, jsonify, session, abort
 from datetime import datetime, timezone, timedelta
 from passlib.hash import pbkdf2_sha256
@@ -24,11 +24,10 @@ if __name__:
     
     app, err = cdeapp.config.set(__name__)
     if err != None:
-        sys.exit()
+        sys.exit(err)
     
     debug = False
     current_dir = os.path.dirname(os.path.abspath(__file__)).upper() # current absolute directory
-    debug_dir   = os.getenv('DEBUG_DIR').upper().split(';')          # debug directory (evita execução sem configurar diretório)
     default_dir = os.getenv('DEFAULT_DIR').upper()                   # default dir (executa somente no diretório de produção)
 
     dirs = {}
@@ -1260,6 +1259,7 @@ class ProdutoUtils:
     # implementa o filtro para itens embalagem
     def get_itens_from_erp():
         whitelist = cde.get_file_text('app/presets/item-whitelist.txt')
+        # TODO: tratamento de erro caso o arquivo nao exista
         query = '''
             SELECT i.ITEM, i.ITEM_DESCRICAO, i.GTIN_14, i.NARRATIVA_10
             FROM DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
@@ -2384,7 +2384,7 @@ def cde_cfg() -> str:
 @app.route('/cde/query-list/', methods=['GET'])
 @cde.verify_auth('DEV000')
 def cde_query_list() -> str:
-    
+    # TODO: implementar 'open to edit'
     return render_template(
         'pages/cde/db-cfg/queries/query-list.html',
         q_list = dbUtils.QueryManager.get_all_queries()
@@ -2935,7 +2935,8 @@ def moving() -> str | Response:
 
 @app.route('/logi/mov/map/')
 @cde.verify_auth('MOV008')
-def stock_map() -> str:
+def stock_map():
+    # TODO: fix map
     if debug:
         return render_template(
             'pages/stock-map.html'
