@@ -92,25 +92,35 @@ function toggleFields() {
     }
 }
 
+
+// Tooltip (hover)
+// * Uses 'title' attribute to show custom tooltip
 document.addEventListener("mouseover", (e) => {
+    // verifica se o elemento cujo mouse está sobre possui o atributo 'title'
     let title = e.target.getAttribute("title");
     if (!title) return;
 
+    // adiciona o atributo 'data-title' ao elemento
     e.target.setAttribute("data-title", title);
     e.target.removeAttribute("title");
 
+    // cria o tooltip
     let tooltip = document.createElement("div");
     tooltip.textContent = title;
-    tooltip.style.position = "absolute";
-    tooltip.style.background = "black";
-    tooltip.style.color = "white";
-    tooltip.style.padding = "5px";
-    tooltip.style.borderRadius = "4px";
-    tooltip.style.fontSize = "12px";
-    tooltip.style.whiteSpace = "nowrap";
-    tooltip.style.pointerEvents = "none";
+    with (tooltip.style) {
+        position =      "absolute";
+        background =    "black";
+        color =         "white";
+        padding =       "5px";
+        borderRadius =  "4px";
+        fontSize =      "12px";
+        whiteSpace =    "nowrap";
+        pointerEvents = "none";
+        zIndex =        "1000";
+    }    
     document.body.appendChild(tooltip);
 
+    // move o tooltip
     const moveTooltip = (event) => {
         tooltip.style.left = event.pageX + 10 + "px";
         tooltip.style.top = event.pageY + 10 + "px";
@@ -119,6 +129,8 @@ document.addEventListener("mouseover", (e) => {
     moveTooltip(e);
     document.addEventListener("mousemove", moveTooltip);
 
+    // remove o tooltip
+    // adiciona o atributo 'title' ao elemento novamente
     e.target.addEventListener("mouseleave", () => {
         e.target.setAttribute("title", e.target.getAttribute("data-title"));
         e.target.removeAttribute("data-title");
