@@ -23,38 +23,38 @@ function updateItemCount(itemCount) {
 }
 
 
-function routeMovRedirect(routePage) {
-    const idInput = document.getElementById('idInput');
-    const idInputBrow = document.getElementById('idInputBrow');
+function preQuickRouting(routePage) {
+    const navigatorInput = document.getElementById('navigatorInput');
+    const headerInput = document.getElementById('headerInput');
 
     var idForRoute;
     try {
         // Se um dos inputs tiver valor, preencha o outro
-        if (idInput.value) {
-            idForRoute = idInput.value;
-        } else if (idInputBrow.value) {
-            idForRoute = idInputBrow.value;
+        if (navigatorInput.value) {
+            idForRoute = navigatorInput.value;
+        } else if (headerInput.value) {
+            idForRoute = headerInput.value;
         }
         idForRoute = parseInt(idForRoute);
-        // Expressão regular para validar números inteiros ou com sufixos como -1, -2, etc.
+        // Expressão para validar números inteiros ou com sufixos como -1, -2, -3...
         const regex = /^-?\d+(-\d+)?$/;
 
         // Verifica se o input de requisição foi preenchido corretamente
-        if (regex.test(idForRoute)) {
-            redirectToMov(routePage, idForRoute);
-        } else {
-            // Opcional: Mostrar um alerta ou mensagem de erro ao usuário
-            alert('Por favor, insira um número válido (ex: 123 ou 123-1).');
-        }
+        if (!regex.test(idForRoute)) {
+            showToast('Por favor, insira um número válido (ex: 123 ou 123-1).', 2);
+            return
+        } 
+        redirectQuickRouting(routePage, idForRoute);
+        
     } catch (error) {
         console.error(error);
     }
 }
 
 
-function redirectToMov(routePage, nroCarga) {
+function redirectQuickRouting(routePage, nroCarga) {
     // redireciona para a rota informada
-    const url = `/mov/${routePage}/${nroCarga}`;
+    const url = `/logi/${routePage}/${nroCarga}`;
     window.location.href = url;
 }
 
