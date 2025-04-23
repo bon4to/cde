@@ -1,5 +1,6 @@
 from app.models import dbUtils as db
 
+# cria a tabela de notificações caso ela não exista
 def createNotificationsTable() -> tuple[None, str]:
     try:
         query = '''
@@ -19,6 +20,7 @@ def createNotificationsTable() -> tuple[None, str]:
     return None, ""
 
 
+# cria uma entrada de notificação para o usuário
 def setNotification(userid: int, title: str, message: str) -> tuple[None, str]:
     try:
         title = title.strip().upper()
@@ -63,8 +65,10 @@ def setNotification(userid: int, title: str, message: str) -> tuple[None, str]:
     return None, ""
 
 
+# pega todas as notificações do usuário
 def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None, str]:
     try:
+        # se o id_notification for diferente de 0, pega a notificação específica
         if id_notification != 0:
             query = f'''
                 SELECT id, title, message, date, flag_read
@@ -73,6 +77,7 @@ def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None
                 AND id = {id_notification};
             '''
         else:
+            # pega todas as notificações do usuário
             query = f'''
                 SELECT id, title, message, date, flag_read
                 FROM tbl_notifications
@@ -84,10 +89,10 @@ def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None
         notifications = []
         for row in result:
             notifications.append({
-                'id': row[0],
-                'title': row[1],
-                'message': row[2],
-                'date': row[3],
+                'id':        row[0],
+                'title':     row[1],
+                'message':   row[2],
+                'date':      row[3],
                 'flag_read': row[4]
             })
         return notifications, None
@@ -95,6 +100,7 @@ def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None
         return None, str(e)
 
 
+# limpa/ marca como lida uma notificação do usuário
 def clearNotification(userid: int, id: int):
     try:
         query = f'''
@@ -109,7 +115,8 @@ def clearNotification(userid: int, id: int):
     except Exception as e:
         return None, str(e)
     
-    
+
+# marca como não lida uma notificação do usuário
 def unclearNotification(userid: int, id: int):
     try:
         query = f'''
