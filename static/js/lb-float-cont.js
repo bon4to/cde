@@ -78,6 +78,8 @@ function toggleFixMove() {
         container.style.zIndex = '10';
 
         fixMoveBtn.style.transform = 'scaleX(-1)';
+
+        showToast('Container bloqueado.', 4, 1.5)
         //// console.log(suplementstat_fc + "O container foi bloqueado para movimento.");
 
     } else {
@@ -93,6 +95,7 @@ function toggleFixMove() {
         container.style.zIndex = '999';
 
         fixMoveBtn.style.transform = 'scaleX(1)';
+        showToast('Container liberado para movimento.', 4, 1.5)
         //// console.log(suplementstat_fc + "O container foi liberado para movimento.");
 
     }
