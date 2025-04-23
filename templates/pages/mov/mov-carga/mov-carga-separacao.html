@@ -104,9 +104,9 @@
             
             {% endblock all_separation_status %}
             <div class="table-overflow" style="max-height: 700px">
-                <form onsubmit="routeMovRedirect('carga/separacao/{{ status }}'); return false;">
+                <form onsubmit="preQuickRouting('cargas/separacao/{{ status }}'); return false;">
                     <div class="flex-h" style="margin: 8px 0; width: 100%;">
-                        <input class="address-one" style="margin: 0; height: 32px" type="number" id="idInput" min="1" placeholder="Carga...">
+                        <input class="address-one" style="margin: 0; height: 32px" type="number" id="navigatorInput" min="1" placeholder="Carga...">
                         <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
                             <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
                         </button>
