@@ -1,6 +1,8 @@
 // JAVASCRIPT
+// * métodos abrangentes do sistema
 
 
+// logging dentro dos diretórios do servidor host
 function logOnServer(logMessage) {
     console.log(logMessage);
     fetch('/api/log/', {
