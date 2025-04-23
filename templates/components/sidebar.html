@@ -1,5 +1,5 @@
 {% macro sidebar(buttons) %}
-<div draggable="false" class="forms-container" style="position: relative; max-width: max-content; padding: 8px;">
+<div draggable="false" class="sidebar-container" style="position: relative; max-width: max-content; padding: 8px;">
     {% for button in buttons %}
         <div class="btn-fancy {% if button.active %}active{% endif %}" 
              {% if button.id %}
