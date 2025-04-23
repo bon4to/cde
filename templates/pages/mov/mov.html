@@ -35,6 +35,7 @@
                 ],
                 type="default"
             ) }}
+
         </div>
         
         <div id="divContent" style="flex-wrap: wrap;">
@@ -46,18 +47,16 @@
             ]) }}
 
             <div id="floating-container" draggable="false" class="forms-container" style="position: relative;">
-                <!--
-                <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
-                </button>
-                -->
                 <div>
                     <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
                     <form id="formBuscarItens" method="post" onsubmit="showLockLabel()" style="display: block; height: unset">
                         <label for="input_code"></label>
                         <div class="split-h">
-                            <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou o Código de Barras...">
+                            <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
                             <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                            <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
+                                <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
+                            </button>
                         </div>
                         <hr>
                     </form>
@@ -244,7 +243,6 @@
                 </div>
             </div>
 
-
             <div id="tables-container" class="tables-container" style="max-height: 600px">
 
                 <div class="table-overflow">
@@ -344,10 +342,10 @@
             </div>
         </div>
 
-        {% include "components/menus/quantity-popup.html" %}
-
+        <!-- script para transacoes em pacote (bundle) -->
         <script src="{{ url_for('static', filename='js/bundle.js') }}"></script>
 
+        <!-- script geral -->
         <script>
             let isColumnVisible = false;
             let ultimoCodigo = '';
