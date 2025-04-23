@@ -610,7 +610,7 @@ function clearRecentPages() {
     localStorage.removeItem('recentPages');
 
     // Limpa o conteúdo da tabela
-    let table = document.getElementById('recent-pages-table');
+    let table = document.getElementById('recent-pages-buttons-container');
     table.innerHTML = '';
     loadRecentPages();
 }
