@@ -265,7 +265,7 @@ function maximizeText(text) {
         popupContent.className = 'popup-content';
         popupContent.innerHTML = '<p>' + text.value + '</p>';
 
-        closeButton.innerText  = '×';
+        closeButton.innerHTML  = '<img class="svg-inv" src="/static/svg/xmark.svg" alt="Fechar">';
         closeButton.className  = 'btn-fancy button-mini';
 
         closeButton.addEventListener('click', function() {
