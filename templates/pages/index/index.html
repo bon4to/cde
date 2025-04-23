@@ -18,7 +18,7 @@
         <div id="divContent" style="flex-wrap: wrap;">
             {% if 'user_grant' in session %}
                 {% if not about %}
-                    <div class="tables-container flex-v" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
+                    <div class="tables-container flex-v" style="border-radius: 44px; min-height: unset; height: 628px; padding: 24px;">
                         <div class="flex-h" style="min-width: 100%; gap: 30px">
                             {% block side_banner %}  
                                
@@ -90,7 +90,7 @@
                 {% endif %}
             {% endif %}
             {% if not about %}
-                <div id="recent-pages-container" class="tables-container" style="max-width: 30%; min-width: 16%; min-height: -webkit-fill-available; border: 1px solid var(--main-color); border-radius: 44px; padding: 24px;">
+                <div id="recent-pages-container" class="tables-container split-v" style="height: 628px; min-height: unset;  max-width: 30%; min-width: 16%; border: 1px solid var(--main-color); border-radius: 44px; padding: 24px;">
                     <div id="recent-pages">
                         <h1 class="text-main-color" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
                         <hr style="margin-right: 4px; width: 20%;">
@@ -98,6 +98,7 @@
                             <!-- Os botões serão inseridos aqui -->
                         </div>
                     </div>
+                    <a class="hyperlink" onclick="clearRecentPages()">LIMPAR HISTÓRICO</a>
                 </div>
             {% endif %}
         </div>

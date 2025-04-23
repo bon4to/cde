@@ -117,12 +117,15 @@ function toggleBundleContainer() {
     if (bundleContainer.style.display === 'none') {
         bundleContainer.style.display = 'block';
         bundleBtn.classList.add('active');
+        showToast('Modo: Pacote (Bundle)', 4, 1.5)
     } else {
         bundleContainer.style.display = 'none';
         bundleBtn.classList.remove('active');
+        showToast('Modo: Unitário (Single)', 4, 1.5)
     }
 
     toggleColumnVisibility()
+
 }
 
 function addToBundle(rowIndex) {

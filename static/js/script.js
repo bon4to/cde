@@ -18,47 +18,65 @@ function logOnServer(logMessage) {
 }
 
 
-// CAMPOS DE TRANSFERENCIA
+// alterna os campos de acordo com a operação em (/logi/mov/)
+// TODO: refatorar e modular para dentro de 'mov'
 function toggleFields() {
+    // obtém a operação (E, S, T, F)
     var operacao = document.getElementById('operacao').value;
 
-    const svgImage = document.getElementById('svg-image');
+    // obtém os elementos SVG
+    const svgOperation = document.getElementById('svg-operation');
     const svgCfg = document.getElementById('svg-cfg');
     
-    var is_end_completo = document.getElementById('is_end_completo');
+    // obtém o checkbox de 'end completo'
+    // * usado para movimentação de endereço completo
+    var isEndCompleto = document.getElementById('is_end_completo');
 
-    var destinoFields = document.getElementById('destinoFields');
+    var dateFabInput = document.getElementById('date_fab');
+    var cargaNumeroInput = document.getElementById('id_carga');
     var destinoNumeroInput = document.getElementById('destino_end_number');
 
-    var dateFields = document.getElementById('dateFields');
-    var dateFabInput = document.getElementById('date_fab');
-    
-    var cargaFields = document.getElementById('cargaFields');
-    var cargaNumeroInput = document.getElementById('id_carga');
-
+    // remove o atributo 'required' dos campos de destino e carga
     cargaNumeroInput.removeAttribute('required');
     destinoNumeroInput.removeAttribute('required');
 
+    // obtém os campos de data
+    var dateFields = document.getElementById('dateFields');
+    var cargaFields = document.getElementById('cargaFields');
+    var destinoFields = document.getElementById('destinoFields');
+
+    // exibe ou esconde os campos de acordo com a operação
     dateFields.style.display = operacao === 'E' ? 'contents' : 'none';
     cargaFields.style.display = operacao === 'F' ? 'contents' : 'none';
     destinoFields.style.display = operacao === 'T' ? 'contents' : 'none';
 
-    const svgPaths = {
-        'E' : "/static/svg/arrow-down-to-dot.svg",
-        'S' : "/static/svg/arrow-up-from-dot.svg",
-        'T' : "/static/svg/arrow-up-down.svg",
-        'F' : "/static/svg/package-check.svg"
-    };
+    function updateSVG(operacao) {
+        const svgPaths = {
+            'E' : "/static/svg/arrow-down-to-dot.svg",
+            'S' : "/static/svg/arrow-up-from-dot.svg",
+            'T' : "/static/svg/arrow-up-down.svg",
+            'F' : "/static/svg/package-check.svg"
+        };
 
-    svgImage.src = svgPaths[operacao];
-    
+        // atualiza o SVG da operação
+        svgOperation.src = svgPaths[operacao];
+    }
+
+    // atualiza o SVG da operação
+    updateSVG(operacao);
+
+    // remove o atributo 'required' do campo de data
+    // * se o tipo de operação não for 'E' (entrada), não é necessário informar a data de fabricação
     if (operacao != "E") {
         dateFabInput.removeAttribute('required');
         dateFabInput.value = '';
     }
 
     if (operacao === 'T') {
+        // adiciona o atributo 'required' ao campo de destino
         destinoNumeroInput.required = true;
+
+        // exibe o SVG de configuração de 'movimentação de endereço completo'
         svgCfg.style.display = 'flex';
     } else if (operacao === 'F') {
         cargaNumeroInput.required = true;
@@ -71,30 +89,40 @@ function toggleFields() {
         destinoNumeroInput.required = false;
         svgCfg.style.display = 'none';
 
-        is_end_completo.checked = false;
+        isEndCompleto.checked = false;
         handleCheckChange();
     }
 }
 
+
+// Tooltip (hover)
+// * Uses 'title' attribute to show custom tooltip
 document.addEventListener("mouseover", (e) => {
+    // verifica se o elemento cujo mouse está sobre possui o atributo 'title'
     let title = e.target.getAttribute("title");
     if (!title) return;
 
+    // adiciona o atributo 'data-title' ao elemento
     e.target.setAttribute("data-title", title);
     e.target.removeAttribute("title");
 
+    // cria o tooltip
     let tooltip = document.createElement("div");
     tooltip.textContent = title;
-    tooltip.style.position = "absolute";
-    tooltip.style.background = "black";
-    tooltip.style.color = "white";
-    tooltip.style.padding = "5px";
-    tooltip.style.borderRadius = "4px";
-    tooltip.style.fontSize = "12px";
-    tooltip.style.whiteSpace = "nowrap";
-    tooltip.style.pointerEvents = "none";
+    with (tooltip.style) {
+        position =      "absolute";
+        background =    "black";
+        color =         "white";
+        padding =       "5px";
+        borderRadius =  "4px";
+        fontSize =      "12px";
+        whiteSpace =    "nowrap";
+        pointerEvents = "none";
+        zIndex =        "1000";
+    }    
     document.body.appendChild(tooltip);
 
+    // move o tooltip
     const moveTooltip = (event) => {
         tooltip.style.left = event.pageX + 10 + "px";
         tooltip.style.top = event.pageY + 10 + "px";
@@ -103,6 +131,8 @@ document.addEventListener("mouseover", (e) => {
     moveTooltip(e);
     document.addEventListener("mousemove", moveTooltip);
 
+    // remove o tooltip
+    // adiciona o atributo 'title' ao elemento novamente
     e.target.addEventListener("mouseleave", () => {
         e.target.setAttribute("title", e.target.getAttribute("data-title"));
         e.target.removeAttribute("data-title");
