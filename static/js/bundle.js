@@ -15,7 +15,7 @@ async function concludeBundle() {
     if (operation === 'T') {
         enderecoDestino = getEnderecoDestino();
         if (enderecoDestino === '') {
-            showToast('Selecione um endereço de destino.', 3);
+            showToast('Selecione um endereço de destino.', 'error');
 
             registrarBtn.onclick = function() {
                 concludeBundle();
@@ -29,7 +29,7 @@ async function concludeBundle() {
     }
 
     if (tableData.length < 1) { // criterio para identificar se a tabela possui itens
-        showToast('Não há itens no pacote para finalizar.', 3);
+        showToast('Não há itens no pacote para finalizar.', 'error');
         
         registrarBtn.onclick = function() {
             concludeBundle();
@@ -57,18 +57,18 @@ async function concludeBundle() {
     .then(response => response.json())
     .then(async (data) => {
         if (data.success) {
-            showToast('Pacote concluído com sucesso! Recarregando tela...', 1, 4);
+            showToast('Pacote concluído com sucesso! Recarregando tela...', 'success', 4);
             setTimeout(function() {
                 location.reload();
             }, 4000);
         } else {
             console.error(data.error);
-            showToast(`<details><summary>Erro ao finalizar o pacote:</summary> ${data.error}</details>`, 3, 0);
+            showToast(`<details><summary>Erro ao finalizar o pacote:</summary> ${data.error}</details>`, 'error', 0);
         }
     })
     .catch(error => {
         console.error(error);
-        showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 0);
+        showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 'error', 0);
     });
 }
 
@@ -117,11 +117,11 @@ function toggleBundleContainer() {
     if (bundleContainer.style.display === 'none') {
         bundleContainer.style.display = 'block';
         bundleBtn.classList.add('active');
-        showToast('Modo: Pacote (Bundle)', 4, 1.5)
+        showToast('Modo: Pacote (Bundle)', 'info', 1.5)
     } else {
         bundleContainer.style.display = 'none';
         bundleBtn.classList.remove('active');
-        showToast('Modo: Unitário (Single)', 4, 1.5)
+        showToast('Modo: Unitário (Single)', 'info', 1.5)
     }
 
     toggleColumnVisibility()
@@ -147,7 +147,7 @@ function addToBundle(rowIndex) {
 
     // Verificar se o item já existe na tabela de destino
     if (isDuplicateItem(item, endereco, lote)) {
-        showToast(`${endereco} - ${item} (${lote}) já foi adicionado ao pacote!`, 3, 3);
+        showToast(`${endereco} - ${item} (${lote}) já foi adicionado ao pacote!`, 'error', 3);
 
         return; // Não adicionar o item se já existir
     }
@@ -216,7 +216,7 @@ function addToBundle(rowIndex) {
     };
     actionCell.textContent = "REMOVER";
 
-    showToast(`${endereco} - ${item} (${lote}) adicionado ao pacote!`, 0, 3);
+    showToast(`${endereco} - ${item} (${lote}) adicionado ao pacote!`, 'info', 3);
 }
 
 function maximizeValue(button) {
