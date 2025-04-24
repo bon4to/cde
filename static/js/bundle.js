@@ -63,12 +63,12 @@ async function concludeBundle() {
             }, 4000);
         } else {
             console.error(data.error);
-            showToast(`<details><summary>Erro ao finalizar o pacote:</summary> ${data.error}</details>`, 'error', 0);
+            showToast(`<details><summary>Erro ao finalizar o pacote:</summary> ${data.error}</details>`, 'error');
         }
     })
     .catch(error => {
         console.error(error);
-        showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 'error', 0);
+        showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 'error');
     });
 }
 
