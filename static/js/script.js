@@ -616,35 +616,40 @@ function clearRecentPages() {
 }
 
 
-function showToast(message, type = 0, duration = 5) {
+function showToast(message, type = 'info', timer_s = 5) {
     const toastContainer = document.getElementById('toast-container');
     let icon;
     let toastColor;
-    duration = duration * 1000;
+    
+    // validação
+    if (!timer_s != 0) { timer_s = 5 }
+
+    // conversão
+    let timer_ms = timer_s * 1000;
 
     switch(type) {
-        case 1: // Success
+        case 'success':
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #4CAF50;">
                 <path d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM10.2432 16.9714L5.12034 11.8485L6.53479 10.4341L10.2432 14.1426L17.4652 6.9205L18.8797 8.33495L10.2432 16.9714Z"/>
                 </svg>`;
             toastColor = '#4CAF50';
             break;
-        case 2: // Warning
+        case 'warn':
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #FF9800;">
                 <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
                 </svg>`;
             toastColor = '#FF9800';
             break;
-        case 3: // Error
+        case 'error':
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #F44336;">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L16.59 17 12 12.41 7.41 17 6 15.59 10.59 11 6 6.41 7.41 5 12 9.59 16.59 5 18 6.41 13.41 11 18 15.59z"/>
                 </svg>`;
             toastColor = '#F44336';
             break;
-        default:
+        default: // case 'info':
             icon = 
                 `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="height: 16px; width: 16px; fill: #2196F3;">
                 <path d="M12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0ZM13 17H11V9H13V17ZM13 7H11V5H13V7Z"/>
@@ -680,7 +685,7 @@ function showToast(message, type = 0, duration = 5) {
 
     // Configura a animação do temporizador
     const toastTimer = toast.querySelector('.toast-timer');
-    toastTimer.style.transition = `width ${duration}ms linear`;
+    toastTimer.style.transition = `width ${timer_ms}ms linear`;
     setTimeout(() => {
         toastTimer.style.width = '0%';
     }, 50); // Pequeno atraso para iniciar a animação
@@ -688,7 +693,7 @@ function showToast(message, type = 0, duration = 5) {
     // Define a duração do toast
     setTimeout(() => {
         removeToast(toast);
-    }, duration);
+    }, timer_ms);
 }
 
 

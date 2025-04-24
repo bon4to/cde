@@ -140,7 +140,7 @@
             })
             .catch(error => {
                 console.error('Erro ao carregar usuários:', error);
-                showToast('Erro ao carregar lista de usuários.', 3, 4);
+                showToast('Erro ao carregar lista de usuários.', 'error', 4);
             });
     });
 
@@ -163,14 +163,14 @@
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            showToast('Notificação enviada com sucesso! Recarregando...', 1, 2);
+            showToast('Notificação enviada com sucesso! Recarregando...', 'success', 2);
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
         })
         .catch(error => {
             console.error('Erro:', error);
-            showToast('Erro ao enviar notificação.', 3, 4);
+            showToast('Erro ao enviar notificação.', 'error', 4);
         });
     });
 
@@ -190,7 +190,7 @@
         })
         .catch(error => {
             console.error('Erro:', error);
-            showToast('Erro ao marcar notificação como lida.', 3, 4);
+            showToast('Erro ao marcar notificação como lida.', 'error', 4);
         });
     }
 
@@ -210,7 +210,7 @@
         })
         .catch(error => {
             console.error('Erro:', error);
-            showToast('Erro ao marcar notificação como não lida.', 3, 4);
+            showToast('Erro ao marcar notificação como não lida.', 'error', 4);
         });
     }
 </script>

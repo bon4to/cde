@@ -469,7 +469,7 @@ async function toggleDoneCarga() {
         const concludeData = await concludeResponse.json();
 
         if (concludeData.success) {
-            showToast('Carga removida com sucesso.', 1, 10);
+            showToast('Carga removida com sucesso.', 'success', 10);
             // recarregar a tabela
             document.getElementById('cargaContainer').innerHTML = `
             <div style="display: flex; justify-content: center; height: 100%;">
@@ -481,12 +481,12 @@ async function toggleDoneCarga() {
             stockTable = document.getElementById('stockTable')
             if (stockTable) stockTable.style.display = 'none';
         } else {
-            showToast(`<details><summary>Erro ao remover a carga:</summary> ${concludeData.error}</details>`, 3, 10);
+            showToast(`<details><summary>Erro ao remover a carga:</summary> ${concludeData.error}</details>`, 'error', 10);
             return;
         }
     } catch (error) {
         console.error('Erro ao remover a carga:', error);
-        showToast(`<details><summary>Erro ao remover a carga:</summary> ${error}</details>`, 3, 10);
+        showToast(`<details><summary>Erro ao remover a carga:</summary> ${error}</details>`, 'error', 10);
         return; // Aborta o processo se houver erro
     }
 }
@@ -504,7 +504,7 @@ async function toggleDoneCargaIncompleta() {
         const concludeData = await concludeResponse.json();
 
         if (concludeData.success) {
-            showToast('Pendência da carga removida com sucesso.', 1, 10);
+            showToast('Pendência da carga removida com sucesso.', 'success', 10);
             // recarregar a tabela
             document.getElementById('incompTable').innerHTML = `
             <div style="display: flex; justify-content: center; height: 100%;">
@@ -516,12 +516,12 @@ async function toggleDoneCargaIncompleta() {
             stockTable = document.getElementById('stockTable')
             if (stockTable) stockTable.style.display = 'none';
         } else {
-            showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${concludeData.error}</details>`, 3, 10);
+            showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${concludeData.error}</details>`, 'error', 10);
             return;
         }
     } catch (error) {
         console.error('Erro ao remover pendência da carga incompleta:', error);
-        showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${error}</details>`, 3, 10);
+        showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${error}</details>`, 'error', 10);
         return; // Aborta o processo se houver erro
     }
 }
@@ -531,7 +531,7 @@ function excludeCarga() {
     const confirmation = confirm('Você tem certeza que deseja limpar TODOS os itens desta carga? Esta ação não pode ser desfeita.');
     if (confirmation) {
         if (!verifyCaptcha(nroCarga)) {
-            showToast('O captcha foi cancelado ou preenchido incorretamente.', 3, 10);
+            showToast('O captcha foi cancelado ou preenchido incorretamente.', 'error', 10);
             return;
         }
         toggleDoneCarga();
@@ -543,7 +543,7 @@ function excludeCargaIncompleta() {
     const confirmation = confirm('Você tem certeza que deseja limpar TODOS os itens incompletos? Esta ação não pode ser desfeita.');
     if (confirmation) {
         if (!verifyCaptcha(nroCarga)) {
-            showToast('O captcha foi cancelado ou preenchido incorretamente.', 3, 10);
+            showToast('O captcha foi cancelado ou preenchido incorretamente.', 'error', 10);
             return;
         }
         toggleDoneCargaIncompleta();
@@ -825,16 +825,16 @@ async function concludeSeparacao() {
 
     if (!hasHistory) {
         // se não há carga no historico, continua a separação
-        showToast('A carga é válida para ser separada...', 1);
+        showToast('A carga é válida para ser separada...', 'success');
     } else {
         // se houver, verifica se a carga está completa antes de continuar
         if (!hasPendingItems) {
             // se não houver itens pendentes, aborta a separação
-            showToast('A carga já está completa e finalizada.', 3);
+            showToast('A carga já está completa e finalizada.', 'error');
             return;
         } else {
             // se houver itens pendentes, prossegue a separação
-            showToast('Continuando a separação da carga incompleta...', 0);
+            showToast('Continuando a separação da carga incompleta...', 'info');
             isIncompSeparation = true;
         }
     }
@@ -888,14 +888,14 @@ async function concludeSeparacao() {
             // adiciona o item e quantidade
             // ao array de itens não disponíveis
             nonAvailableItems.push({ cod_item: cod_item, qtde_faltante: qtde_faltante });
-            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 2);
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 'warn');
 
         } else if (qtde_solic == subTotal) {
-            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 1);
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 'success');
 
         } else {
-            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 3);
-            showToast(`Quantidade EXCEDENTE para o item ${cod_item}`, 3);
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 'error');
+            showToast(`Quantidade EXCEDENTE para o item ${cod_item}`, 'error');
             return;
         }
         await visualDelay(100);
@@ -913,7 +913,7 @@ async function concludeSeparacao() {
         if (confirmation) {
             saveAsPendingItems = true;
         } else {
-            showToast('Operação cancelada.', 3);
+            showToast('Operação cancelada.', 'error');
             hideLoading();
             await visualDelay(400);
             finalizarBtn.innerHTML = '✘';
@@ -929,7 +929,7 @@ async function concludeSeparacao() {
         
         if (sepCarga.length === 0) {
             
-            showToast('Não há itens separados para finalizar.', 3);
+            showToast('Não há itens separados para finalizar.', 'error');
             return;
         }
     
@@ -957,14 +957,14 @@ async function concludeSeparacao() {
                         const concludeData = await concludeResponse.json();
         
                         if (concludeData.success) {
-                            showToast('Pendência da carga removida com sucesso.', 1, 10);
+                            showToast('Pendência da carga removida com sucesso.', 'success', 10);
                         } else {
-                            showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${concludeData.error}</details>`, 3, 10);
+                            showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${concludeData.error}</details>`, 'error', 10);
                             return;
                         }
                     } catch (error) {
                         console.error('Erro ao remover pendência da carga incompleta:', error);
-                        showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${error}</details>`, 3, 10);
+                        showToast(`<details><summary>Erro ao remover pendência da carga incompleta:</summary> ${error}</details>`, 'error', 10);
                         return; // Aborta o processo se houver erro
                     }
                 }
@@ -1013,18 +1013,18 @@ async function concludeSeparacao() {
                 } catch (error) {
                     // feedback visual para o front-end
                     // erro
-                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 3, 10);
+                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 'error', 10);
                 } finally {
                     // feedback visual para o front-end
                     // sucesso
                     hideLoading();
-                    showToast('Separação da carga realizada com sucesso.', 1, 10);
+                    showToast('Separação da carga realizada com sucesso.', 'success', 10);
     
                     // gera relatório da separação
                     genCargaReport();
                 }
             } else {
-                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10);
+                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 'error', 10);
             }
             // atualiza tabelas no front-end
             reloadTables();
@@ -1033,10 +1033,10 @@ async function concludeSeparacao() {
         .catch(error => {
             console.error('Erro:', error);
             
-            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10);
+            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 'error', 10);
         });
     } else {
-        showToast('Operação cancelada.', 3);
+        showToast('Operação cancelada.', 'error');
         hideLoading();
         await visualDelay(400);
         finalizarBtn.innerHTML = '✘';

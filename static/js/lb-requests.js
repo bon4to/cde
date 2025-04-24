@@ -658,7 +658,7 @@ async function concludeSeparacao() {
     await visualDelay(200);
 
     // se não há requisicao no historico, continua a separação
-    showToast('A requisicao é válida para ser separada...', 1);
+    showToast('A requisicao é válida para ser separada...', 'info');
 
     await visualDelay(700);
 
@@ -699,10 +699,10 @@ async function concludeSeparacao() {
 
         // Verifica se a quantidade solicitada é igual à quantidade separada
         if (qtde_solic !== subTotal) {
-            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 2);
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 'warn');
             nonAvailableItems.push(cod_item);
         } else {
-            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 1);
+            showToast(`Item ${cod_item}: ( ${subTotal} / ${qtde_solic} )`, 'success');
         }
         await visualDelay(100);
     }
@@ -712,7 +712,7 @@ async function concludeSeparacao() {
         alert(
             `ALERTA:\nA quantidade total para os itens ${nonAvailableItems.join(', ')} não corresponde ao solicitado.`
         );
-        showToast('Operação cancelada.', 3);
+        showToast('Operação cancelada.', 'error');
         hideLoading();
         await visualDelay(400);
         finalizarBtn.innerHTML = '✘';
@@ -723,7 +723,7 @@ async function concludeSeparacao() {
         const sepReq = JSON.parse(localStorage.getItem(storageKey)) || [];
         
         if (sepReq.length === 0) {
-            showToast('Não há itens separados para finalizar.', 3);
+            showToast('Não há itens separados para finalizar.', 'error');
             return;
         }
     
@@ -747,18 +747,18 @@ async function concludeSeparacao() {
                 } catch (error) {
                     // feedback visual para o front-end
                     // erro
-                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 3, 10);
+                    showToast(`<details><summary>Erro ao finalizar separação:</summary> ${error}</details>`, 'error', 10);
                 } finally {
                     // feedback visual para o front-end
                     // sucesso
                     hideLoading();
-                    showToast('Separação da requisicao realizada com sucesso.', 1, 10);
+                    showToast('Separação da requisicao realizada com sucesso.', 'success', 10);
     
                     // gera relatório da separação
                     genRequestReport();
                 }
             } else {
-                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 3, 10);
+                showToast(`<details><summary>Erro ao finalizar separação:</summary> ${data.error}</details>`, 'error', 10);
             }
             // atualiza tabelas no front-end
             reloadTables();
@@ -767,7 +767,7 @@ async function concludeSeparacao() {
         .catch(error => {
             console.error('Erro:', error);
             
-            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 3, 10);
+            showToast(`<details><summary>Erro ao realizar movimentação em massa:</summary> ${error.message}</details>`, 'error', 10);
         });
     }
 }
