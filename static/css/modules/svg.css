@@ -18,6 +18,8 @@
 }
 
 .svg-link {
+    height: 14px;
+    width: 14px;
     cursor: pointer;
     user-select: none;
 }
