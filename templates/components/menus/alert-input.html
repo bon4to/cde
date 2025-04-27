@@ -5,18 +5,20 @@
         <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
 
         {% include 'shared/header/cde-header.html' %}
-
-        <div style="display: flex;min-width: 100%; margin: 0 auto; align-items: center; justify-content: center;">
-            <div class="form-login" style="padding: 30px">
-                <h1 style="color: var(--main-color)">{{ alert_type | safe }}</h1>
-                <h1 style="display: block" class="alert-message">Preencha o campo abaixo.</h1>
-                <p style="display: block" class="alert-more">{{ alert_msge | safe }}</p>
-                <form style="display: flex;" id="form-field" method="post" action="{{ alert_more }}">
-                    <label for="input"></label>
-                    <input style="font-size: 14px;" id="input" name="input" type="password" minlength="6" maxlength="30" placeholder="{{ url_return }}" required>
-                    <input class="btn-fancy" style="max-width: 300px;" type="submit" value="Prosseguir...">
-                    <a href="/cde/home" style="margin: 0; font-size: 16px">Agora não</a>
-                </form>
-            </div>
+    
+        <div class="form-login" style="max-width: 460px; max-height: 400px; padding: 32px">
+            <h1 class="text-main-color">{{ alert_type | safe }}</h1>
+            <p class="alert-more" style="wra">{{ alert_msge | safe }}</p>
+            <form style="display: flex;" id="form-field" method="post" action="{{ alert_more }}">
+                <div class="split-v">
+                    <div class="inputs">
+                        <input style="font-size: 14px;" id="input" name="input" type="password" minlength="6" maxlength="30" placeholder="{{ url_return }}" required>
+                    </div>
+                    <div class="inputs">
+                        <input class="btn-fancy" type="submit" value="PROSSEGUIR">
+                    </div>
+                </div>
+            </form>
         </div>
+
 {% include 'shared/footer.html' %}
