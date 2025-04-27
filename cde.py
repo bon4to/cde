@@ -2580,7 +2580,7 @@ def login():
             else:
             # se a senha é temporária...
                 alert_type = 'REDEFINIR (SENHA)'
-                alert_msge = 'Você deve definir sua senha no seu primeiro acesso.'
+                alert_msge = 'Você deve redefinir sua senha no primeiro acesso.'
                 alert_more = '/users/reset-password'
                 url_return = 'Digite sua nova senha...'
 
@@ -2604,8 +2604,8 @@ def logout() -> Response:
 @app.route('/cde/profile/change-password/', methods=['GET', 'POST'])
 def change_password() -> str | Response:
     if request.method == 'GET':
-        alert_type = 'QUAL A SENHA ATUAL?'
-        alert_msge = 'Primeiramente, informe sua senha.'
+        alert_type = 'SENHA ATUAL'
+        alert_msge = 'Primeiramente, informe sua senha atual.'
         alert_more = '/cde/profile/change-password'
         url_return = 'Informe sua senha atual...'
         return render_template(
