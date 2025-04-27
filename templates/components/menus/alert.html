@@ -6,13 +6,14 @@
 
         {% include 'shared/header/cde-header.html' %}
 
-        <div style="display: flex;min-width: 100%; margin: 0 auto; align-items: center; justify-content: center;">
-            <div class="form-login" style="padding: 30px">
-                <h1 style="color: var(--main-color)">{{ alert_type | safe }}</h1>
-                <h1 style="display: block" class="alert-message">{{ alert_msge | safe }}</h1>
-                <p style="display: block" class="alert-more">{{ alert_more | safe }}</p>
-                <br>
-                <a class="btn-fancy" style="max-width: 300px;" onclick="goBack()">Voltar</a>
+        <div class="form-login" style="max-width: 520px; max-height: 400px; padding: 32px">
+            <div class="split-v">
+                <div class="flex-v">
+                    <h1 class="text-main-color">{{ alert_type | safe }}</h1>
+                    <h1 style="display: block" class="alert-message">{{ alert_msge | safe }}</h1>
+                    <p style="display: block" class="alert-more">{{ alert_more | safe }}</p>
+                </div>
+                <a class="btn-fancy" onclick="goBack()">VOLTAR</a>
             </div>
         </div>
 
