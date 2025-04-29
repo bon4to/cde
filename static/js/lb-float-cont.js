@@ -28,11 +28,11 @@ function toggleContainer() {
     let containerBtn = document.getElementById('move-btn');
 
     if (container) {
-        if (container.style.display === 'block') {
+        if (container.style.display === 'flex') {
             container.style.display = 'none';
             containerBtn.classList.remove('active');
         } else {
-            container.style.display = 'block';
+            container.style.display = 'flex';
             containerBtn.classList.add('active');
 
             try {
@@ -60,7 +60,6 @@ function toggleFixMove() {
     var container = document.getElementById('floating-container');
     var tablesContainer = document.querySelector('.tables-container');
 
-    container.classList.toggle('absolute');
     tablesContainer.classList.toggle('absolute');
 
     isFixed = !isFixed;
@@ -77,24 +76,25 @@ function toggleFixMove() {
         container.style.position = 'relative';
         container.style.zIndex = '10';
 
-        fixMoveBtn.style.transform = 'scaleX(-1)';
+        fixMoveBtn.classList.remove('active');
 
         showToast('Container bloqueado.', 'info', 1.5)
         //// console.log(suplementstat_fc + "O container foi bloqueado para movimento.");
 
     } else {
-        container.style.left = '';
-        container.style.top = '';
+        container.style.left = '298px';
+        container.style.top = '168px';
         container.style.right = '';
         container.style.bottom = '';
 
-        container.style.scale = '1.03';
+        container.style.scale = '1.02';
         container.style.transition = 'scale 0.2s ease';
 
         container.style.position = 'absolute';
         container.style.zIndex = '999';
+        
+        fixMoveBtn.classList.add('active');
 
-        fixMoveBtn.style.transform = 'scaleX(1)';
         showToast('Container liberado para movimento.', 'info', 1.5)
         //// console.log(suplementstat_fc + "O container foi liberado para movimento.");
 
