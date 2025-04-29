@@ -168,15 +168,16 @@ input.address-one, select.address-one {
 }
 
 input.address-two, select.address-two {
-    width: 244px;
+    width: 152px;
 }
 
 input.address-three, select.address-three {
-    width: 114px;
+    width: 118px;
 }
 
 input.address-four, select.address-four {
-    width: 57px;
+    width: 62px;
+
 }
 
 textarea.address-observ {
@@ -216,7 +217,7 @@ select#operacao option {
     justify-content: center;
     background-color: #333132;
     font-family: 'Inter', sans-serif;
-    transition: box-shadow 0.3s ease-out, background-color 0.3s, letter-spacing 0.3s, border-radius 0.2s;
+    transition: box-shadow 0.3s ease-out, background-color 0.3s, letter-spacing 0.3s, border-radius 0.2s, opacity 0.2s;
 }
 
 .btn-fancy:focus {
@@ -247,10 +248,9 @@ select#operacao option {
 
 .btn-fancy:hover, .btn-fancy:focus {
     color: #fff;
-    border-radius: 12px;
+    border-radius: 14px;
     letter-spacing: 3px;
-    background-color: var(--main-color);
-    box-shadow: 0 0 6px var(--main-color);
+    opacity: 0.8;
 }
 
 .btn-fancy.active {
@@ -315,7 +315,7 @@ div.back-modal {
 
 .form-login,
 .form-filter {
-    margin: 0 auto;
+    margin: auto;
     border-radius: 30px;
     box-sizing: border-box;
     background-color: #ffffff;
@@ -330,8 +330,8 @@ div.back-modal {
     transform: translate(-50%, -50%);
 }
 
-.form-filter .generic {
-    width: 800px;
+.form-filter.default {
+    max-width: 600px;
     height: unset;
     max-height: unset;
     border-radius: 14px;
@@ -367,7 +367,7 @@ div.back-modal {
 .table-overflow {
     text-wrap: wrap;
     overflow-y: auto;
-    max-height: 600px;
+    max-height: 660px;
     overflow-x: hidden;
 }
 
@@ -565,6 +565,12 @@ div.log {
     object-fit: cover;
     position: relative;
     border-radius: 20px;
+}
+
+.side-banner.login {
+    width: 450px; 
+    height: 450px;
+    margin-left: unset;
 }
 
 .checked {
@@ -799,7 +805,7 @@ p.phrase {
 
 #table-filter {
     padding: 6px;
-    margin: 6px 0;
+    height: min-content;
     border-radius: 12px;
     justify-content: flex-end;
     background-color: #3e5ea640;
@@ -807,19 +813,6 @@ p.phrase {
 }
 
 #table-filter button {
-    margin: auto;
-}
-
-.table-filter {
-    padding: 6px;
-    margin: 8px 0;
-    border-radius: 12px;
-    justify-content: flex-end;
-    background-color: #3e5ea640;
-    border: 1px solid var(--cde-color);
-}
-
-.table-filter button {
     margin: auto;
 }
 

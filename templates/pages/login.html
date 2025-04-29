@@ -7,35 +7,33 @@
         {% include 'shared/header/cde-header.html' %}
 
         <div id="divContent">
-            <div style="display: flex; min-width: 100%; margin: 0 auto;align-items: center;justify-content: center;">
-                <div draggable="false" class="form-login" style="padding: 20px">
-                    <div class="two-split" style="grid-gap: 30px">
-                        <div class="side-banner" style="width: 450px; height: 450px; border-radius: 20px; margin-left: unset;" id="tables-container">
-                            <img class="side-banner" style="filter: brightness(0.95); width: 450px; height: 450px; border-radius: 20px; margin-left: unset;" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
-                        </div>
-                        {% if 'logged_in' not in session %}
-                            <div class="log" style="width: 100%">
-                                <h1 style="font-size: 46px; margin-bottom: 10px" class="text-main-color title">Entrar</h1>
-                                <form id="form-field" action="/login" method="post" onsubmit="showLoading()">
-                                    <div>
-                                        <div>
-                                            <label for="login_user">Usuário <span style="color: red">*</span></label><br>
-                                            <input type="text" id="login_user" name="login_user" placeholder="usuário / seu@email.com" required>
-                                        </div>
-                                        <div>
-                                            <label for="password_user">Senha <span style="color: red">*</span></label><br>
-                                            <input type="password" id="password_user" name="password_user" placeholder="*****" required>
-                                        </div>
-                                        <br>
-                                        <p class="alert" id="custom-alert">{% if alert_msge %}{{ alert_msge }}{% else %}Sua sessão expirou, entre novamente!{% endif %}</p>
-                                        <button class="btn-fancy" style="margin: 20px 0" type="submit" id="submitform">
-                                            <img class="svg-inv" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        {% endif %}
+            <div class="form-login" style="padding: 20px">
+                <div class="two-split" style="grid-gap: 30px">
+                    <div class="side-banner login">
+                        <img class="side-banner login" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
                     </div>
+                    {% if 'logged_in' not in session %}
+                        <div class="log" style="width: 100%">
+                            <h1 style="font-size: 46px; margin-bottom: 10px" class="text-main-color title">Entrar</h1>
+                            <form id="form-field" action="/login" method="post" onsubmit="showLoading()">
+                                <div>
+                                    <div>
+                                        <label for="login_user">Usuário <span style="color: red">*</span></label><br>
+                                        <input type="text" id="login_user" name="login_user" placeholder="usuário / seu@email.com" required>
+                                    </div>
+                                    <div>
+                                        <label for="password_user">Senha <span style="color: red">*</span></label><br>
+                                        <input type="password" id="password_user" name="password_user" placeholder="*****" required>
+                                    </div>
+                                    <br>
+                                    <p class="alert" id="custom-alert">{% if alert_msge %}{{ alert_msge }}{% else %}Sua sessão expirou, entre novamente!{% endif %}</p>
+                                    <button class="btn-fancy" style="margin: 20px 0" type="submit" id="submitform">
+                                        <img class="svg-inv" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
