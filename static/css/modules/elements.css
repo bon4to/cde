@@ -163,7 +163,7 @@ a.id-page.filled:hover {
 }
 
 
-/* Advertisement banner */
+/* Advert banner */
 .ad-container {
     min-width: 100%;
     display: flex;
@@ -182,7 +182,7 @@ a.id-page.filled:hover {
     flex-direction: column;
     align-items: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    margin: 0 0 15px 0;
+    margin: 0;
     max-width: 600px;
     text-align: center;
 }
