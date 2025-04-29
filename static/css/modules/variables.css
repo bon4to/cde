@@ -65,16 +65,16 @@
 }
 
 .glow-cde {
-    background-color: #3e5ea640 !important; 
+    background-color: rgb(192, 204, 241) !important; 
     border: 1px solid var(--cde-color) !important;
 }
 
 .glow-logi {
-    background-color: #ea5a2640 !important;
+    background-color: rgb(241, 204, 192) !important;
     border: 1px solid var(--logi-color) !important;
 }
 
 .glow-prod {
-    background-color: #8f794340 !important;
+    background-color: rgb(241, 192, 192) !important;
     border: 1px solid var(--prod-color) !important;
 }
