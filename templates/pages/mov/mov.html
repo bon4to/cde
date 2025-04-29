@@ -43,44 +43,44 @@
             {% from 'components/sidebar.html' import sidebar %}
             {{ sidebar([
                 {'id': 'move-btn', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR (UNITÁRIO)', 'onclick': 'toggleContainer()'},
+                {'id': 'fix-move-btn', 'icon': 'svg/picture-in-picture.svg', 'title': 'SOLTAR FORMULÁRIO', 'onclick': 'toggleFixMove()'},
                 {'id': 'bundle-btn', 'icon': 'svg/bag.svg', 'title': 'MOVIMENTAR (PACOTE)', 'onclick': 'toggleBundleContainer()'}
             ]) }}
 
-            <div id="floating-container" draggable="false" class="forms-container" style="position: relative;">
-                <div>
+            <div id="floating-container" class="forms-container" draggable="false" style="min-height:740px; position: relative;">
+                
                     <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
-                    <form id="formBuscarItens" method="post" onsubmit="showLockLabel()" style="display: block; height: unset">
+                    <form id="formBuscarItens" style="width: 100%;" method="post" onsubmit="showLockLabel()">
                         <label for="input_code"></label>
-                        <div class="split-h">
+                        <div class="inputs">
                             <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
                             <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
-                            <button class="bit-button" id="fix-move-btn" onclick="toggleFixMove()">
-                                <img class="svg-gray" src="{{ url_for('static', filename='svg/picture-in-picture.svg') }}" alt="">
-                            </button>
                         </div>
                         <hr>
                     </form>
 
                     <form id="form-field" class="split-v" method="post" action="/logi/mov/moving">
-                        <div class="flex-v" style="align-items: center;">
+                        <div class="flex-v">
                             <div id="produtoField">
                                 <div class="flex-v">
-                                    <div>
-                                        {% from 'components/lock-label.html' import lock_label %}
-                                        {{ lock_label('Produto', 'desc_item') }}
-                                        <input 
-                                            id="desc_item" 
-                                            name="desc_item" 
-                                            class="address-one" 
-                                            type="text" 
-                                            required readonly 
-                                            placeholder="Descrição do item..." 
-                                            onclick="maximizeText(this)"
-                                            value="{{ json_desc_item }}"
-                                        >
+                                    <div class="inputs">
+                                        <div class="flex-v">
+                                            {% from 'components/lock-label.html' import lock_label %}
+                                            {{ lock_label('Produto', 'desc_item') }}
+                                            <input 
+                                                id="desc_item" 
+                                                name="desc_item" 
+                                                class="address-one" 
+                                                type="text" 
+                                                required readonly 
+                                                placeholder="Descrição do item..." 
+                                                onclick="maximizeText(this)"
+                                                value="{{ json_desc_item }}"
+                                            >
+                                        </div>
                                     </div>
-                                    <div class="split-h">
-                                        <div>
+                                    <div class="inputs">
+                                        <div class="flex-v">
                                             {% from 'components/lock-label.html' import lock_label %}
                                             {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_item_no"></span>' | safe) }}
                                             <select 
@@ -97,7 +97,7 @@
                                             <!-- itens preenchidos dinamicamente -->
                                             </select>
                                         </div>
-                                        <div>
+                                        <div class="flex-v">
                                             {% from 'components/lock-label.html' import lock_label %}
                                             {{ lock_label('Lote', 'cod_lote') }}
                                             <input 
@@ -105,13 +105,15 @@
                                                 name="cod_lote" 
                                                 required readonly 
                                                 class="address-three" 
-                                                pattern="[A-Z0-9]{6}" maxlength="6" type="text" 
+                                                pattern="[A-Z0-9]{6}" 
+                                                maxlength="6" 
+                                                type="text" 
                                                 value="{{ json_cod_lote }}" 
                                                 placeholder="Ex.: CS0000" 
-                                                onchange="getItemFirstMov()"
+                                                oninput="getItemFirstMov(this.value)"
                                             >
                                         </div>
-                                        <div>
+                                        <div class="flex-v">
                                             <label for="operacao">Operação</label>
                                             <select 
                                                 id="operacao" 
@@ -128,25 +130,17 @@
                                     </div>
                                 </div>
                             </div>
-                            <div style="display: flex;">
-                                <div class="flex-h">
-                                    <div style="display: flex; align-items: center">
-                                        <img id="svg-operation" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
-                                    </div>
-                                    <div style="display: flex; align-items: center">
-                                        <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
-                                    </div>
+                            <div id="IconsField" class="inputs">
+                                <div class="flex-h" style="justify-content: center; align-items: center">
+                                    <img id="svg-operation" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
+                                    <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
                                 </div>
                                 <div id="popup-field" style="display: none; right: 25px">
                                     <div class="back-modal" onclick="togglePopUp()"></div>
-                                    <div class="form-filter generic">
+                                    <div class="form-filter default">
                                         <div class="split-h" style="background-color: var(--strong-dark-m); border-radius: 12px 12px 0 0">
                                             <h1 style="text-align: left; margin: auto 14px; padding-left: 0; color: var(--light-text)" class="subtitle">Configurações de Operação</h1>
-                                            <div style="scale: 1">
-                                                <div class="svg-inv" style="padding: 8px" onclick="togglePopUp()">
-                                                    <img style="height: 30px; width: 30px" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                                                </div>
-                                            </div>
+                                            <img class="svg-inv" style="height: 30px; width: 30px; padding: 8px" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="togglePopUp()">
                                         </div>
                                         <div id="enderecoCompletoContainer" style="border-radius: 0 0 12px 12px; padding: 14px">
                                             <p style="justify-content: left">
@@ -161,78 +155,85 @@
                                     </div>
                                 </div>
                             </div>
-                            <div style="display: flex;">
-                                <div id="quantField" style="display: flex; flex-direction: column; justify-content: flex-end;">
-                                    <label for="quantidade">Quantidade</label>
-                                    <input 
-                                        id="quantidade" 
-                                        class="address-two" 
-                                        type="number" 
-                                        name="quantidade" 
-                                        min="1" 
-                                        placeholder="Quantidade..." 
-                                        required
-                                    >
-                                </div>
-                            </div>
-                            <div style="display: flex; align-items: flex-end">
-                                <div>
-                                    <label for="end_letra">Endereço</label>
-                                    <div style="display: flex; flex-direction: column; justify-content: flex-end;">
-                                        <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
-                                            {% include "shared/elements/address-select.html" %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
-                            </div>
-                            <div id="destinoFields" style="display: none;">
-                                <div style="text-align: center;">
-                                    <img class="svg-orange" src="{{ url_for('static', filename='svg/square-arrow-down.svg') }}" alt="">
-                                </div>
-                                <div style="display: flex; align-items: flex-end;">
-                                    <div style="display: flex; flex-direction: column; justify-content: flex-end;">
-                                        <label for="destino_end_letra">End. de Destino</label>
-                                        <select 
-                                            class="address-three" 
-                                            id="destino_end_letra" 
-                                            name="destino_end_letra" 
-                                            onchange="toggleEndNumber()"
+                            <div id="ParamsField" class="glow-logi" style="padding: 8px 22px; margin: 8px 16px; border-radius: 16px">
+                                
+                                <div class="inputs">
+                                    <div id="quantField" class="flex-v">
+                                        <label for="quantidade">Quantidade</label>
+                                        <input 
+                                            id="quantidade" 
+                                            class="address-one" 
+                                            type="number" 
+                                            name="quantidade" 
+                                            min="1" 
+                                            placeholder="Quantidade..." 
+                                            required
                                         >
-                                            {% include "shared/elements/address-select.html" %}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="destino_end_number"> </label>
-                                        <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="999" placeholder="Número...">
                                     </div>
                                 </div>
-                            </div>
-                            <div id="cargaFields" style="display: none;">
-                                <div style="text-align: center;">
-                                    <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
-                                </div>
-                                <div style="display: flex;">
-                                    <div>
-                                        <label for="id_carga">Número de Carga</label>
-                                        <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
-                                    </div>
-                                    <div>
-                                        <label for="id_carga_seq"> </label>
-                                        <select class="address-three" type="number" id="id_carga_seq" name="id_carga_seq" step="any">
-                                            {% for index in range(0, 10) %}
-                                                <option value="{{ index }}">- {{ index }}</option>
-                                            {% endfor %}
-                                        </select>
+    
+                                <div class="inputs">
+                                    <div class="flex-v">
+                                        <label for="end_letra">Endereço</label>
+                                        <div class="flex-h" style="gap: 16px">
+                                            <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
+                                                {% include "shared/elements/address-select.html" %}
+                                            </select>
+                                            <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div id="dateFields" style="display: flex;">
-                                <div class="flex-v" style="gap: 0">
-                                    <label for="date_fab">Data de Fabricação</label>
-                                    <input type="date" id="date_fab" name="date_fab" class="address-two" required="true">
-                                    <input type="hidden" name="data_locked" id="data_locked" value="false">
-                                    <!-- TODO: se colocar um lote já conhecido, puxa a data da primeira movimentacao --> 
+    
+                                <div id="TransfFields" class="inputs" style="display: none;">
+                                    
+                                        <div class="flex-v">
+                                            <label for="destino_end_letra">End. de Destino</label>
+                                            <div class="flex-h" style="gap: 16px">
+                                                <select 
+                                                    class="address-three" 
+                                                    id="destino_end_letra" 
+                                                    name="destino_end_letra" 
+                                                    onchange="toggleEndNumber()"
+                                                >
+                                                    {% include "shared/elements/address-select.html" %}
+                                                </select>
+                                                <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="999" placeholder="Número...">
+                                            </div>
+                                        </div>
+                                </div>
+    
+                                <div id="FaturaFields" class="inputs" style="display: none;">
+                                    <div style="text-align: center;">
+                                        <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
+                                    </div>
+                                    <div style="display: flex;">
+                                        <div>
+                                            <label for="id_carga">Número de Carga</label>
+                                            <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
+                                        </div>
+                                        <div>
+                                            <select class="address-three" type="number" id="id_carga_seq" name="id_carga_seq" step="any">
+                                                {% for index in range(0, 10) %}
+                                                    <option value="{{ index }}">- {{ index }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div id="EntradaFields" class="inputs">
+                                    <div class="flex-v">
+                                        <input type="hidden" name="data_locked" id="data_locked" value="false">
+                                        <!-- TODO: se colocar um lote já conhecido, puxa a data da primeira movimentacao --> 
+                                        <label for="date_fab">Data de Fabricação</label>
+                                        <input 
+                                            type="date" 
+                                            id="date_fab" 
+                                            name="date_fab" 
+                                            class="address-one" 
+                                            required="true"
+                                        >                                    
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -240,7 +241,7 @@
                             <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
                         </div>
                     </form>
-                </div>
+                
             </div>
 
             <div id="tables-container" class="tables-container" style="max-height: 600px">
@@ -409,6 +410,7 @@
                             $("#lote_item").prop("readonly", false);
                         } else {
                             $("#lote_item").prop("readonly", true);
+                            getItemFirstMov(response.json_cod_lote)
                         }
                     },
                     error: function(error) {
@@ -421,9 +423,13 @@
                 document.getElementById("submitform").disabled = true;
             });
             
-            function getItemFirstMov() {
+            function getItemFirstMov(loteItem) {
+                // busca apenas se a string for maior de 4 caracteres
+                if (loteItem.length < 4) {
+                    return
+                }
+
                 const selectedItem = document.getElementById("cod_item").value;
-                const loteItem = document.getElementById("lote_item").value;
                 const dataFabInput = document.getElementById("date_fab");
                 const dataLockedInput = document.getElementById("data_locked");
                 

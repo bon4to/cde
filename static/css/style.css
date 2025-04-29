@@ -248,10 +248,9 @@ select#operacao option {
 
 .btn-fancy:hover, .btn-fancy:focus {
     color: #fff;
-    border-radius: 12px;
+    border-radius: 14px;
     letter-spacing: 3px;
-    background-color: var(--main-color);
-    box-shadow: 0 0 6px var(--main-color);
+    opacity: 0.8;
 }
 
 .btn-fancy.active {
@@ -566,6 +565,12 @@ div.log {
     object-fit: cover;
     position: relative;
     border-radius: 20px;
+}
+
+.side-banner.login {
+    width: 450px; 
+    height: 450px;
+    margin-left: unset;
 }
 
 .checked {

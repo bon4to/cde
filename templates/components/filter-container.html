@@ -1,15 +1,29 @@
 {% macro filter_container(filter_id="table-filter", filter_input_id="filterInput", filter_select_id="filterSelect", filter_options=None, type="default", date_value="", date_action="", date_button_title="", date_button_icon="calendar-search.svg") %}
+
 {% if type == "default" %}
-<div class="filter-container" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-    <div class="table-filter" id="{{ filter_id }}" style="display: none">
-        <input type="text" class="filterInput address" id="{{ filter_input_id }}" oninput="filterTable()" placeholder="Filtrar por...">
-        <select class="address" id="{{ filter_select_id }}" onchange="updateFilterIndex()">
-        {% if filter_options %}
-            {% for option in filter_options %}
-                <option value="{{ option.value }}">{{ option.text }}</option>
-            {% endfor %}
-        {% endif %}
-        </select>
+
+<div class="filter-container" style="display: flex; margin: 0 0 8px 0; align-items: center">
+    <div id="{{ filter_id }}" style="display: none">
+        <div class="inputs" style="margin: 0; gap: 6px">
+            <input 
+                id="{{ filter_input_id }}" 
+                class="filterInput address-two" 
+                type="text" 
+                oninput="filterTable()" 
+                placeholder="Filtrar por..."
+            >
+            <select 
+                id="{{ filter_select_id }}" 
+                class="address-two" 
+                onchange="updateFilterIndex()"
+            >
+            {% if filter_options %}
+                {% for option in filter_options %}
+                    <option value="{{ option.value }}">{{ option.text }}</option>
+                {% endfor %}
+            {% endif %}
+            </select>
+        </div>
     </div>
 </div>
 
@@ -29,4 +43,5 @@
 </div>
 
 {% endif %}
+
 {% endmacro %} 
