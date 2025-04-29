@@ -15,8 +15,11 @@ html.dark {
 
 html.dark body,
 html.dark div.container {
-    background-color: var(--strong-dark-h);
     color: var(--dark-text);
+}
+
+html.dark .view-width {
+    background: linear-gradient(0deg, var(--strong-dark-h), var(--strong-dark-h), var(--main-color));
 }
 
 html.dark h1,
