@@ -41,14 +41,14 @@ function toggleFields() {
     destinoNumeroInput.removeAttribute('required');
 
     // obtém os campos de data
-    var dateFields = document.getElementById('dateFields');
-    var cargaFields = document.getElementById('cargaFields');
-    var destinoFields = document.getElementById('destinoFields');
+    var EntradaFields = document.getElementById('EntradaFields');
+    var FaturaFields = document.getElementById('FaturaFields');
+    var TransfFields = document.getElementById('TransfFields');
 
     // exibe ou esconde os campos de acordo com a operação
-    dateFields.style.display = operacao === 'E' ? 'contents' : 'none';
-    cargaFields.style.display = operacao === 'F' ? 'contents' : 'none';
-    destinoFields.style.display = operacao === 'T' ? 'contents' : 'none';
+    EntradaFields.style.display = operacao === 'E' ? 'flex' : 'none';
+    FaturaFields.style.display = operacao === 'F' ? 'flex' : 'none';
+    TransfFields.style.display = operacao === 'T' ? 'flex' : 'none';
 
     function updateSVG(operacao) {
         const svgPaths = {
@@ -143,29 +143,35 @@ document.addEventListener("mouseover", (e) => {
 
 
 function handleCheckChange() {
-    const busca        = document.getElementById('formBuscarItens');
     const checkbox     = document.getElementById('is_end_completo');
+    
+    const buscaField   = document.getElementById('formBuscarItens');
     const produtoField = document.getElementById('produtoField');
     const quantField   = document.getElementById('quantField');
-    const quantidade   = document.getElementById('quantidade');
-    const cod_lote     = document.getElementById('lote_item');
-    const cod_item     = document.getElementById('cod_item');
+    const qtdeInput    = document.getElementById('quantidade');
+    const loteInput    = document.getElementById('lote_item');
+    const itemInput    = document.getElementById('cod_item');
     
+    // se for movimentação de endereço completo,
+    // oculta campos desnecessários
     if (checkbox.checked) {
-        produtoField.style.display = 'none';
-        busca.style.display        = 'none';
-        quantField.style.display   = 'none';
-        quantidade.required        = false;
-        cod_lote.required          = false;
-        cod_item.required          = false;
-    } else {
-        produtoField.style.display = 'block';
-        busca.style.display        = 'block';
-        quantField.style.display   = 'block';
-        quantidade.required        = true;
-        cod_lote.required          = true;
-        cod_item.required          = true;
+        qtdeInput.required = false;
+        loteInput.required = false;
+        itemInput.required = false;
+        buscaField.classList.add('hidden');
+        quantField.classList.add('hidden');
+        produtoField.classList.add('hidden');
+
+        return
     }
+    qtdeInput.required = true;
+    loteInput.required = true;
+    itemInput.required = true;
+    buscaField.classList.remove('hidden');
+    quantField.classList.remove('hidden');
+    produtoField.classList.remove('hidden');
+
+    return
 }
 
 
