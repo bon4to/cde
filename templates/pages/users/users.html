@@ -6,7 +6,6 @@
 
         {% include 'shared/header/cde-header.html' %}
 
-    <!-- TABELA -->
     <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
             <div class="titles-container flex-h title-centerer">
         <h1>
@@ -27,47 +26,73 @@
     </div>
     </div>
         <div id="divContent">
-        <div class="forms-container" style="padding: 12px 30px; display: unset; max-height: 550px; min-height: unset;">
+        <div class="forms-container">
             {% if 'CDE014' in user_perm or session['user_grant'] <= 2 %}
-                <div class="split-h">
-                    <div>
-                        <h2>Cadastrar Usuário</h2>
-                        <hr>
-                        <form action="/users/inserting" method="post">
-                            <label for="login_user">Login: <span style="color: red">*</span></label>
-                            <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário..." required>
-                            <div onclick="alert('A senha padrão é esta, e deverá ser alterada pelo usuário no seu primeiro acesso.')">
-                                <label for="password_user">Senha: <span style="color: red">*</span></label><label class="text-main-color" style="text-align: right;" id="password_strength"></label>
-                                <input class="disabled" id="password_user" name="password_user" placeholder="Senha de usuário..." value="12345" disabled required>
+                <div>
+                    <h1 class="subtitle">Cadastrar Usuário</h1>
+                    <hr>
+                    <form action="/users/inserting" method="post">
+                        <div class="inputs">
+                            <div>
+                                <label for="login_user">Login: <span style="color: red">*</span></label>
+                                <input 
+                                    class="address-one"
+                                    type="text" 
+                                    id="login_user" 
+                                    name="login_user" 
+                                    placeholder="E-mail, telefone ou usuário..." 
+                                    required
+                                >
                             </div>
-                            <div class="split-h">
-                                <div>
-                                    <label for="nome_user">Nome: <span style="color: red">*</span></label><br>
-                                    <input class="address" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
-                                </div>
-                                <div>
-                                    <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label><br>
-                                    <input class="address" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
-                                </div>
+                        </div>
+                        <div class="inputs">
+                            <div>
+                                <label for="password_user">Senha: <span style="color: red">*</span></label>
+                                <input 
+                                    class="address-one disabled" 
+                                    id="password_user" 
+                                    name="password_user" 
+                                    value="12345" 
+                                    disabled 
+                                    required
+                                >
                             </div>
+                        </div>
 
-                            <label for="privilege_user">Privilégios: <span style="color: red">*</span></label>
-                            <select id="privilege_user" name="privilege_user" required>
-                                {% if 'user_grant' in session %}
-                                    <option value="3">Padrão</option>
-                                    <option value="2">Administrador</option>
-                                    {% if session['user_grant'] <= 1 %}
-                                        <option value="1" style="color: red">Desenvolvedor</option>
-                                    {% endif %}
-                                {% endif %}
-                            </select>
-                            <p style="color: red">Campos com * são obrigatórios.</p>
-                            <div style="display: flex;width: 100%;">
-                                <input class="btn-fancy" style="max-width: none;" type="submit" value="Cadastrar">
-                                
+                        <div class="inputs">
+                            <div>
+                                <label for="nome_user">Nome: <span style="color: red">*</span></label>
+                                <input class="address-two" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
                             </div>
-                        </form>
-                    </div>
+                            <div>
+                                <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label>
+                                <input class="address-two" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
+                            </div>
+                        </div>
+                        <div class="inputs">
+                            <div>
+                                <label for="privilege_user">Privilégios: <span style="color: red">*</span></label>
+                                <select 
+                                class="address-one"
+                                    id="privilege_user" 
+                                    name="privilege_user" 
+                                    required
+                                >
+                                    {% if 'user_grant' in session %}
+                                        <option value="3">Padrão</option>
+                                        <option value="2">Administrador</option>
+                                        {% if session['user_grant'] <= 1 %}
+                                            <option value="1" style="color: red">Desenvolvedor</option>
+                                        {% endif %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <p style="color: red">Campos com * são obrigatórios.</p>
+                        <div style="display: flex;width: 100%;">
+                            <input class="btn-fancy" style="max-width: none;" type="submit" value="CADASTRAR">
+                        </div>
+                    </form>
                 </div>
             {% else %}
                 <div style="margin-top: 50%; padding: 0 80px;">
@@ -76,10 +101,9 @@
             {% endif %}
         </div>
         <div draggable="false" class="tables-container" style="width: 600px">
-            <h1>Usuários do Sistema</h1>
             <div class="split-h">
                 <div style="width: 100%;">
-                    <div class="table-overflow" style="max-height: 620px;">
+                    <div class="table-overflow">
                         <table id="filterTable">
                             <tr>
                                 <th>Usuário (Cód.)</th>
@@ -97,7 +121,7 @@
                                         <img 
                                             title="EDITAR USUÁRIO"
                                             alt=""
-                                            class="svg-link table-more" 
+                                            class="svg-link"
                                             onclick="redirectToEdit('{{ item['cod_user'] }}')" 
                                             src="{{ url_for('static', filename='svg/edit-link.svg') }}" 
                                         >
