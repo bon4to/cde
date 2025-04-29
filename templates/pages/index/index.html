@@ -11,11 +11,9 @@
             {% endblock brow %}
             </div>
         </div>
-        <span class="ad-container">
-            {% include "components/advert.html" %}
-        </span>
         
         <div id="divContent" style="flex-wrap: wrap;">
+            {% include "components/advert.html" %}
             {% if 'user_grant' in session %}
                 {% if not about %}
                     <div class="tables-container flex-v" style="border-radius: 44px; min-height: unset; height: 628px; padding: 24px;">
