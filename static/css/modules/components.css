@@ -42,7 +42,6 @@
 
 /* Form styles */
 form {
-    height: 100%;
     display: flex;
     margin: 0 auto;
     max-width: 100%;
@@ -59,11 +58,24 @@ input, select, textarea {
     font-size: 12px;
     border-radius: 8px;
     box-sizing: border-box;
-    margin: 8px;
+    margin: 0;
     border: 1px solid #dcdcdc;
     border-bottom: 2px solid #dcdcdc;
     background-color: #efefef;
     font-family: "Inter", sans-serif;
+}
+
+.inputs {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    margin: 8px 0;
+    align-items: center;
+}
+
+.inputs div {
+    width: 100%;
 }
 
 input:focus, select:focus, textarea:focus {
