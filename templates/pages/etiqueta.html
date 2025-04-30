@@ -29,26 +29,28 @@
         </div>
         
         <div id="divContent">
-            <div class="forms-container" id="floating-container" draggable="false" style="position: relative; max-width: max-content">
-                    <div style="max-width: 400px; justify-content: flex-start; margin: auto">
-                        <div>
-                            <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
-                                <label for="input_code"></label>
-                                <div class="split-h">
-                                    <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="Leia o código aqui...">
-                                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
-                                </div>
-                                <hr>
-                            </form>
-                        </div>
-                        <form id="form-field" method="post" action="{{ url_for('etiqueta') }}">
-                            <div>
+            <div class="forms-container">
+                <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
+                <form id="formBuscarItens" style="width: 100%;" method="post" onsubmit="showLockLabel()">
+                    <label for="input_code"></label>
+                    <div class="inputs">
+                        <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
+                        <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                    </div>
+                    <hr>
+                </form>
+
+                <form id="form-field" method="post" action="{{ url_for('etiqueta') }}">
+                    <div class="flex-v">
+                        <div class="inputs">
+                            <div class="flex-v">
                                 {% from 'components/lock-label.html' import lock_label %}
                                 {{ lock_label('Produto', 'desc_item') }}
-
+        
                                 <input 
                                     id="desc_item" 
                                     name="desc_item" 
+                                    class="address-one"
                                     type="text" 
                                     value="{{ json_desc_item }}" 
                                     onclick="maximizeText(this)" 
@@ -57,43 +59,66 @@
                                     placeholder="Produto..."
                                 >
                             </div>
-
-                            <div class="two-split">
-                                <div>
-                                    {% from 'components/lock-label.html' import lock_label %}
-                                    {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_cod_item_ocurr"></span>' | safe) }}
-                                    
-                                    <select class="address" id="cod_item" name="cod_item" required onchange="showLockLabel()"></select>
-                                </div>
-                                <div>
-                                    {% from 'components/lock-label.html' import lock_label %}
-                                    {{ lock_label('Lote', 'cod_lote') }}
-
-                                    <input 
-                                        id="lote_item" 
-                                        name="cod_lote" 
-                                        class="address" 
-                                        pattern="[A-Z0-9]{6}" 
-                                        maxlength="6" 
-                                        type="text" 
-                                        value="{{ json_cod_lote }}" 
-                                        required 
-                                        readonly 
-                                        placeholder="Lote..."
-                                    >
-                                </div>
+                        </div>
+    
+                        <div class="inputs">
+                            <div class="flex-v">
+                                {% from 'components/lock-label.html' import lock_label %}
+                                {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_cod_item_ocurr"></span>' | safe) }}
+                                
+                                <select 
+                                    id="cod_item" 
+                                    name="cod_item" 
+                                    class="address-two" 
+                                    required 
+                                    onchange="showLockLabel()"
+                                >
+                                </select>
                             </div>
-                            <br>
-                            <div class="flex-h" style="gap: 0; min-width: 100%;">
-                                <input class="btn-fancy" type="submit" value="GERAR">
-                                <button class="btn-fancy" style="max-height: 60px; max-width: 60px; padding: 12px; margin: 8px" onclick="toggleCheckbox('imgCheckbox','imgDownload')" >
-                                    <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" alt="">
-                                </button>
+                            <div class="flex-v">
+                                {% from 'components/lock-label.html' import lock_label %}
+                                {{ lock_label('Lote', 'cod_lote') }}
+    
+                                <input 
+                                    id="lote_item" 
+                                    name="cod_lote" 
+                                    class="address-two" 
+                                    pattern="[A-Z0-9]{6}" 
+                                    maxlength="6" 
+                                    type="text" 
+                                    value="{{ json_cod_lote }}" 
+                                    required 
+                                    readonly 
+                                    placeholder="Lote..."
+                                >
                             </div>
-                            <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">
-                        </form>
-                </div>
+                        </div>
+                        <div class="inputs">
+                            <input 
+                                class="btn-fancy" 
+                                type="submit" 
+                                value="GERAR"
+                            >
+                            <button 
+                                class="btn-fancy" 
+                                style="
+                                    max-height: 60px; 
+                                    max-width: 60px; 
+                                    padding: 12px; 
+                                " 
+                                onclick="toggleCheckbox('imgCheckbox','imgDownload')" 
+                            >
+                                <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" alt="">
+                            </button>
+                        </div>
+
+                        <!-- checkbox real oculta -->
+                        <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">
+
+                    </div>
+                </form>
             </div>
+
             <div class="tables-container" style="max-height: 600px">
                 <div class="centralizado">
                     <div class="qr-item featured">
@@ -102,6 +127,7 @@
                 </div>
                 <p id="label-success" style="font-weight: 500; color: var(--main-color);">Aguardando dados...</p>
             </div>
+
             <div id="tables-container" class="tables-container glow-cde" style="max-height: 600px">
                 <div class="centralizado">
                     <div id="qr-grid" class="qr-grid">
@@ -133,7 +159,6 @@
                 </div>
             </div>
         </div>
-
 
         <script>
 
