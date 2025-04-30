@@ -87,9 +87,9 @@ th.bigger-size {
 }
 
 .action-cell {
-    cursor: pointer; 
+    cursor: pointer;
     display: none;
-    max-width: 100px; 
+    max-width: 60px; 
     text-align: center; 
     color: white; 
     font-weight: 500;
