@@ -40,7 +40,6 @@
                                             <a href="{{ url_for('estoque_preset') }}">PRESET</a>
                                         </div>
                                     </div>
-                                    <hr>
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('cargas') }}">
                                             <div class="split-h" style="align-items: center;">
@@ -55,7 +54,6 @@
                                             <a href="{{ url_for('carga_sep_done', id_carga=0) }}">SEPARAÇÃO</a>
                                         </div>
                                     </div>
-                                    <hr>
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('mov_request') }}">
                                             <div class="split-h" style="align-items: center;">
@@ -116,7 +114,7 @@
                         </div>
                         <div class="flex-h" style="gap: 0">
                             <div style="display: flex; justify-content: center; align-items: center; height: 48px; width: 48px;">
-                                <img id="toggle-theme" style="height: 16px; width: 16px; cursor: pointer;" onclick="toggleTheme()" class="svg-inv" src="{{ url_for('static', filename='svg/moon.svg') }}" alt="">
+                                <img id="toggle-theme" title="Alterar Tema" style="height: 16px; width: 16px; cursor: pointer;" onclick="toggleTheme()" class="svg-inv" src="{{ url_for('static', filename='svg/moon.svg') }}" alt="">
                             </div>
                             <div class="dropdown">
                                 <button class="dropbtn" style="cursor: pointer;" onclick="window.location.href='{{ url_for('cde_notifications') }}';">
@@ -157,7 +155,7 @@
                                 <hr class="vert" style="width: 0;">
                             </div>
                             <div class="user-params-button flex-h" onclick="window.location.href='{{ url_for('cde_profile') }}';">
-                                <p style="margin: auto 8px; max-height: 14px" class="id-page white">{{ app_unit }}</p>
+                                <p style="margin: auto 8px; max-height: 14px" class="id-page white-filled">{{ app_unit }}</p>
                                 <div style="margin: auto 4px auto auto;" class="user-button">
                                     {{ session.get('user_initials', '') }}
                                 </div>
