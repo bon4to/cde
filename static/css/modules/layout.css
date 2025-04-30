@@ -34,7 +34,7 @@
 .view-width {
     max-width: 90vw;
     padding: 0 5vw 5vh 5vw;
-    background: linear-gradient(0deg, var(--main-color), #f1f1f1, #f1f1f1);
+    background: linear-gradient(0deg, #f1f1f1, #f1f1f1, #f1f1f1, var(--main-color));
 }
 
 #divContent {

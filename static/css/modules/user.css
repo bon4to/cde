@@ -40,11 +40,15 @@ div.user-button {
 div.user-params-button {
     gap: 0;
     max-height: 38px;
-    margin: auto 12px;
+    margin: auto 0;
     padding: 4px 0;
-    background-color: var(--main-color); 
+    background-color: transparent; 
     border-radius: 8px;
     cursor: pointer;
+}
+
+div.user-params-button:hover {
+    background-color: var(--white-or-dark); 
 }
 
 div.logged-header {

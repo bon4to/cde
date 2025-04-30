@@ -19,7 +19,7 @@ html.dark div.container {
 }
 
 html.dark .view-width {
-    background: linear-gradient(0deg, var(--strong-dark-h), var(--strong-dark-h), var(--main-color));
+    background: linear-gradient(0deg, var(--strong-dark-h), var(--strong-dark-h), var(--strong-dark-h), var(--main-color));
 }
 
 html.dark h1,
@@ -72,10 +72,9 @@ html.dark .navigation-bar hr {
     border-color: var(--dark-text);
 }
 
-html.dark .navigation-bar {
-    background-color: var(--strong-dark-h);
-}
 
+html.dark .index-container,
+html.dark .sidebar-container,
 html.dark .tables-container,
 html.dark .mobile-container,
 html.dark .titles-container,

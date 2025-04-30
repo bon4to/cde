@@ -2,7 +2,7 @@
     display: flex;
     padding: 0 36px;
     justify-content: left;
-    background-color: #323232;
+    background-color: var(--main-color);
 }
 
 .navigation-bar .user-button {
@@ -26,7 +26,7 @@
     min-width: 220px;
     transition: none;
     position: absolute;
-    background-color: var(--main-color);
+    background-color: var(--strong-dark-l);
 }
 
 .dropdown-content hr {
@@ -49,13 +49,13 @@
     padding: 14px 16px;
     text-decoration: none;
     font-family: 'Chivo Mono', monospace;
-    background-color: var(--main-color);
+    background-color: var(--strong-dark-l);
 }
 
 .dropdown-content a:hover {
     transition: none;
     background-color: var(--dark-or-white);
-    color: var(--white-or-dark);
+    color: var(--main-color);
 }
 
 .dropdown:hover .dropdown-content {
@@ -63,14 +63,15 @@
 }
 
 .dropdown-notification {
+    background-color: var(--strong-dark-l);
     min-width: 360px;
 }
 
 .dropdown-notification:hover h1, 
 .dropdown-notification:hover p,
 .dropdown-notification:hover {
-    color: var(--dark-or-white);
-    background-color: var(--main-color);
+    background-color: var(--dark-or-white);
+    color: var(--main-color);
 }
 
 .dropdown-notification .dropdown-notification-title, 
@@ -98,7 +99,7 @@
 
 .dropdown-notification h1 {
     margin: 0;
-    color: var(--main-color);
+    color: var(--dark-or-white);
     display: block;
     text-align: left;
     transition: none;
@@ -110,7 +111,7 @@
 }
 
 .dropdown-notification p {
-    color: var(--white-or-dark);
+    color: var(--dark-or-white);
     font-size: 11px;
     text-align: left;
     transition: none;
@@ -129,7 +130,7 @@
     border: none;
     display: flex;
     padding: 16px;
-    color: white;
+    color: var(--dark-or-white);
     font-size: 14px;
     transition: none;
     text-wrap: nowrap;
@@ -139,7 +140,7 @@
 
 .dropbtn:hover {
     background-color: var(--dark-or-white);
-    color: var(--white-or-dark);
+    color: var(--main-color);
 }
 
 .submenu {
@@ -153,8 +154,7 @@
     display: none;
     min-width: 200px;
     position: absolute;
-    background-color: var(--main-color);
-    border-left: 6px solid var(--dark-or-white);
+    background-color: var(--strong-dark-l);
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
 
@@ -189,16 +189,16 @@
 .submenu:hover a.submenu-title,
 .submenu:hover a.submenu-title {
     background-color: var(--dark-or-white);
-    color: var(--white-or-dark);
+    color: var(--main-color);
 }
 
 .submenu:hover .dropbtn, 
 .submenu-content:hover .dropbtn {
-    background-color: var(--main-color);
+    background-color: var(--strong-dark-l);
     color: #fff;
 }
 
 .dropdown:hover .dropbtn {
+    background-color: var(--strong-dark-l);
     color: #fff;
-    background-color: var(--main-color);
 }
