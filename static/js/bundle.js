@@ -147,7 +147,7 @@ function addToBundle(rowIndex) {
 
     // Verificar se o item já existe na tabela de destino
     if (isDuplicateItem(item, endereco, lote)) {
-        showToast(`${endereco} - ${item} (${lote}) já foi adicionado ao pacote!`, 'error', 3);
+        showToast(`${endereco} - ${item} (${lote}) já foi adicionado ao pacote!`, 'error');
 
         return; // Não adicionar o item se já existir
     }
@@ -208,13 +208,17 @@ function addToBundle(rowIndex) {
     const actionCell = newRow.insertCell(originalRow.cells.length - 1);
     actionCell.classList.add("action-cell");
     actionCell.classList.add("red");
+
     actionCell.style.display = "table-cell";
+    actionCell.style.padding = 0
+
+    actionCell.title = `REMOVER (${item} | ${lote})`
     
     // Definir o evento onclick para remover a linha
     actionCell.onclick = function() { 
         removeRow(this); 
     };
-    actionCell.textContent = "REMOVER";
+    actionCell.innerHTML = `<img class="svg-inv" src="/static/svg/list-x.svg" alt="">`;
 
     showToast(`${endereco} - ${item} (${lote}) adicionado ao pacote!`, 'info', 3);
 }

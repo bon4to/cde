@@ -47,7 +47,7 @@
                 {'id': 'bundle-btn', 'icon': 'svg/bag.svg', 'title': 'MOVIMENTAR (PACOTE)', 'onclick': 'toggleBundleContainer()'}
             ]) }}
 
-            <div id="floating-container" class="forms-container" draggable="false" style="min-height:740px; position: relative;">
+            <div id="floating-container" class="forms-container" draggable="false">
                 
                     <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
                     <form id="formBuscarItens" style="width: 100%;" method="post" onsubmit="showLockLabel()">
@@ -254,7 +254,9 @@
                             <th>Item (Descrição)</th>
                             <th>Lote (Código)</th>
                             <th>QTDE (Efetiva)</th>
-                            <th id="header-add-column" style="display: none; width: 100px; padding: 0;"></th>
+                            <th id="header-add-column" style="display: none; width: 100px; padding: 0;">
+                                <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
+                            </th>
                         </tr>
                         {% for item in saldo_atual %}
                             <tr id="row-{{ loop.index }}">   
@@ -263,8 +265,8 @@
                                 <td>{{ item['desc_item'] }}</td>
                                 <td>{{ item['cod_lote'] }}</td>
                                 <td class="number">{{ item['saldo'] }},0</td>
-                                <td class="action-cell green" onclick="addToBundle({{ loop.index }})">
-                                    <span>ADICIONAR</span>
+                                <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
+                                    <img class="svg-inv" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
                                 </td>
                             </tr>
                         {% endfor %}
@@ -273,7 +275,7 @@
 
             </div>
             
-            <div id="bundle-container" class="tables-container glow-logi" style="display: none; max-width: -webkit-fill-available; min-width: 800px;">
+            <div id="bundle-container" class="tables-container glow-logi" style="display: none; max-width: 920px; min-width: 800px;">
                 <div style="display: flex; justify-content: space-between; flex-direction: column; height: 100%;">
                     <div>
                         <h1 class="subtitle">Pacote de itens:</h1>
