@@ -426,14 +426,34 @@
             });
             
             function getItemFirstMov(loteItem) {
-                // busca apenas se a string for maior de 4 caracteres
-                if (loteItem.length < 4) {
-                    return
-                }
-
                 const selectedItem = document.getElementById("cod_item").value;
                 const dataFabInput = document.getElementById("date_fab");
                 const dataLockedInput = document.getElementById("data_locked");
+
+                function setDataFab(date=null) {
+                    if (date) {
+                        dataFabInput.value = date;
+                        dataFabInput.setAttribute('readonly', true);
+                        dataLockedInput.value = true;
+
+                        dataFabInput.onclick = function() {
+                            alert("O lote deste item foi registrado pela primeira vez em " + data.first_mov);
+                        }
+                        return
+                    }
+                    dataFabInput.value = '';
+                    dataFabInput.removeAttribute('readonly');
+                    dataLockedInput.value = false;
+
+                    dataFabInput.onclick = ''
+                    return
+                }
+
+                // busca apenas se a string for maior de 4 caracteres
+                if (loteItem.length <= 3 || !/^[A-Z]{2}\d{4}$/.test(loteItem)) {
+                    setDataFab()
+                    return
+                }
                 
                 // impede datas futuras na data de fabricação
                 dataFabInput.max = new Date().toISOString().split('T')[0];
@@ -441,19 +461,8 @@
                 fetch(`/api/get_item_first_mov?cod_item=${selectedItem}&cod_lote=${loteItem}`)
                     .then(response => response.json())
                     .then(data => {
-                        if (data.first_mov) {
-                            dataFabInput.value = data.first_mov;
-                            dataFabInput.setAttribute('readonly', true);
-                            dataLockedInput.value = true;
-                            dataFabInput.onclick = function() {
-                                alert("O lote deste item foi registrado pela primeira vez em " + data.first_mov);
-                            }
-                        } else {
-                            dataFabInput.value = '';
-                            dataFabInput.removeAttribute('readonly');
-                            dataLockedInput.value = false;
-                            dataFabInput.onclick = ''
-                        }
+                        setDataFab(data.first_mov)
+                        return
                     })
                     .catch(error => {
                         console.error('Erro ao obter data de fabricação:', error);
