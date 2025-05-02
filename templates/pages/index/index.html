@@ -16,21 +16,16 @@
             {% include "components/advert.html" %}
             {% if 'user_grant' in session %}
                 {% if not about %}
-                    <div class="tables-container flex-v" style="border-radius: 44px; min-height: unset; height: 628px; padding: 24px;">
-                        <div class="flex-h" style="min-width: 100%; gap: 30px">
+                    <div class="index-container flex-v">
+                        <div class="flex-h" style="gap: 30px">
                             {% block side_banner %}  
                                
                             {% endblock side_banner %}
                     
-                            <div style="display: flex; flex-direction: column; justify-content: space-between">
-                                <div>
-                                    <div>
-                                        <div class="salute-text">
-                                            <h1 class="saudacao" id="saudacao"></h1>
-                                            <p class="phrase disabled" id="frase-motivacional">“{{ frase }}”</p>
-                                        </div>
-                                    </div>
-                                    <hr style="margin-left: 20px; width: 20%;">
+                            <div class="split-v">
+                                <div class="salute-text">
+                                    <h1 class="salute-text" id="salute-text"></h1>
+                                    <p class="phrase disabled" id="frase-motivacional">``{{ frase }}``</p>
                                 </div>
                                 <div class="container-grid" style="margin-bottom: 32px; padding: 10px 0">
                                     {% block grid_buttons %}
@@ -102,21 +97,30 @@
         </div>
         
         <script>
-            function getSaudacao() {
-                let saudacao;
+            function getSaluteText() {
+                let saluteText;
                 let horaAtual = new Date().getHours();
 
                 if (horaAtual >= 5 && horaAtual < 12) {
-                    saudacao = "Bom dia, ";
+                    saluteText = "Bom dia";
                 } else if (horaAtual >= 12 && horaAtual < 18) {
-                    saudacao = "Boa tarde, ";
+                    saluteText = "Boa tarde";
                 } else {
-                    saudacao = "Boa noite, ";
+                    saluteText = "Boa noite";
                 }
-                return saudacao;
+                return saluteText;
             }
-            let salute = getSaudacao() + "<span class='text-main-color'>{{ session.get('user_name') }}</span>!";
-            document.getElementById("saudacao").innerHTML = salute;
+
+            function updateSaluteText() {
+                let saluteHTML = getSaluteText() + ", " + getUserHTML() + "!";
+                document.getElementById("salute-text").innerHTML = saluteHTML;
+            }
+
+            function getUserHTML() {
+                return `<span class='text-main-color'>{{ session.get('user_name') }}</span>`
+            }
+
+            updateSaluteText();
 
         </script>
 

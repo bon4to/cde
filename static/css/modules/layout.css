@@ -34,7 +34,7 @@
 .view-width {
     max-width: 90vw;
     padding: 0 5vw 5vh 5vw;
-    background: linear-gradient(0deg, var(--main-color), #f1f1f1, #f1f1f1);
+    background: linear-gradient(0deg, #f1f1f1, #f1f1f1, #f1f1f1, var(--main-color));
 }
 
 #divContent {
@@ -43,7 +43,7 @@
     min-width: 100%;
     gap: 20px;
     justify-content: space-between;
-    min-height: 740px;
+    min-height: 726px;
 }
 
 .container {
@@ -56,6 +56,7 @@
     justify-content: flex-start;
 }
 
+.index-container,
 .tables-container,
 .mobile-container,
 .sidebar-container,
@@ -67,6 +68,18 @@
     box-sizing: border-box;
     background-color: #fff;
     box-shadow: 0 0 22px rgba(0, 0, 0, 0.2);
+}
+
+.index-container {
+    border-radius: 44px; 
+    min-height: unset; 
+    height: 628px; 
+    padding: 24px;
+}
+
+.tables-container {
+    max-height: 130%;
+    transition: width 0.3s ease-out;
 }
 
 .forms-container {

@@ -79,33 +79,6 @@
     display: inline-block;
 }
 
-
-/* action cells */
-.action-cell {
-    cursor: pointer; 
-    display: none;
-    max-width: 100px; 
-    text-align: center; 
-    color: white; 
-    font-weight: 500;
-    padding: 0;
-}
-
-.action-cell.red {
-    background-color: #d72828; 
-    border-color: #d72828; 
-}
-
-.action-cell.green {
-    background-color: #34bb34; 
-    border-color: #34bb34; 
-}
-
-.action-cell.blue {
-    background-color: #346ebb; 
-    border-color: #346ebb; 
-}
-
 /* standard tags */
 
 .readonly {
@@ -359,11 +332,6 @@ div.back-modal {
     font-size: 12px;
 }
 
-.tables-container {
-    max-height: 130%;
-    transition: width 0.3s ease-out;
-}
-
 .table-overflow {
     text-wrap: wrap;
     overflow-y: auto;
@@ -575,17 +543,6 @@ div.log {
 
 .checked {
     background-color: var(--main-color);
-}
-
-
-div.user-params-button {
-    gap: 0;
-    max-height: 38px;
-    margin: auto 12px;
-    padding: 4px 0;
-    background-color: var(--main-color); 
-    border-radius: 8px;
-    cursor: pointer;
 }
 
 .container-grid {

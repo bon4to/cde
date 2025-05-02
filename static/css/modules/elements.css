@@ -54,6 +54,19 @@ p.id-page.white {
     font-weight: bold;
 }
 
+p.id-page.main {
+    border: 1px solid var(--main-color);
+    color: var(--main-color) !important;
+    font-weight: bold;
+}
+
+p.id-page.white-filled {
+    background-color: var(--dark-or-white);
+    color: var(--main-color) !important;
+    font-weight: bold;
+    border: none;
+}
+
 span.id-page {
     font-size: 18px;
     color: var(--main-color);
