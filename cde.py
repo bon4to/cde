@@ -447,6 +447,103 @@ class EstoqueUtils:
 
 
     @staticmethod
+    # RETORNA ENDEREÇAMENTO POR LOTES
+    def get_inv_report(timestamp=False):
+        if timestamp:
+            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
+        timestamp = misc.parse_db_datetime(timestamp)
+        
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                WITH base AS (
+                    SELECT  
+                        h.rua_letra,
+                        h.rua_numero, 
+                        i.cod_item, 
+                        i.desc_item, 
+                        h.lote_item,
+
+                        {a} saldo,
+
+                        (
+                            SELECT REPLACE(time_mov, '/', '-')
+                            FROM tbl_transactions
+                            WHERE cod_item = i.cod_item
+                            AND lote_item = h.lote_item
+                            ORDER BY time_mov ASC
+                            LIMIT 1
+                        ) AS first_mov_raw,
+
+                        i.validade
+
+                    FROM tbl_transactions h
+                    JOIN itens i ON h.cod_item = i.cod_item
+                    
+                    GROUP BY 
+                        h.rua_numero, h.rua_letra, 
+                        h.cod_item, h.lote_item
+                )
+
+                SELECT 
+                    rua_letra,
+                    rua_numero,
+                    cod_item,
+                    desc_item,
+                    lote_item,
+                    saldo,
+                    first_mov_raw AS first_mov,
+                    validade,
+                    CASE 
+                        WHEN validade IS NOT NULL 
+                        THEN datetime(first_mov_raw, '+' || validade || ' months')
+                        ELSE 'N/A'
+                    END AS data_vencimento
+
+                FROM base
+                WHERE saldo != 0
+                
+                ORDER BY 
+                    rua_letra ASC, rua_numero ASC,
+                    desc_item ASC
+                    ;'''.format(a=EstoqueUtils.sql_balance_calc),
+            )
+
+            result = []
+            for row in cursor.fetchall():
+                validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
+                if err != None:
+                    validade = err
+                
+                validade_str = ''
+                validade_perc_str = 0
+                if type(validade) == int:
+                    validade_str = f"{(float(validade) / 30):.1f} / {row[7]} meses"
+                    validade_perc_str = float(f"{(float(validade) / 30 / row[7] * 100):.1f}")
+                
+                
+                # checa se a data de vencimento existe
+                date_venc = row[8]
+                
+                if date_venc == None:
+                    date_venc = 'N/A'
+                
+                result.append({
+                    # itera letra e numero da rua com um '.'
+                    'address': f'{row[0]}.{row[1]} ', 
+                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                    #   exemplo:
+                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                    #    'A.1 ' -> ['A.1 ']
+                    'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
+                    'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
+                    'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str, 
+                    'date_venc': date_venc
+                })
+        return result
+
+
+    @staticmethod
     # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
     def get_address_lote_fat():
         with sqlite3.connect(db_path) as connection:
