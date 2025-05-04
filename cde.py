@@ -4609,6 +4609,22 @@ def estoque_enderecado() -> str:
     )
 
 
+@app.route('/inv/report/', methods=['GET', 'POST'])
+@cde.verify_auth('MOV004')
+def inv_report() -> str:
+    if request.method == 'POST':
+        date = request.form['date']
+        result = EstoqueUtils.get_inv_report(date)
+    else:
+        result = EstoqueUtils.get_inv_report()
+        date = False
+    return render_template(
+        'pages/inv-report.html',
+        saldo_atual=result,
+        search_term=date
+    )
+
+
 @app.route('/estoque/presets/', methods=['GET', 'POST'])
 @cde.verify_auth('MOV004')
 def estoque_preset() -> str:
