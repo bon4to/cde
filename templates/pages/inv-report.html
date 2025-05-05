@@ -1,0 +1,130 @@
+{% extends "pages/estoque.html" %}
+
+    {% block svg %}
+        <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/group.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+        </a>
+        <a class="aux-button {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/land-plot.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
+        </a>
+            <a class="aux-button {% if request.endpoint == 'estoque_preset' %}active{% endif %}">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
+        </a>
+    {% endblock svg %}
+
+    {% block filter_options %}
+        <option value=1>Item (Código)</option>
+        <option value=0>Endereço</option>
+        <option value=2>Item (Descrição)</option>
+        <option value=3>Lote (Código)</option>
+        <option value=4>Validade (Dias)</option>
+    {% endblock filter_options %}
+
+    {% block table %}
+        <div class="split-h">
+            <span>
+                <h1 class="subtitle">Estoque</h1>
+                <p class="text-main-color">Visualização de Estoque (para Relatório)</p>
+            </span>
+            <div class="table-filter" style="display: none;">
+                <div>
+                    <form action="/estoque/enderecado" method="post">
+                        <div class="flex-h">
+                            <input type="date" class="address" id="date" name="date" value="{{ search_term }}">
+                            <button class="button-mini btn-fancy" type="submit">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-search.svg') }}" title="CARREGAR ESTOQUE NO DIA">
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% if search_term %}
+            <div class="split-h">
+                <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
+                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';" title="Limpar">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                </a>
+            </div>
+        {% endif %}
+        <div class="table-overflow">
+            <table id="filterTable">
+                <thead>
+                    <tr>
+                        <th>Endereço</th>
+                        <th>Item (Código)</th>
+                        <th>Item (Descrição)</th>
+                        <th>Lote (Código)</th>
+                        <th>Validade (Dias)</th>
+                        <th>Fabricacão (Data)</th>
+                        <th>Vencimento (Data)</th>
+                        <th>Saldo (Quant.)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in saldo_atual %}
+                        <tr>
+                            <td>{{ item['address'] }} </td>
+                            <td class="number">{{ item['cod_item'] }}</td>
+                            <td>{{ item['desc_item'] }}</td>
+                            <td 
+                                {% if 'CS' not in item['cod_lote']|string %}
+                                    style="color:rgb(113, 113, 113);"
+                                {% endif %}
+                            >
+                                {{ item['cod_lote'] }}
+                            </td>
+                                {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
+                                <td 
+                                    style="color:rgb(113, 113, 113);"
+                                    title="Validade não informada!"
+                                >
+                                    -
+                                </td>
+                                {% elif '/' in item['validade']|string %}
+                                    <td 
+                                        style="color:rgb(113, 113, 113);"
+                                    >
+                                    {{ item['validade'] }}
+                                    </td>
+                                {% else %}
+                                <td 
+                                    {% set validade_meses = item['validade'] | int / 30  %}
+                                    title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
+                                    style="color: var(--cde-color); font-weight: bold"
+                                >
+                                    {{ item['validade'] }}
+                                </td>
+                                {% endif %}
+                            <td>{{ item['date_fab'] }}</td>
+                                {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
+                                <td 
+                                    style="color:rgb(113, 113, 113);"
+                                    title="Validade não informada!"
+                                >
+                                    -
+                                </td>
+                                {% elif '/' in item['validade']|string %}
+                                    <td 
+                                        style="color:rgb(113, 113, 113);"
+                                    >
+                                    {{ item['date_venc'] }}
+                                    </td>
+                                {% else %}
+                                <td 
+                                    {% set validade_meses = item['validade'] | int / 30  %}
+                                    title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
+                                    style="color: var(--cde-color); font-weight: bold"
+                                >
+                                    {{ item['date_venc'] }}
+                                </td>
+                                {% endif %}
+                            
+                            <td class="number">{{ item['saldo'] }},0</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p>{{ saldo_atual|length }} registros |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Exportar (CSV)</a></p>
+    {% endblock table %}
