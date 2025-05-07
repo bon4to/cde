@@ -1,7 +1,9 @@
 <!-- footer.html -->
-
+        <!-- temporary div closer to non-set base.html -->
+        {% if session['module'] == 'unset' %}
             </div>
         </div>
+        {% endif %}
 
         <div id="scroll-to-top-button" class="hidden-opacity">
             <button onclick="scrollToTop()">
