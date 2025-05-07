@@ -172,7 +172,7 @@ class cde:
     
     @staticmethod
     # VERIFICA PRIVILÉGIO DE ACESSO
-    def verify_auth(id_page):
+    def verify_auth(id_page, module='unset'):
         def decorator(f):
             @wraps(f)
             def decorador(*args, **kwargs):
@@ -180,6 +180,7 @@ class cde:
                     return redirect(url_for('login'))
                 id_user = cde.format_three_no(session.get('id_user'))
                 session['id_page'] = f'{id_page}'
+                session['module']  = f'{module}'
                 if session.get('user_grant') <= 2:
                     lt.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
                     app.config['APP_UNIT'] = cde.get_unit()
@@ -2666,7 +2667,7 @@ def get_item() -> Response:
 
 # rota de movimentação no estoque (/mov)
 @app.route('/logi/mov/')
-@cde.verify_auth('MOV002')
+@cde.verify_auth('MOV002', 'logi')
 def mov() -> str:
     result = EstoqueUtils.get_address_lote()
 
