@@ -4654,39 +4654,32 @@ def cargas_preset() -> str:
     )
 
 
-@app.route('/export_csv/<tipo>/', methods=['GET'])
+@app.route('/export_csv/<type>/', methods=['GET'])
 @cde.verify_auth('CDE017')
-def export_csv_tipo(tipo) -> str | Response:
+def export_csv_type(type) -> str | Response:
     # export .csv reports
     header = True
-    if tipo == 'historico':
-        data =  HistoricoUtils.get_all_historico()
-        filename = 'exp_historico'
-    elif tipo == 'produtos':
-        data = ProdutoUtils.get_active_itens()
-        filename = 'exp_produtos'
-    elif tipo == 'saldo':
-        data = EstoqueUtils.get_address_lote()
-        filename = 'exp_saldo_lote'
-    elif tipo == 'faturado':
-        data = EstoqueUtils.get_address_lote_fat()
-        filename = 'exp_faturado'
-    elif tipo == 'estoque':
-        data = EstoqueUtils.get_saldo_view()
-        filename = 'exp_estoque'
-    elif tipo == 'envase':
-        data =  Schedule.EnvaseUtils.get_envase()
-        filename = 'exp_prog_envase'
-    elif tipo == 'producao':
-        data =  Schedule.ProcessamentoUtils.get_producao()
-        filename = 'exp_prog_producao'
-    elif tipo == 'saldo_preset':
-        data = EstoqueUtils.get_saldo_preset(1)
-        filename = 'get_saldo_preset'    
-    elif tipo == 'export_promob':
+    filename = f'exp_{type}'
+    
+    if type == 'export_promob':
         header = False
         data = misc.CSVUtils.get_export_promob()
-        filename = 'export_promob'
+    elif type == 'historico':
+        data =  HistoricoUtils.get_all_historico()
+    elif type == 'produtos':
+        data = ProdutoUtils.get_active_itens()
+    elif type == 'saldo':
+        data = EstoqueUtils.get_address_lote()
+    elif type == 'faturado':
+        data = EstoqueUtils.get_address_lote_fat()
+    elif type == 'estoque':
+        data = EstoqueUtils.get_saldo_view()
+    elif type == 'envase':
+        data =  Schedule.EnvaseUtils.get_envase()
+    elif type == 'producao':
+        data =  Schedule.ProcessamentoUtils.get_producao()
+    elif type == 'saldo_preset':
+        data = EstoqueUtils.get_saldo_preset(1)
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
         alert_msge = 'A tabela não tem informações suficientes para exportação. \n'

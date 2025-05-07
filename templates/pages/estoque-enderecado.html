@@ -101,5 +101,5 @@
                 </tbody>
             </table>
         </div>
-        <p>{{ saldo_atual|length }} registros |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_tipo', tipo='saldo') }}">Exportar (CSV)</a></p>
+        <p>{{ saldo_atual|length }} registros |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_type', type='saldo') }}">Exportar (CSV)</a></p>
     {% endblock table %}
