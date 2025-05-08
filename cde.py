@@ -380,12 +380,10 @@ class EstoqueUtils:
 
     @staticmethod
     # RETORNA ENDEREÇAMENTO POR LOTES
-    def get_address_lote(timestamp=False):
+    def get_inv_address_with_batch(timestamp=False):
         if timestamp:
             timestamp = misc.add_days_to_datetime_str(timestamp, 1)
         timestamp = misc.parse_db_datetime(timestamp)
-        
-        sql_balance_calc = EstoqueUtils.sql_balance_calc
         
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -417,7 +415,7 @@ class EstoqueUtils:
                 ORDER BY 
                     h.rua_letra ASC, h.rua_numero ASC,
                     i.desc_item ASC
-                ;'''.format(a=sql_balance_calc),(timestamp,)
+                ;'''.format(a=EstoqueUtils.sql_balance_calc),(timestamp,)
             )
 
             result = []
@@ -545,7 +543,7 @@ class EstoqueUtils:
 
     @staticmethod
     # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
-    def get_address_lote_fat():
+    def get_inv_address_with_batch_fat():
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -2765,7 +2763,7 @@ def get_item() -> Response:
 @app.route('/logi/mov/')
 @cde.verify_auth('MOV002')
 def mov() -> str:
-    result = EstoqueUtils.get_address_lote()
+    result = EstoqueUtils.get_inv_address_with_batch()
 
     return render_template(
         'pages/mov/mov.html', 
@@ -2843,7 +2841,7 @@ def historico_search() -> str:
 @app.route('/logi/mov/faturado/')
 @cde.verify_auth('MOV005')
 def faturado() -> str:
-    saldo_atual = EstoqueUtils.get_address_lote_fat()
+    saldo_atual = EstoqueUtils.get_inv_address_with_batch_fat()
 
     return render_template(
         'pages/mov/mov-faturado.html', 
@@ -3157,7 +3155,7 @@ def moving_carga_bulk():
 @app.route('/get/stock_items/')
 @cde.verify_auth('MOV002')
 def get_stock_items() -> str:
-    result = EstoqueUtils.get_address_lote()
+    result = EstoqueUtils.get_inv_address_with_batch()
 
     return jsonify(result)
 
@@ -4597,9 +4595,9 @@ def estoque() -> str:
 def estoque_enderecado() -> str:
     if request.method == 'POST':
         date = request.form['date']
-        result = EstoqueUtils.get_address_lote(date)
+        result = EstoqueUtils.get_inv_address_with_batch(date)
     else:
-        result = EstoqueUtils.get_address_lote()
+        result = EstoqueUtils.get_inv_address_with_batch()
         date = False
     return render_template(
         'pages/estoque-enderecado.html',
