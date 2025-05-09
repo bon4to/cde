@@ -45,14 +45,17 @@ function updateFilterIndex() {
 
 // OCULTAR FILTRO
 function toggleFilter() {
+    let container = document.getElementById('filter-container');
     let filter = document.getElementById('table-filter');
     let auxFilters = document.querySelectorAll('.table-filter');
     let input = document.getElementById('filterInput');
 
-    if (filter.style.display === 'flex') {
+    if (container.style.display === 'flex') {
+        container.style.display = 'none';
         filter.style.display = 'none';
         auxFilters.forEach(element => element.style.display = 'none');
     } else {
+        container.style.display = 'flex';
         filter.style.display = 'flex';
         auxFilters.forEach(element => element.style.display = 'flex');
         input.focus();
