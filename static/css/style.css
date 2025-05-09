@@ -375,10 +375,10 @@ header {
 }
 
 .button-mini {
-    max-width: 45px;
-    max-height: 45px;
-    min-width: 45px;
-    min-height: 45px;
+    max-width: 42px;
+    max-height: 42px;
+    min-width: 42px;
+    min-height: 42px;
     margin: unset;
 }
 
