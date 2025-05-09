@@ -12,20 +12,7 @@
         </a>
     {% endblock svg %}
 
-    {% block filter_options %}
-        <option value=0>Item (Código)</option>
-        <option value=1>Item (Descrição)</option>
-        <option value=2>QTDE (Efetiva)</option>
-        <option value=3>Últ. Movimen. (Data/Hora)</option>
-    {% endblock filter_options %}
-
     {% block table %}
-        <div class="split-h">
-            <span>
-                <h1 class="subtitle">Estoque</h1>
-                <p class="text-main-color">Visualização de Estoque (Preset)</p>
-            </span>
-        </div>
         {% if search_term %}
             <div class="split-h">
                 <div>
@@ -71,5 +58,5 @@
                 </tbody>
             </table>
         </div>
-        <p>{{ saldo_atual|length }} registros |<a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_tipo', tipo='saldo_preset') }}">Exportar (CSV)</a></p>
+        <p>{{ saldo_atual|length }} registros |<a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='saldo_preset') }}">Exportar (CSV)</a></p>
     {% endblock table %}
