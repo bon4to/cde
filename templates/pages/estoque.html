@@ -60,20 +60,7 @@
             <div class="tables-container" style="max-width: 100vw;">
                 {% block table %}
                     <div class="split-h">
-                        <span>
-                            <h1 class="subtitle">Estoque</h1>
-                            <p class="text-main-color">Visualização de Estoque (Agrupado)</p>
-                        </span>
-
-                        {% from 'components/filter-container.html' import filter_container %}
-                        {{ filter_container(
-                            type="date",
-                            date_value=search_term,
-                            date_action="/estoque",
-                            date_button_title="CARREGAR ESTOQUE NO DIA",
-                            date_button_icon="calendar-search.svg"
-                        ) }}
-
+                        
                     </div>
                     {% if search_term %}
                         <div class="split-h">
