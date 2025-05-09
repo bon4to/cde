@@ -12,33 +12,7 @@
         </a>
     {% endblock svg %}
 
-    {% block filter_options %}
-        <option value=1>Item (Código)</option>
-        <option value=0>Endereço</option>
-        <option value=2>Item (Descrição)</option>
-        <option value=3>Lote (Código)</option>
-        <option value=4>Validade (Dias)</option>
-    {% endblock filter_options %}
-
     {% block table %}
-        <div class="split-h">
-            <span>
-                <h1 class="subtitle">Estoque</h1>
-                <p class="text-main-color">Visualização de Estoque (para Relatório)</p>
-            </span>
-            <div class="table-filter" style="display: none;">
-                <div>
-                    <form action="/estoque/enderecado" method="post">
-                        <div class="flex-h">
-                            <input type="date" class="address" id="date" name="date" value="{{ search_term }}">
-                            <button class="button-mini btn-fancy" type="submit">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-search.svg') }}" title="CARREGAR ESTOQUE NO DIA">
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
         {% if search_term %}
             <div class="split-h">
                 <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
