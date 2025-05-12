@@ -264,7 +264,7 @@
                                 <td class="number">{{ item['cod_item'] }}</td>
                                 <td>{{ item['desc_item'] }}</td>
                                 <td>{{ item['cod_lote'] }}</td>
-                                <td class="number">{{ item['saldo'] }},0</td>
+                                <td class="number">{{ item['saldo'] }}.0</td>
                                 <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
                                     <img class="svg-inv" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
                                 </td>

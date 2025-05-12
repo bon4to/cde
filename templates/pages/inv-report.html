@@ -36,7 +36,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in saldo_atual %}
+                    {% for item in inv_data %}
                         <tr>
                             <td>{{ item['address'] }} </td>
                             <td class="number">{{ item['cod_item'] }}</td>
@@ -94,11 +94,10 @@
                                 </td>
                                 {% endif %}
                             
-                            <td class="number">{{ item['saldo'] }},0</td>
+                            <td class="number">{{ item['saldo'] }}.0</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <p>{{ saldo_atual|length }} registros |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_type', type='saldo') }}">Exportar (CSV)</a></p>
     {% endblock table %}
