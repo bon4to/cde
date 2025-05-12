@@ -234,11 +234,43 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="flex-h" style="gap: 0; min-width: 100%;">
-                        <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
-                    </div>
-                </form>
+                        <div class="flex-h" style="gap: 0; min-width: 100%;">
+                            <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
+                        </div>
+                    </form>
+                
+            </div>
+
+            <div id="tables-container" class="tables-container" style="max-height: 600px">
+
+                <div class="table-overflow">
+                    <table id="filterTable" style="max-height: revert-layer;">
+                        <tr>
+                            <th>Endereço</th>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
+                            <th>Lote (Código)</th>
+                            <th>QTDE (Efetiva)</th>
+                            <th id="header-add-column" style="display: none; width: 100px; padding: 0;">
+                                <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
+                            </th>
+                        </tr>
+                        {% for item in saldo_atual %}
+                            <tr id="row-{{ loop.index }}">   
+                                <td>{{ item['address'] }}</td>
+                                <td class="number">{{ item['cod_item'] }}</td>
+                                <td>{{ item['desc_item'] }}</td>
+                                <td>{{ item['cod_lote'] }}</td>
+                                <td class="number">{{ item['saldo'] }}.0</td>
+                                <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
+                                    <img class="svg-inv" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+            </div>
             
         </div>
 
