@@ -27,6 +27,14 @@ th {
     border-bottom: 4px solid var(--main-color);
 }
 
+th.hoverable {
+    cursor: pointer;
+}
+
+th.hoverable:hover {
+    opacity: 0.8;
+}
+
 td {
     background-color: rgb(243, 243, 243);
     font-family: Reddit Mono;
