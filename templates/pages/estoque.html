@@ -92,22 +92,23 @@
                             </tbody>
                         </table>
                     </div>
-                    <p>
-                        <span>{{ saldo_visualization|length }} registros |</span>
-                        <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='estoque') }}">Exportar (CSV)</a>
-                        <span>|</span>
-                        <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="#" onclick="exportTableToXLSX('estoque.xlsx')">Exportar (Excel)</a>
-
-                        {% if session['user_grant'] <= 2 %}
-                            <span>|</span>
-                            <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='export_promob') }}">Exportar (Promob)</a>
-                        {% endif %}
-                    </p>
                 {% endblock table %}
+                <p>
+                    <span>{{ inv_data|length }} registros |</span>
+                    <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='estoque') }}">Exportar (CSV)</a>
+                    <span>|</span>
+                    <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="#" onclick="exportTableToXLSX('exp_{{request.endpoint}}.xlsx')">Exportar (Excel)</a>
+                    {% if session['user_grant'] <= 2 %}
+                        <span>|</span>
+                        <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='export_promob') }}">Exportar (Promob)</a>
+                    {% endif %}
+                </p>
             </div>
         </div>
 
         {% include 'shared/footer.html' %}
+
+        <!-- lib for xlsx export -->
         <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
         <script>
