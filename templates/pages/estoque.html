@@ -109,29 +109,56 @@
 
         {% include 'shared/footer.html' %}
         <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-        <script src="{{ url_for('static', filename='js/filter.js') }}"></script>
-        <script>
 
+        <script>
             function exportTableToXLSX(filename) {
                 // get table
                 var table = document.getElementById("filterTable");
-                
+                let input = document.getElementById('filterInput');
+                let select = document.getElementById('filterSelect');
+                let auxFilters = document.querySelectorAll('.table-filter');
+
                 // create a new workbook
                 var wb = XLSX.utils.book_new();
                 
-                // convert main table to worksheet
-                var ws_data = XLSX.utils.table_to_sheet(table);
+                if (!input.value) { // is not filtered
+                    // convert main table to worksheet
+                    var ws_data = XLSX.utils.table_to_sheet(table);
+                } else {
+                    // removes rows with (display: none) from data
+                    var ws_data_array = [];
+                    let rows = table.querySelectorAll("tr");
+                    rows.forEach(row => {
+                        if (row.offsetParent !== null) {  // tr with display: none
+                            let rowData = [];
+                            row.querySelectorAll("th, td").forEach(cell => {
+                                rowData.push(cell.innerText);
+                            });
+                            ws_data_array.push(rowData);
+                        }
+                    });
+
+                    var ws_data = XLSX.utils.aoa_to_sheet(ws_data_array);
+                }
                 
                 // add the data worksheet
                 XLSX.utils.book_append_sheet(wb, ws_data, "Estoque");
 
                 // add metadata sheet
                 var metadata = [
-                    ["Relatório de Estoque"],
+                    ["Relatório:", document.title],
+                    [""],
                     ["Data/Hora:", new Date().toLocaleString()],
                     ["Usuário:", "{{ session.get('id_user', 'N/A') }} - {{ session.get('user_name', 'N/A') }}"],
-                    ["Página:", "{{ session.get('id_page', 'N/A') }}"]
+                    [""]
                 ];
+
+                if (input.value) { // is filtered
+                    metadata.push(["Filtros:", input.value, "em", select.options[select.selectedIndex].text]);
+                    metadata.push([""]);
+                }
+
+                metadata.push(["CDE", "({{ request.endpoint }})"]);
                 
                 var ws_meta = XLSX.utils.aoa_to_sheet(metadata);
                 XLSX.utils.book_append_sheet(wb, ws_meta, "Info");
