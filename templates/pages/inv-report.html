@@ -30,7 +30,9 @@
                         <th>Item (Descrição)</th>
                         <th>Lote (Código)</th>
                         <th>Validade (Dias)</th>
-                        <th>QTDE (Efetiva)</th>
+                        <th>Fabricacão (Data)</th>
+                        <th>Vencimento (Data)</th>
+                        <th>Saldo (Quant.)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,7 +42,6 @@
                             <td class="number">{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td 
-                                title="Data Fab.: {{ item['date_fab'] }}"
                                 {% if 'CS' not in item['cod_lote']|string %}
                                     style="color:rgb(113, 113, 113);"
                                 {% endif %}
@@ -69,6 +70,30 @@
                                     {{ item['validade'] }}
                                 </td>
                                 {% endif %}
+                            <td>{{ item['date_fab'] }}</td>
+                                {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
+                                <td 
+                                    style="color:rgb(113, 113, 113);"
+                                    title="Validade não informada!"
+                                >
+                                    -
+                                </td>
+                                {% elif '/' in item['validade']|string %}
+                                    <td 
+                                        style="color:rgb(113, 113, 113);"
+                                    >
+                                    {{ item['date_venc'] }}
+                                    </td>
+                                {% else %}
+                                <td 
+                                    {% set validade_meses = item['validade'] | int / 30  %}
+                                    title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
+                                    style="color: var(--cde-color); font-weight: bold"
+                                >
+                                    {{ item['date_venc'] }}
+                                </td>
+                                {% endif %}
+                            
                             <td class="number">{{ item['saldo'] }}.0</td>
                         </tr>
                     {% endfor %}

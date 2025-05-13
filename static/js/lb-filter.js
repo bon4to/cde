@@ -45,17 +45,44 @@ function updateFilterIndex() {
 
 // OCULTAR FILTRO
 function toggleFilter() {
-    let filter = document.getElementById('table-filter');
-    let auxFilters = document.querySelectorAll('.table-filter');
+    let container = document.getElementById('filter-container');
     let input = document.getElementById('filterInput');
 
-    if (filter.style.display === 'flex') {
-        filter.style.display = 'none';
-        auxFilters.forEach(element => element.style.display = 'none');
-    } else {
-        filter.style.display = 'flex';
-        auxFilters.forEach(element => element.style.display = 'flex');
-        input.focus();
+    if (container.style.display === 'flex') {
+        setFilterDisplay('none')
+        return
     }
+    setFilterDisplay('flex')
+    input.focus();
+    return
 }
+
+function setFilterDisplay(displayType) {
+    let container = document.getElementById('filter-container');
+    let filter = document.getElementById('table-filter');
+    let auxFilters = document.querySelectorAll('.table-filter');
+
+    container.style.display = displayType;
+    filter.style.display = displayType;
+    auxFilters.forEach(element => element.style.display = displayType);
+    return
+}
+
+function addToFilterSelect(i, text) {
+    let select = document.getElementById('filterSelect');
+    select.innerHTML = `<option value="${i}">${text}</option>`;
+
+    setFilterDisplay('flex');
+    updateFilterIndex();
+}
+
+const headerCells = document.querySelectorAll("#filterTable thead th");
+
+headerCells.forEach((th, index) => {
+    th.addEventListener("click", () => {
+        addToFilterSelect(index, th.innerText);
+    });
+    th.title = `Filtrar por: ${th.innerText}`;
+    th.classList.add('hoverable');
+});
 

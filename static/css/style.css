@@ -375,10 +375,10 @@ header {
 }
 
 .button-mini {
-    max-width: 45px;
-    max-height: 45px;
-    min-width: 45px;
-    min-height: 45px;
+    max-width: 42px;
+    max-height: 42px;
+    min-width: 42px;
+    min-height: 42px;
     margin: unset;
 }
 
@@ -760,7 +760,13 @@ p.phrase {
     background-color: #409642;
 }
 
-#table-filter {
+#filter-container {
+    display: none; 
+    margin: 0 0 8px 0; 
+    align-items: center;
+}
+
+.table-filter {
     padding: 6px;
     height: min-content;
     border-radius: 12px;
@@ -769,7 +775,7 @@ p.phrase {
     border: 1px solid var(--cde-color);
 }
 
-#table-filter button {
+.table-filter button {
     margin: auto;
 }
 

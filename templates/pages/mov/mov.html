@@ -256,21 +256,21 @@
                             <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
                         </th>
                     </tr>
-                    {% for item in saldo_atual %}
-                        <tr id="row-{{ loop.index }}">   
-                            <td>{{ item['address'] }}</td>
-                            <td class="number">{{ item['cod_item'] }}</td>
-                            <td>{{ item['desc_item'] }}</td>
-                            <td>{{ item['cod_lote'] }}</td>
-                            <td class="number">{{ item['saldo'] }},0</td>
-                            <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
-                                <img class="svg-inv" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
+                        {% for item in inv_data %}
+                            <tr id="row-{{ loop.index }}">   
+                                <td>{{ item['address'] }}</td>
+                                <td class="number">{{ item['cod_item'] }}</td>
+                                <td>{{ item['desc_item'] }}</td>
+                                <td>{{ item['cod_lote'] }}</td>
+                                <td class="number">{{ item['saldo'] }}.0</td>
+                                <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
+                                    <img class="svg-inv" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
             </div>
-
         </div>
         
         <div id="bundle-container" class="tables-container glow-logi" style="display: none; max-width: 920px; min-width: 800px;">
