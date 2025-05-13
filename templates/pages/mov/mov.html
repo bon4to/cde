@@ -258,7 +258,7 @@
                                 <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
                             </th>
                         </tr>
-                        {% for item in saldo_atual %}
+                        {% for item in inv_data %}
                             <tr id="row-{{ loop.index }}">   
                                 <td>{{ item['address'] }}</td>
                                 <td class="number">{{ item['cod_item'] }}</td>
