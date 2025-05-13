@@ -2117,13 +2117,13 @@ class misc:
                         i.cod_item;
                 '''.format(a=sql_balance_calc))
 
-                saldo_visualization = [{
+                inv_data = [{
                     'cod_item': row[1],
                     'deposito': int(5), #TODO: create a menu to config this
                     'qtde'    : row[2]
                 } for row in cursor.fetchall()]
 
-            return saldo_visualization
+            return inv_data
 
         
         @staticmethod
@@ -2768,7 +2768,7 @@ def mov() -> str:
 
     return render_template(
         'pages/mov/mov.html', 
-        saldo_atual=result
+        inv_data=result
     )
 
 
@@ -2842,11 +2842,11 @@ def historico_search() -> str:
 @app.route('/logi/mov/faturado/')
 @cde.verify_auth('MOV005')
 def faturado() -> str:
-    saldo_atual = EstoqueUtils.get_inv_address_with_batch_fat()
+    inv_data = EstoqueUtils.get_inv_address_with_batch_fat()
 
     return render_template(
         'pages/mov/mov-faturado.html', 
-        saldo_atual=saldo_atual
+        inv_data=inv_data
     )
 
 
@@ -4580,13 +4580,13 @@ def get_linhas() -> Response | None:
 def estoque() -> str:
     if request.method == 'POST':
         date = request.form['date']
-        saldo_visualization = EstoqueUtils.get_saldo_view(date)
+        inv_data = EstoqueUtils.get_saldo_view(date)
     else:
         date = False
-        saldo_visualization = EstoqueUtils.get_saldo_view()
+        inv_data = EstoqueUtils.get_saldo_view()
     return render_template(
         'pages/estoque.html', 
-        saldo_visualization=saldo_visualization,
+        inv_data=inv_data,
         search_term=date
     )
 
@@ -4602,7 +4602,7 @@ def estoque_enderecado() -> str:
         date = False
     return render_template(
         'pages/estoque-enderecado.html',
-        saldo_atual=result,
+        inv_data=result,
         search_term=date
     )
 
@@ -4618,7 +4618,7 @@ def inv_report() -> str:
         date = False
     return render_template(
         'pages/inv-report.html',
-        saldo_atual=result,
+        inv_data=result,
         search_term=date
     )
 
@@ -4633,7 +4633,7 @@ def estoque_preset() -> str:
         saldo_preset = EstoqueUtils.get_saldo_preset(preset_id)
     return render_template(
         'pages/estoque-preset.html',
-        saldo_atual=saldo_preset,
+        inv_data=saldo_preset,
         search_term=preset_id
     )
 
@@ -4648,7 +4648,7 @@ def cargas_preset() -> str:
         cargas_preset = EstoqueUtils.get_saldo_preset(preset_id)
     return render_template(
         'pages/estoque-preset.html',
-        saldo_atual=cargas_preset,
+        inv_data=cargas_preset,
         search_term=preset_id
     )
 
