@@ -46,12 +46,11 @@
             </div>
         </div>
         
-        <!-- FOOTER -->
+        <!-- footer -->
         {% include 'shared/footer.html' %}
 
-        <!-- SCRIPTS -->
-        <script src="{{ url_for('static', filename='js/filter.js') }}"></script>
-        {% block route_script %}{% endblock route_script %}
-
+        {% block route_script %}
+            <!-- additional scripts here if needed -->
+        {% endblock route_script %}
     </body>
 </html> 
