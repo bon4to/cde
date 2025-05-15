@@ -32,7 +32,99 @@
         <!-- prevent access to this page if user is not logged -->
         {% if 'user_grant' in session %}
             <!-- if 'id_carga' is selected -->
-            {% if id_carga %}
+            {% if not id_carga %}
+                <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
+                    {% if alert %}
+                        {% if class_alert == 'error' %}
+                            <div class="msg-error">
+                                <details>
+                                    <summary>A lista não pôde ser carregada!</summary>
+                                    {{ alert | safe }}
+                                </details>
+                            </div>
+                        {% elif class_alert == 'success' %}
+                            <h1 class="subtitle">Selecione a <span class="text-main-color">carga</span> para iniciar a <span class="text-main-color">separação</span>:</h1>
+                            <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                                {% if result %}
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Carga (Código)</th>
+                                                <th>Pedido (Código)</th>
+                                                <th>Cliente (Código)</th>
+                                                <th>Cliente (Descrição)</th>
+                                                <th>Emissão (Data)</th>
+                                                <th>Entrega (Data)</th>
+                                                <th>OBS.</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in result %}
+                                                {% if class_alert != 'error' %}
+                                                    <tr class="selectable-row js_query_selector" style="vertical-align: baseline;" data-id="{{ row[columns.index('NRO_CARGA')] }}">
+                                                        <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
+                                                        <td class="number r second-plan">{{ row[columns.index('NRO_PEDIDO')] }}</td>
+                                                        <td class="number r second-plan">{{ row[columns.index('COD_CLIENTE')] }}</td>
+                                                        <td style="text-wrap: none;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                                        <td class="second-plan c">{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
+                                                        <td class="second-plan c">{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
+                                                        <td class="c">
+                                                            {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
+                                                                <span title="{{ row[columns.index('OBS_CARGA')] }}">🟢</span>
+                                                            {% else %}
+                                                                <span>🔴</span>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% endif %}
+                            </div>
+                            <div class="msg-success flex-v" style="margin: 0; gap: 0">
+                                <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
+                                <span style="font-size: 12px">
+                                    {{ alert | safe }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div style="display: flex; justify-content: center; height: 100%;">
+                            <p class="disabled">
+                                Carregue a lista de cargas clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}"> acima...
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% if not cod_item %}
+                <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+                    <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
+                    <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
+                        <option style="color: var(--main-color);">Pendentes</option>
+                        <option style="color: green;">Finalizadas</option>
+                    </select>
+                    {% block all_separation_status %}
+                    
+                    {% endblock all_separation_status %}
+                    <div class="table-overflow" style="max-height: 700px">
+                        <form onsubmit="preQuickRouting('cargas'); return false;">
+                            <div class="flex-h" style="margin: 8px 0; width: 100%;">
+                                <input class="address-one" style="margin: 0; height: 32px" type="number" id="navigatorInput" min="1" placeholder="Carga...">
+                                <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
+                                    <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                                </button>
+                            </div>
+                        </form>
+                        <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
+                            <tbody>
+                                <!-- executa listCargasLocalStorage(); -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
                 <div id="cargaContainer" class="tables-container" style="max-width: 55%; min-width: 55%;">
                     <div class="flex-v">
                         <div class="split-h">
@@ -74,7 +166,7 @@
                                 </details>
                             </div>
                         {% endif %}
-                    {% endif %}\
+                    {% endif %}
 
                     {% if result and columns %}
                         <div id="detailedTable" class="hidden">
@@ -248,98 +340,6 @@
                         <br>
                     </div>
                 {% endif %}
-            {% else %}
-                <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
-                    {% if alert %}
-                        {% if class_alert == 'error' %}
-                            <div class="msg-error">
-                                <details>
-                                    <summary>A lista não pôde ser carregada!</summary>
-                                    {{ alert | safe }}
-                                </details>
-                            </div>
-                        {% elif class_alert == 'success' %}
-                            <h1 class="subtitle">Selecione a <span class="text-main-color">carga</span> para iniciar a <span class="text-main-color">separação</span>:</h1>
-                            <div style="max-height: 540px; overflow-y: auto; width: 100%;">
-                                {% if result %}
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Carga (Código)</th>
-                                                <th>Pedido (Código)</th>
-                                                <th>Cliente (Código)</th>
-                                                <th>Cliente (Descrição)</th>
-                                                <th>Emissão (Data)</th>
-                                                <th>Entrega (Data)</th>
-                                                <th>OBS.</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for row in result %}
-                                                {% if class_alert != 'error' %}
-                                                    <tr class="selectable-row js_query_selector" style="vertical-align: baseline;" data-id="{{ row[columns.index('NRO_CARGA')] }}">
-                                                        <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
-                                                        <td class="number r second-plan">{{ row[columns.index('NRO_PEDIDO')] }}</td>
-                                                        <td class="number r second-plan">{{ row[columns.index('COD_CLIENTE')] }}</td>
-                                                        <td style="text-wrap: none;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
-                                                        <td class="second-plan c">{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
-                                                        <td class="second-plan c">{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
-                                                        <td class="c">
-                                                            {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
-                                                                <span title="{{ row[columns.index('OBS_CARGA')] }}">🟢</span>
-                                                            {% else %}
-                                                                <span>🔴</span>
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                {% endif %}
-                            </div>
-                            <div class="msg-success flex-v" style="margin: 0; gap: 0">
-                                <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
-                                <span style="font-size: 12px">
-                                    {{ alert | safe }}
-                                </span>
-                            </div>
-                        {% endif %}
-                    {% else %}
-                        <div style="display: flex; justify-content: center; height: 100%;">
-                            <p class="disabled">
-                                Carregue a lista de cargas clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}"> acima...
-                            </p>
-                        </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-                {% if not cod_item %}
-                <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                    <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
-                    <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
-                        <option style="color: var(--main-color);">Pendentes</option>
-                        <option style="color: green;">Finalizadas</option>
-                    </select>
-                    {% block all_separation_status %}
-                    
-                    {% endblock all_separation_status %}
-                    <div class="table-overflow" style="max-height: 700px">
-                        <form onsubmit="preQuickRouting('cargas'); return false;">
-                            <div class="flex-h" style="margin: 8px 0; width: 100%;">
-                                <input class="address-one" style="margin: 0; height: 32px" type="number" id="navigatorInput" min="1" placeholder="Carga...">
-                                <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
-                                    <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                                </button>
-                            </div>
-                        </form>
-                        <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
-                            <tbody>
-                                <!-- executa listCargasLocalStorage(); -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             {% endif %}
 
             <form class="hidden" id="cod_item_form" method="GET" action="">
