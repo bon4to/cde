@@ -173,6 +173,27 @@ class cde:
     @staticmethod
     # VERIFICA PRIVILÉGIO DE ACESSO
     def verify_auth(id_page, module='unset'):
+        """
+        Decorator to verify user authentication and authorization.
+
+        Grants access if:
+        - **Authenticated** The user is logged in AND
+        - **Privileged** Is an admin/superuser OR
+        - **Authorized** Has explicit permission for the page
+
+        Args:
+            id_page (str): Page identifier for permission check.
+            module (str): Module name to set in session.
+
+        Returns:
+            function: Decorated view function.
+        
+        Example:
+            @app.route('/cde/')
+            @cde.verify_auth('CDE001', 'default')
+            def cde_page():
+                ...
+        """
         def decorator(f):
             @wraps(f)
             def decorador(*args, **kwargs):
@@ -204,8 +225,23 @@ class cde:
     
     
     @staticmethod
-    # method to split codes from their sequences
     def split_code_seq(code):
+        """
+        Splits a string code into its base code and sequence number.
+
+        Args:
+            code (str): A string in the format 'code-seq', e.g. '123-1'.
+
+        Returns:
+            tuple: (code, seq) where both are strings. If no sequence is provided, seq defaults to '0'.
+
+        Example:
+            >>> split_code_seq('123-1')
+            ('123', '1')
+            
+            >>> split_code_seq('456')
+            ('456', '0')
+        """
         if '-' in code:
             code, seq = code.split('-')
             return code, seq
@@ -214,12 +250,46 @@ class cde:
 
 
 class EstoqueUtils:
-    # define a query que calcula o saldo
     sql_balance_template = dbUtils.QueryManager.get(query_id=1)
+    """
+    SQL query template used to calculate the current inventory balance.
+    The balance is computed by summing transaction quantities:
+    - 'E' (Entrada) transactions add to the balance (+).
+    - 'S' (Saída) transactions subtract from the balance (-).
+    
+    Example:
+      t1: quantity = 30, operation = 'E' => +30
+      t2: quantity = 20, operation = 'S' => -20
+    """
+    
     
     @staticmethod
-    # retorna saldo do item
     def get_item_inv_locations(cod_item=None):
+        """
+        Retrieves all storage addresses that contain the specified item.
+
+        For each matching address, the function computes additional metadata such as
+        item expiration, balance, batch number, etc.
+
+        Args:
+            cod_item (str, optional): Code of the item to search for. If not provided or False, 
+                returns an empty result. #TODO: use a string.
+
+        Returns:
+            tuple:
+                - list[dict]: List of addresses containing the item with detailed metadata.
+                - list: Column headers corresponding to the database query result.
+
+        Side Effects:
+            - Calls `misc.days_to_expire` for each result row.
+
+        Example:
+            >>> result, columns = EstoqueUtils.get_item_inv_locations('ITEM123')
+
+        Notes:
+            - Adds a space at the end of 'address' to improve exact search results.
+            - Returns empty lists if `cod_item` is not provided.
+        """
         if cod_item:
             query = dbUtils.QueryManager.get(
                 query_id = 2,
@@ -309,7 +379,7 @@ class EstoqueUtils:
             timestamp = misc.add_days_to_datetime_str(timestamp, 1)
         timestamp = misc.parse_db_datetime(timestamp)
         
-        # prepara uma string sql (ex.: ?, ?, ?...)
+        # prepara uma string de placeholders sql (ex.: ?, ?, ?...)
         # e coloca na query
         placeholders = ','.join(['?'] * len(itens))
         
