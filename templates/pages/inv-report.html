@@ -95,7 +95,8 @@
                                     {{ item['validade_perc_str'] }}
                                 </td>
                                 {% endif %}
-                            <td>{{ item['date_fab'] }}</td>
+                                {% set data_fab = item['date_fab'].split(' ') %}
+                                <td>{{ data_fab[0] }}</td>
                                 {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
                                 <td 
                                     style="color:rgb(113, 113, 113);"
@@ -107,15 +108,15 @@
                                     <td 
                                         style="color:rgb(113, 113, 113);"
                                     >
-                                    {{ item['date_venc'] }}
+                                    N/A
                                     </td>
                                 {% else %}
                                 <td 
-                                    {% set validade_meses = item['validade'] | int / 30  %}
                                     title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
                                     style="color: var(--cde-color); font-weight: bold"
                                 >
-                                    {{ item['date_venc'] }}
+                                    {% set date_venc = item['date_venc'].split(' ') %}
+                                    {{ date_venc[0] }}
                                 </td>
                                 {% endif %}
                             
