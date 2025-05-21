@@ -97,34 +97,8 @@
                         </div>
                     {% endif %}
                 </div>
-                {% endif %}
-                {% if not cod_item %}
-                <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                    <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
-                    <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
-                        <option style="color: var(--main-color);">Pendentes</option>
-                        <option style="color: green;">Finalizadas</option>
-                    </select>
-                    {% block all_separation_status %}
-                    
-                    {% endblock all_separation_status %}
-                    <div class="table-overflow" style="max-height: 700px">
-                        <form onsubmit="preQuickRouting('cargas'); return false;">
-                            <div class="flex-h" style="margin: 8px 0; width: 100%;">
-                                <input class="address-one" style="margin: 0; height: 32px" type="number" id="navigatorInput" min="1" placeholder="Carga...">
-                                <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
-                                    <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                                </button>
-                            </div>
-                        </form>
-                        <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
-                            <tbody>
-                                <!-- executa listCargasLocalStorage(); -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% else %}
+            {% endif %}
+            {% if id_carga %}
                 <div id="cargaContainer" class="tables-container" style="max-width: 55%; min-width: 55%;">
                     <div class="flex-v">
                         <div class="split-h">
@@ -341,6 +315,33 @@
                     </div>
                 {% endif %}
             {% endif %}
+            {% if not cod_item %}
+                <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+                    <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
+                    <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
+                        <option style="color: var(--main-color);">Pendentes</option>
+                        <option style="color: green;">Finalizadas</option>
+                    </select>
+                    {% block all_separation_status %}
+                    
+                    {% endblock all_separation_status %}
+                    <div class="table-overflow" style="max-height: 700px">
+                        <form onsubmit="preQuickRouting('cargas'); return false;">
+                            <div class="flex-h" style="margin: 8px 0; width: 100%;">
+                                <input class="address-one" style="margin: 0; height: 32px" type="number" id="navigatorInput" min="1" placeholder="Carga...">
+                                <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
+                                    <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                                </button>
+                            </div>
+                        </form>
+                        <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
+                            <tbody>
+                                <!-- executa listCargasLocalStorage(); -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
 
             <form class="hidden" id="cod_item_form" method="GET" action="">
                 <input type="hidden" id="cod_item_input" name="cod_item">
@@ -355,8 +356,6 @@
 {% endblock content %}
 
 {% block route_script %}
-    <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
-
     <script>
         const nroCarga = '{{ id_carga }}';
 
@@ -490,4 +489,7 @@
         });
 
     </script>
+
+    <!-- script for page logic -->
+    <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
 {% endblock route_script %}
