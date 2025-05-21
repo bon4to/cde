@@ -3194,7 +3194,7 @@ def get_fant_clientes() -> Response:
 
 
 @app.route('/logi/cargas/incompletas/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def carga_incomp():
     result, columns = CargaUtils.get_carga_incomp()
     carga_list = CargaUtils.listed_carga_incomp()
@@ -3208,7 +3208,7 @@ def carga_incomp():
 
 
 @app.route('/logi/cargas/incompletas/<string:id_carga>/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def carga_incomp_id(id_carga) -> str:
     id_carga = cde.split_code_seq(id_carga)[0]
     
@@ -3253,7 +3253,7 @@ def carga_incomp_id(id_carga) -> str:
 
 
 @app.route('/api/insert_carga_incomp/', methods=['POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def api_insert_carga_incomp() -> Response:
     data = request.get_json()
     id_carga = data.get('id_carga')
@@ -3269,7 +3269,7 @@ def api_insert_carga_incomp() -> Response:
 
 
 @app.route('/get/itens_carga_incomp/<string:id_carga>/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def route_get_carga_incomp(id_carga) -> Response:
     id_carga = cde.split_code_seq(id_carga)[0]
     
@@ -3287,7 +3287,7 @@ def route_get_carga_incomp(id_carga) -> Response:
 
 
 @app.route('/api/conclude-carga/<string:id_carga>/', methods=['POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def conclude_carga(id_carga) -> Response:
     try:
         CargaUtils.excluir_carga(id_carga)
@@ -3297,7 +3297,7 @@ def conclude_carga(id_carga) -> Response:
 
 
 @app.route('/api/conclude-incomp/<string:id_carga>/', methods=['POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def conclude_incomp(id_carga) -> Response:
     try:
         CargaUtils.conclude_carga_incomp(id_carga)
@@ -3800,7 +3800,7 @@ def cadastrar_usuario() -> Response | str:
 
 
 @app.route('/logi/cargas/<string:id_carga>/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def carga_id(id_carga) -> str:
     result_local, columns_local = [], []
     
@@ -3879,7 +3879,7 @@ def carga_id(id_carga) -> str:
  
 
 @app.route('/logi/cargas/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def cargas() -> str:
     if request.method == 'POST':
         all_cargas = CargaUtils.get_cargas_finalizadas()
@@ -4112,7 +4112,7 @@ def mov_op() -> str:
 
 
 @app.route('/api/carga/qtde_solic/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def get_carga_qtde_solic():
     id_carga = request.args.get('id_carga', type=int)
     cod_item = request.args.get('cod_item', type=str)
@@ -4176,7 +4176,7 @@ def get_carga_qtde_solic():
 
 
 @app.route('/api/itens_carga/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def get_itens_carga():
     id_carga = request.args.get('id_carga', type=int)
     
@@ -4203,7 +4203,7 @@ def get_itens_carga():
 
 
 @app.route('/logi/cargas/separacao/p/<string:id_carga>', methods=['GET', 'POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def carga_sep_pend(id_carga) -> str:
     id_carga = cde.split_code_seq(id_carga)[0]
     
@@ -4222,7 +4222,7 @@ def carga_sep_pend(id_carga) -> str:
 
 
 @app.route('/logi/cargas/separacao/f/<string:id_carga>', methods=['GET', 'POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def carga_sep_done(id_carga) -> str:
     if '-' in id_carga:
         id_carga, seq = cde.split_code_seq(id_carga)
@@ -4269,7 +4269,7 @@ def get_username_route(id_user) -> Response:
 
 
 @app.route('/post/save-localstorage/', methods=['POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def save_localstorage():
     try:
         data = request.get_json()
@@ -4329,7 +4329,7 @@ def has_carga_at_history(id_carga) -> Response:
 
 
 @app.route('/get/carga/load-table-data/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def get_carga_table_data():
     try:
         filename = request.args.get('filename')
@@ -4351,7 +4351,7 @@ def get_carga_table_data():
     
     
 @app.route('/get/request/load-table-data/', methods=['GET'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def get_request_table_data():
     try:
         filename = request.args.get('filename')
@@ -4372,7 +4372,7 @@ def get_request_table_data():
     
 
 @app.route('/get/list-all-separations/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def list_all_separations():
     try:
         data = request.get_json()
@@ -4640,7 +4640,7 @@ def estoque_preset() -> str:
 
 
 @app.route('/cargas-presets/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV006')
+@cde.verify_auth('MOV006', 'logi')
 def cargas_preset() -> str:
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
