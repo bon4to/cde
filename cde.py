@@ -428,8 +428,8 @@ class EstoqueUtils:
                 validade_str = ''
                 validade_perc_str = 0
                 if type(validade) == int:
-                    validade_str = f"{(float(validade) / 30):.1f} / {row[7]} meses"
-                    validade_perc_str = float(f"{(float(validade) / 30 / row[7] * 100):.1f}")
+                    validade_str = f"{(float(validade) / 30.44):.1f} / {row[7]} meses"
+                    validade_perc_str = float(f"{(float(validade) / 30.44 / row[7] * 100):.1f}")
                 
                 result.append({
                     # itera letra e numero da rua com um '.'
@@ -516,10 +516,11 @@ class EstoqueUtils:
                 
                 validade_str = ''
                 validade_perc_str = 0
+                validade_meses = 0
                 if type(validade) == int:
-                    validade_str = f"{(float(validade) / 30):.1f} / {row[7]} meses"
-                    validade_perc_str = float(f"{(float(validade) / 30 / row[7] * 100):.1f}")
-                
+                    validade_meses = float(validade) / 30.44 # approximadamente 30.44 dias por mes
+                    validade_str = f"{(validade_meses):.1f} / {row[7]} meses"
+                    validade_perc_str = float(f"{(validade_meses / row[7] * 100):.1f}")
                 
                 # checa se a data de vencimento existe
                 date_venc = row[8]
@@ -537,7 +538,7 @@ class EstoqueUtils:
                     'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
                     'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
                     'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str, 
-                    'date_venc': date_venc
+                    'validade_meses': float(validade_meses), 'date_venc': date_venc
                 })
         return result
 
