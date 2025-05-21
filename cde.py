@@ -171,7 +171,38 @@ class cde:
     
     
     @staticmethod
-    # VERIFICA PRIVILÉGIO DE ACESSO
+    def is_admin() -> bool:
+        """
+        Returns True if the user is admin (1) or superuser (2).
+        """
+        return session.get('user_grant', 99) <= 2
+
+
+    @staticmethod
+    def has_permission(id_user, id_page) -> bool:
+        """
+        Checks if the given user has explicit permission to access the given page.
+        """
+        user_perm = UserUtils.get_user_permissions(id_user)
+        user_perm_ids = [item['id_perm'] for item in user_perm]
+        return id_page in user_perm_ids
+
+
+    @staticmethod
+    def deny_access() -> str:
+        """
+        Renders the 'access denied' alert page.
+        """
+        return render_template(
+            'components/menus/alert.html',
+            alert_type='SEM PERMISSÕES',
+            alert_msge='Você não tem permissão para acessar esta página.',
+            alert_more='SOLUÇÕES:\n• Solicite ao seu supervisor um novo nível de acesso.',
+            url_return=url_for('index')
+        )
+        
+
+    @staticmethod
     def verify_auth(id_page, module='unset'):
         """
         Decorator to verify user authentication and authorization.
@@ -196,31 +227,26 @@ class cde:
         """
         def decorator(f):
             @wraps(f)
-            def decorador(*args, **kwargs):
-                if not 'logged_in' in session:
+            def wrapper(*args, **kwargs):
+                if 'logged_in' not in session:
                     return redirect(url_for('login'))
+
                 id_user = cde.format_three_no(session.get('id_user'))
-                session['id_page'] = f'{id_page}'
-                session['module']  = f'{module}'
-                if session.get('user_grant') <= 2:
-                    lt.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
+                session['id_page'] = str(id_page)
+                session['module'] = str(module)
+
+                current_page = inject_page()["current_page"]
+                log_msg = f'{id_user} - {id_page} ({current_page})'
+
+                if cde.is_admin() or cde.has_permission(id_user, id_page):
+                    lt.log(1, log_msg, 200)
                     app.config['APP_UNIT'] = cde.get_unit()
                     return f(*args, **kwargs)
-                user_perm = UserUtils.get_user_permissions(id_user)
-                user_perm = [item['id_perm'] for item in user_perm]
-                if id_page in user_perm:
-                    lt.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 200)
-                    app.config['APP_UNIT'] = cde.get_unit()
-                    return f(*args, **kwargs)
-                lt.log(1, f'{id_user} - {id_page} ({inject_page()["current_page"]})', 403)
-                return render_template(
-                    'components/menus/alert.html', 
-                    alert_type='SEM PERMISSÕES',
-                    alert_msge='Você não tem permissão para acessar esta página.', 
-                    alert_more='SOLUÇÕES:\n• Solicite ao seu supervisor um novo nível de acesso.',
-                    url_return=url_for('index')
-                )
-            return decorador
+
+                lt.log(1, log_msg, 403)
+                return cde.deny_access()
+
+            return wrapper
         return decorator
     
     
