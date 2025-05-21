@@ -49,20 +49,19 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
-        <div id="filterBreak" style="justify-content: flex-end">
-            <div id="table-filter" style="display: none" >
-                <input type="text" class="filterInput address" id="filterInput" oninput="filterTable()" placeholder="Filtrar por...">
-                <select class="address" id="filterSelect" onchange="updateFilterIndex()">
-                    <option value=1>Item (Código)</option>
-                    <option value=2>Item (Descrição)</option>
-                    <option value=0>Endereço (Letra)</option>
-                    <option value=3>Lote (Código)</option>
-                    <option value=5>Data/Hora</option>
-                    <option value=6>Carga (Código)</option>
-                    <option value=7>Requisição (Código)</option>
-                </select>
-            </div>
-        </div>
+        {% from 'components/filter-container.html' import filter_container %}
+        {{ filter_container(
+            filter_options=[
+                {'value': 1, 'text': 'Item (Código)'},
+                {'value': 2, 'text': 'Item (Descrição)'},
+                {'value': 0, 'text': 'Endereço (Letra)'},
+                {'value': 3, 'text': 'Lote (Código)'},
+                {'value': 5, 'text': 'Data/Hora'},
+                {'value': 6, 'text': 'Carga (Código)'},
+                {'value': 7, 'text': 'Requisição (Código)'}
+            ],
+            type="default"
+        ) }}
         </div>
         <div id="divContent">
             <div class="tables-container" id="tables-container">
