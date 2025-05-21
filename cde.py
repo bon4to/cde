@@ -215,15 +215,15 @@ class cde:
 
 class EstoqueUtils:
     # define a query que calcula o saldo
-    sql_balance_calc = dbUtils.QueryManager.get(query_id=1)
+    sql_balance_template = dbUtils.QueryManager.get(query_id=1)
     
     @staticmethod
     # retorna saldo do item
-    def estoque_address_with_item(cod_item=False):
+    def get_item_inv_locations(cod_item=None):
         if cod_item:
             query = dbUtils.QueryManager.get(
                 query_id = 2,
-                calc = EstoqueUtils.sql_balance_calc,
+                calc = EstoqueUtils.sql_balance_template,
                 b = str(cod_item)
             )
             
@@ -259,7 +259,7 @@ class EstoqueUtils:
             timestamp = misc.add_days_to_datetime_str(timestamp, 1)
         timestamp = misc.parse_db_datetime(timestamp)
         
-        sql_balance_calc = EstoqueUtils.sql_balance_calc
+        sql_balance_template = EstoqueUtils.sql_balance_template
         
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -287,7 +287,7 @@ class EstoqueUtils:
                     t.rn = 1 OR 
                     t.rn IS NULL
                 ORDER BY t.time_mov DESC;
-            '''.format(a=sql_balance_calc), (timestamp,))
+            '''.format(a=sql_balance_template), (timestamp,))
 
             result = [{
                 'cod_item': row[0], 'desc_item': row[1], 
@@ -313,7 +313,7 @@ class EstoqueUtils:
         # e coloca na query
         placeholders = ','.join(['?'] * len(itens))
         
-        sql_balance_calc = EstoqueUtils.sql_balance_calc
+        sql_balance_template = EstoqueUtils.sql_balance_template
         
         query = '''
             SELECT 
@@ -336,7 +336,7 @@ class EstoqueUtils:
             
             WHERE i.cod_item IN ({b})
             ORDER BY i.cod_item;
-        '''.format(a=sql_balance_calc, b=placeholders)
+        '''.format(a=sql_balance_template, b=placeholders)
 
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
@@ -416,7 +416,7 @@ class EstoqueUtils:
                 ORDER BY 
                     h.rua_letra ASC, h.rua_numero ASC,
                     i.desc_item ASC
-                ;'''.format(a=EstoqueUtils.sql_balance_calc),(timestamp,)
+                ;'''.format(a=EstoqueUtils.sql_balance_template),(timestamp,)
             )
 
             result = []
@@ -505,7 +505,7 @@ class EstoqueUtils:
                 ORDER BY 
                     rua_letra ASC, rua_numero ASC,
                     desc_item ASC
-                    ;'''.format(a=EstoqueUtils.sql_balance_calc),
+                    ;'''.format(a=EstoqueUtils.sql_balance_template),
             )
 
             result = []
@@ -585,7 +585,7 @@ class EstoqueUtils:
     @staticmethod
     # RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
     def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
-        sql_balance_calc = EstoqueUtils.sql_balance_calc
+        sql_balance_template = EstoqueUtils.sql_balance_template
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -597,7 +597,7 @@ class EstoqueUtils:
                     rua_letra = ? AND
                     cod_item = ? AND
                     lote_item = ?;
-            '''.format(a=sql_balance_calc), (rua_numero, rua_letra, cod_item, cod_lote))
+            '''.format(a=sql_balance_template), (rua_numero, rua_letra, cod_item, cod_lote))
             saldo_item = cursor.fetchone()[0]
         return saldo_item
 
@@ -1219,7 +1219,7 @@ class HistoricoUtils:
     @staticmethod
     # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
     def select_address(letra, numero):
-        sql_balance_calc = EstoqueUtils.sql_balance_calc
+        sql_balance_template = EstoqueUtils.sql_balance_template
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -1232,7 +1232,7 @@ class HistoricoUtils:
                     rua_numero = ?
                 GROUP BY 
                     cod_item, lote_item;
-            '''.format(a=sql_balance_calc), (letra, numero))
+            '''.format(a=sql_balance_template), (letra, numero))
             
             items = cursor.fetchall()
 
@@ -2086,7 +2086,7 @@ class misc:
         @staticmethod    
         # retorna tabela de saldo
         def get_export_promob():
-            sql_balance_calc = EstoqueUtils.sql_balance_calc
+            sql_balance_template = EstoqueUtils.sql_balance_template
             with sqlite3.connect(db_path) as connection:
                 cursor = connection.cursor()
                 cursor.execute('''
@@ -2116,7 +2116,7 @@ class misc:
                         t.rn = 1 OR t.rn IS NULL
                     ORDER BY 
                         i.cod_item;
-                '''.format(a=sql_balance_calc))
+                '''.format(a=sql_balance_template))
 
                 inv_data = [{
                     'cod_item': row[1],
@@ -3232,7 +3232,7 @@ def carga_incomp_id(id_carga) -> str:
         class_alert = 'error'
     
     if cod_item:
-        result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
+        result_local, columns_local = EstoqueUtils.get_item_inv_locations(cod_item)
     else:
         result_local, columns_local = [], []
     
@@ -3809,7 +3809,7 @@ def carga_id(id_carga) -> str:
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
+            result_local, columns_local = EstoqueUtils.get_item_inv_locations(cod_item)
 
         # extrai o primeiro elemento de `id_carga`
         id_carga = cde.split_code_seq(id_carga)[0]
@@ -3938,7 +3938,7 @@ def mov_request_id(id_req) -> str:
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            result_local, columns_local = EstoqueUtils.estoque_address_with_item(cod_item)
+            result_local, columns_local = EstoqueUtils.get_item_inv_locations(cod_item)
 
         result, columns = MovRequestUtils.get_mov_request(id_req)
 
