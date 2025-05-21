@@ -98,17 +98,19 @@
                                     <div class="flex-v">
                                         {% from 'components/lock-label.html' import lock_label %}
                                         {{ lock_label('Lote', 'cod_lote') }}
-                                        <input 
-                                            id="lote_item" 
-                                            name="cod_lote" 
-                                            required readonly 
-                                            class="address-three" 
-                                            pattern="[A-Z0-9]{6}" 
-                                            maxlength="6" 
-                                            type="text" 
-                                            value="{{ json_cod_lote }}" 
-                                            placeholder="Ex.: CS0000" 
+                                        <!-- CS + 4 a 6 dígitos -->
+                                        <input
+                                            id="lote_item"
+                                            name="cod_lote"
+                                            required
+                                            readonly
+                                            class="address-three"
+                                            maxlength="8"
+                                            type="text"
+                                            value="{{ json_cod_lote }}"
                                             oninput="getItemFirstMov(this.value)"
+                                            placeholder="Ex.: CS0000"
+                                            pattern="^CS\d{4,6}$" 
                                         >
                                     </div>
                                     <div class="flex-v">
