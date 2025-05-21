@@ -1,41 +1,82 @@
-{% macro filter_container(filter_id="table-filter", filter_input_id="filterInput", filter_select_id="filterSelect", filter_options=None, type="default", date_value="", date_action="", date_button_title="", date_button_icon="calendar-search.svg") %}
+{% macro filter_container(
+    type="default", 
+    filter_id="table-filter", 
+    filter_input_id="filterInput", 
+    filter_select_id="filterSelect", 
+    filter_options=None, 
+    date_value="", 
+    date_action="", 
+    date_button_title="", 
+    button_icon="search.svg",
+    form_endpoint=""
+) %}
 
 
 <div id="filter-container">
     {% if type == "default" %}
-    <div id="table-filter" class="table-filter" style="display: none">
-        <div class="inputs" style="margin: 0; gap: 6px">
-            <input 
-                id="{{ filter_input_id }}" 
-                class="filterInput address-two" 
-                type="text" 
-                oninput="filterTable()" 
-                placeholder="Filtrar por..."
-            >
-            <select 
-                id="{{ filter_select_id }}" 
-                class="address-two" 
-                onchange="updateFilterIndex()"
-            >
-            {% if filter_options %}
-                {% for option in filter_options %}
-                    <option value="{{ option.value }}">{{ option.text }}</option>
-                {% endfor %}
-            {% endif %}
-            </select>
-        </div>
-    </div>
-    {% elif type == "date" %}
-    <div class="table-filter" style="display: none">
-        <form action="{{ date_action }}" method="post">
-            <div class="flex-h">
-                <input type="date" class="address" id="date" name="date" value="{{ date_value }}">
-                <button class="button-mini btn-fancy" type="submit">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/' + date_button_icon) }}" title="{{ date_button_title }}">
-                </button>
+        <div id="table-filter" class="table-filter" style="display: none">
+            <div class="inputs" style="margin: 0; gap: 6px">
+                <input 
+                    id="{{ filter_input_id }}" 
+                    class="address-two" 
+                    type="text" 
+                    oninput="filterTable()" 
+                    placeholder="Filtrar por..."
+                >
+                <select 
+                    id="{{ filter_select_id }}" 
+                    class="address-two" 
+                    onchange="updateFilterIndex()"
+                >
+                {% if filter_options %}
+                    {% for option in filter_options %}
+                        <option value="{{ option.value }}">{{ option.text }}</option>
+                    {% endfor %}
+                {% endif %}
+                </select>
             </div>
-        </form>
-    </div>
+        </div>
+    {% elif type == "form" %}
+        <div id="table-filter" class="table-filter" style="display: none">
+            <form method="post" action="{{ form_endpoint }}">
+                <div class="inputs" style="margin: 0; gap: 6px">
+                    <input 
+                        id="{{ filter_input_id }}" 
+                        name="search_term"
+                        class="address-two" 
+                        type="text" 
+                        oninput="filterTable()" 
+                        placeholder="Filtrar por..."
+                    >
+                    <select 
+                        id="{{ filter_select_id }}" 
+                        name="search_index"
+                        class="address-two" 
+                        onchange="updateFilterIndex()"
+                    >
+                    {% if filter_options %}
+                        {% for option in filter_options %}
+                            <option value="{{ option.value }}">{{ option.text }}</option>
+                        {% endfor %}
+                    {% endif %}
+                    </select>
+                    <button class="button-mini btn-fancy" type="submit">
+                        <img src="{{ url_for('static', filename='svg/' + button_icon) }}" alt="">
+                    </button>
+                </div>
+            </form>
+        </div>
+    {% elif type == "date" %}
+        <div class="table-filter" style="display: none">
+            <form action="{{ date_action }}" method="post">
+                <div class="flex-h">
+                    <input type="date" class="address" id="date" name="date" value="{{ date_value }}">
+                    <button class="button-mini btn-fancy" type="submit">
+                        <img class="svg-invert" src="{{ url_for('static', filename='svg/' + button_icon) }}" title="{{ date_button_title }}">
+                    </button>
+                </div>
+            </form>
+        </div>
     {% endif %}
 </div>
 

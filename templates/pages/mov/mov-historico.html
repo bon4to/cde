@@ -32,24 +32,22 @@
                 <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
             </div>
         </div>
-        <div id="filterBreak" style="justify-content: flex-end">
-            <div id="table-filter" style="display: none;">
-                <form style="display: flex; flex-direction: row" id="search-all" method="post" action="/logi/mov/historico/search">
-                    <input type="text" class="filterInput address" id="filterInput" name="search_term" oninput="filterTable()" placeholder="Filtrar por...">
-                    <select class="address" id="filterSelect" name="search_index" onchange="updateFilterIndex()">
-                        <option value="cod_item"  >Item (Código)</option>
-                        <option value="desc_item" >Item (Descrição)</option>
-                        <option value="address"   >Endereço</option>
-                        <option value="operacao"  >Operação (Descrição)</option>
-                        <option value="quantidade">Quantidade</option>
-                        <option value="cod_lote"  >Lote (Código)</option>
-                        <option value="user_name" >Usuário (Nome)</option>
-                        <option value="timestamp" >Horário (Data/Hora)</option>
-                    </select>
-                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px" type="image" src="{{ url_for('static', filename='svg/search.svg') }}" alt="">
-                </form>
-            </div>
-        </div>
+        {% from 'components/filter-container.html' import filter_container %}
+        {{ filter_container(
+            filter_options=[
+                {'value': 'cod_item', 'text': 'Item (Código)'},
+                {'value': 'desc_item', 'text': 'Item (Descrição)'},
+                {'value': 'address', 'text': 'Endereço'},
+                {'value': 'operacao', 'text': 'Operação (Descrição)'},
+                {'value': 'quantidade', 'text': 'Quantidade'},
+                {'value': 'cod_lote', 'text': 'Lote (Código)'},
+                {'value': 'user_name', 'text': 'Usuário (Nome)'},
+                {'value': 'timestamp', 'text': 'Horário (Data/Hora)'}
+            ],
+            button_icon="search.svg",
+            form_endpoint="/logi/mov/historico/search",
+            type="form"
+        ) }}
         </div>
         <div id="divContent">
             <div class="mobile-container">
