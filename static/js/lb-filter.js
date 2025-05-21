@@ -69,11 +69,79 @@ function setFilterDisplay(displayType) {
 }
 
 function addToFilterSelect(i, text) {
+    orderTableBy(i);
+    text = text.replace(/[\u25B2\u25BC]/g, '').trim()
     let select = document.getElementById('filterSelect');
     select.innerHTML = `<option value="${i}">${text}</option>`;
 
     setFilterDisplay('flex');
     updateFilterIndex();
+}
+
+let sortDirections = {};
+
+function orderTableBy(i) {
+    const table = document.getElementById("filterTable");
+    const thead = table.tHead;
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.rows);
+
+    // alternar direção
+    const currentDirection = sortDirections[i] || "asc";
+    const newDirection = currentDirection === "asc" ? "desc" : "asc";
+    sortDirections[i] = newDirection;
+
+    // detectar se é número
+    const isNumberColumn = rows
+        .map(row => row.cells[i].innerText.trim())
+        .filter(val => val !== '' && val.toUpperCase() !== 'N/A')
+        .every(val => !isNaN(parseFloat(val)));
+
+    function isDateISO(str) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(str);
+    }
+
+    rows.sort((a, b) => {
+        let x = a.cells[i].innerText.trim();
+        let y = b.cells[i].innerText.trim();
+
+        const isNAx = x === '' || x.toUpperCase() === 'N/A';
+        const isNAy = y === '' || y.toUpperCase() === 'N/A';
+
+        if (isNAx && !isNAy) return 1;
+        if (!isNAx && isNAy) return -1;
+        if (isNAx && isNAy) return 0;
+
+        // verifica se ambos são datas válidas (YYYY-MM-DD)
+        if (isDateISO(x) && isDateISO(y)) {
+            x = new Date(x);
+            y = new Date(y);
+        }
+        // verifica se são números (após confirmar que não são datas)
+        else if (!isNaN(x) && !isNaN(y)) {
+            x = parseFloat(x);
+            y = parseFloat(y);
+        }
+
+        if (x < y) return newDirection === "asc" ? -1 : 1;
+        if (x > y) return newDirection === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    // reanexar as linhas
+    rows.forEach(row => tbody.appendChild(row));
+
+    // atualizar ícones de ordenação
+    const headers = thead.rows[0].cells;
+    for (let j = 0; j < headers.length; j++) {
+        // remove setas antigas
+        let baseText = headers[j].innerText.replace(/[\u25B2\u25BC]/g, '').trim(); 
+        headers[j].innerHTML = baseText;
+        if (j === i) {
+            const arrow = newDirection === "asc" ? "▲" : "▼";
+            headers[j].innerHTML += ` <span style="font-size: 0.6em;">${arrow}</span>`;
+        }
+    }
 }
 
 const headerCells = document.querySelectorAll("#filterTable thead th");
@@ -85,4 +153,3 @@ headerCells.forEach((th, index) => {
     th.title = `Filtrar por: ${th.innerText}`;
     th.classList.add('hoverable');
 });
-
