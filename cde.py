@@ -2387,7 +2387,7 @@ def home() -> str:
 
 
 @app.route('/logi/home/')
-@cde.verify_auth('CDE001')
+@cde.verify_auth('CDE001', 'logi')
 def home_logi() -> str:
     return render_template(
         'pages/index/tl-index.html', 
@@ -2396,7 +2396,7 @@ def home_logi() -> str:
 
 
 @app.route('/prod/home/')
-@cde.verify_auth('CDE001')
+@cde.verify_auth('CDE001', 'prod')
 def home_prod() -> str:
     return render_template(
         'pages/index/hp-index.html', 
@@ -2844,7 +2844,7 @@ def mov() -> str:
 
 
 @app.route('/logi/mov/historico/')
-@cde.verify_auth('MOV003')
+@cde.verify_auth('MOV003', 'logi')
 def historico() -> str:
     page = request.args.get('page', 1, type=int)
     per_page = 14
@@ -2911,7 +2911,7 @@ def historico_search() -> str:
 
 
 @app.route('/logi/mov/faturado/')
-@cde.verify_auth('MOV005')
+@cde.verify_auth('MOV005', 'logi')
 def faturado() -> str:
     inv_data = EstoqueUtils.get_inv_address_with_batch_fat()
 
@@ -3377,7 +3377,7 @@ def conclude_incomp(id_carga) -> Response:
 
 
 @app.route('/envase/', methods=['GET'])
-@cde.verify_auth('ENV006')
+@cde.verify_auth('ENV006', 'prod')
 def envase() -> str:
     envase_list = Schedule.EnvaseUtils.get_envase()
 
@@ -3388,7 +3388,7 @@ def envase() -> str:
 
 
 @app.route('/envase/calendar/')
-@cde.verify_auth('ENV008')
+@cde.verify_auth('ENV008', 'prod')
 def calendar_envase() -> str:
     envase_list = Schedule.EnvaseUtils.get_envase()
     return render_template(
@@ -3398,7 +3398,7 @@ def calendar_envase() -> str:
 
 
 @app.route('/envase/delete/<id_envase>/')
-@cde.verify_auth('ENV007')
+@cde.verify_auth('ENV007', 'prod')
 def delete_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3413,7 +3413,7 @@ def delete_envase(id_envase) -> Response:
 
 
 @app.route('/envase/done/<id_envase>/')
-@cde.verify_auth('ENV006')
+@cde.verify_auth('ENV006', 'prod')
 def conclude_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3428,7 +3428,7 @@ def conclude_envase(id_envase) -> Response:
 
 
 @app.route('/envase/pending/<id_envase>/')
-@cde.verify_auth('ENV007')
+@cde.verify_auth('ENV007', 'prod')
 def set_pending_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3443,7 +3443,7 @@ def set_pending_envase(id_envase) -> Response:
 
 
 @app.route('/envase/edit/', methods=['GET', 'POST'])
-@cde.verify_auth('ENV007')
+@cde.verify_auth('ENV007', 'prod')
 def edit_envase() -> Response | str:
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -3498,7 +3498,7 @@ def edit_envase() -> Response | str:
 
 
 @app.route('/envase/insert/', methods=['POST'])
-@cde.verify_auth('ENV006')
+@cde.verify_auth('ENV006', 'prod')
 def insert_envase() -> Response:
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -3545,7 +3545,7 @@ def insert_envase() -> Response:
 
 
 @app.route('/processamento/', methods=['GET'])
-@cde.verify_auth('PRC010')
+@cde.verify_auth('PRC010', 'prod')
 def producao() -> str:
     id_user = session.get('id_user')
     user_perm = UserUtils.get_user_permissions(id_user)
@@ -3560,7 +3560,7 @@ def producao() -> str:
 
 
 @app.route('/processamento/calendar/')
-@cde.verify_auth('PRC012')
+@cde.verify_auth('PRC012', 'prod')
 def calendar_producao() -> str:
     producao_list =  Schedule.ProcessamentoUtils.get_producao()
 
@@ -3571,7 +3571,7 @@ def calendar_producao() -> str:
 
 
 @app.route('/processamento/delete/<id_producao>/')
-@cde.verify_auth('PRC011')
+@cde.verify_auth('PRC011', 'prod')
 def delete_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3586,7 +3586,7 @@ def delete_producao(id_producao) -> Response:
 
 
 @app.route('/processamento/done/<id_producao>/')
-@cde.verify_auth('PRC010')
+@cde.verify_auth('PRC010', 'prod')
 def conclude_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3601,7 +3601,7 @@ def conclude_producao(id_producao) -> Response:
 
 
 @app.route('/processamento/pending/<id_producao>/')
-@cde.verify_auth('PRC011')
+@cde.verify_auth('PRC011', 'prod')
 def set_pending_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3616,7 +3616,7 @@ def set_pending_producao(id_producao) -> Response:
 
 
 @app.route('/processamento/edit/', methods=['GET', 'POST'])
-@cde.verify_auth('PRC011')
+@cde.verify_auth('PRC011', 'prod')
 def edit_producao() -> Response | str:
     id_user = session.get('id_user')
     user_perm = UserUtils.get_user_permissions(id_user)
@@ -3681,7 +3681,7 @@ def edit_producao() -> Response | str:
 
 
 @app.route('/processamento/insert/', methods=['POST'])
-@cde.verify_auth('PRC010')
+@cde.verify_auth('PRC010', 'prod')
 def insert_producao() -> Response:
     if request.method == 'POST':
         linha           = request.form['linha']
@@ -4465,14 +4465,14 @@ def list_all_separations():
 
 
 @app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>/', methods=['GET', 'POST'])
-@cde.verify_auth('ITE005')
+@cde.verify_auth('ITE005', 'prod')
 def produtos_toggle_perm(cod_item, flag) -> Response:
     ProdutoUtils.toggle_item_flag(cod_item, flag)
     return redirect(url_for('produtos_flag'))
 
 
 @app.route('/produtos/status/', methods=['GET', 'POST'])
-@cde.verify_auth('ITE005')
+@cde.verify_auth('ITE005', 'prod')
 def produtos_flag() -> str:
     itens = ProdutoUtils.get_all_itens()
     
@@ -4483,7 +4483,7 @@ def produtos_flag() -> str:
 
 
 @app.route('/produtos/', methods=['GET', 'POST'])
-@cde.verify_auth('ITE005')
+@cde.verify_auth('ITE005', 'prod')
 def produtos() -> str:
     itens = ProdutoUtils.get_active_itens() # salva os itens ativos
     if request.method == 'POST':
@@ -4647,7 +4647,7 @@ def get_linhas() -> Response | None:
 
 
 @app.route('/estoque/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def estoque() -> str:
     if request.method == 'POST':
         date = request.form['date']
@@ -4663,7 +4663,7 @@ def estoque() -> str:
 
 
 @app.route('/estoque/enderecado/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def estoque_enderecado() -> str:
     if request.method == 'POST':
         date = request.form['date']
@@ -4679,7 +4679,7 @@ def estoque_enderecado() -> str:
 
 
 @app.route('/inv/report/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def inv_report() -> str:
     if request.method == 'POST':
         date = request.form['date']
@@ -4695,7 +4695,7 @@ def inv_report() -> str:
 
 
 @app.route('/estoque/presets/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def estoque_preset() -> str:
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
