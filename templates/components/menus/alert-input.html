@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Alerta | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/cde-header.html' %}
-    
+{% block title %}Alerta{% endblock title %}
+
+{% block content %}
+    <div id="divContent">
         <div class="form-login" style="max-width: 460px; max-height: 400px; padding: 32px">
             <h1 class="text-main-color">{{ alert_type | safe }}</h1>
             <p class="alert-more" style="wra">{{ alert_msge | safe }}</p>
@@ -20,5 +18,5 @@
                 </div>
             </form>
         </div>
-
-{% include 'shared/footer.html' %}
+    </div>
+{% endblock content%}

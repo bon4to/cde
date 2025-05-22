@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Alerta | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/cde-header.html' %}
+{% block title %}Alerta{% endblock title %}
 
+{% block content %}
+
+    <div id="divContent">
         <div class="form-login" style="max-width: 520px; max-height: 400px; padding: 32px">
             <div class="split-v">
                 <div class="flex-v">
@@ -16,5 +15,6 @@
                 <a class="btn-fancy" onclick="goBack()">VOLTAR</a>
             </div>
         </div>
+    </div>
 
-{% include 'shared/footer.html' %}
+{% endblock content %}

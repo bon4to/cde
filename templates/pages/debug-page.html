@@ -1,24 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-    <head>
-        <title>Debug | PRODUÇÃO</title>
-        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include "shared/header/hp-header.html" %}
+{% block title %}Debug{% endblock title %}
 
-    <div>
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'DEBUG'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
         
     </div>
 
-    <script>
-        let docTitle = document.title;
+    <div id="divContent">
+    </div>
 
-        window.addEventListener("blur", () => {
-            document.title = "CDE | PRODUÇÃO";
-        })
-        window.addEventListener("focus", () => {
-            document.title = docTitle;
-        })
-    </script>
+{% endblock content%}
 
-    {% include 'shared/footer.html' %}
+{% block route_script %}
+{% endblock route_script %}

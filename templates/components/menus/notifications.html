@@ -1,109 +1,106 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Notificações | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/cde-header.html' %}
-        <div class="titles-ruler">
+{% block title %}Notificações{% endblock title %}
 
-            {% from 'components/title-route.html' import title_container %}
-            {{ title_container(
-                title='NOTIFICAÇÕES',
-                id_page=session['id_page'],
-                breadcrumbs=[
-                    {'text': 'NOTIFICAÇÕES'}
-                ],
-                aux_buttons=[
-                    {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
-                    {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL'},
-                    {'type': 'divider'},
-                    {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
-                    {'type': 'divider'},
-                    {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
-                ]
-            ) }}
+{% block content %}
+    <div class="titles-ruler">
 
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'NOTIFICAÇÕES'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
+    </div>
+    <div id="divContent" style="flex-wrap: wrap;">
+        
+        <div class="tables-container" style="flex: 0; display: flex; justify-content: flex-start; min-width: 30vw;">
+            <div style="width: 100%; height: 640px; overflow-x: hidden;">
+                {% for notification in notifications %}
+                <div class="notification-container {% if notification['flag_read'] %}read{% endif %}" id="notification-{{ notification['id'] }}">
+                    <div class="split-h" style="padding: 16px; width: unset;">
+                        <div style="margin-right: 14px;">
+                            <h2 class="notification-title" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 20px;">{{ notification['title'] }}</h2>
+                            <p class="notification-message" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 20px;">{{ notification['message'] }}</p>
+                        </div>
+                        <div class="notification-icons">
+                            {% if not notification['flag_read'] %}
+                            <img class="notification-icon" src="{{ url_for('static', filename='svg/mail-open.svg') }}" title="Marcar como lida" onclick="clearNotification({{ session['id_user'] }}, {{ notification['id'] }})">
+                            {% endif %}
+                            <img class="notification-icon" src="{{ url_for('static', filename='svg/open.svg') }}" title="Abrir" onclick="window.location.href='{{ url_for('cde_notifications_id', id_notification=notification['id']) }}'">
+                        </div>
+                    </div>
+                    <p class="notification-date">{{ notification['date'] }}</p>
+                </div>
+                {% endfor %}
+            </div>
         </div>
-        <div id="divContent" style="flex-wrap: wrap;">
-            
-            <div class="tables-container" style="flex: 0; display: flex; justify-content: flex-start; min-width: 30vw;">
-                <div style="width: 100%; height: 640px; overflow-x: hidden;">
-                    {% for notification in notifications %}
-                    <div class="notification-container {% if notification['flag_read'] %}read{% endif %}" id="notification-{{ notification['id'] }}">
-                        <div class="split-h" style="padding: 16px; width: unset;">
-                            <div style="margin-right: 14px;">
-                                <h2 class="notification-title" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 20px;">{{ notification['title'] }}</h2>
-                                <p class="notification-message" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 20px;">{{ notification['message'] }}</p>
+        {% if notification %}
+            {% set notification = notification[0] %}
+            <div class="tables-container" style="flex: 0; display: flex; justify-content: flex-start; min-width: 40vw;">
+                <div class="split-v" style="width: 100%;">
+                    <div style="width: 100%; height: 600px; overflow-x: hidden;">
+                        <div style="padding: 16px;">
+                            <div class="split-h">
+                                <h2 class="notification-title" style="font-size: 24px; margin-top: 0">{{ notification['title'] }}</h2>
                             </div>
-                            <div class="notification-icons">
-                                {% if not notification['flag_read'] %}
-                                <img class="notification-icon" src="{{ url_for('static', filename='svg/mail-open.svg') }}" title="Marcar como lida" onclick="clearNotification({{ session['id_user'] }}, {{ notification['id'] }})">
-                                {% endif %}
-                                <img class="notification-icon" src="{{ url_for('static', filename='svg/open.svg') }}" title="Abrir" onclick="window.location.href='{{ url_for('cde_notifications_id', id_notification=notification['id']) }}'">
+                            <p class="notification-message"  style="font-size: 16px">{{ notification['message'] }}</p>
+                        </div>
+                    </div>
+                    <div class="split-h" style="width: 100%;">
+                        <p class="notification-date">Emitido em: <br> {{ notification['date'] }}</p>
+                        <div class="flex-h" style="width: 100%; justify-content: flex-end;">
+                            {% if notification['flag_read'] %}
+                            <div class="button-mini btn-fancy" onclick="unclearNotification({{ session['id_user'] }}, {{ notification['id'] }})" title="Marcar como não lida">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/mail.svg') }}" alt="">
+                            </div>
+                            {% else %}
+                            <div class="button-mini btn-fancy" onclick="clearNotification({{ session['id_user'] }}, {{ notification['id'] }})" title="Marcar como lida">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/mail-open.svg') }}" alt="">
+                            </div>
+                            {% endif %}
+                            <div class="button-mini btn-fancy" onclick="window.location.href='{{ url_for('cde_notifications') }}'" title="Fechar">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                             </div>
                         </div>
-                        <p class="notification-date">{{ notification['date'] }}</p>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
-            {% if notification %}
-                {% set notification = notification[0] %}
-                <div class="tables-container" style="flex: 0; display: flex; justify-content: flex-start; min-width: 40vw;">
-                    <div class="split-v" style="width: 100%;">
-                        <div style="width: 100%; height: 600px; overflow-x: hidden;">
-                            <div style="padding: 16px;">
-                                <div class="split-h">
-                                    <h2 class="notification-title" style="font-size: 24px; margin-top: 0">{{ notification['title'] }}</h2>
-                                </div>
-                                <p class="notification-message"  style="font-size: 16px">{{ notification['message'] }}</p>
+        {% else %}
+            {% if session['user_grant'] <= 2 %}
+                <div draggable="false" class="forms-container" style="position: relative; max-width: max-content">
+                    <form id="formSetNotification" method="post" style="display: block; height: unset">
+                        <div>
+                            <h2>Enviar Notificação</h2>
+                            <div class="split-h">
+                                <input class="address-two" type="text" id="title" maxlength="180" name="title" required placeholder="Título...">
+                                <select class="address-three" id="userid" name="userid" title="Selecione o usuário">
+                                    <option value="0">0 - TODOS</option>
+                                </select>
                             </div>
+                            <textarea class="address-observ" id="message" maxlength="180" name="message" required placeholder="Mensagem..."></textarea>
+                            <button type="submit" class="btn-fancy">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/send.svg') }}" alt="Enviar">
+                            </button>
                         </div>
-                        <div class="split-h" style="width: 100%;">
-                            <p class="notification-date">Emitido em: <br> {{ notification['date'] }}</p>
-                            <div class="flex-h" style="width: 100%; justify-content: flex-end;">
-                                {% if notification['flag_read'] %}
-                                <div class="button-mini btn-fancy" onclick="unclearNotification({{ session['id_user'] }}, {{ notification['id'] }})" title="Marcar como não lida">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/mail.svg') }}" alt="">
-                                </div>
-                                {% else %}
-                                <div class="button-mini btn-fancy" onclick="clearNotification({{ session['id_user'] }}, {{ notification['id'] }})" title="Marcar como lida">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/mail-open.svg') }}" alt="">
-                                </div>
-                                {% endif %}
-                                <div class="button-mini btn-fancy" onclick="window.location.href='{{ url_for('cde_notifications') }}'" title="Fechar">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </form>
                 </div>
-            {% else %}
-                {% if session['user_grant'] <= 2 %}
-                    <div draggable="false" class="forms-container" style="position: relative; max-width: max-content">
-                        <form id="formSetNotification" method="post" style="display: block; height: unset">
-                            <div>
-                                <h2>Enviar Notificação</h2>
-                                <div class="split-h">
-                                    <input class="address-two" type="text" id="title" maxlength="180" name="title" required placeholder="Título...">
-                                    <select class="address-three" id="userid" name="userid" title="Selecione o usuário">
-                                        <option value="0">0 - TODOS</option>
-                                    </select>
-                                </div>
-                                <textarea class="address-observ" id="message" maxlength="180" name="message" required placeholder="Mensagem..."></textarea>
-                                <button type="submit" class="btn-fancy">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/send.svg') }}" alt="Enviar">
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                {% endif %}
             {% endif %}
-        </div>
+        {% endif %}
+    </div>
+{% endblock content%}
 
-{% include 'shared/footer.html' %}
-
+{% block route_script %}
 <script>
     // evento de carregamento da página
     document.addEventListener('DOMContentLoaded', function() {
@@ -214,3 +211,4 @@
         });
     }
 </script>
+{% endblock route_script %}

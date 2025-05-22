@@ -1,48 +1,49 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Queries {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/cde-header.html' %}
-    </style>
-    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-        <h1>
-            <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-            <span style="margin: 0 8px;"></span>
-            <span>QUERIES</span>
-            <span class="id-page">{{session['id_page']}}</span>
-        </h1>
-        <div class="aux-buttons">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="AJUSTES" alt="" onclick="window.location.href='{{ url_for('cde_cfg') }}';">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="PERFIL" alt="" onclick="window.location.href='{{ url_for('cde_profile') }}';">
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="SAIR" alt="" onclick="goBack()">
-        </div>
+{% block title %}Queries{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'AJUSTES', 'url': 'cde_cfg', 'title': 'AJUSTES'},
+                {'text': 'QUERIES'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
     </div>
-    </div>
-        <div id="divContent">
-            <div class="mobile-container">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
-                    <table>
-                        <tr>
-                            <th>ID</th>
-                            <th>VALOR</th>
-                            <th>STATUS</th>
-                        </tr>
-                        {% for query_id, query_data in q_list.items() %}
-                        <tr>
-                            <td>{{ query_id }}</td>
-                            <td>{{ query_data }}</td>
-                            <td class="c" title="OK">🟢</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </div>
+    
+    <div id="divContent">
+        <div class="mobile-container">
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>VALOR</th>
+                        <th>STATUS</th>
+                    </tr>
+                    {% for query_id, query_data in q_list.items() %}
+                    <tr>
+                        <td>{{ query_id }}</td>
+                        <td>{{ query_data }}</td>
+                        <td class="c" title="OK">🟢</td>
+                    </tr>
+                    {% endfor %}
+                </table>
             </div>
         </div>
+    </div>
 
-    {% include 'shared/footer.html' %}
+{% endblock content %}
