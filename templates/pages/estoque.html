@@ -1,172 +1,169 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Estoque {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | LOGÍSTICA</title>
-        <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/tl-header.html' %}
-        <div class="titles-ruler">
-            
-            {% from 'components/title-route.html' import title_container %}
-            {{ title_container(
-                title='ESTOQUE',
-                id_page=session['id_page'],
-                breadcrumbs=[
-                    {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
-                    {'text': 'MOV', 'url': 'mov', 'title': 'MOVIMENTAR'},
-                    {'text': 'ESTOQUE'}
-                ],
-                aux_buttons=[
-                    {'type': 'link', 'url': 'mov', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR'},
-                    {'type': 'link', 'url': 'estoque', 'icon': 'svg/boxes.svg', 'title': 'ESTOQUE', 'active': True},
-                    {'type': 'link', 'url': 'historico', 'icon': 'svg/history.svg', 'title': 'HISTÓRICO'},
-                    {'type': 'divider'},
-                    {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
-                    {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
-                ]
-            ) }}
+{% block title %}Estoque{% endblock title %}
 
-            {% from 'components/filter-container.html' import filter_container %}
-            {{ filter_container(
-                filter_options=[
-                    {'value': 0, 'text': 'Item (Código)'},
-                    {'value': 1, 'text': 'Item (Descrição)'},
-                    {'value': 2, 'text': 'QTDE (Efetiva)'},
-                    {'value': 3, 'text': 'Últ. Movimen. (Data/Hora)'}
-                ],
-                type="default"
-            ) }}
-            {% from 'components/filter-container.html' import filter_container %}
-            {{ filter_container(
-                type="date",
-                date_value=search_term,
-                date_action=request.url,
-                date_button_title="CARREGAR ESTOQUE NO DIA",
-                button_icon="calendar-search.svg"
-            ) }}
-        </div>
+{% block content %}
 
+    <div class="titles-ruler">
         
-        <div id="divContent" style="flex-wrap: wrap;">
-            
-            {% from 'components/sidebar.html' import sidebar %}
-            {{ sidebar([
-                {'url': 'estoque', 'icon': 'svg/group.svg', 'title': 'ESTOQUE (AGRUPADO)', 'active': request.endpoint == 'estoque'},
-                {'url': 'estoque_enderecado', 'icon': 'svg/land-plot.svg', 'title': 'ESTOQUE (ENDEREÇADO)', 'active': request.endpoint == 'estoque_enderecado'},
-                {'url': 'inv_report', 'icon': 'svg/file-text.svg', 'title': 'ESTOQUE (REPORT)', 'active': request.endpoint == 'inv_report'},
-                {'url': 'estoque_preset', 'icon': 'svg/blend.svg', 'title': 'ESTOQUE (PRESET)', 'active': request.endpoint == 'estoque_preset'}
-            ]) }}
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'MOV', 'url': 'mov', 'title': 'MOVIMENTAR'},
+                {'text': 'ESTOQUE'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'mov', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR'},
+                {'type': 'link', 'url': 'estoque', 'icon': 'svg/boxes.svg', 'title': 'ESTOQUE', 'active': True},
+                {'type': 'link', 'url': 'historico', 'icon': 'svg/history.svg', 'title': 'HISTÓRICO'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
 
-            <div class="tables-container" style="max-width: 100vw;">
-                {% block table %}
+        {% from 'components/filter-container.html' import filter_container %}
+        {{ filter_container(
+            filter_options=[
+                {'value': 0, 'text': 'Item (Código)'},
+                {'value': 1, 'text': 'Item (Descrição)'},
+                {'value': 2, 'text': 'QTDE (Efetiva)'},
+                {'value': 3, 'text': 'Últ. Movimen. (Data/Hora)'}
+            ],
+            type="default"
+        ) }}
+        {% from 'components/filter-container.html' import filter_container %}
+        {{ filter_container(
+            type="date",
+            date_value=search_term,
+            date_action=request.url,
+            date_button_title="CARREGAR ESTOQUE NO DIA",
+            button_icon="calendar-search.svg"
+        ) }}
+    </div>
+
+    <div id="divContent" style="flex-wrap: wrap;">
+        
+        {% from 'components/sidebar.html' import sidebar %}
+        {{ sidebar([
+            {'url': 'estoque', 'icon': 'svg/group.svg', 'title': 'ESTOQUE (AGRUPADO)', 'active': request.endpoint == 'estoque'},
+            {'url': 'estoque_enderecado', 'icon': 'svg/land-plot.svg', 'title': 'ESTOQUE (ENDEREÇADO)', 'active': request.endpoint == 'estoque_enderecado'},
+            {'url': 'inv_report', 'icon': 'svg/file-text.svg', 'title': 'ESTOQUE (REPORT)', 'active': request.endpoint == 'inv_report'},
+            {'url': 'estoque_preset', 'icon': 'svg/blend.svg', 'title': 'ESTOQUE (PRESET)', 'active': request.endpoint == 'estoque_preset'}
+        ]) }}
+
+        <div class="tables-container" style="max-width: 100vw;">
+            {% block table %}
+                <div class="split-h">
+                    
+                </div>
+                {% if search_term %}
                     <div class="split-h">
-                        
+                        <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
+                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                        </a>
                     </div>
-                    {% if search_term %}
-                        <div class="split-h">
-                            <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
-                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                            </a>
-                        </div>
-                    {% endif %}
-                    <div class="table-overflow">
-                        <table id="filterTable">
-                            <thead>
+                {% endif %}
+                <div class="table-overflow">
+                    <table id="filterTable">
+                        <thead>
+                            <tr>
+                                <th>Item (Código)</th>
+                                <th>Item (Descrição)</th>
+                                <th>QTDE (Efetiva)</th>
+                                <th>Últ. Movimentação (Data/Hora)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in inv_data %}
                                 <tr>
-                                    <th>Item (Código)</th>
-                                    <th>Item (Descrição)</th>
-                                    <th>QTDE (Efetiva)</th>
-                                    <th>Últ. Movimentação (Data/Hora)</th>
+                                    <td class="number">{{ item.cod_item }}</td>
+                                    <td>{{ item.desc_item }}</td>
+                                    <td class="number">{{ item.saldo }}.0</td>
+                                    <td>{{ item.ult_mov }}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in inv_data %}
-                                    <tr>
-                                        <td class="number">{{ item.cod_item }}</td>
-                                        <td>{{ item.desc_item }}</td>
-                                        <td class="number">{{ item.saldo }}.0</td>
-                                        <td>{{ item.ult_mov }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% endblock table %}
-                <p>
-                    <span>{{ inv_data|length }} registros |</span>
-                    <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='estoque') }}">Exportar (CSV)</a>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endblock table %}
+            <p>
+                <span>{{ inv_data|length }} registros |</span>
+                <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='estoque') }}">Exportar (CSV)</a>
+                <span>|</span>
+                <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="#" onclick="exportTableToXLSX('exp_{{request.endpoint}}.xlsx')">Exportar (Excel)</a>
+                {% if session['user_grant'] <= 2 %}
                     <span>|</span>
-                    <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="#" onclick="exportTableToXLSX('exp_{{request.endpoint}}.xlsx')">Exportar (Excel)</a>
-                    {% if session['user_grant'] <= 2 %}
-                        <span>|</span>
-                        <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='export_promob') }}">Exportar (Promob)</a>
-                    {% endif %}
-                </p>
-            </div>
+                    <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='export_promob') }}">Exportar (Promob)</a>
+                {% endif %}
+            </p>
         </div>
+    </div>
 
-        {% include 'shared/footer.html' %}
+{% endblock content %}
 
-        <!-- lib for xlsx export -->
-        <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+{% block route_script %}
+    <!-- lib for xlsx export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
-        <script>
-            function exportTableToXLSX(filename) {
-                // get table
-                var table = document.getElementById("filterTable");
-                let input = document.getElementById('filterInput');
-                let select = document.getElementById('filterSelect');
-                let auxFilters = document.querySelectorAll('.table-filter');
+    <script>
+        function exportTableToXLSX(filename) {
+            // get table
+            var table = document.getElementById("filterTable");
+            let input = document.getElementById('filterInput');
+            let select = document.getElementById('filterSelect');
+            let auxFilters = document.querySelectorAll('.table-filter');
 
-                // create a new workbook
-                var wb = XLSX.utils.book_new();
-                
-                if (!input.value) { // is not filtered
-                    // convert main table to worksheet
-                    var ws_data = XLSX.utils.table_to_sheet(table);
-                } else {
-                    // removes rows with (display: none) from data
-                    var ws_data_array = [];
-                    let rows = table.querySelectorAll("tr");
-                    rows.forEach(row => {
-                        if (row.offsetParent !== null) {  // tr with display: none
-                            let rowData = [];
-                            row.querySelectorAll("th, td").forEach(cell => {
-                                rowData.push(cell.innerText);
-                            });
-                            ws_data_array.push(rowData);
-                        }
-                    });
+            // create a new workbook
+            var wb = XLSX.utils.book_new();
+            
+            if (!input.value) { // is not filtered
+                // convert main table to worksheet
+                var ws_data = XLSX.utils.table_to_sheet(table);
+            } else {
+                // removes rows with (display: none) from data
+                var ws_data_array = [];
+                let rows = table.querySelectorAll("tr");
+                rows.forEach(row => {
+                    if (row.offsetParent !== null) {  // tr with display: none
+                        let rowData = [];
+                        row.querySelectorAll("th, td").forEach(cell => {
+                            rowData.push(cell.innerText);
+                        });
+                        ws_data_array.push(rowData);
+                    }
+                });
 
-                    var ws_data = XLSX.utils.aoa_to_sheet(ws_data_array);
-                }
-                
-                // add the data worksheet
-                XLSX.utils.book_append_sheet(wb, ws_data, "Estoque");
-
-                // add metadata sheet
-                var metadata = [
-                    ["Relatório:", document.title],
-                    [""],
-                    ["Data/Hora:", new Date().toLocaleString()],
-                    ["Usuário:", "{{ session.get('id_user', 'N/A') }} - {{ session.get('user_name', 'N/A') }}"],
-                    [""]
-                ];
-
-                if (input.value) { // is filtered
-                    metadata.push(["Filtros:", input.value, "em", select.options[select.selectedIndex].text]);
-                    metadata.push([""]);
-                }
-
-                metadata.push(["CDE", "({{ request.endpoint }})"]);
-                
-                var ws_meta = XLSX.utils.aoa_to_sheet(metadata);
-                XLSX.utils.book_append_sheet(wb, ws_meta, "Info");
-                
-                // generate xlsx file
-                XLSX.writeFile(wb, filename);
+                var ws_data = XLSX.utils.aoa_to_sheet(ws_data_array);
             }
-        </script>
-    </body>
-</html>
+            
+            // add the data worksheet
+            XLSX.utils.book_append_sheet(wb, ws_data, "Estoque");
+
+            // add metadata sheet
+            var metadata = [
+                ["Relatório:", document.title],
+                [""],
+                ["Data/Hora:", new Date().toLocaleString()],
+                ["Usuário:", "{{ session.get('id_user', 'N/A') }} - {{ session.get('user_name', 'N/A') }}"],
+                [""]
+            ];
+
+            if (input.value) { // is filtered
+                metadata.push(["Filtros:", input.value, "em", select.options[select.selectedIndex].text]);
+                metadata.push([""]);
+            }
+
+            metadata.push(["CDE", "({{ request.endpoint }})"]);
+            
+            var ws_meta = XLSX.utils.aoa_to_sheet(metadata);
+            XLSX.utils.book_append_sheet(wb, ws_meta, "Info");
+            
+            // generate xlsx file
+            XLSX.writeFile(wb, filename);
+        }
+    </script>
+{% endblock route_script %}

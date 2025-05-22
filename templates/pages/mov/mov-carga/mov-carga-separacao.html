@@ -1,36 +1,36 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
+{% extends 'base.html' %}
 
-    {% block title %}
-        <title>Carga Sep. {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | LOGÍSTICA</title>
-    {% endblock title %}
-    
-    <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+{% block title %}Cargas Sep.{% endblock title %}
 
-    {% include 'shared/header/tl-header.html' %}
-    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                <span style="margin: 0 8px;"></span>
-                <a href="{{ url_for('home_logi') }}"title="LOGISTICA">LOGI</a>
-                <span class="dash">/</span>
-                <a href="{{ url_for('cargas') }}">CARGAS</a>
-                <span class="dash">/</span>
-                {% block sep_status %}
-                    <span>SEPARACAO</span>
-                {% endblock sep_status %}
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-        <div class="aux-buttons">
-            {% block aux_buttons %}
-                
-            {% endblock aux_buttons %}
-        </div>
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'CARGAS', 'url': 'cargas', 'title': 'CARGAS'},
+                {'text': 'SEPARACAO'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'carga_incomp', 'icon': 'svg/package-badge.svg', 'title': 'INCOMPLETAS'},
+                {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS'},
+                {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS'},
+                {'type': 'divider'},
+                {'type': 'form', 'url': 'cargas', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)', 'active': True},
+                {'type': 'divider'},
+                {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
     </div>
-    </div>
-        <div id="divContent" style="flex-wrap: wrap;">
+
+    <div id="divContent" style="flex-wrap: wrap;">
         <div class="tables-container" id="sepContainer" style="min-width: 40vw; min-height: 40vh;">
             <div style="{% if id_carga == '0' %}display: none;{% endif %}">
                 <div class="split-h">
@@ -121,11 +121,14 @@
         </div>
     </div>
 
+{% endblock content %}
     
-    {% block script %}
-    
-    {% endblock script %}
+{% block route_script %}
+    <!-- additional script from each separation -->
+    {% block add_script %}
+    {% endblock add_script %}
+
+    <!-- lib for carga logic -->
     <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
         
-
-    {% include 'shared/footer.html' %}
+{% endblock route_script %}
