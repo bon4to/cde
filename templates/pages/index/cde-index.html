@@ -1,99 +1,76 @@
 {% extends "pages/index/index.html" %}
 
-    {% block title %}
-        <title>Página Inicial | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% block grid_buttons %}
+    <div class="item featured" onclick="window.location.href='{{ url_for('home_prod') }}';">
+        <div class="split-h algn-cntr">
+            <div style="text-align: left">
+                <h2 class="text-default">Produção</h2>
+                <p class="text-default bold">Acesse as ferramentas da empresa!</p>
+            </div>
+            <a class="btn-fancy button-mini">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/package-open.svg') }}" alt="">
+            </a>
+        </div>
+    </div>
+    <div class="item" onclick="window.location.href='{{ url_for('cde_profile') }}';">
+        <div class="split-h algn-cntr">
+            <div style="text-align: left">
+                <h2 class="text-default">Perfil</h2>
+                <p class="text-default bold"><span class="id-page">CDE003</span></p>
+            </div>
+            <a class="btn-fancy button-mini">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-user.svg') }}" alt="">
+            </a>
+        </div>
+    </div>
+    <div class="item featured" onclick="window.location.href='{{ url_for('home_logi') }}';" >
+        <div class="split-h algn-cntr">
+            <div style="text-align: left">
+                <h2 class="text-default">Logística</h2>
+                <p class="text-default bold">Acesse as ferramentas da empresa!</p>
+            </div>
+            <a class="btn-fancy button-mini">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/truck.svg') }}" alt="">
+            </a>
+        </div>
+    </div>
+    <div class="item" onclick="window.location.href='{{ url_for('users') }}';">
+        <div class="split-h algn-cntr">
+            <div style="text-align: left">
+                <h2 class="text-default">Usuários</h2>
+                <p class="text-default bold"><span class="id-page">CDE016</span></p>
+            </div>
+            <a class="btn-fancy button-mini">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
+            </a>
+        </div>
+    </div>
+    <div class="item featured" onclick="window.location.href='{{ url_for('cde_cfg') }}';">
+        <div class="split-h algn-cntr">
+            <div style="text-align: left">
+                <h2 class="text-default">Ajustes</h2>
+                <p class="text-default bold">Configure o sistema...</p>
+            </div>
+            <a class="btn-fancy button-mini">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
+            </a>
+        </div>
+    </div>
+    <div class="item" onclick="window.location.href='{{ url_for('about') }}';">
+        <div class="split-h algn-cntr">
+            <div style="text-align: left">
+                <h2 class="text-default">Sobre</h2>
+                <p class="text-default bold"><span class="id-page">CDE004</span></p>
+            </div>
+            <a class="btn-fancy button-mini">
+                <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-help.svg') }}" alt="">
+            </a>
+        </div>
+    </div>
+{% endblock grid_buttons %}
 
-        {% include 'shared/header/cde-header.html' %}
-    {% endblock title %}
-
-    {% block brow %}
-        <h1>
-            <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-            <span style="margin: 0 8px;"></span> MENU INICIAL
-            <span class="id-page">{{session['id_page']}}</span>
-        </h1>
-        <div class="aux-buttons">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="AJUSTES" alt="" onclick="window.location.href='{{ url_for('cde_cfg') }}';">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="PERFIL" alt="" onclick="window.location.href='{{ url_for('cde_profile') }}';">
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/exit.svg') }}" title="SAIR" alt="" onclick="confirmLogout()">
-        </div>
-    {% endblock brow %}
-
-    {% block grid_buttons %}
-        <div class="item featured" onclick="window.location.href='{{ url_for('home_prod') }}';">
-            <div class="split-h algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Produção</h2>
-                    <p class="text-default bold">Acesse as ferramentas da empresa!</p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/package-open.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
-        <div class="item" onclick="window.location.href='{{ url_for('cde_profile') }}';">
-            <div class="split-h algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Perfil</h2>
-                    <p class="text-default bold"><span class="id-page">CDE003</span></p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-user.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
-        <div class="item featured" onclick="window.location.href='{{ url_for('home_logi') }}';" >
-            <div class="split-h algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Logística</h2>
-                    <p class="text-default bold">Acesse as ferramentas da empresa!</p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/truck.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
-        <div class="item" onclick="window.location.href='{{ url_for('users') }}';">
-            <div class="split-h algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Usuários</h2>
-                    <p class="text-default bold"><span class="id-page">CDE016</span></p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
-        <div class="item featured" onclick="window.location.href='{{ url_for('cde_cfg') }}';">
-            <div class="split-h algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Ajustes</h2>
-                    <p class="text-default bold">Configure o sistema...</p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
-        <div class="item" onclick="window.location.href='{{ url_for('about') }}';">
-            <div class="split-h algn-cntr">
-                <div style="text-align: left">
-                    <h2 class="text-default">Sobre</h2>
-                    <p class="text-default bold"><span class="id-page">CDE004</span></p>
-                </div>
-                <a class="btn-fancy button-mini">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-help.svg') }}" alt="">
-                </a>
-            </div>
-        </div>
-    {% endblock grid_buttons %}
-
-    {% block side_banner %}  
-        <div class="side-banner" style="background-color: var(--main-color); filter: brightness(0.95)">
-            <img class="side-banner" style="filter: brightness(1)" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
-        </div>
-    {% endblock side_banner %}
+{% block side_banner %}  
+    <div class="side-banner" style="background-color: var(--main-color); filter: brightness(0.95)">
+        <img class="side-banner" style="filter: brightness(1)" src="{{ url_for('static', filename='img/cde-side-banner.jpg') }}" alt="Imagem de rawpixel.com no Freepik">
+    </div>
+{% endblock side_banner %}

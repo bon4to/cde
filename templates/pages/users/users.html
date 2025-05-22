@@ -1,31 +1,27 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Usuários {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/cde-header.html' %}
+{% block title %}Usuários{% endblock title %}
 
-    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-        <h1>
-            <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-            <span style="margin: 0 8px;"></span>
-            <span>USUARIOS</span>
-            <span class="id-page">{{session['id_page']}}</span>
-        </h1>
-        <div class="aux-buttons">
-            {% if 'user_grant' in session %}
-                {% if 'CDE015' in user_perm or session['user_grant'] <= 2 %}
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/pen-line.svg') }}" title="EDITAR USUÁRIOS" alt="" onclick="toggleEdit()">
-                {% endif %}
-            {% endif %}
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-        </div>
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'USUÁRIOS'}
+            ],
+            aux_buttons=[
+                {'type': 'action', 'icon': 'svg/pen-line.svg', 'title': 'EDITAR USUÁRIOS', 'onclick': 'toggleEdit()'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
     </div>
-    </div>
-        <div id="divContent">
+
+    <div id="divContent">
         <div class="forms-container">
             {% if 'CDE014' in user_perm or session['user_grant'] <= 2 %}
                 <div>
@@ -135,10 +131,12 @@
         </div>
     </div>
 
+{% endblock content %}
+
+{% block route_script %}
     <script>
         function redirectToEdit(idUser) {
             window.location.href = "/users/edit?id_user=" + idUser;
         }
     </script>
-
-    {% include 'shared/footer.html' %}
+{% endblock route_script %}

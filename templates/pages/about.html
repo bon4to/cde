@@ -1,31 +1,7 @@
 {% extends "pages/index/index.html" %}
     
-    {% block title %}
-        <title>Sobre | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% block grid_buttons %}
+{% endblock grid_buttons %}
 
-        {% include 'shared/header/cde-header.html' %}
-    {% endblock title %}
-
-    {% block brow %}
-        <h1>
-            <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-            <span class="dash">/</span>
-            <span>SOBRE</span>
-            <span class="id-page">{{session['id_page']}}</span>
-        </h1>
-        <div class="aux-buttons">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" title="AJUSTES" alt="" onclick="window.location.href='{{ url_for('cde_cfg') }}';">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-user.svg') }}" title="PERFIL" alt="" onclick="window.location.href='{{ url_for('cde_profile') }}';">
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-help.svg') }}" title="AJUDA" alt="" onclick="window.location.href='{{ url_for('about') }}';">
-            <hr class="vert">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-        </div>
-    {% endblock brow %}
-        
-    {% block grid_buttons %}
-    {% endblock grid_buttons %}
-
-    {% block side_banner %}
-    {% endblock side_banner %}
+{% block side_banner %}
+{% endblock side_banner %}

@@ -1,13 +1,13 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Cargas{% endblock %}
+{% block title %}Cargas{% endblock title %}
 
 {% block content %}
+
     <div class="titles-ruler">
         
         {% from 'components/title-route.html' import title_container %}
         {{ title_container(
-            title='CARGAS',
             id_page=session['id_page'],
             breadcrumbs=[
                 {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
@@ -21,6 +21,7 @@
                 {'type': 'form', 'url': 'cargas', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
                 {'type': 'divider'},
                 {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)'},
+                {'type': 'divider'},
                 {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
                 {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
             ]
@@ -356,6 +357,7 @@
 {% endblock content %}
 
 {% block route_script %}
+
     <script>
         const nroCarga = '{{ id_carga }}';
 
@@ -490,6 +492,7 @@
 
     </script>
 
-    <!-- script for page logic -->
+    <!-- lib for carga logic -->
     <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
+
 {% endblock route_script %}

@@ -1,215 +1,212 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Rótulo {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | CDE</title>
-        <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/cde-header.html' %}
+{% block title %}Rótulo{% endblock title %}
 
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                <span style="margin: 0 8px;"></span>
-                <a href="{{ url_for('home') }}">OUTROS</a>
-                <span class="dash">/</span>
-                <span>RÓTULO</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <a class="aux-button {% if request.endpoint == 'etiqueta' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/sticky-note.svg') }}" title="ETIQUETA" alt="" onclick="window.location.href='{{ url_for('etiqueta') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'rotulo' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/roll.svg') }}" title="RÓTULO" alt="" onclick="window.location.href='{{ url_for('rotulo') }}';">
-                </a>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-            </div>
-        </div>
-        </div>
-        <div id="divContent">
-            <div draggable="false" style="display: flex; align-items: center;" class="form-login">
-                <div class="flex-h">
-                    <div class="log">
-                        <div style="max-width: 400px; justify-content: flex-start; margin: auto">
-                            <form style="max-width: 400px; justify-content: flex-start; margin: auto" id="form-field" method="post" action="{{ url_for('rotulo') }}">
-                                <div class="two-split">
-                                    <div>
-                                        <label for="diametro_inicial" >Diâmetro (Externo)</label>
-                                        <br>
-                                        <input 
-                                            class="address" 
-                                            maxlength="6" 
-                                            id="diametro_inicial" 
-                                            type="number" 
-                                            name="diametro_minimo"  
-                                            required placeholder="Diâmetro..."
-                                        >
-                                    </div>
-                                    <div>
-                                        <label for="diametro_minimo">Diâmetro (Interno)</label>
-                                        <br>
-                                        <input 
+{% block content %}
+
+    <div class="titles-ruler">
+
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'OUTROS', 'url': 'home', 'title': 'OUTROS'},
+                {'text': 'ROTULO'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'etiqueta', 'icon': 'svg/sticky-note.svg', 'title': 'ETIQUETA'},
+                {'type': 'link', 'url': 'rotulo', 'icon': 'svg/roll.svg', 'title': 'RÓTULO', 'active': True},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
+    </div>
+
+    <div id="divContent">
+        <div draggable="false" style="display: flex; align-items: center;" class="form-login">
+            <div class="flex-h">
+                <div class="log">
+                    <div style="max-width: 400px; justify-content: flex-start; margin: auto">
+                        <form style="max-width: 400px; justify-content: flex-start; margin: auto" id="form-field" method="post" action="{{ url_for('rotulo') }}">
+                            <div class="two-split">
+                                <div>
+                                    <label for="diametro_inicial" >Diâmetro (Externo)</label>
+                                    <br>
+                                    <input 
                                         class="address" 
                                         maxlength="6" 
-                                        id="diametro_minimo" 
+                                        id="diametro_inicial" 
                                         type="number" 
-                                        name="diametro_minimo"
-                                        required 
-                                        placeholder="Diâmetro..."
+                                        name="diametro_minimo"  
+                                        required placeholder="Diâmetro..."
                                     >
-                                    </div>
                                 </div>
-                                <hr>
-                                <div class="two-split">
-                                    <div>
-                                        <label for="espessura_fita">Rótulo (Espessura)</label>
-                                        <br>
-                                        <input 
-                                            class="address" 
-                                            maxlength="6" 
-                                            name="espessura_fita" 
-                                            id="espessura_fita" 
-                                            type="number"  
-                                            required 
-                                            placeholder="Espessura..."
-                                        >
-                                    </div>
-                                    <div>
-                                        <label for="espessura_papelao">Tubete (Espessura)</label>
-                                        <br>
-                                        <input 
-                                            class="address" 
-                                            maxlength="6" 
-                                            type="number" 
-                                            id="espessura_papelao" 
-                                            name="espessura_papelao"  
-                                            required 
-                                            placeholder="Espessura..."
-                                        >
-                                    </div>
+                                <div>
+                                    <label for="diametro_minimo">Diâmetro (Interno)</label>
+                                    <br>
+                                    <input 
+                                    class="address" 
+                                    maxlength="6" 
+                                    id="diametro_minimo" 
+                                    type="number" 
+                                    name="diametro_minimo"
+                                    required 
+                                    placeholder="Diâmetro..."
+                                >
                                 </div>
-                                    <div>
-                                        <label for="compr_rotulo">Rótulo (Comprimento)</label>
-                                        <br>
-                                        <input 
-                                            type="number" 
-                                            maxlength="6" 
-                                            id="compr_rotulo" 
-                                            name="compr_rotulo" 
-                                            required 
-                                            placeholder="Distância do início de um rótulo ao início de outro..."
-                                        >
-                                    </div>
-                                <hr>
-                                <h3 id="resposta1" class="alert">Calculadora</h3>
-                                <p id="resposta2">Digite os parâmetros...</p>
-                                <div style="display: none" class="split-h">
-                                    <input class="btn-fancy" type="submit" value="Calcular...">
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div id="tables-container" style="margin: 40px;">
-                        <div class="centralizado">
-                            <div class="centralizado" style="background-color: var(--main-color); border-radius: 20px; width: 450px; height: 450px;">
-                                <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="">
                             </div>
-                        </div>
-                        <p id="resposta3" style="font-weight: 500; color: var(--main-color);">Aguardando dados...</p>
+                            <hr>
+                            <div class="two-split">
+                                <div>
+                                    <label for="espessura_fita">Rótulo (Espessura)</label>
+                                    <br>
+                                    <input 
+                                        class="address" 
+                                        maxlength="6" 
+                                        name="espessura_fita" 
+                                        id="espessura_fita" 
+                                        type="number"  
+                                        required 
+                                        placeholder="Espessura..."
+                                    >
+                                </div>
+                                <div>
+                                    <label for="espessura_papelao">Tubete (Espessura)</label>
+                                    <br>
+                                    <input 
+                                        class="address" 
+                                        maxlength="6" 
+                                        type="number" 
+                                        id="espessura_papelao" 
+                                        name="espessura_papelao"  
+                                        required 
+                                        placeholder="Espessura..."
+                                    >
+                                </div>
+                            </div>
+                                <div>
+                                    <label for="compr_rotulo">Rótulo (Comprimento)</label>
+                                    <br>
+                                    <input 
+                                        type="number" 
+                                        maxlength="6" 
+                                        id="compr_rotulo" 
+                                        name="compr_rotulo" 
+                                        required 
+                                        placeholder="Distância do início de um rótulo ao início de outro..."
+                                    >
+                                </div>
+                            <hr>
+                            <h3 id="resposta1" class="alert">Calculadora</h3>
+                            <p id="resposta2">Digite os parâmetros...</p>
+                            <div style="display: none" class="split-h">
+                                <input class="btn-fancy" type="submit" value="Calcular...">
+                            </div>
+                        </form>
                     </div>
+                </div>
+                <div id="tables-container" style="margin: 40px;">
+                    <div class="centralizado">
+                        <div class="centralizado" style="background-color: var(--main-color); border-radius: 20px; width: 450px; height: 450px;">
+                            <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="">
+                        </div>
+                    </div>
+                    <p id="resposta3" style="font-weight: 500; color: var(--main-color);">Aguardando dados...</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
+{% endblock content %}
 
-                var static_path = "{{ url_for('static', filename='') }}";
-                var input1 = document.getElementById("espessura_fita");
-                var input2 = document.getElementById("diametro_inicial");
-                var input3 = document.getElementById("diametro_minimo");
-                var input4 = document.getElementById("espessura_papelao");
-                var input5 = document.getElementById("compr_rotulo");
+{% block route_script %}
 
-                var dynamicImage = document.getElementById("dynamicImage");
+    <script>
+        var static_path = "{{ url_for('static', filename='') }}";
+        var input1 = document.getElementById("espessura_fita");
+        var input2 = document.getElementById("diametro_inicial");
+        var input3 = document.getElementById("diametro_minimo");
+        var input4 = document.getElementById("espessura_papelao");
+        var input5 = document.getElementById("compr_rotulo");
 
-                input1.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "img/rotulo/rotulo_esp_rot.jpg";
-                });
-                input2.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "img/rotulo/rotulo_diam_total.jpg";
-                });
-                input3.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "img/rotulo/rotulo_diam_int.jpg";
-                });
-                input4.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "img/rotulo/rotulo_esp_tub.jpg";
-                });
-                input5.addEventListener("focus", function() {
-                    dynamicImage.src = static_path + "img/rotulo/rotulo_dist_rot.jpg";
-                });
+        var dynamicImage = document.getElementById("dynamicImage");
 
-                $("#field").submit(function(event) {
-                    event.preventDefault();
+        input1.addEventListener("focus", function() {
+            dynamicImage.src = static_path + "img/rotulo/rotulo_esp_rot.jpg";
+        });
+        input2.addEventListener("focus", function() {
+            dynamicImage.src = static_path + "img/rotulo/rotulo_diam_total.jpg";
+        });
+        input3.addEventListener("focus", function() {
+            dynamicImage.src = static_path + "img/rotulo/rotulo_diam_int.jpg";
+        });
+        input4.addEventListener("focus", function() {
+            dynamicImage.src = static_path + "img/rotulo/rotulo_esp_tub.jpg";
+        });
+        input5.addEventListener("focus", function() {
+            dynamicImage.src = static_path + "img/rotulo/rotulo_dist_rot.jpg";
+        });
+
+        $("#field").submit(function(event) {
+            event.preventDefault();
+            var espessura_fita = $("#espessura_fita").val();
+            var diametro_inicial = $("#diametro_inicial").val();
+            var diametro_minimo = $("#diametro_minimo").val();
+            var espessura_papelao = $("#espessura_papelao").val();
+            var compr_rotulo = $("#compr_rotulo").val();
+            calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo);
+        });
+
+        $(document).ready(function() {
+            var timeout;
+
+            $("input[type='number']").on('input', function() {
+                clearTimeout(timeout);
+
+                timeout = setTimeout(function() {
                     var espessura_fita = $("#espessura_fita").val();
                     var diametro_inicial = $("#diametro_inicial").val();
                     var diametro_minimo = $("#diametro_minimo").val();
                     var espessura_papelao = $("#espessura_papelao").val();
                     var compr_rotulo = $("#compr_rotulo").val();
                     calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo);
-                });
+                }, 1000);
+            });
+        });
 
-                $(document).ready(function() {
-                    var timeout;
-
-                    $("input[type='number']").on('input', function() {
-                        clearTimeout(timeout);
-
-                        timeout = setTimeout(function() {
-                            var espessura_fita = $("#espessura_fita").val();
-                            var diametro_inicial = $("#diametro_inicial").val();
-                            var diametro_minimo = $("#diametro_minimo").val();
-                            var espessura_papelao = $("#espessura_papelao").val();
-                            var compr_rotulo = $("#compr_rotulo").val();
-                            calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo);
-                        }, 1000);
-                    });
-                });
-
-                function calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo) {
-                    $.ajax({
-                        type: "POST",
-                        url: "/rotulo",
-                        data: { espessura_fita: espessura_fita, diametro_inicial: diametro_inicial, diametro_minimo: diametro_minimo, espessura_papelao: espessura_papelao, compr_rotulo: compr_rotulo },
-                        success: function(response) {
-                            $("#resposta1").text(response.num_rotulos_str + " rótulos");
-                            $("#resposta2").text(response.comprimento_mtrs + " metros");
-                            $("#resposta3").text("O tubo de rótulo tem " + response.num_voltas + " voltas");
-                        },
-                        error: function(error) {
-                            console.error("Erro ao exibir o valor", error);
-                        }
-                    });
+        function calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo) {
+            $.ajax({
+                type: "POST",
+                url: "/rotulo",
+                data: { espessura_fita: espessura_fita, diametro_inicial: diametro_inicial, diametro_minimo: diametro_minimo, espessura_papelao: espessura_papelao, compr_rotulo: compr_rotulo },
+                success: function(response) {
+                    $("#resposta1").text(response.num_rotulos_str + " rótulos");
+                    $("#resposta2").text(response.comprimento_mtrs + " metros");
+                    $("#resposta3").text("O tubo de rótulo tem " + response.num_voltas + " voltas");
+                },
+                error: function(error) {
+                    console.error("Erro ao exibir o valor", error);
                 }
+            });
+        }
 
-                function verificarComprimento(input) {
-                    if (input.value.length > input.maxLength) {
-                        input.value = input.value.slice(0, input.maxLength);
-                    }
-                }
+        function verificarComprimento(input) {
+            if (input.value.length > input.maxLength) {
+                input.value = input.value.slice(0, input.maxLength);
+            }
+        }
 
-                document.addEventListener('DOMContentLoaded', function() {
-                    var inputs = document.querySelectorAll('.address');
-                    inputs.forEach(function(input) {
-                        input.addEventListener('input', function() {
-                            verificarComprimento(this);
-                        });
-                    });
+        document.addEventListener('DOMContentLoaded', function() {
+            var inputs = document.querySelectorAll('.address');
+            inputs.forEach(function(input) {
+                input.addEventListener('input', function() {
+                    verificarComprimento(this);
                 });
-
+            });
+        });
     </script>
 
-
-
-    {% include 'shared/footer.html' %}
+{% endblock route_script %}

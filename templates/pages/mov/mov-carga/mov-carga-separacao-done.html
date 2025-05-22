@@ -1,42 +1,9 @@
 {% extends "pages/mov/mov-carga/mov-carga-separacao.html" %}
 
-
 {% block title %}
-    <title>Carga Sep. (🟢) {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | LOGÍSTICA</title>
+    Carga Sep. (🟢)
 {% endblock title %}
 
-
-{% block sep_status %}
-    <span>SEPARAÇÃO <span style="font-size: 16px">(🟢)</span></span>
-{% endblock sep_status %}
-
-
-{% block aux_buttons %}
-    <form onsubmit="preQuickRouting('cargas/separacao/f'); return false;">
-        <div class="flex-h" style="margin: 8px 0; width: 100%;">
-            <input class="address-three" style="margin: 0; height: 14px" id="headerInput" min="1" placeholder="{{ id_carga }}">
-            <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
-                <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-            </button>
-        </div>
-    </form>
-    <hr class="vert">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="INCOMPLETAS" alt="" onclick="window.location.href='{{ url_for('carga_incomp') }}';">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
-    <hr class="vert">
-    <form class="disabled">
-        <button type="submit" style="all: unset">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
-        </button>
-    </form>
-    <hr class="vert">
-    <a class="aux-button {% if request.endpoint == 'carga_sep_pend' or request.endpoint == 'carga_sep_done' %}active{% endif %}">
-        <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=id_carga) }}';">
-    </a>
-    <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
-    <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-{% endblock aux_buttons %}
 
 {% block switch %}
     <input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}">
@@ -54,6 +21,7 @@
     </div>
     {% endif %}
 {% endblock switch %}
+
 
 {% block separation_buttons %}
     <div class="flex-h">
@@ -75,7 +43,7 @@
 {% endblock all_separation_status %}
 
 
-{% block script %}
+{% block add_script %}
     <script>
 
         const nroCarga = '{{ id_carga }}';
@@ -318,4 +286,4 @@
         });
         
     </script>
-{% endblock script %}
+{% endblock add_script %}

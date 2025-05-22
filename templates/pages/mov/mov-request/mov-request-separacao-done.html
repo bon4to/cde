@@ -1,27 +1,8 @@
 {% extends "pages/mov/mov-request/mov-request-separacao.html" %}
 
-
 {% block title %}
-    <title>Requisição Sep. (🟢) {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | LOGÍSTICA</title>
+    Requisição Sep. (🟢)
 {% endblock title %}
-
-
-{% block sep_status %}
-    <span>SEPARAÇÃO <span style="font-size: 16px">(🟢)</span></span>
-{% endblock sep_status %}
-
-
-{% block aux_buttons %}
-    <form onsubmit="preQuickRouting('req/separacao/f'); return false;">
-        <div class="flex-h" style="margin: 8px 0; width: 100%;">
-            <input class="address-three" style="margin: 0; height: 14px" id="headerInput" min="1" placeholder="Requisição...">
-            <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA REQUISIÇÃO..." >
-                <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-            </button>
-        </div>
-    </form>
-    <hr class="vert">
-{% endblock aux_buttons %}
 
 
 {% block separation_buttons %}
@@ -44,7 +25,7 @@
 {% endblock all_separation_status %}
 
 
-{% block script %}
+{% block add_script %}
     <script>
 
         const nroReq   = '{{ id_req }}';
@@ -235,4 +216,4 @@
         });
         
     </script>
-{% endblock script %}
+{% endblock add_script %}
