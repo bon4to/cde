@@ -1,54 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Faturado {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | LOGÍSTICA</title>
-        <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include "shared/header/tl-header.html" %}
+{% block title %}Faturado{% endblock title %}
 
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                <span style="margin: 0 8px;"></span>
-                <a href="{{ url_for('home_logi') }}"title="LOGISTICA">LOGI</a>
-                <span class="dash">/</span>
-                <a href="{{ url_for('mov') }}">MOV</a>
-                <span class="dash">/</span>
-                <span>FATURADO</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <form onsubmit="preQuickRouting('cargas/separacao/f'); return false;">
-                    <div class="flex-h" style="margin: 8px 0; width: 100%;">
-                        <input class="address-three" style="margin: 0; height: 14px" type="number" id="headerInput" min="1" placeholder="Carga...">
-                        <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
-                            <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                        </button>
-                    </div>
-                </form>
-                <hr class="vert">
-                <a class="aux-button {% if request.endpoint == 'carga_incomp' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-badge.svg') }}" title="INCOMPLETAS" alt="" onclick="window.location.href='{{ url_for('carga_incomp') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'faturado' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/package-check.svg') }}" title="FATURADOS" alt="" onclick="window.location.href='{{ url_for('faturado') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'cargas' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/truck.svg') }}" title="SEPARACÃO DE CARGAS" alt="" onclick="window.location.href='{{ url_for('cargas') }}';">
-                </a>
-                <hr class="vert">
-                <form method="post" class="disabled">
-                    <button type="submit" style="all: unset">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE CARGAS">
-                    </button>
-                </form>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-            </div>
-        </div>
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'CARGAS', 'url': 'home_logi', 'title': 'CARGAS'},
+                {'text': 'FATURADAS'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'carga_incomp', 'icon': 'svg/package-badge.svg', 'title': 'INCOMPLETAS'},
+                {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS', 'active': True},
+                {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS'},
+                {'type': 'divider'},
+                {'type': 'disabled', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
         {% from 'components/filter-container.html' import filter_container %}
         {{ filter_container(
             filter_options=[
@@ -62,102 +41,106 @@
             ],
             type="default"
         ) }}
-        </div>
-        <div id="divContent">
-            <div class="tables-container" id="tables-container">
-                <div class="table-overflow">
-                    <table id="filterTable">
-                        <tr>
-                            <th>Endereço</th>
-                            <th>Item (Código)</th>
-                            <th>Item (Descrição)</th>
-                            <th>Lote (Código)</th>
-                            <th style="max-width: 50px;">Qtde.</th>
-                            <th>Data/Hora</th>
-                            <th style="max-width: 50px;">Carga (Código)</th>
-                            <th style="max-width: 50px;">Requisição (Código)</th>
-                        </tr>
-                        {% for item in inv_data %}
-                        <tr>
-                            <td>{{ item['address'] }}</td>
-                            <td>{{ item['cod_item'] }}</td>
-                            <td>{{ item['desc_item'] }}</td>
-                            <td>{{ item['cod_lote'] }}</td>
-                            <td style="text-align: right">{{ item['saldo'] }}</td>
-                            <td>{{ item['time_mov'] }}</td>
-                            <td>{{ item['id_carga'] }} </td>
-                            <td>{{ item['id_req'] }} </td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                <a href="{{ url_for('export_csv_type', type='faturado') }}">
-                    Exportar (CSV)
-                </a>
-            </div>
-        </div>
-        <script>
 
-            $("#formBuscarItens").submit(function(event) {
-                event.preventDefault();
-                buscarItens();
+    </div>
+
+    <div id="divContent">
+        <div class="tables-container" id="tables-container">
+            <div class="table-overflow">
+                <table id="filterTable">
+                    <tr>
+                        <th>Endereço</th>
+                        <th>Item (Código)</th>
+                        <th>Item (Descrição)</th>
+                        <th>Lote (Código)</th>
+                        <th style="max-width: 50px;">Qtde.</th>
+                        <th>Data/Hora</th>
+                        <th style="max-width: 50px;">Carga (Código)</th>
+                        <th style="max-width: 50px;">Requisição (Código)</th>
+                    </tr>
+                    {% for item in inv_data %}
+                    <tr>
+                        <td>{{ item['address'] }}</td>
+                        <td>{{ item['cod_item'] }}</td>
+                        <td>{{ item['desc_item'] }}</td>
+                        <td>{{ item['cod_lote'] }}</td>
+                        <td style="text-align: right">{{ item['saldo'] }}</td>
+                        <td>{{ item['time_mov'] }}</td>
+                        <td>{{ item['id_carga'] }} </td>
+                        <td>{{ item['id_req'] }} </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <a href="{{ url_for('export_csv_type', type='faturado') }}">
+                Exportar (CSV)
+            </a>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block route_script %}
+
+    <script>
+
+        $("#formBuscarItens").submit(function(event) {
+            event.preventDefault();
+            buscarItens();
+        });
+
+        function buscarItens() {
+            var codigo = $("#input_code").val();
+
+            $.ajax({
+                type: "POST",
+                url: "/get/item",
+                data: { input_code: codigo },
+                success: function(response) {
+
+                    $("#desc_item").val(response.json_desc_item);
+                    $("#input_code").val("");
+                    $("#cod_item").empty();
+
+                    if (response.json_cod_item.length > 1) {
+                        hideLockLabel("label-cod_item");
+                    }
+
+                    if (response.json_cod_item) {
+                        response.json_cod_item.forEach(function(item) {
+
+                            $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
+                        });
+                    } else {
+                        $("#cod_item").append("<option value=''></option>");
+                    }
+
+                    $("#lote_item").val(response.json_cod_lote);
+
+                    if (response.json_cod_lote === "") {
+                        hideLockLabel("label-cod_lote")
+
+                        $("#lote_item").prop("readonly", false);
+                    } else {
+
+                        $("#lote_item").prop("readonly", true);
+                    }
+                },
+
+                error: function(error) {
+                    console.error("Erro ao buscar itens:", error);
+                }
+            });
+        }
+
+        document.getElementById("form-field").addEventListener("submit", function() {
+                document.getElementById("submitform").disabled = true;
+
             });
 
-            function buscarItens() {
-                var codigo = $("#input_code").val();
-
-                $.ajax({
-                    type: "POST",
-                    url: "/get/item",
-                    data: { input_code: codigo },
-                    success: function(response) {
-
-                        $("#desc_item").val(response.json_desc_item);
-                        $("#input_code").val("");
-                        $("#cod_item").empty();
-
-                        if (response.json_cod_item.length > 1) {
-                            hideLockLabel("label-cod_item");
-                        }
-
-                        if (response.json_cod_item) {
-                            response.json_cod_item.forEach(function(item) {
-
-                                $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
-                            });
-                        } else {
-                            $("#cod_item").append("<option value=''></option>");
-                        }
-
-                        $("#lote_item").val(response.json_cod_lote);
-
-                        if (response.json_cod_lote === "") {
-                            hideLockLabel("label-cod_lote")
-
-                            $("#lote_item").prop("readonly", false);
-                        } else {
-
-                            $("#lote_item").prop("readonly", true);
-                        }
-                    },
-
-                    error: function(error) {
-                        console.error("Erro ao buscar itens:", error);
-                    }
-                });
-            }
-
-            document.getElementById("form-field").addEventListener("submit", function() {
-                    document.getElementById("submitform").disabled = true;
-
-                });
 
 
 
+    </script>
 
-        </script>
-
-    <!-- SUPLEMENTO P/ FILTRO [LB-FILTER] -->
-        <script src="{{ url_for('static', filename='js/lb-filter.js') }}"></script>
-
-    {% include 'shared/footer.html' %}
+{% endblock route_script %}

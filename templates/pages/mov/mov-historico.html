@@ -1,37 +1,29 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Histórico {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | LOGÍSTICA</title>
-        <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/tl-header.html' %}
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                <span style="margin: 0 8px;"></span>
-                <a href="{{ url_for('home_logi') }}"title="LOGISTICA">LOGI</a>
-                <span class="dash">/</span>
-                <a href="{{ url_for('mov') }}">MOV</a>
-                <span class="dash">/</span>
-                <span>HISTÓRICO</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <a class="aux-button {% if request.endpoint == 'mov' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/arrow-up-down.svg') }}" title="MOVIMENTAR" alt="" onclick="window.location.href='{{ url_for('mov') }}';">
-                </a>
-                <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/boxes.svg') }}" title="ESTOQUE" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
-                </a>
-                    <a class="aux-button {% if request.endpoint == 'historico' %}active{% endif %}">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/history.svg') }}" title="HISTÓRICO" alt="" onclick="window.location.href='{{ url_for('historico') }}';">
-                </a>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-            </div>
-        </div>
+{% block title %}Histórico{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'MOV', 'url': 'mov', 'title': 'MOVIMENTAR'},
+                {'text': 'HISTORICO'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'mov', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR'},
+                {'type': 'link', 'url': 'estoque', 'icon': 'svg/boxes.svg', 'title': 'ESTOQUE'},
+                {'type': 'link', 'url': 'historico', 'icon': 'svg/history.svg', 'title': 'HISTÓRICO', 'active': True},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
         {% from 'components/filter-container.html' import filter_container %}
         {{ filter_container(
             filter_options=[
@@ -48,20 +40,22 @@
             form_endpoint="/logi/mov/historico/search",
             type="form"
         ) }}
-        </div>
-        <div id="divContent">
-            <div class="mobile-container">
-                <div style="justify-content: flex-end">
+
+    </div>
+
+    <div id="divContent">
+        <div class="mobile-container">
+            <div style="justify-content: flex-end">
                 {% if search_term %}
-                <div class="split-h">
-                    <h1 style="font-size: 22px">Critério de pesquisa: <span class="text-main-color">"{{ search_term }}"</span> em <span class="text-main-color">{{ search_row_text }}</span>.</h1>
-                    <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                    </a>
-                </div>
+                    <div class="split-h">
+                        <h1 style="font-size: 22px">Critério de pesquisa: <span class="text-main-color">"{{ search_term }}"</span> em <span class="text-main-color">{{ search_row_text }}</span>.</h1>
+                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                        </a>
+                    </div>
                 {% endif %}
             </div>
-            <div style="max-height: 800px;">
+            <div>
                 <table id="filterTable">
                     <tr>
                         <th>Endereço</th>
@@ -122,4 +116,4 @@
         </div>
     </div>
 
-        {% include 'shared/footer.html' %}
+{% endblock content %}

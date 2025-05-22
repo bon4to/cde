@@ -1,59 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
+{% extends 'base.html' %}
 
-    {% block title %}
-        <title>Requisição Sep. {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | LOGÍSTICA</title>
-    {% endblock title %}
-    
-    <link rel="icon" href="{{ url_for('static', filename='tl-logo-only.svg') }}" type="image/x-icon">
+{% block title %}Requisição Sep.{% endblock title %}
 
-    {% include 'shared/header/tl-header.html' %}
-    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <a class="id-page filled" href="{{ url_for('home') }}">CDE</a>
-                <span style="margin: 0 8px;"></span>
-                <a href="{{ url_for('home_logi') }}"title="LOGISTICA">LOGI</a>
-                <span class="dash">/</span>
-                <a href="{{ url_for('mov_request') }}">REQUISIÇÃO</a>
-                <span class="dash">/</span>
-                {% block sep_status %}
-                    <span>SEPARACAO</span>
-                {% endblock sep_status %}
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-        <div class="aux-buttons">
-            {% block aux_buttons %}
-                <form onsubmit="preQuickRouting('req/separacao/f'); return false;">
-                    <div class="flex-h" style="margin: 8px 0; width: 100%;">
-                        <input class="address-three" style="margin: 0; height: 14px" id="headerInput" min="1" placeholder="Carga...">
-                        <button type="submit" class="button-mini btn-fancy" style="height: 26px; width: 26px;" title="IR PARA CARGA..." >
-                            <img class="svg-invert" style="height: 14px; width: 14px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                        </button>
-                    </div>
-                </form>
-                <hr class="vert">
-            {% endblock aux_buttons %}
-            <a class="aux-button {% if request.endpoint == 'mov_request' or request.endpoint == 'mov_request_id' %}active{% endif %}">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/hand-helping.svg') }}" title="REQUISIÇÃO" alt="" onclick="window.location.href='{{ url_for('mov_request') }}';">
-            </a>
-            <hr class="vert">
-            <form action="{{ url_for('mov_request') }}" method="post">
-                <button type="submit" style="all: unset" onclick="showLoading()">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE REQUISIÇÕES">
-                </button>
-            </form>
-            <hr class="vert">
-            <a class="aux-button {% if request.endpoint == 'req_sep_pend' or request.endpoint == 'req_sep_done' %}active{% endif %}">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}" title="SEPARAÇÃO (CONCLUÍDOS)" alt="" onclick="window.location.href='{{ url_for('req_sep_done', id_req=id_req) }}';">
-            </a>
-            <img class="svg-gray disabled" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS (NÃO POSSUI)" alt="" onclick="toggleFilter()">
-            <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
-        </div>
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'REQUISIÇÕES'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'mov_request', 'icon': 'svg/hand-helping.svg', 'title': 'REQUISICOES'},
+                {'type': 'divider'},
+                {'type': 'form', 'url': 'mov_request', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE REQUISIÇÕES'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'req_sep_done', 'param_name': 'id_req', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)', 'active': True},
+                {'type': 'divider'},
+                {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
     </div>
-    </div>
-        <div id="divContent" style="flex-wrap: wrap;">
+
+    <div id="divContent" style="flex-wrap: wrap;">
         <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
             <div style="{% if id_req == '0' %}display: none;{% endif %}">
                 <div class="split-h">
@@ -144,11 +118,15 @@
         </div>
     </div>
 
-    
-    {% block script %}
-    
-    {% endblock script %}
-    <script src="{{ url_for('static', filename='js/lb-requests.js') }}"></script>
-        
+{% endblock content %}
 
-    {% include 'shared/footer.html' %}
+{% block route_script %}
+
+    <!-- additional script from each separation -->
+    {% block add_script %}
+    {% endblock add_script %}
+
+    <!-- lib for requests logic -->
+    <script src="{{ url_for('static', filename='js/lb-requests.js') }}"></script>
+
+{% endblock route_script %}

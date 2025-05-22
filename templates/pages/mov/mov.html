@@ -1,13 +1,13 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Movimentar{% endblock %}
+{% block title %}Movimentar{% endblock title %}
 
 {% block content %}
+
     <div class="titles-ruler">
         
         {% from 'components/title-route.html' import title_container %}
         {{ title_container(
-            title='MOVIMENTAR',
             id_page=session['id_page'],
             breadcrumbs=[
                 {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
