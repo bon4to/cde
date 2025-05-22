@@ -1,113 +1,112 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Produtos {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | PRODUÇÃO</title>
-        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include 'shared/header/hp-header.html' %}
+{% block title %}Produtos{% endblock title %}
 
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <span>PRODUTOS</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/list-todo.svg') }}" title="STATUS DO ITEM" onclick="window.location.href='{{ url_for('produtos_flag') }}';">
-                <hr class="vert">
-                <form action="{{ url_for('produtos') }}" method="post">
-                    <button type="submit" style="all: unset">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="RECARREGAR LISTA DE ITENS">
-                    </button>
-                </form>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" title="FILTROS" onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" onclick="goBack()">
-            </div>
-        </div>
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'PROD', 'url': 'home_prod', 'title': 'PRODUÇÃO'},
+                {'text': 'PRODUTOS'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'produtos_flag', 'icon': 'svg/list-todo.svg', 'title': 'STATUS DO ITEM'},
+                {'type': 'divider'},
+                {'type': 'form', 'url': 'produtos', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'ATUALIZAR LISTA DE PRODUTOS'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
         {% from 'components/filter-container.html' import filter_container %}
-            {{ filter_container(
-                filter_options=[
-                    {'value': 0, 'text': 'Item (Código)'},
-                    {'value': 1, 'text': 'Item (Descrição)'},
-                    {'value': 2, 'text': 'Código de Barras (DUN-14)'},
-                    {'value': 3, 'text': 'Validade (Meses)'}
-                ],
-                type="default"
-            ) }}
-        </div>
-        <div id="divContent">
-            {% if 'user_grant' in session %}
-                {% if session['user_grant'] <= 2 %}
-                    {% if alert %}
-                        {% if class_alert == 'error' %}
-                            <div class="forms-container" style="height: max-content;" class="disabled">
-                                <h1>Novo desc_item...</h1>
-                                <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
+        {{ filter_container(
+            filter_options=[
+                {'value': 0, 'text': 'Item (Código)'},
+                {'value': 1, 'text': 'Item (Descrição)'},
+                {'value': 2, 'text': 'Código de Barras (DUN-14)'},
+                {'value': 3, 'text': 'Validade (Meses)'}
+            ],
+            type="default"
+        ) }}
+    </div>
+
+    <div id="divContent">
+        {% if 'user_grant' in session %}
+            {% if session['user_grant'] <= 2 %}
+                {% if alert %}
+                    {% if class_alert == 'error' %}
+                        <div class="forms-container" style="height: max-content;" class="disabled">
+                            <h1>Novo desc_item...</h1>
+                            <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
+                                <div>
+                                    <label for="desc_item">Item (Descrição)</label>
+                                    <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
+                                </div>
+                                <div class="split-h">
                                     <div>
-                                        <label for="desc_item">Item (Descrição)</label>
-                                        <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
+                                        <label for="cod_item">Código (SKU)</label>
+                                        <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" type="text" name="cod_item" placeholder="SKU..." required>
                                     </div>
-                                    <div class="split-h">
-                                        <div>
-                                            <label for="cod_item">Código (SKU)</label>
-                                            <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" type="text" name="cod_item" placeholder="SKU..." required>
-                                        </div>
-                                        <div>
-                                            <label for="cod_item">Código de Barras (DUN-14)</label>
-                                            <input class="address" type="number" inputmode="numeric" pattern="\d{14}" minlength="14" maxlength="14" name="cod_dun14" placeholder="DUN-14..." required>
-                                        </div>
+                                    <div>
+                                        <label for="cod_item">Código de Barras (DUN-14)</label>
+                                        <input class="address" type="number" inputmode="numeric" pattern="\d{14}" minlength="14" maxlength="14" name="cod_dun14" placeholder="DUN-14..." required>
                                     </div>
-                                    <br>
-                                    <input class="btn-fancy" type="submit" value="Cadastrar" style="width: 100%">
-                                </form>
-                            </div>
-                        {% endif %}
+                                </div>
+                                <br>
+                                <input class="btn-fancy" type="submit" value="Cadastrar" style="width: 100%">
+                            </form>
+                        </div>
                     {% endif %}
                 {% endif %}
             {% endif %}
-            <div class="mobile-container" >
-                {% if alert %}
-                    {% if class_alert == 'error' %}
-                        <div class="msg-error">
-                            <details><summary>A lista não pôde ser carregada!</summary>
-                                {{ alert | safe }}
-                            </details>
-                        </div>
-                    {% elif class_alert == 'success' %}
-                        <div class="msg-success flex-v" style="margin: 0; gap: 0">
-                            <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
-                            <span style="font-size: 12px">
-                                {{ alert | safe }}
-                            </span>
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <div class="msg-info flex-v" style="margin: 0; gap: 0">
-                        <span style="font-weight: 600">Esta lista pode estar desatualizada.</span>
-                        <span style="font-size: 12px">Caso necessário, inative itens sem movimentação prévia.</span>
+        {% endif %}
+        <div class="mobile-container" >
+            {% if alert %}
+                {% if class_alert == 'error' %}
+                    <div class="msg-error">
+                        <details><summary>A lista não pôde ser carregada!</summary>
+                            {{ alert | safe }}
+                        </details>
+                    </div>
+                {% elif class_alert == 'success' %}
+                    <div class="msg-success flex-v" style="margin: 0; gap: 0">
+                        <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
+                        <span style="font-size: 12px">
+                            {{ alert | safe }}
+                        </span>
                     </div>
                 {% endif %}
-                    <div style="max-height: 600px; overflow-y: auto;">
-                        <table id="filterTable">
+            {% else %}
+                <div class="msg-info flex-v" style="margin: 0; gap: 0">
+                    <span style="font-weight: 600">Esta lista pode estar desatualizada.</span>
+                    <span style="font-size: 12px">Caso necessário, inative itens sem movimentação prévia.</span>
+                </div>
+            {% endif %}
+                <div style="max-height: 600px; overflow-y: auto;">
+                    <table id="filterTable">
+                        <tr>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
+                            <th>Código de Barras (DUN-14)</th>
+                            <th>Validade (Meses)</th>
+                        </tr>
+                        {% for item in itens %}
                             <tr>
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th>Código de Barras (DUN-14)</th>
-                                <th>Validade (Meses)</th>
+                                <td>{{ item['cod_item'] }}</td>
+                                <td>{{ item['desc_item'] }}</td>
+                                <td>{{ item['dun14'] }}</td>
+                                <td>{{ item['validade'] }}</td>
                             </tr>
-                            {% for item in itens %}
-                                <tr>
-                                    <td>{{ item['cod_item'] }}</td>
-                                    <td>{{ item['desc_item'] }}</td>
-                                    <td>{{ item['dun14'] }}</td>
-                                    <td>{{ item['validade'] }}</td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <p>{{ itens|length }} itens cadastrados |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_type', type='produtos') }}">Exportar (CSV)</a></p>
-            </div>
+                        {% endfor %}
+                    </table>
+                </div>
+                <p>{{ itens|length }} itens cadastrados |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_type', type='produtos') }}">Exportar (CSV)</a></p>
         </div>
+    </div>
 
-        {% include 'shared/footer.html' %}
+{% endblock content %}

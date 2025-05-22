@@ -1,406 +1,412 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <title>Envase {% if session['id_page'] %} {{'(' + session['id_page'] + ')' }} {% endif %} | PRODUÇÃO</title>
-        <link rel="icon" href="{{ url_for('static', filename='hp-logo-only.svg') }}" type="image/x-icon">
+{% extends 'base.html' %}
 
-        {% include "shared/header/hp-header.html" %}
-        <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-            <div class="titles-container flex-h title-centerer">
-            <h1>
-                <span>ENVASE</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/calendar.svg') }}" alt="" title="Calendário de Envase" onclick="window.location.href='{{ url_for('calendar_envase') }}';">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/clipboard-list.svg') }}" title="Mostrar/Ocultar Formulário" alt="" onclick="toggleContainer()">
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="Filtros para a tabela..." onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" alt="" onclick="goBack()">
-            </div>
-        </div>
-        <div>
+{% block title %}Envase{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.html' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'PROD', 'url': 'home_prod', 'title': 'PRODUÇÃO'},
+                {'text': 'ENVASE'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'calendar_envase', 'icon': 'svg/calendar.svg', 'title': 'MODO: CALENDÁRIO'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/clipboard-list.svg', 'title': 'MOSTRAR/OCULTAR FORMULÁRIO', 'onclick': 'toggleContainer()'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
+        <div id="filter-container">
             <div style="display: none;" class="flex-h" id="table-filter">
                 <input type="date" class="address" id="filterDate1" onchange="filterByDate()">
                 <div id="period-date" style="display: contents">
                     <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
                 </div>
-                <a class="button-mini btn-fancy" onclick="getHoje()" title="Hoje">
+                <a class="button-mini btn-fancy" onclick="getHoje()" title="HOJE">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-day.svg') }}" alt="">
                 </a>
-                <a class="button-mini btn-fancy" onclick="getSemana()" title="Semana">
+                <a class="button-mini btn-fancy" onclick="getSemana()" title="SEMANA">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/calendar-week.svg') }}" alt="">
                 </a>
-                <a class="button-mini btn-fancy" onclick="limpaData()" title="Limpar">
+                <a class="button-mini btn-fancy" onclick="limpaData()" title="LIMPAR">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>
             </div>
         </div>
-        </div>
-        <div id="divContent">
-            <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
-                <hr>
-                <div class="centralizado">
+
+    </div>
+
+    <div id="divContent">
+        <div id="floating-container" draggable="false" class="forms-container" style="position: relative">
+            <hr>
+            <div class="centralizado">
+                <div>
                     <div>
-                        <div>
-                            <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
-                                <label for="input_code"></label>
-                                <div class="split-h">
-                                    <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="DUN-14 ou código do item...">
-                                    <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px; transform: rotate(90deg);" type="image" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
-                                </div>
-                                <hr>
-                            </form>
-                            <form style="display: flex;" id="form-field" method="post" action="/envase/insert">
+                        <form id="formBuscarItens" method="post" onsubmit="showLockLabel()">
+                            <label for="input_code"></label>
+                            <div class="split-h">
+                                <input type="text" style="width: 320px;" id="input_code" maxlength="14" name="input_code" required placeholder="DUN-14 ou código do item...">
+                                <input class="btn-fancy" style="width: 42px; height: 42px; margin-left: 4px; padding: 8px; transform: rotate(90deg);" type="image" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
+                            </div>
+                            <hr>
+                        </form>
+                        <form style="display: flex;" id="form-field" method="post" action="/envase/insert">
+                            <div>
+                                <label for="desc_item">Produto<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
+                                <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Produto...">
+                            </div>
+                            <div class="three-split">
                                 <div>
-                                    <label for="desc_item">Produto<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
-                                    <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Produto...">
-                                </div>
-                                <div class="three-split">
-                                    <div>
-                                        <label for="cod_item">SKU<img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
-                                        <select id="cod_item" name="codinterno" class="address-three" required></select>
-                                    </div>
-                                    <div>
-                                        <label for="linha">Linha<img id="label-linha" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
-                                        <select name="linha" id="linha" class="address-three" required></select>
-                                    </div>
-                                    <div>
-                                        <label for="quantidade1">Quantidade</label><br>
-                                        <input class="address-three" type="number" id="quantidade1" name="quantidade" min="1" required placeholder="Quantidade...">
-                                    </div>
-                                </div>
-                                <hr>
-                                <div class="two-split">
-                                    <div>
-                                        <label for="data_antec">Entrada Antec.</label><br>
-                                        <input name="data_antec" id="data_antec" type="date" placeholder="DD/MM/AAAA" class="address">
-                                    </div>
-                                    <div>
-                                        <label for="data_envase">Envase</label><br>
-                                        <input name="data_envase" id="data_envase" type="date" class="address">
-                                    </div>
-                                </div>
-                                <label for="cliente">Cliente</label>
-                                <div>
-                                    <select name="cliente" id="cliente" class="select2">
-                                        {% for item in fant_clientes %}
-                                            <option value="{{ item['desc_item'] }}">{{ item['desc_item'] }}</option>
-                                        {% endfor %}
-                                    </select>
+                                    <label for="cod_item">SKU<img id="label-cod_item" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
+                                    <select id="cod_item" name="codinterno" class="address-three" required></select>
                                 </div>
                                 <div>
-                                    <label for="observacao">Observação</label><br>
-                                    <textarea class="address-observ" id="observacao" name="observacao" placeholder="Observações..."></textarea>
+                                    <label for="linha">Linha<img id="label-linha" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
+                                    <select name="linha" id="linha" class="address-three" required></select>
                                 </div>
-                                <div style="display: flex;width: 100%;">
-                                    <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
-                                    {% if 'user_grant' in session %}
-                                        {% if session['user_grant'] <= 2 %}
-                                            <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px; margin-left: 15px" src="{{ url_for('static', filename='svg/pen-line.svg') }}" alt="" onclick="toggleEdit()">
-                                        {% endif %}
+                                <div>
+                                    <label for="quantidade1">Quantidade</label><br>
+                                    <input class="address-three" type="number" id="quantidade1" name="quantidade" min="1" required placeholder="Quantidade...">
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="two-split">
+                                <div>
+                                    <label for="data_antec">Entrada Antec.</label><br>
+                                    <input name="data_antec" id="data_antec" type="date" placeholder="DD/MM/AAAA" class="address">
+                                </div>
+                                <div>
+                                    <label for="data_envase">Envase</label><br>
+                                    <input name="data_envase" id="data_envase" type="date" class="address">
+                                </div>
+                            </div>
+                            <label for="cliente">Cliente</label>
+                            <div>
+                                <select name="cliente" id="cliente">
+                                    {% for item in fant_clientes %}
+                                        <option value="{{ item['desc_item'] }}">{{ item['desc_item'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="observacao">Observação</label><br>
+                                <textarea class="address-observ" id="observacao" name="observacao" placeholder="Observações..."></textarea>
+                            </div>
+                            <div style="display: flex;width: 100%;">
+                                <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
+                                {% if 'user_grant' in session %}
+                                    {% if session['user_grant'] <= 2 %}
+                                        <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px; margin-left: 15px" src="{{ url_for('static', filename='svg/pen-line.svg') }}" alt="" onclick="toggleEdit()">
                                     {% endif %}
-                                </div>
-                            </form>
-                        </div>
+                                {% endif %}
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-            <div class="tables-container" id="tables-container">
-                <!--
-                    <div id="filterBreak" style="justify-content: flex-end">
-                        <label for="filterDate1"></label>
-                        <div id="table-filter" style="position: absolute; display: none; right: 25px">
-                            <div class="back-modal" onclick="toggleFilter()"></div>
-                                <div class="form-filter generic" style="">
-                                    <div style="padding: 5px;display: flex;max-height: 40px;align-items: center;justify-content: center;">
-                                        <div class="split-h" style="align-items: center">
-                                            <h3 style="font-size: 24px">Filtros</h3>
-                                            <div style="scale: 0.7">
-                                                <div class="pin" id="fix-move-btn" onclick="toggleFilter()">
-                                                    <img style="height: 30px;width: 30px" class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                                                </div>
+        </div>
+        <div class="tables-container" id="tables-container">
+            <!--
+                <div id="filterBreak" style="justify-content: flex-end">
+                    <label for="filterDate1"></label>
+                    <div id="table-filter" style="position: absolute; display: none; right: 25px">
+                        <div class="back-modal" onclick="toggleFilter()"></div>
+                            <div class="form-filter generic" style="">
+                                <div style="padding: 5px;display: flex;max-height: 40px;align-items: center;justify-content: center;">
+                                    <div class="split-h" style="align-items: center">
+                                        <h3 style="font-size: 24px">Filtros</h3>
+                                        <div style="scale: 0.7">
+                                            <div class="pin" id="fix-move-btn" onclick="toggleFilter()">
+                                                <img style="height: 30px;width: 30px" class="svg-gray" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                                             </div>
                                         </div>
                                     </div>
-                                <hr>
-                                <div style="padding: 20px;">
-                                    <p class="text-main-color">Linhas</p>
-                                    <div style="display: flex; flex-direction: column">
-                                        <div>
-                                            <input type="checkbox" class="check" id="toggle_linha1" onclick="toggleTable('linha1')" checked>
-                                            <label for="toggle_linha1">Linha 1</label>
-                                        </div>
-                                        <div>
-                                            <input type="checkbox" class="check" id="toggle_linha2" onclick="toggleTable('linha2')" checked>
-                                            <label for="toggle_linha2">Linha 2</label>
-                                        </div>
-                                        <div>
-                                            <input type="checkbox" class="check" id="toggle_linha3" onclick="toggleTable('linha3')" checked>
-                                            <label for="toggle_linha3">Linha 3</label>
-                                        </div>
-                                        <div>
-                                            <input type="checkbox" class="check" id="toggle_linha4" onclick="toggleTable('linha4')" checked>
-                                            <label for="toggle_linha4">Linha 4</label>
-                                        </div>
-                                        <div>
-                                            <input type="checkbox" class="check" id="toggle_linha5" onclick="toggleTable('linha5')" checked>
-                                            <label for="toggle_linha5">Linha 5</label>
-                                        </div>
-                                    </div>
-                                    <br>
                                 </div>
+                            <hr>
+                            <div style="padding: 20px;">
+                                <p class="text-main-color">Linhas</p>
+                                <div style="display: flex; flex-direction: column">
+                                    <div>
+                                        <input type="checkbox" class="check" id="toggle_linha1" onclick="toggleTable('linha1')" checked>
+                                        <label for="toggle_linha1">Linha 1</label>
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" class="check" id="toggle_linha2" onclick="toggleTable('linha2')" checked>
+                                        <label for="toggle_linha2">Linha 2</label>
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" class="check" id="toggle_linha3" onclick="toggleTable('linha3')" checked>
+                                        <label for="toggle_linha3">Linha 3</label>
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" class="check" id="toggle_linha4" onclick="toggleTable('linha4')" checked>
+                                        <label for="toggle_linha4">Linha 4</label>
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" class="check" id="toggle_linha5" onclick="toggleTable('linha5')" checked>
+                                        <label for="toggle_linha5">Linha 5</label>
+                                    </div>
+                                </div>
+                                <br>
                             </div>
                         </div>
                     </div>
-                    -->
-                {% for linha_indice in range(1, 6) %}
-                    <div class="table-overflow section-linhas alt-color-{{ linha_indice }}" id="linha{{ linha_indice }}_table">
-                        <h4>Linha {{ linha_indice }}</h4>
-                        <table id="filterTable">
-                            <tr>
-                                <th>Cliente (Desc.)</th>
-                                <th>Produto (Cód.)</th>
-                                <th>Produto (Desc.)</th>
-                                <th>Quantidade (Caixa)</th>
-                                <th>Data Entrada Antec.</th>
-                                <th>Data Envase</th>
-                                <th>Concluído</th>
-                                <td class="td-more"></td>
-                                <td class="td-more"></td>
-                            </tr>
-                            {% for item in envase %}
-                                {% if item['linha'] == linha_indice %}
-                                    <tr>
-                                        <td style="max-width: 100px;" {% if item['fantasia_cliente']|length > 15 %} title="{{ item['fantasia_cliente'] }}" {% endif %}>
-                                            {{ item['fantasia_cliente'] }}
-                                        </td>
-                                        <td style="width: 80px;">{{ item['cod_item'] }}</td>
-                                        <td>{{ item['desc_item'] }}</td>
-                                        <td style="width: 100px;">{{ '{:,.0f}'.format(item['quantidade']).replace(',', '.') }}</td>
-                                        <td style="width: 80px;">{{ item['data_entr_antec'] }}</td>
-                                        <td style="width: 80px;">{{ item['data_envase'] }}</td>
-                                        <td class="tb-checkbox">
-                                            <input type="checkbox" oninput="confirmConcluir('{{ item['id_envase'] }}', this)" style="width: 16px; height: auto" {% if item['flag_concluido'] %} checked {% endif %} {% if item['flag_concluido'] %} disabled {% endif %}>
-                                        </td>
-                                        <td class="td-more" data-toggle="tooltip" title="obs.:&#10;{{ item['observacao'] }}">
-                                            <img class="svg-gray table-more" style="height: 15px;width: 15px; padding: 2px" src="{{ url_for('static', filename='svg/info.svg') }}" alt="">
-                                        </td>
-                                        <td class="td-more hidden-button" data-toggle="tooltip"><img class="svg-link table-more" src="{{ url_for('static', filename='svg/edit-link.svg') }}" onclick="redirectToEdit('{{ item['id_envase'] }}')" alt=""></td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </table>
-                        <br>
-                    </div>
-                {% endfor %}
+                </div>
+                -->
+            {% for linha_indice in range(1, 6) %}
+                <div class="table-overflow section-linhas alt-color-{{ linha_indice }}" id="linha{{ linha_indice }}_table">
+                    <h4>Linha {{ linha_indice }}</h4>
+                    <table id="filterTable">
+                        <tr>
+                            <th>Cliente (Desc.)</th>
+                            <th>Produto (Cód.)</th>
+                            <th>Produto (Desc.)</th>
+                            <th>Quantidade (Caixa)</th>
+                            <th>Data Entrada Antec.</th>
+                            <th>Data Envase</th>
+                            <th>Concluído</th>
+                            <td class="td-more"></td>
+                            <td class="td-more"></td>
+                        </tr>
+                        {% for item in envase %}
+                            {% if item['linha'] == linha_indice %}
+                                <tr>
+                                    <td style="max-width: 100px;" {% if item['fantasia_cliente']|length > 15 %} title="{{ item['fantasia_cliente'] }}" {% endif %}>
+                                        {{ item['fantasia_cliente'] }}
+                                    </td>
+                                    <td style="width: 80px;">{{ item['cod_item'] }}</td>
+                                    <td>{{ item['desc_item'] }}</td>
+                                    <td style="width: 100px;">{{ '{:,.0f}'.format(item['quantidade']).replace(',', '.') }}</td>
+                                    <td style="width: 80px;">{{ item['data_entr_antec'] }}</td>
+                                    <td style="width: 80px;">{{ item['data_envase'] }}</td>
+                                    <td class="tb-checkbox">
+                                        <input type="checkbox" oninput="confirmConcluir('{{ item['id_envase'] }}', this)" style="width: 16px; height: auto" {% if item['flag_concluido'] %} checked {% endif %} {% if item['flag_concluido'] %} disabled {% endif %}>
+                                    </td>
+                                    <td class="td-more" data-toggle="tooltip" title="obs.:&#10;{{ item['observacao'] }}">
+                                        <img class="svg-gray table-more" style="height: 15px;width: 15px; padding: 2px" src="{{ url_for('static', filename='svg/info.svg') }}" alt="">
+                                    </td>
+                                    <td class="td-more hidden-button" data-toggle="tooltip"><img class="svg-link table-more" src="{{ url_for('static', filename='svg/edit-link.svg') }}" onclick="redirectToEdit('{{ item['id_envase'] }}')" alt=""></td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                    <br>
+                </div>
+            {% endfor %}
 
-                <a href="{{ url_for('export_csv_type', type='envase') }}">
-                    Baixar tabela...
-                </a>
-            </div>
+            <a href="{{ url_for('export_csv_type', type='envase') }}">
+                Baixar tabela...
+            </a>
         </div>
-        <script>
-            getSemana()
+    </div>
 
-            function redirectToEdit(idEnvase) {
-                window.location.href = "/envase/edit?id_envase=" + idEnvase;
-            }
+{% endblock content %}
 
-            $(document).ready(function() {
-                function getFantasiaClientes() {
-                    $.get('/get/clientes', function(data) {
-                        if (data.class_alert === 'success') {
-                            data.clientes.forEach(function(cliente) {
-                                $('#cliente').append('<option>' + cliente.FANTASIA + '</option>');
-                            });
-                            $('#cliente').select2();
-                        } else {
-                            console.error(data.alert);
-                        }
-                    });
-                }
-                getFantasiaClientes();
-            });
-                       
+{% block route_script %}
 
-            function buscarLinhas() {
-                var item_selec = $("#desc_item").val();
+    <script>
+        getSemana()
 
-                $.ajax({
-                    type: "POST",
-                    url: "/get/linhas",
-                    data: { desc_item: item_selec },
-                    success: function(response) {
+        function redirectToEdit(idEnvase) {
+            window.location.href = "/envase/edit?id_envase=" + idEnvase;
+        }
 
-                        $("#linha").empty();
-
-                        if (response.cod_linha.length > 1) {
-                            hideLockLabel("label-linha");
-                        }
-
-                        response.cod_linha.forEach(function(linha) {
-                            $("#linha").append("<option value='" + linha + "'>" + linha + "</option>");
+        $(document).ready(function() {
+            function getFantasiaClientes() {
+                $.get('/get/clientes', function(data) {
+                    if (data.class_alert === 'success') {
+                        data.clientes.forEach(function(cliente) {
+                            $('#cliente').append('<option>' + cliente.FANTASIA + '</option>');
                         });
-                    },
-                    error: function(error) {
-                        console.error("Erro ao buscar as linhas:", error);
+                    } else {
+                        console.error(data.alert);
                     }
                 });
             }
+            getFantasiaClientes();
+        });
+                
 
-            $("#formBuscarItens").submit(function(event) {
-                event.preventDefault();
-                buscarItens();
-            });
+        function buscarLinhas() {
+            var item_selec = $("#desc_item").val();
 
-            function buscarItens() {
-                var codigo = $("#input_code").val();
+            $.ajax({
+                type: "POST",
+                url: "/get/linhas",
+                data: { desc_item: item_selec },
+                success: function(response) {
 
-                $.ajax({
-                    type: "POST",
-                    url: "/get/item",
-                    data: { input_code: codigo },
-                    success: function(response) {
+                    $("#linha").empty();
 
-                        $("#desc_item").val(response.json_desc_item);
-                        $("#input_code").val("");
-                        $("#cod_item").empty();
-
-                        buscarLinhas();
-
-                        if (response.json_cod_item.length > 1) {
-                            hideLockLabel("label-cod_item");
-                        }
-
-                        if (response.json_cod_item) {
-                            response.json_cod_item.forEach(function(item) {
-
-                                $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
-                            });
-                        } else {
-                            $("#cod_item").append("<option value=''></option>");
-                        }
-
-                        $("#lote_item").val(response.json_cod_lote);
-
-                        if (response.json_cod_lote === "") {
-                            hideLockLabel("label-cod_lote")
-
-                            $("#lote_item").prop("readonly", false);
-                        } else {
-
-                            $("#lote_item").prop("readonly", true);
-                        }
-                    },
-
-                    error: function(error) {
-                        console.error("Erro ao buscar itens:", error);
+                    if (response.cod_linha.length > 1) {
+                        hideLockLabel("label-linha");
                     }
-                });
-            }
 
-            function confirmConcluir(codEnvase, checkbox) {
-                if (confirm("Você tem certeza que deseja concluir esta programação?")) {
-                    window.location.href = "/envase/done/" + codEnvase;
-                } else {
-                    checkbox.checked = false;
-                }
-            }
-
-            function filterByDate() {
-                let filterDate1 = document.getElementById('filterDate1').value;
-                let filterDate2 = document.getElementById('filterDate2').value;
-                const tables = document.querySelectorAll('.table-overflow');
-                if (!filterDate2) { // se data final é nula, considera a data inicial
-                    filterDate2 = filterDate1
-                }
-                tables.forEach(table => {
-                    const rows = table.querySelectorAll('tr');
-                    rows.forEach(row => {
-                        const cells = row.querySelectorAll('td');
-                        if (cells.length > 5) {
-                            const dataEnvase = cells[5].textContent.trim(); // seleciona apenas visíveis // cells[5] = coluna de dataEnvase
-                            const isVisible = isDateInRange(dataEnvase, filterDate1, filterDate2);
-                            row.style.display = isVisible ? 'table-row' : 'none';
-                        }
+                    response.cod_linha.forEach(function(linha) {
+                        $("#linha").append("<option value='" + linha + "'>" + linha + "</option>");
                     });
+                },
+                error: function(error) {
+                    console.error("Erro ao buscar as linhas:", error);
+                }
+            });
+        }
+
+        $("#formBuscarItens").submit(function(event) {
+            event.preventDefault();
+            buscarItens();
+        });
+
+        function buscarItens() {
+            var codigo = $("#input_code").val();
+
+            $.ajax({
+                type: "POST",
+                url: "/get/item",
+                data: { input_code: codigo },
+                success: function(response) {
+
+                    $("#desc_item").val(response.json_desc_item);
+                    $("#input_code").val("");
+                    $("#cod_item").empty();
+
+                    buscarLinhas();
+
+                    if (response.json_cod_item.length > 1) {
+                        hideLockLabel("label-cod_item");
+                    }
+
+                    if (response.json_cod_item) {
+                        response.json_cod_item.forEach(function(item) {
+
+                            $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
+                        });
+                    } else {
+                        $("#cod_item").append("<option value=''></option>");
+                    }
+
+                    $("#lote_item").val(response.json_cod_lote);
+
+                    if (response.json_cod_lote === "") {
+                        hideLockLabel("label-cod_lote")
+
+                        $("#lote_item").prop("readonly", false);
+                    } else {
+
+                        $("#lote_item").prop("readonly", true);
+                    }
+                },
+
+                error: function(error) {
+                    console.error("Erro ao buscar itens:", error);
+                }
+            });
+        }
+
+        function confirmConcluir(codEnvase, checkbox) {
+            if (confirm("Você tem certeza que deseja concluir esta programação?")) {
+                window.location.href = "/envase/done/" + codEnvase;
+            } else {
+                checkbox.checked = false;
+            }
+        }
+
+        function filterByDate() {
+            let filterDate1 = document.getElementById('filterDate1').value;
+            let filterDate2 = document.getElementById('filterDate2').value;
+            const tables = document.querySelectorAll('.table-overflow');
+            if (!filterDate2) { // se data final é nula, considera a data inicial
+                filterDate2 = filterDate1
+            }
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length > 5) {
+                        const dataEnvase = cells[5].textContent.trim(); // seleciona apenas visíveis // cells[5] = coluna de dataEnvase
+                        const isVisible = isDateInRange(dataEnvase, filterDate1, filterDate2);
+                        row.style.display = isVisible ? 'table-row' : 'none';
+                    }
                 });
+            });
+        }
+
+        function isDateInRange(date, startDate, endDate) {
+
+            if (!startDate && !endDate) {
+                return true
+            } else if (!startDate) {
+                endDate.value = startDate.value
+            } else if (!endDate) {
+                startDate.value = endDate.value
             }
 
-            function isDateInRange(date, startDate, endDate) {
+            const dateObj = new Date(date);
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
 
-                if (!startDate && !endDate) {
-                    return true
-                } else if (!startDate) {
-                    endDate.value = startDate.value
-                } else if (!endDate) {
-                    startDate.value = endDate.value
-                }
-
-                const dateObj = new Date(date);
-                const startDateObj = new Date(startDate);
-                const endDateObj = new Date(endDate);
-
-                if (!isNaN(dateObj.getTime()) && !isNaN(startDateObj.getTime()) && !isNaN(endDateObj.getTime())) {
-                    return dateObj >= startDateObj && dateObj <= endDateObj;
-                }
-
-                return false;
+            if (!isNaN(dateObj.getTime()) && !isNaN(startDateObj.getTime()) && !isNaN(endDateObj.getTime())) {
+                return dateObj >= startDateObj && dateObj <= endDateObj;
             }
 
-            function getHoje() {
-                const today = new Date();
-                const periodDateField = document.getElementById("period-date");
+            return false;
+        }
 
-                document.getElementById('filterDate1').value = today.toISOString().split('T')[0];
-                document.getElementById('filterDate2').value = ''
-                periodDateField.style.display = 'none';
+        function getHoje() {
+            const today = new Date();
+            const periodDateField = document.getElementById("period-date");
 
-                filterByDate();
-                document.getElementById('filterDate1').focus()
-            }
+            document.getElementById('filterDate1').value = today.toISOString().split('T')[0];
+            document.getElementById('filterDate2').value = ''
+            periodDateField.style.display = 'none';
 
-            function limpaData() {
-                document.getElementById('filterDate1').value = "";
-                document.getElementById('filterDate2').value = "";
-                filterByDate();
-                document.getElementById('filterDate1').focus()
-            }
+            filterByDate();
+            document.getElementById('filterDate1').focus()
+        }
 
-            function getSemana() {
-                const today = new Date();
-                const firstDayOfWeek = new Date(today);
-                const lastDayOfWeek = new Date(today);
-                const periodDateField = document.getElementById("period-date");
+        function limpaData() {
+            document.getElementById('filterDate1').value = "";
+            document.getElementById('filterDate2').value = "";
+            filterByDate();
+            document.getElementById('filterDate1').focus()
+        }
 
-                const diff = today.getDay();
-                firstDayOfWeek.setDate(today.getDate() - diff);
-                lastDayOfWeek.setDate(today.getDate() + (6 - diff));
+        function getSemana() {
+            const today = new Date();
+            const firstDayOfWeek = new Date(today);
+            const lastDayOfWeek = new Date(today);
+            const periodDateField = document.getElementById("period-date");
 
-                document.getElementById('filterDate1').value = formatDate(firstDayOfWeek);
-                document.getElementById('filterDate2').value = formatDate(lastDayOfWeek);
-                periodDateField.style.display = 'contents';
+            const diff = today.getDay();
+            firstDayOfWeek.setDate(today.getDate() - diff);
+            lastDayOfWeek.setDate(today.getDate() + (6 - diff));
 
-                filterByDate();
-                document.getElementById('filterDate1').focus();
-            }
+            document.getElementById('filterDate1').value = formatDate(firstDayOfWeek);
+            document.getElementById('filterDate2').value = formatDate(lastDayOfWeek);
+            periodDateField.style.display = 'contents';
 
-            function formatDate(date) {
-                const year = date.getFullYear();
-                let month = date.getMonth() + 1;
-                let day = date.getDate();
+            filterByDate();
+            document.getElementById('filterDate1').focus();
+        }
 
-                month = month < 10 ? '0' + month : month;
-                day = day < 10 ? '0' + day : day;
+        function formatDate(date) {
+            const year = date.getFullYear();
+            let month = date.getMonth() + 1;
+            let day = date.getDate();
 
-                return `${year}-${month}-${day}`;
-            }
+            month = month < 10 ? '0' + month : month;
+            day = day < 10 ? '0' + day : day;
 
-        </script>
+            return `${year}-${month}-${day}`;
+        }
 
-    <!-- SUPLEMENTO P/ FILTRO [LB-FILTER] -->
-        <script src="{{ url_for('static', filename='js/lb-filter.js') }}"></script>
+    </script>
 
-    {% include 'shared/footer.html' %}
+{% endblock route_script %}
