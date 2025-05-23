@@ -110,7 +110,7 @@
                                             value="{{ json_cod_lote }}"
                                             oninput="getItemFirstMov(this.value)"
                                             placeholder="Ex.: CS0000"
-                                            pattern="^CS\d{4,6}$" 
+                                            pattern="^(CS\d{4,6}|VINHOS|OUTROS)$" 
                                         >
                                     </div>
                                     <div class="flex-v">
@@ -344,6 +344,7 @@
             </div>
         </div>
     </div>
+
 {% endblock content%}
 
 {% block route_script %}
