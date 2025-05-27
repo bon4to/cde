@@ -3104,11 +3104,9 @@ def moving() -> str | Response:
 @cde.verify_auth('MOV008')
 def stock_map():
     # TODO: fix map
-    if debug:
-        return render_template(
-            'pages/stock-map.html'
-        )
-    return force_error(503)
+    return render_template(
+        'pages/stock-map.html'
+    )
 
 
 @app.route('/logi/req/moving/bulk/', methods=['POST'])
