@@ -1,5 +1,5 @@
 {% macro title_container(title, id_page, breadcrumbs, aux_buttons=None) %}
-<div class="titles-container flex-h title-centerer" style="margin: 0 0 8px 0;">
+<div class="titles-container flex-h title-centerer">
     <h1>
         <a class="id-page filled" style="margin: 0 16px 0 0;" href="{{ url_for('home') }}">CDE</a>
         {% for crumb in breadcrumbs %}
@@ -17,39 +17,39 @@
         {% endif %}
     </h1>
     {% if aux_buttons %}
-    <div class="aux-buttons" style="margin: 0;">
-        {% for button in aux_buttons %}
-            {% if button.type == 'divider' %}
-                <hr class="vert">
-            {% elif button.type == 'link' %}
-                <a class="aux-button{% if button.disabled %} disabled{% endif %}{% if button.active %} active{% endif %}" 
-                    {% if button.param %}
-                        href="{{ url_for(button.url, **{button.param_name: button.param}) }}"
-                    {% else %}
-                        href="{{ url_for(button.url) }}"
-                    {% endif %}
-                >
-                    <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="">
-                </a>
-            {% elif button.type == 'action' %}
-                <a class="aux-button">
-                    <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="" onclick="{{ button.onclick }}">
-                </a>
-            {% elif button.type == 'disabled' %}
-                <div class="aux-button disabled">
-                    <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }} (INATIVO)" alt="">
-                </div>
-            {% elif button.type == 'form' %}
-                <a class="aux-button">
-                    <form action="{{ url_for(button.url) }}" method="{{ button.method or 'post' }}">
-                        <button type="submit" style="all: unset" onclick="showLoading()">
-                            <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}">
-                        </button>
-                    </form>
-                </a>
-            {% endif %}
-        {% endfor %}
-    </div>
+        <div class="aux-buttons" style="margin: 0;">
+            {% for button in aux_buttons %}
+                {% if button.type == 'divider' %}
+                    <hr class="vert">
+                {% elif button.type == 'link' %}
+                    <a class="aux-button{% if button.disabled %} disabled{% endif %}{% if button.active %} active{% endif %}" 
+                        {% if button.param %}
+                            href="{{ url_for(button.url, **{button.param_name: button.param}) }}"
+                        {% else %}
+                            href="{{ url_for(button.url) }}"
+                        {% endif %}
+                    >
+                        <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="">
+                    </a>
+                {% elif button.type == 'action' %}
+                    <a class="aux-button">
+                        <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="" onclick="{{ button.onclick }}">
+                    </a>
+                {% elif button.type == 'disabled' %}
+                    <div class="aux-button disabled">
+                        <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }} (INATIVO)" alt="">
+                    </div>
+                {% elif button.type == 'form' %}
+                    <a class="aux-button">
+                        <form action="{{ url_for(button.url) }}" method="{{ button.method or 'post' }}">
+                            <button type="submit" style="all: unset" onclick="showLoading()">
+                                <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}">
+                            </button>
+                        </form>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
     {% endif %}
 </div>
 {% endmacro %}
