@@ -47,200 +47,200 @@
 
         <div id="floating-container" class="forms-container" draggable="false">
             
-                <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
-                <form id="formBuscarItens" style="width: 100%;" method="post" onsubmit="showLockLabel()">
-                    <label for="input_code"></label>
-                    <div class="inputs">
-                        <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
-                        <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
-                    </div>
-                    <hr>
-                </form>
+            <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
+            <form id="formBuscarItens" style="width: 100%;" method="post" onsubmit="showLockLabel()">
+                <label for="input_code"></label>
+                <div class="inputs">
+                    <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
+                    <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                </div>
+                <hr>
+            </form>
 
-                <form id="form-field" class="split-v" method="post" action="/logi/mov/moving">
-                    <div class="flex-v">
-                        <div id="produtoField">
-                            <div class="flex-v">
-                                <div class="inputs">
-                                    <div class="flex-v">
-                                        {% from 'components/lock-label.html' import lock_label %}
-                                        {{ lock_label('Produto', 'desc_item') }}
-                                        <input 
-                                            id="desc_item" 
-                                            name="desc_item" 
-                                            class="address-one" 
-                                            type="text" 
-                                            required readonly 
-                                            placeholder="Descrição do item..." 
-                                            onclick="maximizeText(this)"
-                                            value="{{ json_desc_item }}"
-                                        >
-                                    </div>
-                                </div>
-                                <div class="inputs">
-                                    <div class="flex-v">
-                                        {% from 'components/lock-label.html' import lock_label %}
-                                        {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_item_no"></span>' | safe) }}
-                                        <select 
-                                            id="cod_item" 
-                                            name="cod_item" 
-                                            class="address-three" 
-                                            placeholder="Código do item..."
-                                            title="Ex.: 000123"
-                                            onchange="showLockLabel()"
-                                            required 
-                                        >
-                                        <option value="">Selecione...</option>
-                                        <hr>
-                                        <!-- itens preenchidos dinamicamente -->
-                                        </select>
-                                    </div>
-                                    <div class="flex-v">
-                                        {% from 'components/lock-label.html' import lock_label %}
-                                        {{ lock_label('Lote', 'cod_lote') }}
-                                        <!-- CS + 4 a 6 dígitos -->
-                                        <input
-                                            id="lote_item"
-                                            name="cod_lote"
-                                            required
-                                            readonly
-                                            class="address-three"
-                                            maxlength="8"
-                                            type="text"
-                                            value="{{ json_cod_lote }}"
-                                            oninput="getItemFirstMov(this.value)"
-                                            placeholder="Ex.: CS0000"
-                                            pattern="^(CS\d{4,6}|VINHOS|OUTROS)$" 
-                                        >
-                                    </div>
-                                    <div class="flex-v">
-                                        <label for="operacao">Operação</label>
-                                        <select 
-                                            id="operacao" 
-                                            name="operacao" 
-                                            class="address-four" 
-                                            onchange="toggleFields()" 
-                                            title="E = Entrada, S = Saída, T = Transferência"
-                                        >
-                                            <option value="E">E</option>
-                                            <option value="S">S</option>
-                                            <option value="T">T</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="IconsField" class="inputs">
-                            <div class="flex-h" style="justify-content: center; align-items: center">
-                                <img id="svg-operation" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
-                                <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
-                            </div>
-                            <div id="popup-field" style="display: none; right: 25px">
-                                <div class="back-modal" onclick="togglePopUp()"></div>
-                                <div class="form-filter default">
-                                    <div class="split-h" style="background-color: var(--strong-dark-m); border-radius: 12px 12px 0 0">
-                                        <h1 style="text-align: left; margin: auto 14px; padding-left: 0; color: var(--light-text)" class="subtitle">Configurações de Operação</h1>
-                                        <img class="svg-inv" style="height: 30px; width: 30px; padding: 8px" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="togglePopUp()">
-                                    </div>
-                                    <div id="enderecoCompletoContainer" style="border-radius: 0 0 12px 12px; padding: 14px">
-                                        <p style="justify-content: left">
-                                            <input type="checkbox" class="check" style="margin: 0 4px 0 0" id="is_end_completo" name="is_end_completo" onchange="handleCheckChange()">
-                                            Movimentação COMPLETA de Endereço.
-                                        </p>
-                                        <label>EXEMPLOS: 
-                                            <br>• TODOS os itens em A.1 vão para o endereço A.2
-                                            <br>• TODOS os itens em A.1 são faturados (funcionalidade desativada)
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="ParamsField" class="glow-logi" style="padding: 8px 22px; margin: 8px 16px; border-radius: 16px">
-                            
+            <form id="form-field" class="split-v" method="post" action="/logi/mov/moving">
+                <div class="flex-v">
+                    <div id="produtoField">
+                        <div class="flex-v">
                             <div class="inputs">
-                                <div id="quantField" class="flex-v">
-                                    <label for="quantidade">Quantidade</label>
+                                <div class="flex-v">
+                                    {% from 'components/lock-label.html' import lock_label %}
+                                    {{ lock_label('Produto', 'desc_item') }}
                                     <input 
-                                        id="quantidade" 
+                                        id="desc_item" 
+                                        name="desc_item" 
                                         class="address-one" 
-                                        type="number" 
-                                        name="quantidade" 
-                                        min="1" 
-                                        placeholder="Quantidade..." 
-                                        required
+                                        type="text" 
+                                        required readonly 
+                                        placeholder="Descrição do item..." 
+                                        onclick="maximizeText(this)"
+                                        value="{{ json_desc_item }}"
                                     >
                                 </div>
                             </div>
-
                             <div class="inputs">
                                 <div class="flex-v">
-                                    <label for="end_letra">Endereço</label>
-                                    <div class="flex-h" style="gap: 16px">
-                                        <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
-                                            {% include "shared/elements/address-select.html" %}
-                                        </select>
-                                        <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
-                                    </div>
+                                    {% from 'components/lock-label.html' import lock_label %}
+                                    {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_item_no"></span>' | safe) }}
+                                    <select 
+                                        id="cod_item" 
+                                        name="cod_item" 
+                                        class="address-three" 
+                                        placeholder="Código do item..."
+                                        title="Ex.: 000123"
+                                        onchange="showLockLabel()"
+                                        required 
+                                    >
+                                    <option value="">Selecione...</option>
+                                    <hr>
+                                    <!-- itens preenchidos dinamicamente -->
+                                    </select>
                                 </div>
-                            </div>
-
-                            <div id="TransfFields" class="inputs" style="display: none;">
-                                
-                                    <div class="flex-v">
-                                        <label for="destino_end_letra">End. de Destino</label>
-                                        <div class="flex-h" style="gap: 16px">
-                                            <select 
-                                                class="address-three" 
-                                                id="destino_end_letra" 
-                                                name="destino_end_letra" 
-                                                onchange="toggleEndNumber()"
-                                            >
-                                                {% include "shared/elements/address-select.html" %}
-                                            </select>
-                                            <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="999" placeholder="Número...">
-                                        </div>
-                                    </div>
-                            </div>
-
-                            <div id="FaturaFields" class="inputs" style="display: none;">
-                                <div style="text-align: center;">
-                                    <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
-                                </div>
-                                <div style="display: flex;">
-                                    <div>
-                                        <label for="id_carga">Número de Carga</label>
-                                        <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
-                                    </div>
-                                    <div>
-                                        <select class="address-three" type="number" id="id_carga_seq" name="id_carga_seq" step="any">
-                                            {% for index in range(0, 10) %}
-                                                <option value="{{ index }}">- {{ index }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="EntradaFields" class="inputs">
                                 <div class="flex-v">
-                                    <input type="hidden" name="data_locked" id="data_locked" value="false">
-                                    <!-- TODO: se colocar um lote já conhecido, puxa a data da primeira movimentacao --> 
-                                    <label for="date_fab">Data de Fabricação</label>
-                                    <input 
-                                        type="date" 
-                                        id="date_fab" 
-                                        name="date_fab" 
-                                        class="address-one" 
-                                        required="true"
-                                    >                                    
+                                    {% from 'components/lock-label.html' import lock_label %}
+                                    {{ lock_label('Lote', 'cod_lote') }}
+                                    <!-- CS + 4 a 6 dígitos -->
+                                    <input
+                                        id="lote_item"
+                                        name="cod_lote"
+                                        required
+                                        readonly
+                                        class="address-three"
+                                        maxlength="8"
+                                        type="text"
+                                        value="{{ json_cod_lote }}"
+                                        oninput="getItemFirstMov(this.value)"
+                                        placeholder="Ex.: CS0000"
+                                        pattern="^(CS\d{4,6}|VINHOS|OUTROS)$" 
+                                    >
+                                </div>
+                                <div class="flex-v">
+                                    <label for="operacao">Operação</label>
+                                    <select 
+                                        id="operacao" 
+                                        name="operacao" 
+                                        class="address-four" 
+                                        onchange="toggleFields()" 
+                                        title="E = Entrada, S = Saída, T = Transferência"
+                                    >
+                                        <option value="E">E</option>
+                                        <option value="S">S</option>
+                                        <option value="T">T</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="flex-h" style="gap: 0; min-width: 100%;">
-                        <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
+                    <div id="IconsField" class="inputs">
+                        <div class="flex-h" style="justify-content: center; align-items: center">
+                            <img id="svg-operation" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
+                            <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
+                        </div>
+                        <div id="popup-field" style="display: none; right: 25px">
+                            <div class="back-modal" onclick="togglePopUp()"></div>
+                            <div class="form-filter default">
+                                <div class="split-h" style="background-color: var(--strong-dark-m); border-radius: 12px 12px 0 0">
+                                    <h1 style="text-align: left; margin: auto 14px; padding-left: 0; color: var(--light-text)" class="subtitle">Configurações de Operação</h1>
+                                    <img class="svg-inv" style="height: 30px; width: 30px; padding: 8px" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="togglePopUp()">
+                                </div>
+                                <div id="enderecoCompletoContainer" style="border-radius: 0 0 12px 12px; padding: 14px">
+                                    <p style="justify-content: left">
+                                        <input type="checkbox" class="check" style="margin: 0 4px 0 0" id="is_end_completo" name="is_end_completo" onchange="handleCheckChange()">
+                                        Movimentação COMPLETA de Endereço.
+                                    </p>
+                                    <label>EXEMPLOS: 
+                                        <br>• TODOS os itens em A.1 vão para o endereço A.2
+                                        <br>• TODOS os itens em A.1 são faturados (funcionalidade desativada)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                    <div id="ParamsField" class="glow-logi" style="padding: 8px 22px; margin: 8px 16px; border-radius: 16px">
+                        
+                        <div class="inputs">
+                            <div id="quantField" class="flex-v">
+                                <label for="quantidade">Quantidade</label>
+                                <input 
+                                    id="quantidade" 
+                                    class="address-one" 
+                                    type="number" 
+                                    name="quantidade" 
+                                    min="1" 
+                                    placeholder="Quantidade..." 
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="inputs">
+                            <div class="flex-v">
+                                <label for="end_letra">Endereço</label>
+                                <div class="flex-h" style="gap: 16px">
+                                    <select class="address-three" id="end_letra" name="end_letra" onchange="toggleEndNumber()" required>
+                                        {% include "shared/elements/address-select.html" %}
+                                    </select>
+                                    <input class="address-three" type="number" id="end_number" name="end_number" step="any" min="1" max="99999.9" required placeholder="Número...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="TransfFields" class="inputs" style="display: none;">
+                            
+                                <div class="flex-v">
+                                    <label for="destino_end_letra">End. de Destino</label>
+                                    <div class="flex-h" style="gap: 16px">
+                                        <select 
+                                            class="address-three" 
+                                            id="destino_end_letra" 
+                                            name="destino_end_letra" 
+                                            onchange="toggleEndNumber()"
+                                        >
+                                            {% include "shared/elements/address-select.html" %}
+                                        </select>
+                                        <input class="address-three" type="number" id="destino_end_number" name="destino_end_number" step="any" min="1" max="999" placeholder="Número...">
+                                    </div>
+                                </div>
+                        </div>
+
+                        <div id="FaturaFields" class="inputs" style="display: none;">
+                            <div style="text-align: center;">
+                                <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
+                            </div>
+                            <div style="display: flex;">
+                                <div>
+                                    <label for="id_carga">Número de Carga</label>
+                                    <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
+                                </div>
+                                <div>
+                                    <select class="address-three" type="number" id="id_carga_seq" name="id_carga_seq" step="any">
+                                        {% for index in range(0, 10) %}
+                                            <option value="{{ index }}">- {{ index }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="EntradaFields" class="inputs">
+                            <div class="flex-v">
+                                <input type="hidden" name="data_locked" id="data_locked" value="false">
+                                <!-- TODO: se colocar um lote já conhecido, puxa a data da primeira movimentacao --> 
+                                <label for="date_fab">Data de Fabricação</label>
+                                <input 
+                                    type="date" 
+                                    id="date_fab" 
+                                    name="date_fab" 
+                                    class="address-one" 
+                                    required="true"
+                                >                                    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-h" style="gap: 0; min-width: 100%;">
+                    <input class="btn-fancy" type="submit" value="REGISTRAR" id="submitform">
+                </div>
+            </form>
             
         </div>
 
@@ -253,17 +253,47 @@
                         <th>Item (Código)</th>
                         <th>Item (Descrição)</th>
                         <th>Lote (Código)</th>
+                        <th>Validade (Dias)</th>
                         <th>QTDE (Efetiva)</th>
                         <th id="header-add-column" style="display: none; width: 100px; padding: 0;">
                             <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
                         </th>
                     </tr>
                         {% for item in inv_data %}
-                            <tr id="row-{{ loop.index }}">   
-                                <td>{{ item['address'] }}</td>
+                            <tr id="row-{{ loop.index }}">
+                                <td>{{ item['address'] }} </td>
                                 <td class="number">{{ item['cod_item'] }}</td>
                                 <td>{{ item['desc_item'] }}</td>
-                                <td>{{ item['cod_lote'] }}</td>
+                                <td 
+                                    title="Data Fab.: {{ item['date_fab'] }}"
+                                    {% if 'CS' not in item['cod_lote']|string %}
+                                        style="color:rgb(113, 113, 113);"
+                                    {% endif %}
+                                >
+                                    {{ item['cod_lote'] }}
+                                </td>
+                                {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
+                                    <td 
+                                        style="color:rgb(113, 113, 113);"
+                                        title="Validade não informada!"
+                                    >
+                                        -
+                                    </td>
+                                {% elif '/' in item['validade']|string %}
+                                        <td 
+                                            style="color:rgb(113, 113, 113);"
+                                        >
+                                        {{ item['validade'] }}
+                                        </td>
+                                {% else %}
+                                    <td 
+                                        {% set validade_meses = item['validade'] | int / 30  %}
+                                        title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
+                                        style="color: var(--cde-color); font-weight: bold"
+                                    >
+                                        {{ item['validade'] }}
+                                    </td>
+                                {% endif %}
                                 <td class="number">{{ item['saldo'] }}.0</td>
                                 <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
                                     <img class="svg-inv" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
@@ -275,7 +305,7 @@
             </div>
         </div>
         
-        <div id="bundle-container" class="tables-container glow-logi" style="display: none; max-width: 920px; min-width: 800px;">
+        <div id="bundle-container" class="tables-container glow-logi" style="display: none; min-width: 800px;">
             <div style="display: flex; justify-content: space-between; flex-direction: column; height: 100%;">
                 <div>
                     <h1 class="subtitle">Pacote de itens:</h1>
@@ -291,8 +321,9 @@
                                 <th class="normal-size">Item (Código)</th>
                                 <th class="bigger-size">Item (Descrição)</th>
                                 <th class="normal-size">Lote (Código)</th>
+                                <th class="normal-size">Validade (Dias)</th>
                                 <th class="normal-size">QTDE (Separada)</th>
-                                <th class="normal-size" style="padding: 0;"></th>
+                                <th class="normal-size" style="padding: 0; max-width: 100px"></th>
                             </tr>
                             <tr>
                                 <!-- itens serao preenchidos dinamicamente -->
