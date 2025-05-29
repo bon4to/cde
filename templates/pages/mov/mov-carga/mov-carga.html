@@ -62,7 +62,11 @@
                                         <tbody>
                                             {% for row in result %}
                                                 {% if class_alert != 'error' %}
-                                                    <tr class="selectable-row js_query_selector" style="vertical-align: baseline;" data-id="{{ row[columns.index('NRO_CARGA')] }}">
+                                                    <tr 
+                                                        class="selectable-row js_query_selector" 
+                                                        data-id="{{ row[columns.index('NRO_CARGA')] }}"
+                                                        style="vertical-align: baseline;"
+                                                    >
                                                         <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
                                                         <td class="number r second-plan">{{ row[columns.index('NRO_PEDIDO')] }}</td>
                                                         <td class="number r second-plan">{{ row[columns.index('COD_CLIENTE')] }}</td>
@@ -99,6 +103,7 @@
                     {% endif %}
                 </div>
             {% endif %}
+
             {% if id_carga %}
                 <div id="cargaContainer" class="tables-container" style="max-width: 55%; min-width: 55%;">
                     <div class="flex-v">
@@ -316,6 +321,7 @@
                     </div>
                 {% endif %}
             {% endif %}
+
             {% if not cod_item %}
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
                     <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
@@ -478,13 +484,33 @@
         
 
         document.addEventListener('DOMContentLoaded', function() {
-            var rows = document.querySelectorAll('.js_query_selector');
+            const rows = document.querySelectorAll('.js_query_selector');
+
             rows.forEach(function(row) {
                 row.addEventListener('click', function() {
-                    var idCarga = this.getAttribute('data-id');
+                    const idCarga = this.getAttribute('data-id');
                     window.location.href = '/logi/cargas/' + idCarga;
                 });
+
+                const carga = row.getAttribute('data-id');
+
+                row.addEventListener('mouseenter', function() {
+                    rows.forEach(function(r) {
+                        if (r.getAttribute('data-id') === carga) {
+                            r.classList.add('hover-related');
+                        }
+                    });
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    rows.forEach(function(r) {
+                        if (r.getAttribute('data-id') === carga) {
+                            r.classList.remove('hover-related');
+                        }
+                    });
+                });
             });
+
             if (!codItem) {
                 listSeparationsLocalStorage('carga');
             }

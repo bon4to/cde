@@ -53,8 +53,9 @@ td {
     cursor: pointer;
 }
 
-.selectable-row:hover td {
-    color: var(--main-color);
+.selectable-row:hover td,
+.hover-related td {
+    color: var(--main-color) !important;
     background-color: #e7e7e7;
 }
 
@@ -82,8 +83,12 @@ td {
 }
 
 .selectable-row.sub-total.active td {
-    color: white;
+    color: white !important;
     background-color: var(--main-color);
+}
+
+.selectable-row.sub-total.active:hover td {
+    opacity: 0.5;
 }
 
 th.normal-size {
