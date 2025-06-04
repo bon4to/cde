@@ -1,0 +1,49 @@
+{% extends 'base.j2' %}
+
+{% block title %}Queries{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'AJUSTES', 'url': 'cde_cfg', 'title': 'AJUSTES'},
+                {'text': 'QUERIES'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
+    </div>
+    
+    <div id="divContent">
+        <div class="mobile-container">
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%">
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>VALOR</th>
+                        <th>STATUS</th>
+                    </tr>
+                    {% for query_id, query_data in q_list.items() %}
+                    <tr>
+                        <td>{{ query_id }}</td>
+                        <td>{{ query_data }}</td>
+                        <td class="c" title="OK">🟢</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

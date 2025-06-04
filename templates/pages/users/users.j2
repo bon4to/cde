@@ -1,0 +1,142 @@
+{% extends 'base.j2' %}
+
+{% block title %}Usuários{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'USUÁRIOS'}
+            ],
+            aux_buttons=[
+                {'type': 'action', 'icon': 'svg/pen-line.svg', 'title': 'EDITAR USUÁRIOS', 'onclick': 'toggleEdit()'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
+    </div>
+
+    <div id="divContent">
+        <div class="forms-container">
+            {% if 'CDE014' in user_perm or session['user_grant'] <= 2 %}
+                <div>
+                    <h1 class="subtitle">Cadastrar Usuário</h1>
+                    <hr>
+                    <form action="/users/inserting" method="post">
+                        <div class="inputs">
+                            <div>
+                                <label for="login_user">Login: <span style="color: red">*</span></label>
+                                <input 
+                                    class="address-one"
+                                    type="text" 
+                                    id="login_user" 
+                                    name="login_user" 
+                                    placeholder="E-mail, telefone ou usuário..." 
+                                    required
+                                >
+                            </div>
+                        </div>
+                        <div class="inputs">
+                            <div>
+                                <label for="password_user">Senha: <span style="color: red">*</span></label>
+                                <input 
+                                    class="address-one disabled" 
+                                    id="password_user" 
+                                    name="password_user" 
+                                    value="12345" 
+                                    disabled 
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="inputs">
+                            <div>
+                                <label for="nome_user">Nome: <span style="color: red">*</span></label>
+                                <input class="address-two" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
+                            </div>
+                            <div>
+                                <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label>
+                                <input class="address-two" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
+                            </div>
+                        </div>
+                        <div class="inputs">
+                            <div>
+                                <label for="privilege_user">Privilégios: <span style="color: red">*</span></label>
+                                <select 
+                                class="address-one"
+                                    id="privilege_user" 
+                                    name="privilege_user" 
+                                    required
+                                >
+                                    {% if 'user_grant' in session %}
+                                        <option value="3">Padrão</option>
+                                        <option value="2">Administrador</option>
+                                        {% if session['user_grant'] <= 1 %}
+                                            <option value="1" style="color: red">Desenvolvedor</option>
+                                        {% endif %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <p style="color: red">Campos com * são obrigatórios.</p>
+                        <div style="display: flex;width: 100%;">
+                            <input class="btn-fancy" style="max-width: none;" type="submit" value="CADASTRAR">
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <div style="margin-top: 50%; padding: 0 80px;">
+                    <p class="disabled">Seu usuário não possui privilégios para esta ação.</p>
+                </div>
+            {% endif %}
+        </div>
+        <div draggable="false" class="tables-container" style="width: 600px">
+            <div class="split-h">
+                <div style="width: 100%;">
+                    <div class="table-overflow">
+                        <table id="filterTable">
+                            <tr>
+                                <th>Usuário (Cód.)</th>
+                                <th>Usuário (Desc.)</th>
+                                <th>Usuário (Tipo)</th>
+                                <th>Último Acesso (Data)</th>
+                            </tr>
+                            {% for item in users %}
+                                <tr>
+                                    <td class="number">{{ item['cod_user'] }}</td>
+                                    <td>{{ item['user_name'] }}</td>
+                                    <td>{{ item['user_grant'] }}</td>
+                                    <td style="text-align: right">{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
+                                    <td class="td-more hidden-button" data-toggle="tooltip" style="background-color: transparent">
+                                        <img 
+                                            title="EDITAR USUÁRIO"
+                                            alt=""
+                                            class="svg-link"
+                                            onclick="redirectToEdit('{{ item['cod_user'] }}')" 
+                                            src="{{ url_for('static', filename='svg/edit-link.svg') }}" 
+                                        >
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block route_script %}
+    <script>
+        function redirectToEdit(idUser) {
+            window.location.href = "/users/edit?id_user=" + idUser;
+        }
+    </script>
+{% endblock route_script %}

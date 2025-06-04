@@ -1,0 +1,119 @@
+{% extends 'base.j2' %}
+
+{% block title %}Histórico{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'MOV', 'url': 'mov', 'title': 'MOVIMENTAR'},
+                {'text': 'HISTORICO'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'mov', 'icon': 'svg/arrow-up-down.svg', 'title': 'MOVIMENTAR'},
+                {'type': 'link', 'url': 'estoque', 'icon': 'svg/boxes.svg', 'title': 'ESTOQUE'},
+                {'type': 'link', 'url': 'historico', 'icon': 'svg/history.svg', 'title': 'HISTÓRICO', 'active': True},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
+        {% from 'components/filter-container.j2' import filter_container %}
+        {{ filter_container(
+            filter_options=[
+                {'value': 'cod_item', 'text': 'Item (Código)'},
+                {'value': 'desc_item', 'text': 'Item (Descrição)'},
+                {'value': 'address', 'text': 'Endereço'},
+                {'value': 'operacao', 'text': 'Operação (Descrição)'},
+                {'value': 'quantidade', 'text': 'Quantidade'},
+                {'value': 'cod_lote', 'text': 'Lote (Código)'},
+                {'value': 'user_name', 'text': 'Usuário (Nome)'},
+                {'value': 'timestamp', 'text': 'Horário (Data/Hora)'}
+            ],
+            button_icon="search.svg",
+            form_endpoint="/logi/mov/historico/search",
+            type="form"
+        ) }}
+
+    </div>
+
+    <div id="divContent">
+        <div class="mobile-container">
+            <div style="justify-content: flex-end">
+                {% if search_term %}
+                    <div class="split-h">
+                        <h1 style="font-size: 22px">Critério de pesquisa: <span class="text-main-color">"{{ search_term }}"</span> em <span class="text-main-color">{{ search_row_text }}</span>.</h1>
+                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <table id="filterTable">
+                    <tr>
+                        <th>Endereço</th>
+                        <th>Operação</th>
+                        <th>Item (Código)</th>
+                        <th>Item (Descrição)</th>
+                        <th>Lote</th>
+                        <th>Quantidade</th>
+                        <th>Usuário</th>
+                        <th>Horário</th>
+                    </tr>
+                    {% if estoque %}
+                        {% for item in estoque %}
+                        <tr>
+                            <td>{{ item['address'] }}</td>
+                            <td style="text-align: center">{{ item['operacao'] }}</td>  
+                            <td style="text-align: right">{{ item['cod_item'] }}</td>
+                            <td>{{ item['desc_item'] }}</td>
+                            <td>{{ item['cod_lote'] }}</td>
+                            <td style="text-align: right">{{ item['quantidade'] }}</td>
+                            <td>{{ item['user_name'] }}</td>
+                            <td style="text-align: right">{{ item['timestamp'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td class="c" colspan="8">Nenhum resultado encontrado.</td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+            <div class="pagination">
+                {% if page > 1 %}
+                <a href="{{ url_for('historico', page=page-1) }}">&laquo; Anterior</a>
+                {% endif %}
+            
+                {% if page > 3 %}
+                <a href="{{ url_for('historico', page=1) }}">1</a>
+                <span>...</span>
+                {% endif %}
+            
+                {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+                    <a href="{{ url_for('historico', page=p) }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
+                {% endfor %}
+            
+                {% if page < total_pages - 2 %}
+                <span>...</span>
+                <a href="{{ url_for('historico', page=total_pages) }}">{{ total_pages }}</a>
+                {% endif %}
+            
+                {% if page < total_pages %}
+                <a href="{{ url_for('historico', page=page+1) }}">Próximo &raquo;</a>
+                {% endif %}
+            </div>
+            {% if row_count %}
+                <p>{{ row_count }} registros |<a style="font-size: unset; margin-left: 5px" href="{{ url_for('export_csv_type', type='historico') }}">Exportar (CSV)</a></p>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock content %}

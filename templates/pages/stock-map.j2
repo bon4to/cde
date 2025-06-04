@@ -1,0 +1,186 @@
+{% extends 'base.j2' %}
+
+{% block title %}Mapa{% endblock title %}
+
+{% block content %}
+
+    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
+        <div class="titles-container flex-h title-centerer">
+            <h1>
+                <a href="{{ url_for('mov') }}">MOV</a>
+                <span class="dash">/</span>
+                <span>MAPA (ENDEREÇOS)</span>
+                <span class="id-page">{{session['id_page']}}</span>
+            </h1>
+            <div class="aux-buttons">
+                <a class="aux-button active">
+                    <img class="svg-gray" src="{{ url_for('static', filename='svg/stock-map.svg') }}" title="MAPA (ENDEREÇOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
+                </a>
+                <hr class="vert">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
+                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+            </div>
+        </div>
+    </div>
+
+    <div id="divContent" style="flex-wrap: wrap;">
+        <div class="tables-container" style="max-width: 100%; min-width: 55%; padding: 22px;">
+            <div id="map-container">
+                <div id="map" style="width: fit-content;" class="map-grid">
+                </div>
+                <div class="map-buttons">
+                    <div class="map-button">
+                        <img class="svg-inv" src="{{ url_for('static', filename='svg/circle-plus.svg') }}" alt="" title="VOLTAR" onclick="">
+                    </div>
+                    <div class="map-button">
+                        <img class="svg-inv" src="{{ url_for('static', filename='svg/circle-minus.svg') }}" alt="" title="VOLTAR" onclick="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block route_script %}
+    <script>
+        // definindo o layout das prateleiras e corredores
+        const mapLayout = {
+            'A': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+            'B': [1, 2, 3, 4, 0, 0, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0, 0],
+            'C': [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0, 0, 0, 0, 0, 0, 0, 0],  
+            'D': [0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 0, 0],
+            'PP1': [1, 2],
+            'PP2': [1, 2],
+            'PP3': [1],
+            'PP4': [1]
+        };
+
+        // cores para cada item
+        const colors = [
+            'rgb(var(--alt-color-1))', 'rgb(var(--alt-color-2))', 'rgb(var(--alt-color-3))',
+            'rgb(var(--alt-color-4))', 'rgb(var(--alt-color-5))', 'rgb(var(--alt-color-6))',
+            'rgb(var(--alt-color-7))'
+        ];
+
+        // carregar os dados e gerar o mapa
+        fetch('/get/stock_items')
+            .then(response => response.json())
+            .then(data => {
+            const map = document.getElementById('map');
+            
+            // agrupar por letra e numero
+            const groupedData = {};
+            data.forEach(item => {
+                const { letra, numero, cod_item, saldo } = item;
+                if (!groupedData[letra]) groupedData[letra] = {};
+                if (!groupedData[letra][numero]) groupedData[letra][numero] = {};
+                if (!groupedData[letra][numero][cod_item]) groupedData[letra][numero][cod_item] = 0;
+                groupedData[letra][numero][cod_item] += saldo;
+            });
+
+            // method para gerar ruas
+            function generateRua(corredor) {
+                mapLayout[corredor].forEach(numero => {
+                    const cell = document.createElement('div');
+                    if (numero === 0) {
+                        cell.classList.add('invisible-cell');
+                        map.appendChild(cell);
+                        return;
+                    }
+                    cell.classList.add('map-cell');
+                    const items = groupedData[corredor] && groupedData[corredor][numero];
+                    
+                    if (items) {
+                        let stackedBar = document.createElement('div');
+                        stackedBar.classList.add('stacked-bar');
+                        stackedBar.draggable = false;
+                        let total = Object.values(items).reduce((a, b) => a + b, 0);
+
+                        Object.keys(items).forEach((item, index) => {
+                            let itemBar = document.createElement('div');
+                            itemBar.classList.add('item-bar');
+                            itemBar.style.height = `${(items[item] / total) * 100}%`;
+                            itemBar.style.backgroundColor = colors[index % colors.length];
+
+                            let legend = document.createElement('div');
+                            legend.classList.add('legend');
+                            legend.innerHTML = `${corredor}.${numero}<br>${item}: ${items[item]}`;
+                            itemBar.appendChild(legend);
+
+                            stackedBar.appendChild(itemBar);
+                        });
+
+                        cell.appendChild(stackedBar);
+                    } else {
+                        cell.classList.add('empty-cell');
+                        cell.innerHTML = '';
+                    }
+
+                    map.appendChild(cell);
+                });
+            }
+
+            // gerar ruas
+            generateRua('A');
+
+            // adicionar corredor entre A e B
+            let corredorAB = document.createElement('div');
+            corredorAB.classList.add('corredor-space');
+            map.appendChild(corredorAB);
+
+            generateRua('B');
+
+            // adicionar corredor entre C e D
+            generateRua('C');
+            
+            let corredorCD = document.createElement('div');
+            corredorCD.classList.add('corredor-space');
+            map.appendChild(corredorCD);
+
+            generateRua('D');
+        });
+
+
+        const mapContainer = document.getElementById('map');
+        let scale = 1;
+        let posX = 0, posY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        mapContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            let zoomIntensity = 0.1;
+            let zoom = e.deltaY > 0 ? 1 - zoomIntensity : 1 + zoomIntensity;
+            // limite de zoom entre 0.5x e 3x
+            scale = Math.min(Math.max(0.5, scale * zoom), 3);
+
+            mapContainer.style.transform = `scale(${scale}) translate(${posX}px, ${posY}px)`;
+        }, { passive: false });
+        
+
+        mapContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX - posX;
+            startY = e.pageY - posY;
+        });
+
+        mapContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            posX = e.pageX - startX;
+            posY = e.pageY - startY;
+            mapContainer.style.transform = `scale(${scale}) translate(${posX}px, ${posY}px)`;
+        });
+
+        mapContainer.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        mapContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+    </script>
+
+{% endblock route_script %}
