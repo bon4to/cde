@@ -1,0 +1,102 @@
+{% extends 'base.j2' %}
+
+{% block title %}Permissões{% endblock title %}
+
+{% block content %}
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'PERMISSÕES'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
+    </div>
+
+    <div id="divContent" style="flex-wrap: wrap;">
+        <div class="tables-container" style="min-width: 40vw;">   
+            {% if session['user_grant'] == 1 %}
+                {% if permissions %}
+                    {% if id_perm_data %}
+                        <h1>Código da Página <span class="text-main-color">[{{ id_perm_data[0]['id_perm'] }}]</span></h1>
+                        <h1 class="subtitle">Editando: <span class="text-main-color">''{{ id_perm_data[0]['desc_perm'] }}''</span></h1>
+                        <br>
+                        <form style="height: unset; align-items: flex-start;" action="{{ url_for('permissions_id', id_perm=id_perm_data[0]['id_perm']) }}" method="post">
+                            <div class="flex-h" style="gap: 20px">
+                                <div class="flex-v">
+                                    <label for="id_perm">ID (Página):</label>
+                                    <input class="address-three" style="margin: 0" type="text" name="id_perm" min="6" max="6" value="{{ id_perm_data[0]['id_perm'] }}" placeholder="{{ id_perm_data[0]['id_perm'] }}">
+                                </div>
+                                <div class="flex-v">
+                                    <label for="desc_perm">Descrição (Página):</label>
+                                    <div class="flex-h">
+                                        <input class="address-two" style="margin: 0" type="text" name="desc_perm" max="32" value="{{ id_perm_data[0]['desc_perm'] }}" placeholder="{{ id_perm_data[0]['desc_perm'] }}">
+                                        <button class="button-mini btn-fancy" type="submit" id="submitform">
+                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/pen-line.svg') }}" title="EXECUTAR">
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <a class="hyperlink" style="font-size: 1.2em; margin-top: 14px" href="{{ url_for('permissions') }}">CANCELAR</a>
+                    {% else %}
+                        <h1><span style="color: var(--main-color);">Adicione o ID da Página</span></h1>
+                        <h1 class="subtitle">Ou selecione uma permissão</h1>
+                        <br>
+                        <form style="align-items: flex-start;" action="{{ url_for('permissions') }}" method="post">
+                            <div class="flex-h" style="gap: 20px">
+                                <div class="flex-v">
+                                    <label for="id_perm">ID (Página):</label>
+                                    <input class="address-three" style="margin: 0" type="text" name="id_perm_add" min="6" max="6" placeholder="ID...">
+                                </div>
+                                <div class="flex-v">
+                                    <label for="desc_perm">Descrição (Página):</label>
+                                    <div class="flex-h">
+                                        <input class="address-two" style="margin: 0" type="text" name="desc_perm_add" max="32" placeholder="Descrição...">
+                                        <button class="button-mini btn-fancy" type="submit" id="submitform">
+                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-plus.svg') }}" title="ADICIONAR">
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <h1 class="subtitle">Você não tem permissão para editar estes registros.</h1>
+            {% endif %}
+        </div>
+        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
+            <h1 class="subtitle" style="margin: 0;">Listagem de páginas</h1>
+            <p style="justify-content: flex-start; margin: 0 0 12px 0;">& permissões de acesso</p>
+            {% block all_separation_status %}
+            
+            {% endblock all_separation_status %}
+            <div class="table-overflow" style="max-height: 700px">
+                {% if permissions %}
+                    <table style="border-top: 4px solid var(--main-color)">
+                        <tbody>
+                            {% for row in permissions %}
+                                <tr class="selectable-row js_query_selector" onclick="window.location.href='/cde/permissions/{{ row['id_perm'] }}'">
+                                    <td>{{ row['id_perm'] }}</td>
+                                    <td>{{ row['desc_perm'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

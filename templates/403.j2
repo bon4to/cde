@@ -1,0 +1,21 @@
+{% extends "pages/error-handler.j2" %}
+
+{% block title %}
+    Not Found ({{ error_code }})
+{% endblock title %}
+
+{% block type %}
+    Permission Denied!
+{% endblock type %}
+
+{% block error_code %}
+    <h3 style="color: #d13636; text-align: left">ERRO {{ error_code }}</h3>
+{% endblock error_code %}
+
+{% block message %}
+    <details>
+        <summary><h4 style="margin-top: 0; margin-bottom: 18px; text-align: center">Você não tem permissões para acessar o sistema em si.</h4>
+        </summary>
+        <span style="opacity: 0.6;">{{ error }}</span>
+    </details>
+{% endblock message %}

@@ -1,0 +1,219 @@
+{% extends "pages/mov/mov-request/mov-request-separacao.j2" %}
+
+{% block title %}
+    Requisição Sep. (🟢)
+{% endblock title %}
+
+
+{% block separation_buttons %}
+    <div class="flex-h">
+        <div class="button-mini btn-fancy" onclick="reloadTables()" title="RECARREGAR REGISTROS" >
+            <img class="svg-invert" src="{{ url_for('static', filename='svg/reload.svg') }}" alt="">
+        </div>
+    </div>
+    <div id="btnGenReqReport" class="btn-fancy featured" style="height: 45px; margin: 0; max-width: 200px;" onclick="genRequestReport()">
+        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
+    </div>
+{% endblock separation_buttons %}
+
+
+{% block all_separation_status %}
+    <select class="address-three inline-input" style="color: green; font-size: 12px" onchange="window.location.href='/logi/req/separacao/p/{{ id_req }}'">
+        <option style="color: green;">Finalizadas</option>
+        <option style="color: var(--main-color);">Pendentes</option>
+    </select>
+{% endblock all_separation_status %}
+
+
+{% block add_script %}
+    <script>
+
+        const nroReq   = '{{ id_req }}';
+        const seq      = '{{ seq }}';
+
+        function getSeparacao() {
+            return new Promise((resolve, reject) => {
+                const localStorageData = localStorage.getItem(getStorageKey());
+                if (localStorageData) {
+                    reject(new Error(304));
+                } else {
+                    fetch(`/get/request/load-table-data?filename=${getStorageKey()}&seq=${seq}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(404);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao obter separação:', error);
+                        reject(error);
+                    });
+                }
+            });
+        }
+
+        
+        async function renderItems() {
+            showLoading();
+            const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+            const statusElements = document.getElementsByClassName('separation_status');
+            itemsTable.innerHTML = '';
+
+            try {
+                const sepReq = await getSeparacao();
+
+                // Obter itens da req
+                let itens_req;
+                try {
+                    const response = await fetch(`/api/itens_req?id_req=${nroReq}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+        
+                    if (!response.ok) {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+        
+                    const result = await response.json();
+                    itens_req = result.itens;
+                } catch (error) {
+                    console.error('Erro ao obter itens_req:', error);
+                    return;
+                }
+        
+                // Agrupar os itens por código de item
+                const groupedItems = sepReq.reduce((acc, item) => {
+                    if (!acc[item.cod_item]) {
+                        acc[item.cod_item] = [];
+                    }
+                    acc[item.cod_item].push(item);
+                    return acc;
+                }, {});
+
+                // Iterar sobre os grupos de itens
+                for (const [cod_item, items] of Object.entries(groupedItems)) {
+                    let subtotal = 0;
+
+                    for (const [index, item] of items.entries()) {
+                        await visualDelay(100);
+                        await getSeparadorName(item.user_id);
+
+                        const row = itemsTable.insertRow();
+                        row.insertCell(0).textContent = `${item.rua_letra}.${item.rua_numero}`;
+                        row.insertCell(1).textContent = item.cod_item;
+
+                        const descCell = row.insertCell(2);
+                        row.insertCell(3).textContent = item.lote_item;
+                        row.insertCell(4).textContent = item.qtde_sep;
+
+                        subtotal += item.qtde_sep;
+
+                        try {
+                            const descricao = await fetchItemDescription(item.cod_item);
+                            descCell.style.textWrap = "pretty";
+                            descCell.textContent = descricao;
+                        } catch (error) {
+                            console.error('Erro ao obter descrição:', error);
+                            descCell.textContent = 'Erro ao obter descrição';
+                        }
+                    }
+
+                    const qtde_solic = await fetchQtdeSolic(nroReq, cod_item);
+                    const subtotalRow = itemsTable.insertRow();
+
+                    subtotalRow.insertCell(0);
+                    subtotalRow.insertCell(1);
+                    const cell0 = subtotalRow.insertCell(2);
+
+                    cell0.textContent = cod_item;
+                    cell0.style.textAlign = 'right';
+
+                    const cell1 = subtotalRow.insertCell(3);
+                    cell1.textContent = 'Subtotal:';
+                    subtotalRow.insertCell(4).innerHTML = `<span class="text-main-color">${subtotal}</span> / ${qtde_solic}`;
+        
+                    subtotalRow.classList.add('sub-total');
+                }
+        
+                // Criar linhas de subtotal para itens zerados que não estão em sepReq
+                for (const item of itens_req) {
+                    if (!groupedItems[item]) {
+                        const subtotalRow = itemsTable.insertRow();
+
+                        subtotalRow.insertCell(0);
+                        subtotalRow.insertCell(1);
+                        const cell0 = subtotalRow.insertCell(2);
+
+                        cell0.textContent = item;
+                        cell0.style.textAlign = 'right';
+
+                        const cell1 = subtotalRow.insertCell(3);
+                        cell1.textContent = 'Subtotal:';
+
+                        const qtde_solic = await fetchQtdeSolic(nroReq, item);
+                        subtotalRow.insertCell(4).innerHTML = '<span class="text-main-color">0</span> / ' + qtde_solic;
+
+                        subtotalRow.classList.add('sub-total');
+                        
+                    }
+                    Array.from(statusElements).forEach(element => {
+                        element.innerHTML = "<span style='color: green'>Finalizada</span>";
+                    });
+                }
+
+            } catch (error) {
+                const alert = document.getElementById('alert-message');
+                const content = document.getElementById('contentTable');
+
+                let errorMessage = `<div class="msg-error">Erro: ${error.message}</div>`;
+
+                if (error.message == 304) {
+                    errorMessage = `
+                        <div class="msg-info">
+                            <details>
+                                <summary>Há uma separação pendente neste código!</summary>
+                                Para visualizá-la, filtre por 'pendentes' clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/grid-2x2.svg') }}"> acima.
+                            </details>
+                        </div>
+                        <div class="button-mini btn-fancy" onclick="clearItems()" title="APAGAR ITENS DA SEPARAÇÃO">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                        </div>
+                    `;
+                } else if (error.message == 404) {
+                    errorMessage = `
+                        <div class="msg-error">
+                            <details>
+                                <summary>Nenhuma separação pendente ou iniciada neste código!</summary>
+                                Inicie a <a class="hyperlink" style="font-size: unset" href="/logi/req">separação da requisição</a> para realizar o faturamento.
+                            </details>
+                        </div>
+                    `;
+                }
+
+                alert.innerHTML = errorMessage;
+                alert.classList.toggle('hidden');
+                content.classList.add('hidden');
+            }
+            await visualDelay(500);
+            hideLoading();
+        }
+
+
+        async function reloadTables() {
+            renderItems();
+            renderCartSubtotals();
+            listSeparationsFromServer('logi/req/separacao/f', 'requests');
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            reloadTables();
+        });
+        
+    </script>
+{% endblock add_script %}
