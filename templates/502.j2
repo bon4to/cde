@@ -1,0 +1,21 @@
+{% extends "pages/error-handler.j2" %}
+
+{% block title %}
+    Bad Gateway ({{ error_code }})
+{% endblock title %}
+
+{% block type %}
+    Bad Gateway!
+{% endblock type %}
+
+{% block error_code %}
+    <h3 style="color: #d13636; text-align: left">ERRO {{ error_code }}</h3>
+{% endblock error_code %}
+
+{% block message %}
+    <details>
+        <summary><h4 style="display: contents; margin-top: 0; margin-bottom: 18px; text-align: center">A página que você tentou acessar, recebeu dados inválidos do back-end. Contate o suporte imediatamente.</h4>
+        </summary>
+        <span style="opacity: 0.6;">{{ error }}</span>
+    </details>
+{% endblock message %}

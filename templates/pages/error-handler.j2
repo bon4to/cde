@@ -1,0 +1,49 @@
+{% extends 'base.j2' %}
+
+{% block title %}Oops!{% endblock title %}
+
+{% block content %}
+    <div id="divContent">
+        <div class="container" style="min-width: 90%; display: flex; align-items: center; justify-content: center;">
+            <div class="flex-v" style="shadow-box: 1px 10px #000000">
+                <h1 style="font-size: 60px; margin-top: 30px; text-align: left;">
+                    Oops! 
+                    {% block type %}
+                        Not Ready Yet!
+                    {% endblock type %}
+                </h1>
+                <div class="flex-h">
+                    <div id="tables-container" style="max-width: 500px;">
+                        <div class="centralizado">
+                            <div class="centralizado">
+                                <div>
+                                    <img 
+                                        class="side-banner" 
+                                        style="height: 300px; filter: unset; border-radius: 20px;" 
+                                        src="{{ url_for('static', filename='img/error.jpg') }}" 
+                                        alt=""
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="log" style="width: 340px; padding: 20px">
+                        <div style="margin-bottom: 20px;">
+                            {% block error_code %}
+                                <h3 style="color: #d13636; text-align: left">ERRO CDE</h3>
+                            {% endblock error_code %}
+                            {% block message %}
+                                <details>
+                                    <summary><h4 style="display: contents; margin-top: 0; margin-bottom: 18px; text-align: center">A página que você tentou acessar, está em desenvolvimento no momento.</h4>
+                                    </summary>
+                                    <span style="opacity: 0.6;">DEV006 Under Develop (CDE): The requested URL is currently under development.</span>
+                                </details>
+                            {% endblock message %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

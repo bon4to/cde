@@ -1,0 +1,151 @@
+{% extends 'base.j2' %}
+
+{% block title %}Produtos{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'PROD', 'url': 'home_prod', 'title': 'PRODUÇÃO'},
+                {'text': 'PRODUTOS', 'url': 'produtos', 'title': 'PRODUTOS'},
+                {'text': 'STATUS'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'produtos_flag', 'icon': 'svg/list-todo.svg', 'title': 'STATUS DO ITEM', 'active': True},
+                {'type': 'divider'},
+                {'type': 'form', 'url': 'produtos', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'ATUALIZAR LISTA DE PRODUTOS'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        
+        {% from 'components/filter-container.j2' import filter_container %}
+        {{ filter_container(
+            filter_options=[
+                {'value': 0, 'text': 'Item (Código)'},
+                {'value': 1, 'text': 'Item (Descrição)'},
+                {'value': 2, 'text': 'Código de Barras (DUN-14)'}
+            ],
+            type="default"
+        ) }}
+    </div>
+
+    <div id="divContent">
+        {% if 'user_grant' in session %}
+            {% if session['user_grant'] <= 2 %}
+                {% if alert %}
+                    {% if class_alert == 'error' %}
+                        <div class="forms-container" style="height: max-content;" class="disabled">
+                            <h1>Novo desc_item...</h1>
+                            <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
+                                <div>
+                                    <label for="desc_item">Item (Descrição)</label>
+                                    <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
+                                </div>
+                                <div class="split-h">
+                                    <div>
+                                        <label for="cod_item">Código (SKU)</label>
+                                        <input class="address" pattern="[A-Z0-9]{6}" maxlength="6" type="text" name="cod_item" placeholder="SKU..." required>
+                                    </div>
+                                    <div>
+                                        <label for="cod_item">Código de Barras (DUN-14)</label>
+                                        <input class="address" type="number" inputmode="numeric" pattern="\d{14}" minlength="14" maxlength="14" name="cod_dun14" placeholder="DUN-14..." required>
+                                    </div>
+                                </div>
+                                <br>
+                                <input class="btn-fancy" type="submit" value="Cadastrar" style="width: 100%">
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        <div class="mobile-container" >
+            {% if alert %}
+                {% if class_alert == 'error' %}
+                    <div class="msg-error">
+                        <details><summary>A lista não pôde ser carregada!</summary>
+                            {{ alert | safe }}
+                        </details>
+                    </div>
+                {% elif class_alert == 'success' %}
+                    <div class="msg-success flex-v" style="margin: 0; gap: 0">
+                        <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
+                        <span style="font-size: 12px">
+                            {{ alert | safe }}
+                        </span>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="msg-info flex-v" style="margin: 0; gap: 0">
+                    <span style="font-weight: 600">Esta lista pode estar desatualizada.</span>
+                    <span style="font-size: 12px">Caso necessário, inative itens sem movimentação prévia.</span>
+                </div>
+            {% endif %}
+                <div style="max-height: 600px; overflow-y: auto;">
+                    <table id="filterTable">
+                        <tr>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
+                            <th><img class="svg-inv" style="height: 16px; width: 16px;" src="{{ url_for('static', filename='svg/eye-off.svg') }}" title="OCULTO"></th>
+                        </tr>
+                        {% for item in itens %}
+                            <tr>
+                                <td>{{ item['cod_item'] }}</td>
+                                <td>{{ item['desc_item'] }}</td>
+                                <td class="tb-checkbox">
+                                    {% if item['flag_ativo'] %}
+                                        <input 
+                                            type="checkbox" 
+                                            class="check" 
+                                            oninput="confirmOcultar(
+                                                '{{ item['cod_item'] }}',
+                                                this
+                                            )"
+                                        >
+                                    {% else %}
+                                        <input 
+                                            checked
+                                            type="checkbox" 
+                                            class="check" 
+                                            oninput="confirmAtivar(
+                                                '{{ item['cod_item'] }}',
+                                                this
+                                            )"
+                                        >
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block route_script %}
+    <script>
+        function confirmAtivar(cod_item, checkbox) {
+            if (confirm(`Você tem certeza que deseja ATIVAR o item ${cod_item}?`)) {
+                window.location.href = "/produtos/toggle-perm/" + cod_item + "/" + 1;
+            } else {
+                checkbox.checked = true;
+            }
+        }
+
+        function confirmOcultar(cod_item, checkbox) {
+            if (confirm(`Você tem certeza que deseja OCULTAR o item ${cod_item}?`)) {
+                window.location.href = "/produtos/toggle-perm/" + cod_item + "/" + 0;
+            } else {
+                checkbox.checked = false;
+            }
+
+        }
+    </script>
+{% endblock route_script %}
