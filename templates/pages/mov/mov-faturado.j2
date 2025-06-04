@@ -1,0 +1,146 @@
+{% extends 'base.j2' %}
+
+{% block title %}Faturado{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'CARGAS', 'url': 'home_logi', 'title': 'CARGAS'},
+                {'text': 'FATURADAS'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'carga_incomp', 'icon': 'svg/package-badge.svg', 'title': 'INCOMPLETAS'},
+                {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS', 'active': True},
+                {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS'},
+                {'type': 'divider'},
+                {'type': 'disabled', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
+        {% from 'components/filter-container.j2' import filter_container %}
+        {{ filter_container(
+            filter_options=[
+                {'value': 1, 'text': 'Item (Código)'},
+                {'value': 2, 'text': 'Item (Descrição)'},
+                {'value': 0, 'text': 'Endereço (Letra)'},
+                {'value': 3, 'text': 'Lote (Código)'},
+                {'value': 5, 'text': 'Data/Hora'},
+                {'value': 6, 'text': 'Carga (Código)'},
+                {'value': 7, 'text': 'Requisição (Código)'}
+            ],
+            type="default"
+        ) }}
+
+    </div>
+
+    <div id="divContent">
+        <div class="tables-container" id="tables-container">
+            <div class="table-overflow">
+                <table id="filterTable">
+                    <tr>
+                        <th>Endereço</th>
+                        <th>Item (Código)</th>
+                        <th>Item (Descrição)</th>
+                        <th>Lote (Código)</th>
+                        <th style="max-width: 50px;">Qtde.</th>
+                        <th>Data/Hora</th>
+                        <th style="max-width: 50px;">Carga (Código)</th>
+                        <th style="max-width: 50px;">Requisição (Código)</th>
+                    </tr>
+                    {% for item in inv_data %}
+                    <tr>
+                        <td>{{ item['address'] }}</td>
+                        <td>{{ item['cod_item'] }}</td>
+                        <td>{{ item['desc_item'] }}</td>
+                        <td>{{ item['cod_lote'] }}</td>
+                        <td style="text-align: right">{{ item['saldo'] }}</td>
+                        <td>{{ item['time_mov'] }}</td>
+                        <td>{{ item['id_carga'] }} </td>
+                        <td>{{ item['id_req'] }} </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <a href="{{ url_for('export_csv_type', type='faturado') }}">
+                Exportar (CSV)
+            </a>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block route_script %}
+
+    <script>
+
+        $("#formBuscarItens").submit(function(event) {
+            event.preventDefault();
+            buscarItens();
+        });
+
+        function buscarItens() {
+            var codigo = $("#input_code").val();
+
+            $.ajax({
+                type: "POST",
+                url: "/get/item",
+                data: { input_code: codigo },
+                success: function(response) {
+
+                    $("#desc_item").val(response.json_desc_item);
+                    $("#input_code").val("");
+                    $("#cod_item").empty();
+
+                    if (response.json_cod_item.length > 1) {
+                        hideLockLabel("label-cod_item");
+                    }
+
+                    if (response.json_cod_item) {
+                        response.json_cod_item.forEach(function(item) {
+
+                            $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
+                        });
+                    } else {
+                        $("#cod_item").append("<option value=''></option>");
+                    }
+
+                    $("#lote_item").val(response.json_cod_lote);
+
+                    if (response.json_cod_lote === "") {
+                        hideLockLabel("label-cod_lote")
+
+                        $("#lote_item").prop("readonly", false);
+                    } else {
+
+                        $("#lote_item").prop("readonly", true);
+                    }
+                },
+
+                error: function(error) {
+                    console.error("Erro ao buscar itens:", error);
+                }
+            });
+        }
+
+        document.getElementById("form-field").addEventListener("submit", function() {
+                document.getElementById("submitform").disabled = true;
+
+            });
+
+
+
+
+    </script>
+
+{% endblock route_script %}

@@ -143,7 +143,7 @@ function addToBundle(rowIndex) {
     const item = originalRow.cells[1].innerText.trim();
     const endereco = originalRow.cells[0].innerText.trim();
     const lote = originalRow.cells[3].innerText.trim();
-    const qtde = originalRow.cells[4].innerText.trim().split(",")[0];
+    const qtde = originalRow.cells[5].innerText.trim().split(",")[0];
 
     // Verificar se o item já existe na tabela de destino
     if (isDuplicateItem(item, endereco, lote)) {
@@ -263,37 +263,42 @@ function getTableDataAsDict() {
     const table = document.getElementById("bundleTable");
     const data = [];
     
-    // percorrer todas as linhas da tabela (ignorando o cabeçalho)
-    for (let i = 2; i < table.rows.length; i++) { // começando de 2 para ignorar a linha de cabeçalho
-        const row = table.rows[i];
+    try {
 
-        // verificar se a linha contém "ADICIONAR"
-        if (row.cells[row.cells.length - 1]?.innerText.trim() === "ADICIONAR") {
-            continue; // ignora a linha
+        // percorrer todas as linhas da tabela (ignorando o cabeçalho)
+        for (let i = 2; i < table.rows.length; i++) { // começando de 2 para ignorar a linha de cabeçalho
+            const row = table.rows[i];
+    
+            // verificar se a linha contém "ADICIONAR"
+            if (row.cells[row.cells.length - 1]?.innerText.trim() === "ADICIONAR") {
+                continue; // ignora a linha
+            }
+            
+            const rowData = {};
+            
+            const inputCell = row.cells[5]?.querySelector('input'); // input na celula
+            const quantidade = parseInt(inputCell.value) || 0; // (valor do input)
+            
+            if (quantidade === 0) { 
+                continue; 
+            }
+            
+            // endereço: combinação de rua_letra e rua_numero
+            rowData['rua_letra'] = row.cells[0]?.innerText.trim().split(".")[0];
+            rowData['rua_numero'] = row.cells[0]?.innerText.trim().split(".")[1];
+            
+            rowData['cod_item'] = row.cells[1]?.innerText.trim();
+            rowData['lote_item'] = row.cells[3]?.innerText.trim();
+            
+            rowData['qtde_sep'] = quantidade; 
+            
+            rowData['user_id'] = userID;
+            rowData['nrocarga'] = "0"; // valor fixo
+            
+            data.push(rowData);
         }
-        
-        const rowData = {};
-        
-        const inputCell = row.cells[4]?.querySelector('input'); // input na celula
-        const quantidade = parseInt(inputCell.value) || 0; // (valor do input)
-        
-        if (quantidade === 0) { 
-            continue; 
-        }
-        
-        // endereço: combinação de rua_letra e rua_numero
-        rowData['rua_letra'] = row.cells[0]?.innerText.trim().split(".")[0];
-        rowData['rua_numero'] = row.cells[0]?.innerText.trim().split(".")[1];
-        
-        rowData['cod_item'] = row.cells[1]?.innerText.trim();
-        rowData['lote_item'] = row.cells[3]?.innerText.trim();
-        
-        rowData['qtde_sep'] = quantidade; 
-        
-        rowData['user_id'] = userID;
-        rowData['nrocarga'] = "0"; // valor fixo
-        
-        data.push(rowData);
+        return data;
+    } catch (error) {
+        showToast("Erro ao processar dados", 'error');
     }
-    return data;
 }

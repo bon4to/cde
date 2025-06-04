@@ -4,8 +4,7 @@
     display: flex; 
     min-width: 100%; 
     flex-wrap: wrap; 
-    gap: 8px; 
-    margin: 0 0 8px 0;
+    gap: 8px;
 }
 
 .titles-container {

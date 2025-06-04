@@ -1,0 +1,61 @@
+{% extends "pages/estoque.j2" %}
+
+    {% block svg %}
+        <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/group.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque') }}';">
+        </a>
+        <a class="aux-button {% if request.endpoint == 'estoque_enderecado' %}active{% endif %}">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/land-plot.svg') }}" title="ESTOQUE (ENDEREÇADO)" alt="" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';">
+        </a>
+        <a class="aux-button {% if request.endpoint == 'estoque_preset' %}active{% endif %}">
+            <img class="svg-gray" src="{{ url_for('static', filename='svg/blend.svg') }}" title="ESTOQUE (PRESET)" alt="" onclick="window.location.href='{{ url_for('estoque_preset') }}';">
+        </a>
+    {% endblock svg %}
+
+    {% block table %}
+        {% if search_term %}
+            <div class="split-h">
+                <div>
+                    <form action="/estoque/presets" method="post">
+                        <div class="flex-h" style="align-items: center;">
+                            <select class="address" id="preset_id" name="preset_id" value="{{ search_term }}">
+                                <option value="{{ search_term }}">Preset 0{{ search_term }} (Atual)</option>
+                                <hr>
+                                <!-- TODO for preset in preset_list  -->
+                                <option value="1">Preset 01</option>
+                                <option value="2">Preset 02</option>
+                                <option value="3">Preset 03</option>
+                                <option value="4">Preset 04</option>
+                            </select>
+                            <button class="button-mini btn-fancy" type="submit">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="CARREGAR ESTOQUE DOS ITENS">
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
+                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                </a>
+            </div>
+        {% endif %}
+        <div class="table-overflow">
+            <table id="filterTable">
+                <thead>
+                    <tr>
+                        <th>Item (Código)</th>
+                        <th>Item (Descrição)</th>
+                        <th>QTDE (Efetiva)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in inv_data %}
+                        <tr>
+                            <td class="number">{{ item['cod_item'] }}</td>
+                            <td>{{ item['desc_item'] }}</td>
+                            <td class="number">{{ item['saldo'] }}.0</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endblock table %}

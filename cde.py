@@ -2247,7 +2247,7 @@ class misc:
                     • Contate o suporte. 
                 ''')
                 return render_template(
-                    'components/menus/alert.html', 
+                    'components/menus/alert.j2', 
                     alert_type=alert_type, 
                     alert_msge=alert_msge, 
                     alert_more=alert_more, 
@@ -2345,7 +2345,7 @@ def inject_unit() -> dict:
 @app.errorhandler(403)
 def page_not_found(e) -> tuple[str, 403]:
     return render_template(
-        '403.html',
+        '403.j2',
         error_code=403,
         error=e
     ), 403
@@ -2354,7 +2354,7 @@ def page_not_found(e) -> tuple[str, 403]:
 @app.errorhandler(404)
 def page_not_found(e) -> tuple[str, 404]:
     return render_template(
-        '404.html',
+        '404.j2',
         error_code=404,
         error=e
     ), 404
@@ -2363,7 +2363,7 @@ def page_not_found(e) -> tuple[str, 404]:
 @app.errorhandler(502)
 def page_not_found(e) -> tuple[str, 502]:
     return render_template(
-        '502.html',
+        '502.j2',
         error_code=502,
         error=e
     ), 502
@@ -2372,7 +2372,7 @@ def page_not_found(e) -> tuple[str, 502]:
 @app.errorhandler(503)
 def page_not_found(e) -> tuple[str, 503]:
     return render_template(
-        '503.html',
+        '503.j2',
         error_code=503,
         error=e
     ), 503
@@ -2400,32 +2400,32 @@ def index() -> Response:
 @app.route('/debug-page/')
 @cde.verify_auth('DEV000')
 def debug_page() -> str:
-    return render_template('pages/debug-page.html')
+    return render_template('pages/debug-page.j2')
 
 
 @app.route('/cde/home/')
 @cde.verify_auth('CDE001')
 def home() -> str:
     return render_template(
-        'pages/index/cde-index.html', 
+        'pages/index/cde-index.j2', 
         frase=misc.get_frase()
     )
 
 
 @app.route('/logi/home/')
-@cde.verify_auth('CDE001')
+@cde.verify_auth('CDE001', 'logi')
 def home_logi() -> str:
     return render_template(
-        'pages/index/tl-index.html', 
+        'pages/index/tl-index.j2', 
         frase=misc.get_frase()
     )
 
 
 @app.route('/prod/home/')
-@cde.verify_auth('CDE001')
+@cde.verify_auth('CDE001', 'prod')
 def home_prod() -> str:
     return render_template(
-        'pages/index/hp-index.html', 
+        'pages/index/hp-index.j2', 
         frase=misc.get_frase()
     )
 
@@ -2433,7 +2433,7 @@ def home_prod() -> str:
 @app.route('/in-dev/')
 @cde.verify_auth('CDE001')
 def in_dev() -> str:
-    return render_template('pages/error-handler.html')
+    return render_template('pages/error-handler.j2')
 
 
 @app.route('/users/')
@@ -2445,7 +2445,7 @@ def users() -> str:
     user_perm = [item['id_perm'] for item in user_perm]
     
     return render_template(
-        'pages/users/users.html', 
+        'pages/users/users.j2', 
         users=users,
         user_perm=user_perm
     )
@@ -2497,7 +2497,7 @@ def permissions() -> str:
     permissions = UserUtils.get_permissions()
     
     return render_template(
-        'pages/cde-permissions.html',
+        'pages/cde-permissions.j2',
         permissions=permissions
     )
 
@@ -2516,7 +2516,7 @@ def permissions_id(id_perm) -> str:
     id_perm_data = UserUtils.get_permissions(id_perm)
     
     return render_template(
-        'pages/cde-permissions.html',
+        'pages/cde-permissions.j2',
         permissions=permissions,
         id_perm_data=id_perm_data
     )
@@ -2535,7 +2535,7 @@ def api() -> str:
             if re.search(r'\b(DELETE|INSERT|UPDATE)\b', query, re.IGNORECASE):
                 result = [["Os comandos 'INSERT', 'DELETE' e 'UPDATE' não são permitidos."]]
                 return render_template(
-                    'pages/cde/db-cfg/data-fetcher.html', 
+                    'pages/cde/db-cfg/data-fetcher.j2', 
                     result=result,
                     tables=tables,
                     query=query,
@@ -2551,7 +2551,7 @@ def api() -> str:
                     columns = []
 
                 return render_template(
-                    'pages/cde/db-cfg/data-fetcher.html', 
+                    'pages/cde/db-cfg/data-fetcher.j2', 
                     result=result,
                     columns=columns,
                     tables=tables,
@@ -2562,7 +2562,7 @@ def api() -> str:
     except Exception as e:
         print("Erro na rota /database:", e)
     return render_template(
-        'pages/cde/db-cfg/data-fetcher.html'
+        'pages/cde/db-cfg/data-fetcher.j2'
     )
 
 
@@ -2570,7 +2570,7 @@ def api() -> str:
 @cde.verify_auth('CDE001')
 def cde_cfg() -> str:
     return render_template(
-        'pages/cde/cfg-index.html'
+        'pages/cde/cfg-index.j2'
     )
 
 
@@ -2579,7 +2579,7 @@ def cde_cfg() -> str:
 def cde_query_list() -> str:
     # TODO: implementar 'open to edit'
     return render_template(
-        'pages/cde/db-cfg/queries/query-list.html',
+        'pages/cde/db-cfg/queries/query-list.j2',
         q_list = dbUtils.QueryManager.get_all_queries()
     )
 
@@ -2590,13 +2590,13 @@ def pagina_login() -> Response | str:
         # define o nome da rota de acesso 
         cde.verify_auth('CDE003')
         return redirect(url_for('index'))
-    return render_template('pages/login.html')
+    return render_template('pages/login.j2')
 
 
 @app.route('/cde/profile/', methods=['GET'])
 def cde_profile() -> str | None:
     if session.get('logged_in'):
-        return render_template('pages/account.html')
+        return render_template('pages/account.j2')
     return None
 
 
@@ -2609,7 +2609,7 @@ def cde_notifications() -> str:
     notifications, _ = nm.getNotifications(userid)
     
     return render_template(
-        'components/menus/notifications.html',
+        'components/menus/notifications.j2',
         notifications=notifications
     )
 
@@ -2624,7 +2624,7 @@ def cde_notifications_id(id_notification) -> str:
     notification, _ = nm.getNotifications(userid, id_notification)
     
     return render_template(
-        'components/menus/notifications.html',
+        'components/menus/notifications.j2',
         notifications=notifications,
         notification=notification
     )
@@ -2719,7 +2719,7 @@ def login():
         # ou seja, user não existe
             alert_msge = 'O usuário não foi encontrado. Tente novamente.'
             return render_template(
-                'pages/login.html',
+                'pages/login.j2',
                 alert_msge=alert_msge
             )
         
@@ -2727,7 +2727,7 @@ def login():
         # verifica se a senha do user corresponde à hash
             alert_msge = 'A senha está incorreta. Tente novamente.'
             return render_template(
-                'pages/login.html', 
+                'pages/login.j2', 
                 alert_msge=alert_msge
             )
 
@@ -2780,7 +2780,7 @@ def login():
                 UserUtils.set_ult_acesso(user_id)
 
                 return render_template(
-                    'components/menus/alert-input.html', 
+                    'components/menus/alert-input.j2', 
                     alert_type=alert_type,
                     alert_msge=alert_msge,
                     alert_more=alert_more,
@@ -2802,7 +2802,7 @@ def change_password() -> str | Response:
         alert_more = '/cde/profile/change-password'
         url_return = 'Informe sua senha atual...'
         return render_template(
-            'components/menus/alert-input.html', 
+            'components/menus/alert-input.j2', 
             alert_type=alert_type,
             alert_msge=alert_msge,
             alert_more=alert_more,
@@ -2817,7 +2817,7 @@ def change_password() -> str | Response:
             alert_more = '/users/reset-password'
             url_return = 'Digite sua nova senha...'
             return render_template(
-                'components/menus/alert-input.html', 
+                'components/menus/alert-input.j2', 
                 alert_type=alert_type,
                 alert_msge=alert_msge,
                 alert_more=alert_more,
@@ -2864,13 +2864,13 @@ def mov() -> str:
     result = EstoqueUtils.get_inv_address_with_batch()
 
     return render_template(
-        'pages/mov/mov.html', 
+        'pages/mov/mov.j2', 
         inv_data=result
     )
 
 
 @app.route('/logi/mov/historico/')
-@cde.verify_auth('MOV003')
+@cde.verify_auth('MOV003', 'logi')
 def historico() -> str:
     page = request.args.get('page', 1, type=int)
     per_page = 14
@@ -2878,7 +2878,7 @@ def historico() -> str:
     total_pages = ceil(row_count / per_page)
 
     return render_template(
-        'pages/mov/mov-historico.html', 
+        'pages/mov/mov-historico.j2', 
         estoque=estoque, page=page, 
         total_pages=total_pages, max=max, min=min, 
         row_count=row_count
@@ -2905,7 +2905,7 @@ def historico_search() -> str:
 
         if not search_term or search_index not in option_texts:
             return render_template(
-                'pages/mov/mov-historico.html', 
+                'pages/mov/mov-historico.j2', 
                 estoque=[], 
                 search_term=search_term, 
                 search_row_text=f"coluna inválida ({search_index})",
@@ -2924,7 +2924,7 @@ def historico_search() -> str:
         ]
 
         return render_template(
-            'pages/mov/mov-historico.html', 
+            'pages/mov/mov-historico.j2', 
             estoque=filtered_estoque, 
             search_term=search_term, 
             page = 0, max=max, min=min, 
@@ -2937,12 +2937,12 @@ def historico_search() -> str:
 
 
 @app.route('/logi/mov/faturado/')
-@cde.verify_auth('MOV005')
+@cde.verify_auth('MOV005', 'logi')
 def faturado() -> str:
     inv_data = EstoqueUtils.get_inv_address_with_batch_fat()
 
     return render_template(
-        'pages/mov/mov-faturado.html', 
+        'pages/mov/mov-faturado.j2', 
         inv_data=inv_data
     )
 
@@ -2970,7 +2970,7 @@ def moving() -> str | Response:
         ''')
         
         return render_template(
-            'components/menus/alert.html', 
+            'components/menus/alert.j2', 
             alert_type=alert_type,
             alert_msge=alert_msge,
             alert_more=alert_more, 
@@ -3048,7 +3048,7 @@ def moving() -> str | Response:
             ''')
             
             return render_template(
-                'components/menus/alert.html', 
+                'components/menus/alert.j2', 
                 alert_type=alert_type,
                 alert_msge=alert_msge,
                 alert_more=alert_more, 
@@ -3130,11 +3130,9 @@ def moving() -> str | Response:
 @cde.verify_auth('MOV008')
 def stock_map():
     # TODO: fix map
-    if debug:
-        return render_template(
-            'pages/stock-map.html'
-        )
-    return force_error(503)
+    return render_template(
+        'pages/stock-map.j2'
+    )
 
 
 @app.route('/logi/req/moving/bulk/', methods=['POST'])
@@ -3296,7 +3294,7 @@ def carga_incomp():
     carga_list = CargaUtils.listed_carga_incomp()
     
     return render_template(
-        'pages/mov/mov-carga/mov-carga-incompleta.html',
+        'pages/mov/mov-carga/mov-carga-incompleta.j2',
         carga_incomp=result,
         columns=columns,
         carga_list=carga_list
@@ -3333,7 +3331,7 @@ def carga_incomp_id(id_carga) -> str:
         result_local, columns_local = [], []
     
     return render_template(
-        'pages/mov/mov-carga/mov-carga-incompleta.html',
+        'pages/mov/mov-carga/mov-carga-incompleta.j2',
         alert=alert, class_alert=class_alert,
         carga_incomp=result,
         columns=columns,
@@ -3403,28 +3401,28 @@ def conclude_incomp(id_carga) -> Response:
 
 
 @app.route('/envase/', methods=['GET'])
-@cde.verify_auth('ENV006')
+@cde.verify_auth('ENV006', 'prod')
 def envase() -> str:
     envase_list = Schedule.EnvaseUtils.get_envase()
 
     return render_template(
-        'pages/envase/envase.html', 
+        'pages/envase/envase.j2', 
         envase=envase_list
     )
 
 
 @app.route('/envase/calendar/')
-@cde.verify_auth('ENV008')
+@cde.verify_auth('ENV008', 'prod')
 def calendar_envase() -> str:
     envase_list = Schedule.EnvaseUtils.get_envase()
     return render_template(
-        'pages/envase/envase-calendar.html', 
+        'pages/envase/envase-calendar.j2', 
         envase=envase_list
     )
 
 
 @app.route('/envase/delete/<id_envase>/')
-@cde.verify_auth('ENV007')
+@cde.verify_auth('ENV007', 'prod')
 def delete_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3439,7 +3437,7 @@ def delete_envase(id_envase) -> Response:
 
 
 @app.route('/envase/done/<id_envase>/')
-@cde.verify_auth('ENV006')
+@cde.verify_auth('ENV006', 'prod')
 def conclude_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3454,7 +3452,7 @@ def conclude_envase(id_envase) -> Response:
 
 
 @app.route('/envase/pending/<id_envase>/')
-@cde.verify_auth('ENV007')
+@cde.verify_auth('ENV007', 'prod')
 def set_pending_envase(id_envase) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3469,7 +3467,7 @@ def set_pending_envase(id_envase) -> Response:
 
 
 @app.route('/envase/edit/', methods=['GET', 'POST'])
-@cde.verify_auth('ENV007')
+@cde.verify_auth('ENV007', 'prod')
 def edit_envase() -> Response | str:
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -3518,13 +3516,13 @@ def edit_envase() -> Response | str:
             } for row in cursor.fetchall()]
 
         return render_template(
-            'pages/envase/envase-edit.html', 
+            'pages/envase/envase-edit.j2', 
             env_edit=env_edit
         )
 
 
 @app.route('/envase/insert/', methods=['POST'])
-@cde.verify_auth('ENV006')
+@cde.verify_auth('ENV006', 'prod')
 def insert_envase() -> Response:
     # TODO: criar função auxiliar
     if request.method == 'POST':
@@ -3571,7 +3569,7 @@ def insert_envase() -> Response:
 
 
 @app.route('/processamento/', methods=['GET'])
-@cde.verify_auth('PRC010')
+@cde.verify_auth('PRC010', 'prod')
 def producao() -> str:
     id_user = session.get('id_user')
     user_perm = UserUtils.get_user_permissions(id_user)
@@ -3579,25 +3577,25 @@ def producao() -> str:
     producao_list = Schedule.ProcessamentoUtils.get_producao()
     
     return render_template(
-        'pages/processamento/processamento.html', 
+        'pages/processamento/processamento.j2', 
         producao=producao_list, 
         user_perm=user_perm
     )
 
 
 @app.route('/processamento/calendar/')
-@cde.verify_auth('PRC012')
+@cde.verify_auth('PRC012', 'prod')
 def calendar_producao() -> str:
     producao_list =  Schedule.ProcessamentoUtils.get_producao()
 
     return render_template(
-        'pages/processamento/processamento-calendar.html', 
+        'pages/processamento/processamento-calendar.j2', 
         producao=producao_list
     )
 
 
 @app.route('/processamento/delete/<id_producao>/')
-@cde.verify_auth('PRC011')
+@cde.verify_auth('PRC011', 'prod')
 def delete_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3612,7 +3610,7 @@ def delete_producao(id_producao) -> Response:
 
 
 @app.route('/processamento/done/<id_producao>/')
-@cde.verify_auth('PRC010')
+@cde.verify_auth('PRC010', 'prod')
 def conclude_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3627,7 +3625,7 @@ def conclude_producao(id_producao) -> Response:
 
 
 @app.route('/processamento/pending/<id_producao>/')
-@cde.verify_auth('PRC011')
+@cde.verify_auth('PRC011', 'prod')
 def set_pending_producao(id_producao) -> Response:
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
@@ -3642,7 +3640,7 @@ def set_pending_producao(id_producao) -> Response:
 
 
 @app.route('/processamento/edit/', methods=['GET', 'POST'])
-@cde.verify_auth('PRC011')
+@cde.verify_auth('PRC011', 'prod')
 def edit_producao() -> Response | str:
     id_user = session.get('id_user')
     user_perm = UserUtils.get_user_permissions(id_user)
@@ -3699,7 +3697,7 @@ def edit_producao() -> Response | str:
             prod_edit =  Schedule.ProcessamentoUtils.get_producao()
 
         return render_template(
-            'pages/processamento/processamento-edit.html', 
+            'pages/processamento/processamento-edit.j2', 
             prod_edit=prod_edit, 
             user_perm=user_perm, 
             mode=mode
@@ -3707,7 +3705,7 @@ def edit_producao() -> Response | str:
 
 
 @app.route('/processamento/insert/', methods=['POST'])
-@cde.verify_auth('PRC010')
+@cde.verify_auth('PRC010', 'prod')
 def insert_producao() -> Response:
     if request.method == 'POST':
         linha           = request.form['linha']
@@ -3747,7 +3745,7 @@ def insert_producao() -> Response:
 @cde.verify_auth('CDE001')
 def about() -> str:
     return render_template(
-        'pages/about.html',
+        'pages/about.j2',
         about=True
     )
 
@@ -3760,7 +3758,7 @@ def users_edit() -> str | None:
         user_perm = UserUtils.get_user_permissions(req_id_user)
         permissions = UserUtils.get_permissions()
         return render_template(
-            'pages/users/users-edit.html', 
+            'pages/users/users-edit.j2', 
             user_perm=user_perm,
             permissions=permissions, 
             req_id_user=req_id_user,
@@ -3870,7 +3868,7 @@ def cadastrar_usuario() -> Response | str:
                 alert_more = 'MOTIVO:\n• Já existe um usuário com este login.'
                 
                 return render_template(
-                    'components/menus/alert.html', 
+                    'components/menus/alert.j2', 
                     alert_type=alert_type,
                     alert_msge=alert_msge,
                     alert_more=alert_more, 
@@ -3883,7 +3881,7 @@ def cadastrar_usuario() -> Response | str:
                 alert_more = f'DESCRIÇÃO DO ERRO:\n• {e}.'
                 
                 return render_template(
-                    'components/menus/alert.html', 
+                    'components/menus/alert.j2', 
                     alert_type=alert_type,
                     alert_msge=alert_msge, 
                     alert_more=alert_more, 
@@ -3892,7 +3890,7 @@ def cadastrar_usuario() -> Response | str:
                 
         else:
             return redirect(url_for('users'))
-    return render_template('pages/users/users.html')
+    return render_template('pages/users/users.j2')
 
 
 @app.route('/logi/cargas/<string:id_carga>/', methods=['GET', 'POST'])
@@ -3961,7 +3959,7 @@ def carga_id(id_carga) -> str:
             class_alert = 'error'
 
         return render_template(
-            'pages/mov/mov-carga/mov-carga.html',
+            'pages/mov/mov-carga/mov-carga.j2',
             result=result, columns=columns, alert=alert,
             class_alert=class_alert, id_carga=id_carga, 
             cod_item=cod_item, qtde_solic=qtde_solic,
@@ -3971,7 +3969,7 @@ def carga_id(id_carga) -> str:
     
     # se não for uma requisição GET, renderiza a página com dados vazios
     result = []
-    return render_template('pages/mov/mov-carga/mov-carga.html', result=result, columns=[])
+    return render_template('pages/mov/mov-carga/mov-carga.j2', result=result, columns=[])
  
 
 @app.route('/logi/cargas/', methods=['GET', 'POST'])
@@ -3990,13 +3988,13 @@ def cargas() -> str:
             alert = f'{result[0][0]}'
             class_alert = 'error'
         return render_template(
-            'pages/mov/mov-carga/mov-carga.html',
+            'pages/mov/mov-carga/mov-carga.j2',
             result=result, columns=columns,
             alert=alert, class_alert=class_alert
         )
     result = []
     return render_template(
-        'pages/mov/mov-carga/mov-carga.html',
+        'pages/mov/mov-carga/mov-carga.j2',
         result=result
     )
 
@@ -4014,14 +4012,14 @@ def mov_request() -> str:
             alert = result[0][0]
     
         return render_template(
-            'pages/mov/mov-request/mov-request.html',
+            'pages/mov/mov-request/mov-request.j2',
             result=result,
             columns=columns,
             alert=alert,
             class_alert=class_alert
         )
     return render_template(
-        'pages/mov/mov-request/mov-request.html'
+        'pages/mov/mov-request/mov-request.j2'
     )
 
 
@@ -4055,7 +4053,7 @@ def mov_request_id(id_req) -> str:
             alert = result[0][0]
 
         return render_template(
-            'pages/mov/mov-request/mov-request.html',
+            'pages/mov/mov-request/mov-request.j2',
             id_req=id_req,
             result=result, columns=columns,
             result_local=result_local, columns_local=columns_local,
@@ -4064,7 +4062,7 @@ def mov_request_id(id_req) -> str:
             cod_item_list=cod_item_list
         )
     return render_template(
-        'pages/mov/mov-request/mov-request.html'
+        'pages/mov/mov-request/mov-request.j2'
     )
 
 
@@ -4077,7 +4075,7 @@ def req_sep_pend(id_req) -> str:
     user_info = UserUtils.get_userdata(id_user)
     obs_carga = CargaUtils.get_obs_with_carga(id_req)
     return render_template(
-        'pages/mov/mov-request/mov-request-separacao-pend.html', 
+        'pages/mov/mov-request/mov-request-separacao-pend.j2', 
         id_req=id_req, 
         user_info=user_info,
         obs_carga=obs_carga,
@@ -4098,7 +4096,7 @@ def req_sep_done(id_req) -> str:
     user_info = UserUtils.get_userdata(id_user)
     obs_carga = CargaUtils.get_obs_with_carga(id_req)
     return render_template(
-        'pages/mov/mov-request/mov-request-separacao-done.html', 
+        'pages/mov/mov-request/mov-request-separacao-done.j2', 
         id_req=id_req,
         seq=seq, 
         user_info=user_info,
@@ -4195,14 +4193,14 @@ def mov_op() -> str:
                 alert = result[0][0]
         
             return render_template(
-                'pages/mov/mov-op.html',
+                'pages/mov/mov-op.j2',
                 result=result,
                 columns=columns,
                 alert=alert,
                 class_alert=class_alert
             )
         return render_template(
-            'pages/mov/mov-op.html'
+            'pages/mov/mov-op.j2'
         )
     return force_error(503)
 
@@ -4308,7 +4306,7 @@ def carga_sep_pend(id_carga) -> str:
     obs_carga = CargaUtils.get_obs_with_carga(id_carga)
     fant_cliente   = CargaUtils.get_cliente_with_carga(id_carga)
     return render_template(
-        'pages/mov/mov-carga/mov-carga-separacao-pend.html', 
+        'pages/mov/mov-carga/mov-carga-separacao-pend.j2', 
         id_carga=id_carga, 
         user_info=user_info,
         fant_cliente=fant_cliente,
@@ -4329,7 +4327,7 @@ def carga_sep_done(id_carga) -> str:
     obs_carga    = CargaUtils.get_obs_with_carga(id_carga)
     fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
     return render_template(
-        'pages/mov/mov-carga/mov-carga-separacao-done.html', 
+        'pages/mov/mov-carga/mov-carga-separacao-done.j2', 
         id_carga=id_carga,
         seq=seq, 
         user_info=user_info,
@@ -4491,25 +4489,25 @@ def list_all_separations():
 
 
 @app.route('/produtos/toggle-perm/<string:cod_item>/<int:flag>/', methods=['GET', 'POST'])
-@cde.verify_auth('ITE005')
+@cde.verify_auth('ITE005', 'prod')
 def produtos_toggle_perm(cod_item, flag) -> Response:
     ProdutoUtils.toggle_item_flag(cod_item, flag)
     return redirect(url_for('produtos_flag'))
 
 
 @app.route('/produtos/status/', methods=['GET', 'POST'])
-@cde.verify_auth('ITE005')
+@cde.verify_auth('ITE005', 'prod')
 def produtos_flag() -> str:
     itens = ProdutoUtils.get_all_itens()
     
     return render_template(
-        'pages/produtos-flag.html',
+        'pages/produtos-flag.j2',
         itens=itens
     )
 
 
 @app.route('/produtos/', methods=['GET', 'POST'])
-@cde.verify_auth('ITE005')
+@cde.verify_auth('ITE005', 'prod')
 def produtos() -> str:
     itens = ProdutoUtils.get_active_itens() # salva os itens ativos
     if request.method == 'POST':
@@ -4542,13 +4540,13 @@ def produtos() -> str:
             class_alert = 'error'
         itens = ProdutoUtils.get_active_itens()
         return render_template(
-            'pages/produtos.html', 
+            'pages/produtos.j2', 
             itens=itens, 
             alert=alert, 
             class_alert=class_alert
         )
     return render_template(
-        'pages/produtos.html', 
+        'pages/produtos.j2', 
         itens=itens
     )
 
@@ -4563,7 +4561,7 @@ def etiqueta() -> str:
         cod_lote  = str(request.form['lote_item'])
 
         return stickerUtils.generate(qr_text, desc_item, cod_item, cod_lote)
-    return render_template('pages/etiqueta.html', produtos=produtos)
+    return render_template('pages/etiqueta.j2', produtos=produtos)
 
 
 @app.route('/rotulo/', methods=['GET', 'POST'])
@@ -4613,7 +4611,7 @@ def rotulo() -> Response | str:
                 }
             )
 
-    return render_template('pages/rotulo.html')
+    return render_template('pages/rotulo.j2')
 
 
 @app.route('/get/linhas/', methods=['POST'])
@@ -4673,7 +4671,7 @@ def get_linhas() -> Response | None:
 
 
 @app.route('/estoque/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def estoque() -> str:
     if request.method == 'POST':
         date = request.form['date']
@@ -4682,14 +4680,14 @@ def estoque() -> str:
         date = False
         inv_data = EstoqueUtils.get_saldo_view()
     return render_template(
-        'pages/estoque.html', 
+        'pages/estoque.j2', 
         inv_data=inv_data,
         search_term=date
     )
 
 
 @app.route('/estoque/enderecado/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def estoque_enderecado() -> str:
     if request.method == 'POST':
         date = request.form['date']
@@ -4698,14 +4696,14 @@ def estoque_enderecado() -> str:
         result = EstoqueUtils.get_inv_address_with_batch()
         date = False
     return render_template(
-        'pages/estoque-enderecado.html',
+        'pages/estoque-enderecado.j2',
         inv_data=result,
         search_term=date
     )
 
 
 @app.route('/inv/report/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def inv_report() -> str:
     if request.method == 'POST':
         date = request.form['date']
@@ -4714,14 +4712,14 @@ def inv_report() -> str:
         result = EstoqueUtils.get_inv_report()
         date = False
     return render_template(
-        'pages/inv-report.html',
+        'pages/inv-report.j2',
         inv_data=result,
         search_term=date
     )
 
 
 @app.route('/estoque/presets/', methods=['GET', 'POST'])
-@cde.verify_auth('MOV004')
+@cde.verify_auth('MOV004', 'logi')
 def estoque_preset() -> str:
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
@@ -4729,7 +4727,7 @@ def estoque_preset() -> str:
     else:
         saldo_preset = EstoqueUtils.get_saldo_preset(preset_id)
     return render_template(
-        'pages/estoque-preset.html',
+        'pages/estoque-preset.j2',
         inv_data=saldo_preset,
         search_term=preset_id
     )
@@ -4744,7 +4742,7 @@ def cargas_preset() -> str:
     else:
         cargas_preset = EstoqueUtils.get_saldo_preset(preset_id)
     return render_template(
-        'pages/estoque-preset.html',
+        'pages/estoque-preset.j2',
         inv_data=cargas_preset,
         search_term=preset_id
     )
@@ -4781,7 +4779,7 @@ def export_csv_type(type) -> str | Response:
         alert_msge = 'A tabela não tem informações suficientes para exportação. \n'
         alert_more = 'POSSÍVEIS SOLUÇÕES:\n• Verifique se a tabela possui mais de uma linha.\n• Contate o suporte.'
         return render_template(
-            'components/menus/alert.html', 
+            'components/menus/alert.j2', 
             alert_type=alert_type, 
             alert_msge=alert_msge,
             alert_more=alert_more, 

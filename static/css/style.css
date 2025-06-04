@@ -251,28 +251,6 @@ hr.complete {
 }
 
 
-/* query field */
-#query-field {
-    box-shadow: 0 0 40px rgb(0, 0, 0, 0.4);
-}
-
-textarea.query {
-    resize: none;
-    font-size: 18px;
-    text-align: left;
-    height: 280px; 
-    overflow-wrap: nowrap; 
-    min-width: 800px;
-    font-family: 'Fira Code', monospace;
-    margin: 0;
-    border: 0 solid transparent;
-}
-
-textarea.query:focus {
-    box-shadow: none;
-    border: 0 solid transparent;
-}
-
 /* others */
 
 div.back-modal {
@@ -399,7 +377,6 @@ header {
 }
 
 .alert-more {
-    font-size: 16px;
     color: #3f3f3f;
 }
 

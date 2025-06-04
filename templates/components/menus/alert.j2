@@ -1,0 +1,20 @@
+{% extends 'base.j2' %}
+
+{% block title %}Alerta{% endblock title %}
+
+{% block content %}
+
+    <div id="divContent">
+        <div class="form-login" style="max-width: 520px; max-height: 400px; padding: 32px">
+            <div class="split-v">
+                <div class="flex-v">
+                    <h1 class="text-main-color">{{ alert_type | safe }}</h1>
+                    <h1 class="alert-message">{{ alert_msge | safe }}</h1>
+                    <p class="alert-more">{{ alert_more | safe }}</p>
+                </div>
+                <a class="btn-fancy" onclick="goBack()">VOLTAR</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
