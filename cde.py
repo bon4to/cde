@@ -194,7 +194,7 @@ class cde:
         Renders the 'access denied' alert page.
         """
         return render_template(
-            'components/menus/alert.html',
+            'components/menus/alert.j2',
             alert_type='SEM PERMISSÕES',
             alert_msge='Você não tem permissão para acessar esta página.',
             alert_more='SOLUÇÕES:\n• Solicite ao seu supervisor um novo nível de acesso.',

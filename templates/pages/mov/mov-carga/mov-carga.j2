@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.j2' %}
 
 {% block title %}Cargas{% endblock title %}
 
@@ -6,7 +6,7 @@
 
     <div class="titles-ruler">
         
-        {% from 'components/title-route.html' import title_container %}
+        {% from 'components/title-route.j2' import title_container %}
         {{ title_container(
             id_page=session['id_page'],
             breadcrumbs=[
@@ -356,7 +356,7 @@
                 <input type="hidden" id="qtde_item_input" name="qtde_solic">
             </form>
             <!-- PopUp -->
-            {% include "components/menus/quantity-popup.html" %}
+            {% include "components/menus/quantity-popup.j2" %}
         {% endif %}
     </div>
 
