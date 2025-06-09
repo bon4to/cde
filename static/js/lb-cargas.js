@@ -99,7 +99,11 @@ function listSeparationsLocalStorage(routePage) {
     }
 
     // ordena as chaves em ordem decrescente
-    keys.sort((a, b) => b.localeCompare(a));
+    keys.sort((a, b) => {
+        const numA = parseInt(a.replace('separacao-carga-', ''), 10);
+        const numB = parseInt(b.replace('separacao-carga-', ''), 10);
+        return numB - numA;
+    });
 
 
     // se nenhuma separação foi iniciada, adiciona uma linha
