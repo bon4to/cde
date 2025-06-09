@@ -76,6 +76,13 @@ td {
     border-bottom: 4px solid var(--main-color);
 }
 
+.sub-total td {
+    color: rgb(27, 26, 26);
+    transition: 0.1s ease-in-out all;
+    background-color: rgba(52, 49, 50, 0.1);
+    border-bottom: 4px solid var(--main-color);
+}
+
 .selectable-row.sub-total:hover td {
     color: rgb(27, 26, 26);
     transition: 0.1s ease-in-out all;
