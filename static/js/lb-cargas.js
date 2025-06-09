@@ -415,7 +415,12 @@ function listSeparationsFromServer(routePage, reportDir='cargas') {
             cell.colSpan = 1;
             cell.textContent = files.error;
         } else {
-            files.forEach(file => {
+            files.sort((a, b) => {
+                const numA = parseInt(a.replace('separacao-carga-', '').replace('.json', ''), 10);
+                const numB = parseInt(b.replace('separacao-carga-', '').replace('.json', ''), 10);
+                return numB - numA;
+            })
+            .forEach(file => {
                 const cargaNumber = file.replace('separacao-carga-', '').replace('.json', '');
                 const row = tableBody.insertRow();
                 const cell = row.insertCell(0);
