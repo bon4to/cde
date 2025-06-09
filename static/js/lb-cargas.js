@@ -59,6 +59,25 @@ function redirectQuickRouting(routePage, nroCarga) {
 }
 
 
+function listSeparations(pageRedirect='/logi/cargas/', source='server', reportDir='cargas') {
+    // searches for separations into the server storage 
+    // .json files
+    if (source == 'server') {
+        listSeparationsFromServer(pageRedirect, reportDir);
+        return
+
+    // searches for separations into the localStorage
+    // it works like a browser cache 
+    // not shared between different devices or users!!
+    } else if (source == 'browser') {
+        listSeparationsLocalStorage(pageRedirect);
+        return
+    }
+
+    showToast('Fonte de dados inválida.', 'error', 10);
+}
+
+
 function listSeparationsLocalStorage(routePage) {
     // limpa a tabela atual, evitando duplicações e dados desatualizados
     const allSeparationsTable = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
@@ -74,7 +93,8 @@ function listSeparationsLocalStorage(routePage) {
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key.startsWith('separacao-carga-')) {
-            keys.push(key);
+            const idCarga = key.replace('separacao-carga-', '');
+            keys.push(idCarga);
         }
     }
 
@@ -93,24 +113,80 @@ function listSeparationsLocalStorage(routePage) {
     // remove prefixo 'separacao-carga-'
     // percorre as chaves e adiciona as linhas na tabela
     keys.forEach(key => {
-        const cargaNumber = key.replace('separacao-carga-', '');
+        console.log(key);
         const row = allSeparationsTable.insertRow();
-        row.insertCell(0).textContent = cargaNumber;
+        row.insertCell(0).textContent = key;
         row.classList.add("selectable-row");
 
-        if (cargaNumber === nroCarga) {
+        if (key === nroCarga) {
             row.classList.add("active");
             activeRow = row;
         } 
 
         row.addEventListener('click', function() {
-            window.location.href = `/mov/${routePage}/${cargaNumber}`;
+            window.location.href = `/logi/${routePage}/${key}`;
         });
     });
 
     if (activeRow && nroCarga != '0') {
         activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+}
+
+
+function listSeparationsFromServer(routePage, reportDir='cargas') {
+    const payload = {
+        report_dir: reportDir
+    };
+    fetch('/get/list-all-separations', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+    .then(response => response.json())
+    .then(files => {
+        const tableBody = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';
+
+        let activeRow = null;
+
+        if (files.error) {
+            const row = tableBody.insertRow();
+            const cell = row.insertCell(0);
+            cell.colSpan = 1;
+            cell.textContent = files.error;
+        } else {
+            files.sort((a, b) => {
+                const numA = parseInt(a.replace('separacao-carga-', '').replace('.json', ''), 10);
+                const numB = parseInt(b.replace('separacao-carga-', '').replace('.json', ''), 10);
+                return numB - numA;
+            })
+            .forEach(file => {
+                const cargaNumber = file.replace('separacao-carga-', '').replace('.json', '');
+                const row = tableBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.textContent = cargaNumber;
+                row.classList.add("selectable-row");
+
+                if (cargaNumber === nroCarga) {
+                    row.classList.add("active");
+                    activeRow = row;
+                } 
+
+                row.addEventListener('click', function() {
+                    window.location.href = `/logi/${routePage}/${cargaNumber}`;
+                });
+            });
+            if (activeRow && nroCarga != '0') {
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao carregar dados do servidor:', error);
+    });
 }
 
 
@@ -383,57 +459,6 @@ function renderSubtotals() {
     })
     .catch(error => {
         console.log('A separação foi finalizada.', error);
-    });
-}
-
-
-function listSeparationsFromServer(routePage, reportDir='cargas') {
-    const payload = {
-        report_dir: reportDir
-    };
-    fetch('/get/list-all-separations', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
-    .then(response => response.json())
-    .then(files => {
-        const tableBody = document.getElementById('allSeparationsTable').getElementsByTagName('tbody')[0];
-        tableBody.innerHTML = '';
-
-        let activeRow = null;
-
-        if (files.error) {
-            const row = tableBody.insertRow();
-            const cell = row.insertCell(0);
-            cell.colSpan = 1;
-            cell.textContent = files.error;
-        } else {
-            files.forEach(file => {
-                const cargaNumber = file.replace('separacao-carga-', '').replace('.json', '');
-                const row = tableBody.insertRow();
-                const cell = row.insertCell(0);
-                cell.textContent = cargaNumber;
-                row.classList.add("selectable-row");
-
-                if (cargaNumber === nroCarga) {
-                    row.classList.add("active");
-                    activeRow = row;
-                } 
-
-                row.addEventListener('click', function() {
-                    window.location.href = `/logi/${routePage}/${cargaNumber}`;
-                });
-            });
-            if (activeRow && nroCarga != '0') {
-                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Erro ao carregar dados do servidor:', error);
     });
 }
 
