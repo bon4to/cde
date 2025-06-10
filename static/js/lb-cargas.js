@@ -210,217 +210,206 @@ async function getSeparadorName(user_id) {
 }
 
 
+/*
+ * Generates a PDF report for the current cargo-separation.
+ * Collects table data, draws header/footer/table, and saves the PDF.
+ */
 async function genCargaReport() {
     const { jsPDF } = window.jspdf;
-    const report    = new jsPDF();
-    const tableData = [];
-    const rows      = document.querySelectorAll("#itemsTable tbody tr");
-    const userName  = document.getElementById('separador-info').innerText;
-    
-    // Seleciona o botão de finalizar separação.
-    const btnGenCargaReport = document.getElementById('btnGenCargaReport');
-    
-    // Exibe um indicador de carregamento e desativa o botão de finalizar.
-    btnGenCargaReport.onclick = '';
-    btnGenCargaReport.innerHTML = '<span class="loader-inline"></span>';
-    
+    const pdf = new jsPDF();
+    const btnReport = document.getElementById('btnGenCargaReport');
+    const operatorName = document.getElementById('separador-info').innerText;
+    const tableHeaders = ["Endereço", "Código", "Descrição", "Lote", "Qtde"];
+    const columnWidths = [20, 20, 100, 24, 26];
+    const tableStartX = 10, footerMargin = 20, cellPadding = 4;
+    let tableStartY = 48, defaultCellHeight = 10;
+    const pageHeight = pdf.internal.pageSize.height;
+
+    // UI feedback: show loading on button
+    btnReport.onclick = '';
+    btnReport.innerHTML = '<span class="loader-inline"></span>';
     await visualDelay(700);
-    
+
     try {
-        rows.forEach(row => {
-            const rowData = [];
-            row.querySelectorAll("td").forEach(cell => {
-                rowData.push(cell.innerText);
-            });
-            tableData.push(rowData);
-        });
+        // Collects all rows from the HTML table
+        const itemRows = document.querySelectorAll("#itemsTable tbody tr");
+        const tableRows = Array.from(itemRows).map(row =>
+            Array.from(row.querySelectorAll("td")).map(cell => cell.innerText)
+        );
 
-        const columns = ["Endereço", "Item (Código)", "Item (Descrição)", "Lote (Código)", "Qtde (Sep.)"];
-
-        const data = tableData.map(row => ({
-            rua_letra_end : row[0],
-            cod_item      : row[1],
-            desc_item     : row[2],
-            lote_item     : row[3],
-            qtde_solic    : row[4]
+        // Maps table rows to objects with clear property names
+        const items = tableRows.map(row => ({
+            address: row[0],
+            itemCode: row[1],
+            itemDescription: row[2],
+            batchCode: row[3],
+            quantity: row[4]
         }));
 
-        const filteredData = data.filter(item => !item.lote_item.startsWith('Subtotal:'));
-        const totalQtdeSolic = filteredData.reduce((total, item) => total + parseFloat(item.qtde_solic), 0);
+        // Filters out subtotal rows and calculates the total quantity
+        const filteredItems = items.filter(item => !item.batchCode.startsWith('Subtotal:'));
+        const totalQuantity = filteredItems.reduce((sum, item) => sum + parseFloat(item.quantity), 0);
 
-        data.push({
-            rua_letra_end : '',
-            cod_item      : '',
-            desc_item     : '',
-            lote_item     : 'Total:',
-            qtde_solic    : totalQtdeSolic
+        // Adds a total row at the end
+        items.push({
+            address: '',
+            itemCode: '',
+            itemDescription: '',
+            batchCode: 'Total:',
+            quantity: totalQuantity
         });
+        
+        // Draws the report header on the current PDF page.
+        function drawHeader() {
+            pdf.addImage(headerMainLogo, 'PNG', 164, 20, 35, 8);
+            pdf.setFont("helvetica", "bold").setFontSize(16)
+                .text("RELATÓRIO", 10, 24);
+            pdf.setFont("helvetica", "normal").setFontSize(10)
+                .text("SEPARAÇÃO DE CARGA", 10, 28);
 
-        let startY         = 48;
-        var cellHeight     = 10;
-        const cellPadding  = 4;
+            pdf.setDrawColor(192, 192, 192).setLineWidth(0.2).line(10, 32, 200, 32).setDrawColor(0, 0, 0);
 
-        const startX       = 10;
-        const marginBottom = 20;
-        const colWidths    = [25, 30, 80, 30, 25];
-        const pageHeight   = report.internal.pageSize.height;
-
-        const drawHeader = () => {
-            report.addImage(headerMainLogo, 'PNG', 164, 20, 35, 8);
-
-            report.setFont("times", "bold");
-            report.setFontSize(16);
-            report.text("Relatório de Carga", 10, 22);
-
-            report.setFont("times", "normal");
-            report.setFontSize(12);
-            report.text("INDUSTRIA DE SUCOS 4 LEGUA LTDA - EM RECUPERACAO JUDICIAL", 10, 28);
-
-            report.setDrawColor(192, 192, 192);
-            report.setLineWidth(0.2);
-            report.line(10, 32, 200, 32);
-            report.setDrawColor(0, 0, 0);
-
-            report.setFontSize(10);
-
+            pdf.setFont("courier", "bold").setFontSize(8)
+                .text("MOV006", 200, 38, { align: 'right' });
+            pdf.setFontSize(10);
             if (typeof fantCliente !== 'undefined') {
-                report.setFont("times", "bold");
-                report.text(`CLIENTE: ${fantCliente}`, 10, 38);
+                pdf.setFont("helvetica", "bold").text(`CLIENTE: ${fantCliente}`, 10, 38);
             }
-            
             if (typeof nroCarga !== 'undefined') {
-                report.setFont("times", "normal");
-                report.text(`CARGA: ${nroCarga}`, 10, 42);
+                pdf.setFont("helvetica", "normal").text(`CARGA: ${nroCarga}`, 10, 42);
             }
-            report.setDrawColor(192, 192, 192);
-        };
+            pdf.setDrawColor(192, 192, 192);
+        }
+        
+        // Draws the footer (operator, page, date) on all PDF pages.
+        function drawFooter() {
+            const date = new Date();
+            const formattedDateTime = `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+            const totalPages = pdf.getNumberOfPages();
 
-        const drawFooter = () => {
-            const currentDateTime = new Date().toLocaleString();
-            const totalPages      = report.getNumberOfPages();
+            for (let page = 1; page <= totalPages; page++) {
+                pdf.setPage(page);
+                const pageNumber = pdf.internal.getCurrentPageInfo().pageNumber;
 
-            for (let i = 1; i <= totalPages; i++) {
-                report.setPage(i);
-                const pageNumber = report.internal.getCurrentPageInfo().pageNumber;
+                pdf.setDrawColor(192, 192, 192)
+                    .setLineWidth(0.2)
+                    .line(10, pageHeight - footerMargin, 200, pageHeight - footerMargin)
+                    .setDrawColor(0, 0, 0)
+                    .setFontSize(10);
 
-                report.setDrawColor(192, 192, 192);
-                report.setLineWidth(0.2);
-                report.line(10, pageHeight - marginBottom, 200, pageHeight - marginBottom);
-                report.setDrawColor(0, 0, 0);
-
-                report.setFontSize(10);
-                if (typeof userName === 'string') {
-                    report.text(userName, 10, pageHeight - 10, { align: 'left' });
+                if (typeof operatorName === 'string') {
+                    pdf.text(operatorName, 10, pageHeight - 10, { align: 'left' });
                 }
 
-                report.text(`${pageNumber} / ${totalPages}`, report.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
+                pdf.text(`${pageNumber} / ${totalPages}`, pdf.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' });
 
-                if (typeof currentDateTime === 'string') {
-                    report.text(currentDateTime, report.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
+                if (typeof formattedDateTime === 'string') {
+                    pdf.text(formattedDateTime, pdf.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
                 }
             }
-        };
-
-        const drawTable = (data) => {
-            // Desenhando cabeçalho da tabela
-            report.setFontSize(10);
-            report.setLineWidth(0.1);
-            report.setFont("times", "bold");
-            columns.forEach((col, i) => {
-                const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-                report.setFillColor(62, 94, 166);
-                report.setTextColor(255, 255, 255);
-                report.rect(x, startY, colWidths[i], cellHeight, 'F');
-                report.text(col, x + cellPadding, startY + cellHeight / 2 + cellPadding / 2);
+        }
+        
+        // Draws the table with all items, handling page breaks and cell formatting.
+        // @param {Array} data - Array of item objects to print.
+        function drawTable(data) {
+            // Draw table header
+            pdf.setFontSize(8).setLineWidth(0.1).setFont("courier", "bold");
+            tableHeaders.forEach((header, idx) => {
+                const x = tableStartX + columnWidths.slice(0, idx).reduce((a, b) => a + b, 0);
+                pdf.setFillColor(62, 94, 166).setTextColor(255, 255, 255)
+                    .rect(x, tableStartY, columnWidths[idx], defaultCellHeight, 'F')
+                    .text(header, x + cellPadding, tableStartY + defaultCellHeight / 2 + cellPadding / 2);
             });
-            report.setTextColor(20, 20, 20);
-            report.setDrawColor(220, 220, 220);
+            pdf.setTextColor(20, 20, 20).setDrawColor(220, 220, 220);
+            tableStartY += defaultCellHeight;
+            pdf.setFont("courier", "normal");
 
-            // Ajustando a posição Y após o cabeçalho
-            startY += cellHeight;
-            report.setFont("times", "normal");
-
-            // Desenhando linhas da tabela
-            data.forEach((item) => {
-                const row = [
-                    item.rua_letra_end,
-                    item.cod_item,
-                    item.desc_item,
-                    item.lote_item,
-                    item.qtde_solic.toString()
+            // Draw each row of the table
+            data.forEach(item => {
+                const rowValues = [
+                    item.address,
+                    item.itemCode,
+                    item.itemDescription,
+                    item.batchCode,
+                    item.quantity.toString()
                 ];
 
-                const isSubtotal = item.lote_item && item.lote_item.startsWith('Subtotal:');
-                const isTotal    = item.lote_item === 'Total:';
+                // Check if this is a subtotal or total row for special formatting
+                const isSubtotal = item.batchCode && item.batchCode.startsWith('Subtotal:');
+                const isTotal = item.batchCode === 'Total:';
 
-                const descLines = report.splitTextToSize(item.desc_item, colWidths[2] - 2 * cellPadding);
-                const cellLines = Math.max(descLines.length, 1);
-                var currentCellHeight = cellHeight;
+                // Calculate cell height for multi-line descriptions
+                const descLines = pdf.splitTextToSize(item.itemDescription, columnWidths[2] - 2 * cellPadding);
+                const descLineCount = Math.max(descLines.length, 1);
+                let rowHeight = descLineCount > 2 ? 14 : defaultCellHeight;
 
-                if (cellLines > 2) {
-                    currentCellHeight = 14;
-                }
+                // Draw each cell in the row
+                rowValues.forEach((cellText, colIdx) => {
+                    const cellX = tableStartX + columnWidths.slice(0, colIdx).reduce((a, b) => a + b, 0);
+                    const cellY = tableStartY;
 
-                row.forEach((cell, i) => {
-                    const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
-                    const y = startY;
-
+                    // Set cell style based on row type
                     if (isSubtotal) {
-                        report.setFillColor(220, 220, 220); 
-                        report.setFont("times", "bold");
+                        pdf.setFillColor(220, 220, 220).setFont("courier", "bold");
                     } else if (isTotal) {
-                        report.setFillColor(192, 192, 192); 
-                        report.setDrawColor(192, 192, 192); 
-                        report.setFont("times", "bold");
+                        pdf.setFillColor(192, 192, 192).setDrawColor(192, 192, 192).setFont("courier", "bold");
                     } else {
-                        report.setFillColor(255, 255, 255); 
-                        report.setFont("times", "normal");
+                        pdf.setFillColor(255, 255, 255).setFont("courier", "normal");
                     }
 
-                    report.rect(x, y, colWidths[i], currentCellHeight, 'F');
-                    const text = report.splitTextToSize(cell, colWidths[i] - 2 * cellPadding);
-                    report.text(text, x + cellPadding, y + cellPadding);
-                    report.setFillColor(50, 50, 50);
-                    report.rect(x, y, colWidths[i], currentCellHeight, 'S');
+                    // Draw cell background
+                    pdf.rect(cellX, cellY, columnWidths[colIdx], rowHeight, 'F');
+                    // Draw cell text, wrapping if needed
+                    const wrappedText = pdf.splitTextToSize(cellText, columnWidths[colIdx] - 2 * cellPadding);
+                    pdf.text(wrappedText, cellX + cellPadding, cellY + cellPadding);
+                    // Draw cell border
+                    pdf.setFillColor(50, 50, 50);
+                    pdf.rect(cellX, cellY, columnWidths[colIdx], rowHeight, 'S');
                 });
 
-                startY += currentCellHeight;
+                // Move to next row position
+                tableStartY += rowHeight;
 
-                if (startY + cellHeight + marginBottom > pageHeight) {
-                    report.addPage();
+                // Add new page if needed
+                if (tableStartY + defaultCellHeight + footerMargin > pageHeight) {
+                    pdf.addPage();
                     drawHeader();
-                    startY = 50;
-                    report.setFontSize(10);
-                    report.setLineWidth(0.1);
+                    tableStartY = 50;
+                    
+                    // resets the table format for the next page
+                    pdf.setFontSize(8).setLineWidth(0.1).setFont("courier", "bold");
                 }
             });
-        };
+        }
 
-        loadBase64('/static/b64/cde-logo-b.txt', function(base64String) {
-            headerMainLogo = base64String; // Atribuir ao escopo global
+        // Load logo and generate PDF after logo is loaded
+        loadBase64('/static/b64/cde-logo-b.txt', function(base64Logo) {
+            headerMainLogo = base64Logo;
             drawHeader();
-            drawTable(data);
-            drawFooter(report.internal.getNumberOfPages());
+            drawTable(items);
+            drawFooter();
 
+            // Print observations if available
             if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
-                const finalY = startY + 10;
-                report.setFontSize(10);
-                report.setFont("times", "bold");
-                report.text("OBSERVACÃO: ", 10, finalY);
-
-                report.setFont("times", "normal");
-                report.text(obs_carga, 10 + report.getTextWidth("OBSERVACÃO:") + 5, finalY);
+                const obsY = tableStartY + 10;
+                pdf.setFontSize(10).setFont("courier", "bold").text("OBSERVAÇÕES: ", 10, obsY);
+                pdf.setFont("courier", "normal").text(obs_carga, 10 + pdf.getTextWidth("OBSERVAÇÕES:") + 5, obsY);
             }
 
-            const pdfName = `MOV006-CG${nroCarga}.pdf`;
-            report.save(pdfName);
-            btnGenCargaReport.innerHTML = `✓`;
-            btnGenCargaReport.classList.add('disabled');
+            // Save the PDF file
+            const pdfFileName = `MOV006-${nroCarga}.pdf`;
+            pdf.save(pdfFileName);
+
+            showToast('Relatório gerado com sucesso. O download iniciou automaticamente.', 'success', 10);
+
+            btnReport.innerHTML = `✓`;
+            btnReport.classList.add('disabled');
         });
+    
     } catch (error) {
-        console.error('Erro ao gerar relatório:', error);
-        btnGenCargaReport.innerHTML = `✘`;
-        btnGenCargaReport.classList.add('disabled');
+        showToast(`Erro ao gerar o relatório: ${error.message}`, 'error', 10);
+        btnReport.innerHTML = `✘`;
+        btnReport.classList.add('disabled');
     }
 }
 
