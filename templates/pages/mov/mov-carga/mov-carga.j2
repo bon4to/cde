@@ -116,13 +116,13 @@
                                         <ul class="cart-items">
                                             <!-- Itens serão renderizados aqui -->
                                         </ul>
-                                        <button class="checkout-button" onclick="window.location.href=`{{ url_for('carga_sep_pend', id_carga=id_carga) }}`;">Visualizar Separação</button>
+                                        <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
                                     </div>
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 6px">
                                     <form action="{{ url_for('cargas') }}" method="post">
                                         <button type="submit" style="all: unset" onclick="showLoading()">
-                                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href=`{{ url_for('cargas') }}`;" title="FECHAR">
+                                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
                                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                                             </a>
                                         </button>
@@ -256,7 +256,7 @@
                                 <div 
                                     class="btn-fancy featured" 
                                     style="height: 45px; margin: 0; max-width: 200px;" 
-                                    onclick="window.location.href=`{{ url_for('carga_sep_pend', id_carga=id_carga) }}`;">
+                                    onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
                                     <span>VISUALIZAR</span>
                                 </div>
                             </div>
@@ -300,8 +300,8 @@
                                         {% for row in result_local %}
                                         {% set qtde_solic = request.args.get('qtde_solic') %}
                                             <tr class="selectable-row" onclick="pushItemIntoSeparacao(
-                                                `{{ row['saldo'] }}', '{{ qtde_solic }}`,
-                                                `{{ row['address'] }}', '{{ row['cod_lote'] }}`
+                                                '{{ row['saldo'] }}', '{{ qtde_solic }}',
+                                                '{{ row['address'] }}', '{{ row['cod_lote'] }}'
                                             )">
                                                 <td>{{ row['address'] }}</td>
                                                 <td>{{ row['cod_item'] }}</td>
