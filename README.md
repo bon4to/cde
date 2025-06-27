@@ -10,12 +10,12 @@ Originally conceived as a warehouse management tool, CDE evolved into a flexible
  
 ## 📚 Table of Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Structure](#structure)
-- [Contributing](#contributing)
-- [License](#license)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Installation](#-installation)
+- [Structure](#-structure)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
