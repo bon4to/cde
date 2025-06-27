@@ -1,4 +1,6 @@
 # Control & Dispatch Engine (CDE)
+<img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
+
 
 > A modular web-based application designed for inventory management, logistics coordination, and lightweight ERP functionalities.  
 
