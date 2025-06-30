@@ -1,10 +1,10 @@
-# Control & Dispatch Engine (CDE)
+# Control & Dispatch Engine
 <img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
 
 
-> A modular web-based application designed for inventory management, logistics coordination, and lightweight ERP functionalities.  
+A modular web-based application designed for inventory management, logistics coordination, and lightweight ERP functionalities.  
 
-Originally conceived as a warehouse management tool, CDE evolved into a flexible system for managing operational workflows, dispatch routines, and department-level tasks.
+> Originally conceived as a warehouse management tool, CDE evolved into a flexible system for managing operational workflows, dispatch routines, and department-level tasks.
 
 ---
  
@@ -23,11 +23,10 @@ Originally conceived as a warehouse management tool, CDE evolved into a flexible
 
 - Inventory registration, editing, and tracking
 - Order dispatch and control routines
+- Batching and expiring management
 - Modular architecture for extensibility
 - Templated user interface using Jinja2
 - Internal API endpoints with Flask routing
-- Access control (if implemented)
-- Dashboard-style views for operational oversight
 
 ---
 
