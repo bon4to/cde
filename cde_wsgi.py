@@ -4,25 +4,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('waitress')
 logger.setLevel(logging.ERROR)
 
-class ANSI:
-    RESET = ""
-    BOLD = ""
-    RED = ""
-    GREEN = ""
-    YELLOW = ""
-    BLUE = ""
-    MAGENTA = ""
-    CYAN = ""
-    WHITE = ""
-
 
 class TAGS:
-    SERVIDOR = f'{ANSI.MAGENTA}[SERVIDOR]{ANSI.RESET}'
-    GRANTED  = f'{ANSI.CYAN}200{ANSI.RESET}'
-    DENIED   = f'{ANSI.RED}403{ANSI.RESET}'
-    STATUS   = f'{ANSI.GREEN}[STATUS]{ANSI.RESET}'
-    ERRO     = f'{ANSI.RED}[ERRO]{ANSI.RESET}'
-    INFO     = f'{ANSI.BLUE}[INFO]{ANSI.RESET}'
+    SERVIDOR = '[SERVIDOR]'
+    GRANTED  = '200'
+    DENIED   = '403'
+    STATUS   = '[STATUS]'
+    ERRO     = '[ERRO]'
+    INFO     = '[INFO]'
 
 
 if __name__ == '__main__':
