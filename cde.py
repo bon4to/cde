@@ -69,7 +69,7 @@ if __name__:
 
 
     db_path = cdeapp.config.get_db_path()
-    # se executado diretamente, modo_exec = 'debug'
+    # se executado diretamente (cde.py), modo_exec = 'debug'
     if __name__ == "__main__": 
         port, debug = 5100, cdeapp.config.set_debug(True)
         app.config['APP_VERSION'][2] = True
