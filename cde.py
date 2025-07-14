@@ -3319,7 +3319,7 @@ def carga_incomp_id(id_carga) -> str:
         for row in result:
             cod_item_list.append(row[columns.index('cod_item')])
         
-        alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}'
+        alert = f"Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}"
         class_alert = 'success'
     else:
         alert = f'{result[0][0]}'
@@ -3981,7 +3981,7 @@ def cargas() -> str:
         result, columns = CargaUtils.get_cargas(all_cargas)
         
         if columns:
-            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}'
+            alert = f"Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}"
             class_alert = 'success'
 
         else:
@@ -4042,7 +4042,7 @@ def mov_request_id(id_req) -> str:
             for row in result:
                 cod_item_list.append(row[columns.index('COD_ITEM')])
             
-            alert = f'Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}'
+            alert = f"Última atualização em: {datetime.now().strftime('%d/%m/%Y às %H:%M:%S')}"
             class_alert = 'success'
         else:
             alert = f'{result[0][0]}'
