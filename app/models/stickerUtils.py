@@ -66,19 +66,14 @@ def _draw_text(img, cod_item, desc_item, cod_lote):
 
     # configura fonte
     try:
-        # fonte Arial para Windows
-        font_large = ImageFont.truetype("arialbd.ttf", 30)
-        font_small = ImageFont.truetype("arialbd.ttf", 22)
+        font_path = "static/fonts/arialbd.ttf"
+        font_large = ImageFont.truetype(font_path, 30)
+        font_small = ImageFont.truetype(font_path, 24)
     except:
-        # fonte Arial para Mac OS
-        try:
-            font_large = ImageFont.truetype("Arial Bold.ttf", 30)
-            font_small = ImageFont.truetype("Arial Bold.ttf", 22)
-        except:
-            # usa fonte padrão da biblioteca
-            logTexts.log("Erro ao carregar fonte Arial, é recomendável baixar e utilizar a fonte 'arialbd.ttf'")
-            font_large = ImageFont.load_default()
-            font_small = ImageFont.load_default()
+        # usa fonte padrão da biblioteca
+        logTexts.log("Erro ao carregar fonte Arial, é recomendável baixar e utilizar a fonte 'arialbd.ttf'")
+        font_large = ImageFont.load_default()
+        font_small = ImageFont.load_default()
 
     # desenha o código do lote
     cod_lote_text = f'LOTE: {cod_lote}'
