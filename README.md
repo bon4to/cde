@@ -1,25 +1,22 @@
 # Control & Dispatch Engine
-<img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="git-cde-banner">
-
+<img src="https://github.com/bon4to/cde/assets/129971622/e1c1187c-e281-4f2b-8453-42cc4beb6c34" alt="cde-banner">
 
 A modular web-based application designed for inventory management, logistics coordination, and lightweight ERP functionalities.  
 
 > Originally conceived as a warehouse management tool, CDE evolved into a flexible system for managing operational workflows, dispatch routines, and department-level tasks.
 
 ---
- 
-## 📚 Table of Contents
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Installation](#-installation)
-- [Structure](#-structure)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Structure](#structure)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🚀 Features
+## Features
 
 - Inventory registration, editing, and tracking
 - Order dispatch and control routines
@@ -30,7 +27,7 @@ A modular web-based application designed for inventory management, logistics coo
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 - **Backend:** Python (Flask), JavaScript
 - **Frontend:** Jinja2 templates (HTML + JS)
@@ -38,7 +35,7 @@ A modular web-based application designed for inventory management, logistics coo
 
 ---
 
-## 🛠 Installation
+## Installation
 
 1. Clone the repository:
    ```bash
@@ -77,7 +74,7 @@ A modular web-based application designed for inventory management, logistics coo
 
 ---
 
-## 📁 Structure
+## Structure
 
 ```
 /cde
@@ -94,13 +91,13 @@ A modular web-based application designed for inventory management, logistics coo
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss the proposed modifications.  
 Feel free to fork the repository and submit enhancements aligned with the project's scope and architecture.
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
