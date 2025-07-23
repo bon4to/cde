@@ -36,9 +36,9 @@
 {% block add_script %}
     <script>
 
-        const nroCarga    = '{{ id_carga }}';
-        const fantCliente = '{{ fant_cliente }}';
-        const obs_carga   = '{{ obs_carga }}';
+        const nroCarga    = {{ id_carga | tojson }};
+        const fantCliente = {{ fant_cliente | tojson }};
+        const obs_carga   = {{ obs_carga | tojson }}; 
 
         function getSeparacao() {
             return new Promise((resolve, reject) => {
