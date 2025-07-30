@@ -284,8 +284,8 @@ class EstoqueUtils:
     - 'S' (Saída) transactions subtract from the balance (-).
     
     Example:
-      t1: quantity = 30, operation = 'E' => +30
-      t2: quantity = 20, operation = 'S' => -20
+      t1: quantity = 30 AND operation = 'E' => +30
+      t2: quantity = 20 AND operation = 'S' => -20
     """
     
     
@@ -2240,7 +2240,7 @@ class misc:
                 return csv_filename
             else:
                 alert_type = 'DOWNLOAD IMPEDIDO \n'
-                alert_msge = 'A tabela não tem informações o suficiente para exportação. \n'
+                alert_msge = 'A tabela não tem informações suficientes para exportação. \n'
                 alert_more = ('''
                     POSSÍVEIS SOLUÇÕES:
                     • Verifique se a tabela possui mais de uma linha.

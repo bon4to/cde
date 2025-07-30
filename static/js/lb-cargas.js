@@ -138,6 +138,11 @@ function listSeparationsLocalStorage(routePage) {
 }
 
 
+/**
+ * Gets the list of all separations (.json) from the server.
+ * @param {*} routePage 
+ * @param {string} reportDir 
+ */
 function listSeparationsFromServer(routePage, reportDir='cargas') {
     const payload = {
         report_dir: reportDir
@@ -194,6 +199,9 @@ function listSeparationsFromServer(routePage, reportDir='cargas') {
 }
 
 
+/**
+ * Gets the username of the user who is currently logged in.
+ */
 async function getSeparadorName(user_id) {
     let separador = document.getElementById('separador-info');
 
@@ -210,8 +218,8 @@ async function getSeparadorName(user_id) {
 }
 
 
-/*
- * Generates a PDF report for the current cargo-separation.
+/**
+ * Generates a PDF report for the current dispatch-separation.
  * Collects table data, draws header/footer/table, and saves the PDF.
  */
 async function genCargaReport() {
@@ -413,7 +421,9 @@ async function genCargaReport() {
     }
 }
 
-
+/**
+ * Toggles the visibility of the cart dropdown.
+ */
 function toggleCart() {
     const cartDropdown = document.getElementById('cart-dropdown');
     const itemsCountElement = document.querySelector('.item-count');
@@ -428,7 +438,9 @@ function toggleCart() {
     }
 }
 
-
+/**
+ * Renders the subtotals table based on the current separation data.
+ */
 function renderSubtotals() {
     const subtotalsTable = document.getElementById('subtotalsTable').getElementsByTagName('tbody')[0];
     subtotalsTable.innerHTML = '';
@@ -455,9 +467,11 @@ function renderSubtotals() {
     });
 }
 
-
+/**
+ * Clears all PENDING separations from the localStorage (on browser). 
+ */
 function clearAllSeparations() {
-    const confirmation = confirm('Você tem certeza que deseja limpar TODAS as separações? Esta ação não pode ser desfeita.');
+    const confirmation = confirm('Você tem certeza que deseja limpar TODAS as separações pendentes? Esta ação não pode ser desfeita.');
     if (confirmation) {
         if (!verifyCaptcha()) {
             alert('O captcha foi cancelado ou preenchido incorretamente.')
