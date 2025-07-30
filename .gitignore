@@ -21,3 +21,5 @@ venv
 
 # macOS folder cfg file
 .DS_Store
+
+off-repo/
