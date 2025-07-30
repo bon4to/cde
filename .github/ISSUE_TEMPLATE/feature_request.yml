@@ -1,0 +1,34 @@
+name: Feature Request
+description: Suggest an improvement or new feature
+title: "[FEATURE] ~add a title~"
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for contributing with ideas! Please describe your suggestion clearly.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A brief description of the feature or improvement
+      placeholder: "Add support for OAuth2 authentication"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this feature necessary? What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: If you have an idea on how this could be implemented, describe it here

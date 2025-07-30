@@ -2838,10 +2838,26 @@ def reset_password() -> Response:
     return redirect(url_for('index'))
 
 
-@app.route('/users/redefine-password/<int:id_user>/')
-@cde.verify_auth('CDE001')
-def redefine_password(id_user) -> Response:
-    password = '12345'
+@app.route('/users/forgot-password/<int:id_user>/')
+@cde.verify_auth('DEV000')
+def forgot_password(id_user) -> Response:
+    password = os.getenv('TEMP_PASSWORD')
+    
+    if password == None:
+        alert_type = 'OPERAÇÃO CANCELADA'
+        alert_msge = 'Não há uma senha temporária configurada em .env.'
+        alert_more = ('''
+            POSSÍVEIS SOLUÇÕES:
+            • Se for o administrador, adicione a chave 'TEMP_PASSWORD' com a senha desejada nas variáveis de ambiente.
+        ''')
+        
+        return render_template(
+            'components/menus/alert.j2', 
+            alert_type=alert_type,
+            alert_msge=alert_msge,
+            alert_more=alert_more, 
+            url_return=url_for('index')
+        )
 
     UserUtils.set_password(id_user, password)
 
