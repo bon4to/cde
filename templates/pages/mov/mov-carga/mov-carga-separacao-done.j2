@@ -46,12 +46,12 @@
 {% block add_script %}
     <script>
 
-        const nroCarga = '{{ id_carga }}';
-        const seq = '{{ seq }}';
+        const nroCarga = {{ id_carga | tojson }};
+        const seq = {{ seq | tojson }};
         const seqMax = [];
 
-        const fantCliente = '{{ fant_cliente }}';
-        const obs_carga = '{{ obs_carga }}';
+        const fantCliente = {{ fant_cliente | tojson }};
+        const obs_carga = {{ obs_carga | tojson }};
 
 
         function createSelect(options) {
