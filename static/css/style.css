@@ -137,6 +137,7 @@ input.address, select.address {
 }
 
 input.address-one, select.address-one {
+    width: -moz-available;
     width: -webkit-fill-available;
 }
 

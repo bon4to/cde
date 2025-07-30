@@ -17,6 +17,7 @@
             resize: none;
             height: 100%; 
             font-family: 'Fira Code', monospace;
+            min-width: -moz-available;
             min-width: -webkit-fill-available;
         }
 
@@ -87,7 +88,18 @@
                         </div>
                     </div>
 
-                    <div style="background-color: #212121; padding: 0 0 26px 0; height: 100%; min-width: -webkit-fill-available; max-width: -webkit-fill-available; overflow: auto">
+                    <div 
+                        style="
+                            background-color: #212121;
+                            padding: 0 0 26px 0;
+                            height: 100%;
+                            overflow: auto;
+                            min-width: -moz-available;
+                            max-width: -moz-available;
+                            min-width: -webkit-fill-available;
+                            max-width: -webkit-fill-available;
+                        "
+                    >
                         <textarea 
                             class="query"
                             id="sql_query"
