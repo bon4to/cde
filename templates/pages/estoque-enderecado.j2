@@ -47,14 +47,14 @@
                             >
                                 {{ item['cod_lote'] }}
                             </td>
-                                {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
+                                {% if '/' in item['validade']|string and 'CS' in item['cod_lote']%}
                                 <td 
                                     style="color:rgb(113, 113, 113);"
                                     title="Validade não informada!"
                                 >
                                     -
                                 </td>
-                                {% elif '/' in item['validade']|string %}
+                                {% elif '/' in item['validade']|string %} {# N/A #}
                                     <td 
                                         style="color:rgb(113, 113, 113);"
                                     >
@@ -64,7 +64,12 @@
                                 <td 
                                     {% set validade_meses = item['validade'] | int / 30  %}
                                     title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
-                                    style="color: var(--cde-color); font-weight: bold"
+                                    
+                                    {% if item['validade_perc_str'] > 70 %} {# self life more than 70% #}
+                                        style="color: var(--cde-color); font-weight: bold"
+                                    {% else %}                              {# self life less than 70% #}
+                                        style="color: red; font-weight: bold"
+                                    {% endif %}
                                 >
                                     {{ item['validade'] }}
                                 </td>
