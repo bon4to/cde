@@ -349,6 +349,20 @@ class EstoqueUtils:
 
 
     @staticmethod
+    def get_item_loss(month_str: str, year_str: str):
+        query = dbUtils.QueryManager.get(
+            query_id = 3,
+            year = str(year_str),
+            month = str(month_str)
+        )
+        
+        dsn = 'API'
+        result, columns = dbUtils.query(query, dsn, source=2)
+        
+        return result, columns
+    
+
+    @staticmethod
     # RETORNA TABELA DE SALDO
     def get_saldo_view(timestamp=False):
         if timestamp:
@@ -2395,6 +2409,45 @@ def index() -> Response:
     dbUtils.create_tables(db_path) 
     
     return redirect(url_for('home'))
+
+
+@app.route('/perdas-insumos/', methods=['GET', 'POST'])
+@cde.verify_auth('CDE001')
+def supply_losses():
+    if request.method == 'POST':
+        month = request.form['month_input']
+        year = request.form['year_input']
+        
+        return supply_losses_args(year=year, month=month)
+    
+    return render_template('pages/loss-page.j2')
+
+
+@app.route('/perdas-insumos/<year>/<month>/')
+@cde.verify_auth('CDE001')
+def supply_losses_args(year, month):
+    if not month or not year:
+        return {'error': 'Values missing or not provided'}, 400
+    
+    month_str = None
+    year_str = None
+    
+    try:
+        if int(month) > 12 or int(month) < 1:
+            raise ValueError
+        
+        month_str = f'{int(month):02}'
+        year_str = str(year)
+        
+    except ValueError:
+        return {'error': f'Invalid month or year.'}, 400
+    
+    result, _ = EstoqueUtils.get_item_loss(month_str, year_str)
+    
+    return render_template(
+        'pages/loss-page.j2', 
+        result=result, month=month_str, year=year_str
+    )
 
 
 @app.route('/debug-page/')

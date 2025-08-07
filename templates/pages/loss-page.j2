@@ -1,0 +1,98 @@
+{% extends 'base.j2' %}
+
+{% block title %}Perdas{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+        
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'OUTROS', 'url': 'home', 'title': 'OUTROS'},
+                {'text': 'PERDAS DE INSUMOS'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'supply_losses', 'icon': 'svg/wine-off.svg', 'title': 'PERDAS', 'active': True},
+                {'type': 'link', 'url': 'etiqueta', 'icon': 'svg/sticky-note.svg', 'title': 'ETIQUETA'},
+                {'type': 'link', 'url': 'rotulo', 'icon': 'svg/roll.svg', 'title': 'RÓTULO'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+        <div id="filter-container">
+            <div id="table-filter" class="table-filter" style="display: none">
+                <form method="post" action="/perdas-insumos/">
+                    <div class="inputs" style="margin: 0; gap: 6px">
+                        <input 
+                            id="month_input" 
+                            name="month_input"
+                            class="address-three" 
+                            type="number" 
+                            placeholder="Mês..."
+                            value="{{ month }}"
+                            min="1"
+                            max="12"
+                        >
+                        <input 
+                            id="year_input" 
+                            name="year_input"
+                            class="address-three" 
+                            type="number" 
+                            placeholder="Ano..."
+                            value="{{ year }}"
+                            min="0"
+                            max="9999"
+                        >
+                        <button class="button-mini btn-fancy" type="submit">
+                            <img src="{{ url_for('static', filename='svg/search.svg') }}" alt="">
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    
+    <div id="divContent" style="flex-wrap: wrap;">
+        <div id="tables-container" class="tables-container" style="max-height: 600px">
+            {% if not result %}
+                <div style="display: flex; justify-content: center; height: 100%;">
+                    <p class="disabled">
+                        Informe o mês e o ano clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/filter.svg') }}"> acima...
+                    </p>
+                </div>
+            {% else %}
+                <div class="table-overflow">
+                    <table id="filterTable">
+                        <tr>
+                            <th>Data</th>
+                            <th>Documento</th>
+                            <th>Item (Código)</th>
+                            <th>Item (Descrição)</th>
+                            <th>Depósito</th>
+                            <th>QTDE</th>
+                        </tr>
+                        {% for item in result %}
+                            <tr>
+                                <td class="second-plan c">{{ item[0] | parse_date }}</td>
+                                <td class="second-plan c number">{{ item[1] }}</td>
+                                <td class="number">{{ item[2] }}</td>
+                                <td>{{ item[3] }}</td>
+                                <td class="second-plan c">{{ item[4] }}</td>
+                                <td class="number">{{ item[5] | int }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock content%}
+
+{% block route_script %}
+
+{% endblock route_script %}
