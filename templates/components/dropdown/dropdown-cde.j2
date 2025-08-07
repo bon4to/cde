@@ -1,5 +1,5 @@
             <div class="navigation-bar">
-                <div style="height: 48px;width: auto;display: flex;justify-content: center;align-items: center; padding: 0 10px; cursor: pointer;" onclick="window.location.href='{{ url_for('home') }}';">
+                <div style="height: 48px;width: auto;display: flex;justify-content: center;align-items: center; padding-right: 10px; cursor: pointer;" onclick="window.location.href='{{ url_for('home') }}';">
                     <img style="height: 20px; width: auto;" class="svg" src="{{ url_for('static', filename='img/cde-logo-w.png') }}" alt="">
                 </div>
                 <div style="margin: 4px;display: flex;">
@@ -109,6 +109,7 @@
                                 <div class="dropdown-content">
                                     <a href="{{ url_for('etiqueta') }}">OUT014 | ETIQUETA</a>
                                     <a href="{{ url_for('rotulo') }}">OUT015 | RÓTULO</a>
+                                    <a href="{{ url_for('supply_losses') }}">OUT016 | PERDAS</a>
                                 </div>
                             </div>
                         </div>
@@ -154,7 +155,7 @@
                             <div style="margin: 4px; display: flex;">
                                 <hr class="vert" style="width: 0;">
                             </div>
-                            <div class="user-params-button flex-h" onclick="window.location.href='{{ url_for('cde_profile') }}';">
+                            <div class="user-params-button flex-h" style="margin-left: 10px;" onclick="window.location.href='{{ url_for('cde_profile') }}';">
                                 <p style="margin: auto 8px; max-height: 14px" class="id-page white-filled">{{ app_unit }}</p>
                                 <div style="margin: auto 4px auto auto;" class="user-button">
                                     {{ session.get('user_initials', '') }}

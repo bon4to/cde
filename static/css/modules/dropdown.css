@@ -1,6 +1,6 @@
 .navigation-bar {
     display: flex;
-    padding: 0 36px;
+    padding: 12px 10vw 0 10vw;
     justify-content: left;
     background-color: var(--main-color);
 }

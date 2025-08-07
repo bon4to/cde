@@ -185,6 +185,7 @@ a.id-page.filled:hover {
 }
 
 .ad-banner {
+    min-width: -moz-available;
     min-width: -webkit-fill-available;
     position: relative;
     background: linear-gradient(90deg, #5f77ff, #7ba9fe);

@@ -137,6 +137,7 @@ input.address, select.address {
 }
 
 input.address-one, select.address-one {
+    width: -moz-available;
     width: -webkit-fill-available;
 }
 
@@ -342,10 +343,6 @@ header {
     text-align: left;
     font-weight: bold;
     align-items: center;
-}
-
-.bold {
-    font-weight: normal;
 }
 
 .algn-cntr {

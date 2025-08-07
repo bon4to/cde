@@ -284,8 +284,8 @@ class EstoqueUtils:
     - 'S' (Saída) transactions subtract from the balance (-).
     
     Example:
-      t1: quantity = 30, operation = 'E' => +30
-      t2: quantity = 20, operation = 'S' => -20
+      t1: quantity = 30 AND operation = 'E' => +30
+      t2: quantity = 20 AND operation = 'S' => -20
     """
     
     
@@ -347,6 +347,20 @@ class EstoqueUtils:
         else:
             return [], []
 
+
+    @staticmethod
+    def get_item_loss(month_str: str, year_str: str):
+        query = dbUtils.QueryManager.get(
+            query_id = 3,
+            year = str(year_str),
+            month = str(month_str)
+        )
+        
+        dsn = 'API'
+        result, columns = dbUtils.query(query, dsn, source=2)
+        
+        return result, columns
+    
 
     @staticmethod
     # RETORNA TABELA DE SALDO
@@ -2240,7 +2254,7 @@ class misc:
                 return csv_filename
             else:
                 alert_type = 'DOWNLOAD IMPEDIDO \n'
-                alert_msge = 'A tabela não tem informações o suficiente para exportação. \n'
+                alert_msge = 'A tabela não tem informações suficientes para exportação. \n'
                 alert_more = ('''
                     POSSÍVEIS SOLUÇÕES:
                     • Verifique se a tabela possui mais de uma linha.
@@ -2395,6 +2409,45 @@ def index() -> Response:
     dbUtils.create_tables(db_path) 
     
     return redirect(url_for('home'))
+
+
+@app.route('/perdas-insumos/', methods=['GET', 'POST'])
+@cde.verify_auth('CDE001')
+def supply_losses():
+    if request.method == 'POST':
+        month = request.form['month_input']
+        year = request.form['year_input']
+        
+        return supply_losses_args(year=year, month=month)
+    
+    return render_template('pages/loss-page.j2')
+
+
+@app.route('/perdas-insumos/<year>/<month>/')
+@cde.verify_auth('CDE001')
+def supply_losses_args(year, month):
+    if not month or not year:
+        return {'error': 'Values missing or not provided'}, 400
+    
+    month_str = None
+    year_str = None
+    
+    try:
+        if int(month) > 12 or int(month) < 1:
+            raise ValueError
+        
+        month_str = f'{int(month):02}'
+        year_str = str(year)
+        
+    except ValueError:
+        return {'error': f'Invalid month or year.'}, 400
+    
+    result, _ = EstoqueUtils.get_item_loss(month_str, year_str)
+    
+    return render_template(
+        'pages/loss-page.j2', 
+        result=result, month=month_str, year=year_str
+    )
 
 
 @app.route('/debug-page/')
@@ -2838,10 +2891,26 @@ def reset_password() -> Response:
     return redirect(url_for('index'))
 
 
-@app.route('/users/redefine-password/<int:id_user>/')
-@cde.verify_auth('CDE001')
-def redefine_password(id_user) -> Response:
-    password = '12345'
+@app.route('/users/forgot-password/<int:id_user>/')
+@cde.verify_auth('DEV000')
+def forgot_password(id_user) -> Response:
+    password = os.getenv('TEMP_PASSWORD')
+    
+    if password == None:
+        alert_type = 'OPERAÇÃO CANCELADA'
+        alert_msge = 'Não há uma senha temporária configurada em .env.'
+        alert_more = ('''
+            POSSÍVEIS SOLUÇÕES:
+            • Se for o administrador, adicione a chave 'TEMP_PASSWORD' com a senha desejada nas variáveis de ambiente.
+        ''')
+        
+        return render_template(
+            'components/menus/alert.j2', 
+            alert_type=alert_type,
+            alert_msge=alert_msge,
+            alert_more=alert_more, 
+            url_return=url_for('index')
+        )
 
     UserUtils.set_password(id_user, password)
 
