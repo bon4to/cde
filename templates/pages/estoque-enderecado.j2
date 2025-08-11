@@ -29,8 +29,8 @@
                         <th>Item (Código)</th>
                         <th>Item (Descrição)</th>
                         <th>Lote (Código)</th>
-                        <th>Validade (Dias)</th>
-                        <th>QTDE (Efetiva)</th>
+                        <th colspan="2">Validade (Dias)</th>
+                        <th>QTDE</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,31 +47,53 @@
                             >
                                 {{ item['cod_lote'] }}
                             </td>
-                                {% if '/' in item['validade']|string and 'CS' in item['cod_lote']%}
+                                {% if '/' in item['validade']|string and 'CS' in item['cod_lote']%} 
+                                {# Validade não cadastrada #}
                                 <td 
-                                    style="color:rgb(113, 113, 113);"
-                                    title="Validade não informada!"
+                                    colspan="2" 
+                                    style="color: red; font-weight: bold"
+                                    title="Validade não informada no ERP!"
                                 >
                                     -
                                 </td>
-                                {% elif '/' in item['validade']|string %} {# N/A #}
+                                {% elif '/' in item['validade']|string %} 
+                                {# N/A #}
                                     <td 
+                                        colspan="2" 
                                         style="color:rgb(113, 113, 113);"
+                                        title="Item não possui validade."
                                     >
                                     {{ item['validade'] }}
                                     </td>
                                 {% else %}
+                                {# A data é valida #}
                                 <td 
                                     {% set validade_meses = item['validade'] | int / 30  %}
                                     title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
                                     
-                                    {% if item['validade_perc_str'] > 70 %} {# self life more than 70% #}
-                                        style="color: var(--cde-color); font-weight: bold"
-                                    {% else %}                              {# self life less than 70% #}
+                                    {% if item['validade_perc_str'] >= 80 %}   {# self life more than 80% #}
+                                        style="color: green; font-weight: bold"
+                                    {% elif item['validade_perc_str'] >= 70 %} {# self life more than 70% #}
+                                        style="color: #daa520; font-weight: bold"
+                                    {% else %}                                {# self life less than 70% #}
                                         style="color: red; font-weight: bold"
                                     {% endif %}
                                 >
                                     {{ item['validade'] }}
+                                </td>
+                                <td
+                                    {% set validade_meses = item['validade'] | int / 30  %}
+                                    title="SELF-LIFE"
+                                    
+                                    {% if item['validade_perc_str'] >= 80 %}   {# self life more than 80% #}
+                                        style="width: 10px; color: green; font-weight: bold; text-align: right"
+                                    {% elif item['validade_perc_str'] >= 70 %} {# self life more than 70% #}
+                                        style="width: 10px; color: #daa520; font-weight: bold; text-align: right"
+                                    {% else %}                                {# self life less than 70% #}
+                                        style="width: 10px; color: red; font-weight: bold; text-align: right"
+                                    {% endif %}
+                                >
+                                    {{ item['validade_perc_str'] }}%
                                 </td>
                                 {% endif %}
                             <td class="number">{{ item['saldo'] }}.0</td>
