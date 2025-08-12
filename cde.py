@@ -2102,13 +2102,16 @@ class misc:
                 lt.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
                 return None
             else:
-                bot_token = os.getenv('TLG_BOT_TOKEN')
-                chat_id   = os.getenv('TLG_CHAT_ID')
+                try:
+                    bot_token = os.getenv('TLG_BOT_TOKEN')
+                    chat_id   = os.getenv('TLG_CHAT_ID')
 
-                url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-                params = {'chat_id': chat_id, 'text': msg}
-                response = requests.post(url, params=params)
-                return response.json()
+                    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+                    params = {'chat_id': chat_id, 'text': msg}
+                    response = requests.post(url, params=params)
+                    return response.json()
+                except Exception as e:
+                    return None
         else:
             return None
 
