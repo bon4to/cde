@@ -2095,23 +2095,23 @@ class misc:
 
 
     @staticmethod
-    # mensagem do telegram
     def tlg_msg(msg):
         if not session.get('user_grant') == 1:
-            if debug == True:
+            if debug is True:
                 lt.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
                 return None
-            else:
-                try:
-                    bot_token = os.getenv('TLG_BOT_TOKEN')
-                    chat_id   = os.getenv('TLG_CHAT_ID')
-
-                    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-                    params = {'chat_id': chat_id, 'text': msg}
-                    response = requests.post(url, params=params)
-                    return response.json()
-                except Exception as e:
-                    return None
+            try:
+                bot_token = os.getenv('TLG_BOT_TOKEN')
+                chat_id = os.getenv('TLG_CHAT_ID')
+                url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
+                params = {'chat_id': chat_id, 'text': msg}
+                # 2s no máximo
+                resp = requests.post(url, params=params, timeout=(0.5, 1.5))
+                return resp.json()
+            except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout):
+                return None
+            except requests.exceptions.RequestException:
+                return None
         else:
             return None
 
