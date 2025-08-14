@@ -1,9 +1,9 @@
 ﻿# cde.py #TODO: após o decoupling, nomear para main.py
-import requests, sqlite3, random, json, sys, re, os, time
+import sqlite3, json, sys, re, os, time
 
 # local imports
 from app.utils import cdeapp
-from app.models import dbUtils, stickerUtils, logTexts as lt
+from app.models import dbUtils, stickerUtils, misc, estoqueUtils, logTexts as lt
 from app.services import NotificationManager as nm
 
 # imported dependencies
@@ -111,6 +111,16 @@ class cde:
             return False
 
     
+    @staticmethod
+    @app.template_filter('parse_date')
+    def parse_date(value):
+        try:
+            dt = datetime.fromisoformat(value)
+            return dt.strftime("%d / %m / %Y")
+        except Exception as e:
+            return value
+
+
     @staticmethod
     def format_three_no(number:int) -> str: 
         return str(number).zfill(3)
@@ -273,443 +283,6 @@ class cde:
             return code, seq
         seq = '0'
         return code, seq
-
-
-class EstoqueUtils:
-    sql_balance_template = dbUtils.QueryManager.get(query_id=1)
-    """
-    SQL query template used to calculate the current inventory balance.
-    The balance is computed by summing transaction quantities:
-    - 'E' (Entrada) transactions add to the balance (+).
-    - 'S' (Saída) transactions subtract from the balance (-).
-    
-    Example:
-      t1: quantity = 30 AND operation = 'E' => +30
-      t2: quantity = 20 AND operation = 'S' => -20
-    """
-    
-    
-    @staticmethod
-    def get_item_inv_locations(cod_item=None):
-        """
-        Retrieves all storage addresses that contain the specified item.
-
-        For each matching address, the function computes additional metadata such as
-        item expiration, balance, batch number, etc.
-
-        Args:
-            cod_item (str, optional): Code of the item to search for. If not provided or False, 
-                returns an empty result. #TODO: use a string.
-
-        Returns:
-            tuple:
-                - list[dict]: List of addresses containing the item with detailed metadata.
-                - list: Column headers corresponding to the database query result.
-
-        Side Effects:
-            - Calls `misc.days_to_expire` for each result row.
-
-        Example:
-            >>> result, columns = EstoqueUtils.get_item_inv_locations('ITEM123')
-
-        Notes:
-            - Adds a space at the end of 'address' to improve exact search results.
-            - Returns empty lists if `cod_item` is not provided.
-        """
-        if cod_item:
-            query = dbUtils.QueryManager.get(
-                query_id = 2,
-                calc = EstoqueUtils.sql_balance_template,
-                b = str(cod_item)
-            )
-            
-            dsn = 'LOCAL'
-            result_local, columns_local = dbUtils.query(query, dsn)
-            
-            result = []
-            for row in result_local:
-                validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
-                if err != None:
-                    validade = err
-                result.append({
-                    # itera letra e numero da rua com um '.'
-                    'address': f'{row[0]}.{row[1]} ', 
-                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
-                    #   exemplo:
-                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-                    #    'A.1 ' -> ['A.1 ']
-                    'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                    'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                    'validade': validade
-                })
-            
-            return result, columns_local
-        else:
-            return [], []
-
-
-    @staticmethod
-    def get_item_loss(month_str: str, year_str: str):
-        query = dbUtils.QueryManager.get(
-            query_id = 3,
-            year = str(year_str),
-            month = str(month_str)
-        )
-        
-        dsn = 'API'
-        result, columns = dbUtils.query(query, dsn, source=2)
-        
-        return result, columns
-    
-
-    @staticmethod
-    # RETORNA TABELA DE SALDO
-    def get_saldo_view(timestamp=False):
-        if timestamp:
-            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = misc.parse_db_datetime(timestamp)
-        
-        sql_balance_template = EstoqueUtils.sql_balance_template
-        
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT 
-                    i.cod_item, i.desc_item, 
-                    COALESCE(t.saldo, 0) as saldo,
-                    COALESCE(t.time_mov, "-") as time_mov
-                FROM itens i
-                
-                LEFT JOIN (
-                    SELECT 
-                        cod_item, {a} as saldo,
-                        MAX(time_mov) as time_mov,
-                        ROW_NUMBER() OVER(
-                            PARTITION BY cod_item 
-                            ORDER BY MAX(time_mov) DESC
-                        ) as rn
-                    FROM tbl_transactions h
-                    WHERE time_mov <= ?
-                    GROUP BY cod_item
-                ) t ON i.cod_item = t.cod_item
-                
-                WHERE 
-                    t.rn = 1 OR 
-                    t.rn IS NULL
-                ORDER BY t.time_mov DESC;
-            '''.format(a=sql_balance_template), (timestamp,))
-
-            result = [{
-                'cod_item': row[0], 'desc_item': row[1], 
-                'saldo'   : row[2], 'ult_mov'  : row[3]
-            } for row in cursor.fetchall()]
-
-        return result
-
-    
-    @staticmethod
-    # BUSCA SALDO COM UM FILTRO (PRESET)
-    def get_saldo_preset(index, timestamp=False):
-        itens = EstoqueUtils.get_preset_itens(index)
-        
-        if not itens:
-            return []
-        
-        if timestamp:
-            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = misc.parse_db_datetime(timestamp)
-        
-        # prepara uma string de placeholders sql (ex.: ?, ?, ?...)
-        # e coloca na query
-        placeholders = ','.join(['?'] * len(itens))
-        
-        sql_balance_template = EstoqueUtils.sql_balance_template
-        
-        query = '''
-            SELECT 
-                i.cod_item, i.desc_item,
-                COALESCE(t.saldo, 0) as saldo
-            FROM itens i
-            
-            LEFT JOIN (
-                SELECT 
-                    cod_item, {a} as saldo,
-                    MAX(time_mov) as time_mov,
-                    ROW_NUMBER() OVER(
-                        PARTITION BY cod_item 
-                        ORDER BY MAX(time_mov) DESC
-                    ) as rn
-                FROM tbl_transactions h
-                WHERE time_mov <= ?
-                GROUP BY cod_item
-            ) t ON i.cod_item = t.cod_item
-            
-            WHERE i.cod_item IN ({b})
-            ORDER BY i.cod_item;
-        '''.format(a=sql_balance_template, b=placeholders)
-
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            # executa a query, 
-            # passando o timestamp e os itens p/ os placeholders
-            cursor.execute(query, (timestamp, *itens))
-        
-            result = [{
-                'cod_item': row[0], 'desc_item': row[1], 
-                'saldo'   : row[2]
-            } for row in cursor.fetchall()]
-        return result
-
-    
-    @staticmethod
-    # BUSCA ITENS DE PRESETS
-    def get_preset_itens(index):
-        try:
-            with open(
-                f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8'
-            ) as file:
-                itens = file.read().strip().split(', ')
-        except:
-            itens = []
-        return itens
-
-    
-    @staticmethod
-    def get_first_mov(cod_item: str, cod_lote: str):
-        query = f'''
-            SELECT time_mov
-            FROM tbl_transactions
-            WHERE cod_item = '{cod_item}'
-            AND lote_item = '{cod_lote}'
-            ORDER BY time_mov ASC
-            LIMIT 1;
-        '''
-        dsn = 'LOCAL'
-        result, _ = dbUtils.query(query, dsn)
-        return result
-
-
-    @staticmethod
-    # RETORNA ENDEREÇAMENTO POR LOTES
-    def get_inv_address_with_batch(timestamp=False):
-        if timestamp:
-            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = misc.parse_db_datetime(timestamp)
-        
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT  
-                    h.rua_letra, h.rua_numero, 
-                    i.cod_item, i.desc_item, h.lote_item,
-                    {a} as saldo,
-                    (
-                        SELECT time_mov
-                        FROM tbl_transactions
-                        WHERE cod_item = i.cod_item
-                        AND lote_item = h.lote_item
-                        ORDER BY time_mov ASC
-                        LIMIT 1
-                    ) as first_mov,
-                    i.validade
-                FROM tbl_transactions h
-                
-                JOIN itens i 
-                ON h.cod_item = i.cod_item
-                
-                WHERE h.time_mov <= ?
-                GROUP BY 
-                    h.rua_numero, h.rua_letra, 
-                    h.cod_item, h.lote_item
-                    
-                HAVING saldo != 0
-                ORDER BY 
-                    h.rua_letra ASC, h.rua_numero ASC,
-                    i.desc_item ASC
-                ;'''.format(a=EstoqueUtils.sql_balance_template),(timestamp,)
-            )
-
-            result = []
-            for row in cursor.fetchall():
-                validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
-                if err != None:
-                    validade = err
-                
-                validade_str = ''
-                validade_perc_str = 0
-                if type(validade) == int:
-                    validade_str = f"{(float(validade) / 30.44):.1f} / {row[7]} meses"
-                    validade_perc_str = float(f"{(float(validade) / 30.44 / row[7] * 100):.1f}")
-                
-                result.append({
-                    # itera letra e numero da rua com um '.'
-                    'address': f'{row[0]}.{row[1]} ', 
-                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
-                    #   exemplo:
-                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-                    #    'A.1 ' -> ['A.1 ']
-                    'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                    'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                    'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str
-                })
-        return result
-
-
-    @staticmethod
-    # RETORNA ENDEREÇAMENTO POR LOTES
-    def get_inv_report(timestamp=False):
-        if timestamp:
-            timestamp = misc.add_days_to_datetime_str(timestamp, 1)
-        timestamp = misc.parse_db_datetime(timestamp)
-        
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                WITH base AS (
-                    SELECT  
-                        h.rua_letra,
-                        h.rua_numero, 
-                        i.cod_item, 
-                        i.desc_item, 
-                        h.lote_item,
-
-                        {a} saldo,
-
-                        (
-                            SELECT REPLACE(time_mov, '/', '-')
-                            FROM tbl_transactions
-                            WHERE cod_item = i.cod_item
-                            AND lote_item = h.lote_item
-                            ORDER BY time_mov ASC
-                            LIMIT 1
-                        ) AS first_mov_raw,
-
-                        i.validade
-
-                    FROM tbl_transactions h
-                    JOIN itens i ON h.cod_item = i.cod_item
-                    
-                    GROUP BY 
-                        h.rua_numero, h.rua_letra, 
-                        h.cod_item, h.lote_item
-                )
-
-                SELECT 
-                    rua_letra,
-                    rua_numero,
-                    cod_item,
-                    desc_item,
-                    lote_item,
-                    saldo,
-                    first_mov_raw AS first_mov,
-                    validade,
-                    CASE 
-                        WHEN validade IS NOT NULL 
-                        THEN datetime(first_mov_raw, '+' || validade || ' months')
-                        ELSE 'N/A'
-                    END AS data_vencimento
-
-                FROM base
-                WHERE saldo != 0
-                
-                ORDER BY 
-                    rua_letra ASC, rua_numero ASC,
-                    desc_item ASC
-                    ;'''.format(a=EstoqueUtils.sql_balance_template),
-            )
-
-            result = []
-            for row in cursor.fetchall():
-                validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
-                if err != None:
-                    validade = err
-                
-                validade_str = ''
-                validade_perc_str = 0
-                validade_meses = 0
-                if type(validade) == int:
-                    validade_meses = float(validade) / 30.44 # approximadamente 30.44 dias por mes
-                    validade_str = f"{(validade_meses):.1f} / {row[7]} meses"
-                    validade_perc_str = float(f"{(validade_meses / row[7] * 100):.1f}")
-                
-                # checa se a data de vencimento existe
-                date_venc = row[8]
-                
-                if date_venc == None:
-                    date_venc = 'N/A'
-                
-                result.append({
-                    # itera letra e numero da rua com um '.'
-                    'address': f'{row[0]}.{row[1]} ', 
-                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
-                    #   exemplo:
-                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-                    #    'A.1 ' -> ['A.1 ']
-                    'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                    'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                    'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str, 
-                    'validade_meses': float(validade_meses), 'date_venc': date_venc
-                })
-        return result
-
-
-    @staticmethod
-    # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
-    def get_inv_address_with_batch_fat():
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT  
-                    h.rua_letra, h.rua_numero, i.cod_item,
-                    i.desc_item, h.lote_item, h.id_carga, 
-                    h.id_request, h.quantidade, h.time_mov
-                FROM tbl_transactions h
-                
-                JOIN itens i 
-                ON h.cod_item = i.cod_item
-                
-                WHERE 
-                    (h.operacao = 'S' AND (h.id_request != 0 OR h.id_request IS NULL)) 
-                    OR
-                    (h.operacao = 'F' AND (h.id_carga != 0 OR h.id_carga IS NULL))
-                
-                ORDER BY 
-                    h.time_mov DESC, h.id_carga DESC,
-                    h.id_request DESC, h.cod_item ASC;
-            ''')
-
-            result = [{
-                # itera letra e numero da rua com um '.'
-                'address': f'{row[0]}.{row[1]} ',
-                # adiciona espaço vazio no final para melhorar busca de resultados exatos
-                #   exemplo:
-                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-                #    'A.1 ' -> ['A.1 ']
-                'cod_item' : row[2],
-                'desc_item': row[3], 'cod_lote': row[4], 'saldo'   : row[7],
-                'id_carga' : row[5], 'id_req'  : row[6], 'time_mov': row[8]
-            } for row in cursor.fetchall()]
-        return result
-
-
-    @staticmethod
-    # RETORNA SALDO DO ITEM NO ENDEREÇO FORNECIDO
-    def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
-        sql_balance_template = EstoqueUtils.sql_balance_template
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT 
-                    COALESCE({a}, 0) as saldo
-                FROM tbl_transactions h
-                WHERE 
-                    rua_numero = ? AND
-                    rua_letra = ? AND
-                    cod_item = ? AND
-                    lote_item = ?;
-            '''.format(a=sql_balance_template), (rua_numero, rua_letra, cod_item, cod_lote))
-            saldo_item = cursor.fetchone()[0]
-        return saldo_item
 
 
 class CargaUtils:
@@ -1329,7 +902,7 @@ class HistoricoUtils:
     @staticmethod
     # SELECIONA TODOS ITENS DE REGISTRO POSITIVO NO ENDEREÇO FORNECIDO
     def select_address(letra, numero):
-        sql_balance_template = EstoqueUtils.sql_balance_template
+        sql_balance_template = estoqueUtils.sql_balance_template
         with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute('''
@@ -2026,249 +1599,6 @@ class Schedule:
             return producao_list
 
 
-class misc:
-    @staticmethod
-    def days_to_expire(date_fab: str, months: int, cod_lote: str) -> int | str:
-        if not months or not cod_lote or 'CS' not in cod_lote:
-            return 0, "N/A" # sem prazo de validade, ou não informado
-        months = int(months)
-        
-        if '-' in date_fab:
-            date_fab = date_fab.replace('-', '/')
-        
-        date_fab = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
-        data_vencimento = date_fab.replace(
-            month=(date_fab.month + months - 1) % 12 + 1,
-            year=date_fab.year + (date_fab.month + months - 1) // 12
-        )
-        remaining = (data_vencimento - datetime.today()).days
-        return remaining, None
-        
-        
-    @staticmethod
-    def parse_date_to_html_input(date: str) -> str:
-        date, _ = date.split(' ')
-        return date.replace('/', '-')
-    
-    
-    @staticmethod
-    # busca frase para /index
-    def get_frase() -> str:
-        with open('static/frases.txt', 'r', encoding='utf-8') as file:
-            frases = file.readlines()
-            frase = random.choice(frases).strip()
-            if not frase:
-            # frase padrão
-                frase = 'Seja a mudança que você deseja ver no mundo.'
-        return frase
-
-
-    @staticmethod
-    # converte timestamp para formato do database
-    def parse_db_datetime(timestamp):
-        if not timestamp:
-            timestamp = datetime.now(timezone(timedelta(hours=-3)))
-        elif isinstance(timestamp, str):
-            timestamp = datetime.strptime(timestamp, '%Y-%m-%d')
-            timestamp = timestamp.replace(tzinfo=timezone(timedelta(hours=-3)))
-        
-        return timestamp.strftime('%Y/%m/%d %H:%M:%S')
-    
-
-    @staticmethod
-    # retorna timestamp
-    def get_timestamp() -> str:
-        return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-
-    @staticmethod
-    # adiciona dias À data informada
-    def add_days_to_datetime_str(date_str, qtde_days) -> str:
-
-        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-        
-        new_date_obj = date_obj + timedelta(days=qtde_days)
-        
-        new_date_str = new_date_obj.strftime('%Y-%m-%d')
-        
-        return new_date_str
-
-
-    @staticmethod
-    # mensagem do telegram
-    def tlg_msg(msg):
-        if not session.get('user_grant') == 1:
-            if debug == True:
-                lt.debug_log('[ERRO] A mensagem não pôde ser enviada em modo debug')
-                return None
-            else:
-                bot_token = os.getenv('TLG_BOT_TOKEN')
-                chat_id   = os.getenv('TLG_CHAT_ID')
-
-                url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-                params = {'chat_id': chat_id, 'text': msg}
-                response = requests.post(url, params=params)
-                return response.json()
-        else:
-            return None
-
-
-    @staticmethod
-    # hash da senha
-    def hash_key(password) -> str:
-        return pbkdf2_sha256.hash(password)
-
-
-    @staticmethod
-    # parse p/ float
-    def parse_float(value) -> float:
-        try:
-            return float(value.replace(',', '.'))
-        except ValueError:
-            return 0.0
-    
-    
-    @staticmethod
-    @app.template_filter('parse_date')
-    def parse_date(value):
-        try:
-            dt = datetime.fromisoformat(value)
-            return dt.strftime("%d / %m / %Y")
-        except Exception as e:
-            return value
-
-
-    @staticmethod
-    # verifica senha no banco de hash
-    def password_check(id_user, password) -> bool:
-        with sqlite3.connect(db_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                SELECT password_user
-                FROM users
-                WHERE id_user = ?;
-            ''', (id_user,))
-
-            row = cursor.fetchone()
-            
-            if row:
-                db_password = row[0]
-                return misc.check_key(db_password, password)
-            return False
-
-
-    @staticmethod
-    # verifica senha no banco de hash
-    def check_key(hashed_pwd, pwd) -> bool:
-        return pbkdf2_sha256.verify(pwd, hashed_pwd)
-
-
-    class CSVUtils:
-        @staticmethod
-        # csv para integraçÃo erp
-        def iterate_csv_data_erp(data) -> str:
-            csv_data = ''
-            for item in data:
-                line = ';'.join(map(str, item.values()))
-                csv_data += f'"{line}"\n'
-            return csv_data
-
-
-        @staticmethod
-        # corpo csv padrao
-        def iterate_csv_data(data) -> str:
-            csv_data = ''
-            for item in data:
-                line = ';'.join(map(str, item.values()))
-                csv_data += f'{line}\n'
-            return csv_data
-
-
-        @staticmethod
-        # adiciona cabecalho para csv
-        def add_headers(data):
-            if data and len(data) > 0:
-                headers = ';'.join(data[0].keys())
-                return f'{headers}\n'
-            return ''
-
-        
-        @staticmethod    
-        # retorna tabela de saldo
-        def get_export_promob():
-            sql_balance_template = EstoqueUtils.sql_balance_template
-            with sqlite3.connect(db_path) as connection:
-                cursor = connection.cursor()
-                cursor.execute('''
-                    SELECT 
-                        i.desc_item, 
-                        i.cod_item, 
-                        COALESCE(t.saldo, 0) as saldo, 
-                        t.time_mov
-                    FROM 
-                        itens i
-                    LEFT JOIN (
-                        SELECT 
-                            cod_item, {a} as saldo,
-                            MAX(time_mov) as time_mov,
-                            ROW_NUMBER() OVER(
-                                PARTITION BY cod_item 
-                                ORDER BY MAX(time_mov) DESC
-                            ) as rn
-                        FROM 
-                            tbl_transactions h
-                        GROUP BY 
-                            cod_item
-                        HAVING 
-                            saldo != 0
-                    ) t ON i.cod_item = t.cod_item
-                    WHERE 
-                        t.rn = 1 OR t.rn IS NULL
-                    ORDER BY 
-                        i.cod_item;
-                '''.format(a=sql_balance_template))
-
-                inv_data = [{
-                    'cod_item': row[1],
-                    'deposito': int(5), #TODO: create a menu to config this
-                    'qtde'    : row[2]
-                } for row in cursor.fetchall()]
-
-            return inv_data
-
-        
-        @staticmethod
-        # construtor de csv
-        def export_csv(data, filename, include_headers=True):
-            if data and len(data) > 0:
-                csv_data = ''
-                if not include_headers:
-                    csv_data += misc.CSVUtils.iterate_csv_data_erp(data)
-                else:
-                    csv_data += misc.CSVUtils.add_headers(data)
-                    csv_data += misc.CSVUtils.iterate_csv_data(data)
-
-                csv_filename = Response(csv_data, content_type='text/csv')
-                csv_filename.headers['Content-Disposition'] = f'attachment; filename={filename}.csv'
-
-                return csv_filename
-            else:
-                alert_type = 'DOWNLOAD IMPEDIDO \n'
-                alert_msge = 'A tabela não tem informações suficientes para exportação. \n'
-                alert_more = ('''
-                    POSSÍVEIS SOLUÇÕES:
-                    • Verifique se a tabela possui mais de uma linha.
-                    • Contate o suporte. 
-                ''')
-                return render_template(
-                    'components/menus/alert.j2', 
-                    alert_type=alert_type, 
-                    alert_msge=alert_msge, 
-                    alert_more=alert_more, 
-                    url_return=url_for('index')
-                )
-
-
 # métodos sem classe
 # 
 @app.before_request
@@ -2315,7 +1645,7 @@ def check_ip() -> None:
         blacklist = os.getenv('IP_BLACKLIST')
         if client_ip in blacklist:
             msg = f'{client_ip} na Blacklist.'
-            misc.tlg_msg(msg)
+            misc.telegram_msg(msg)
             abort(403)
 
     else:
@@ -2328,7 +1658,7 @@ def check_ip() -> None:
         if adm_ip not in current_server_ip:
             if client_ip not in adm_ip:
                 msg = f'{client_ip}'
-                misc.tlg_msg(msg)
+                misc.telegram_msg(msg)
             abort(403)
 
     return None
@@ -2442,7 +1772,7 @@ def supply_losses_args(year, month):
     except ValueError:
         return {'error': f'Invalid month or year.'}, 400
     
-    result, _ = EstoqueUtils.get_item_loss(month_str, year_str)
+    result, _ = estoqueUtils.get_item_loss(month_str, year_str)
     
     return render_template(
         'pages/loss-page.j2', 
@@ -2510,12 +1840,12 @@ def get_users():
     return jsonify(users)
     
     
-@app.route('/api/get_item_first_mov', methods=['GET'])
+@app.route('/item/first_mov', methods=['GET'])
 def api_get_first_mov_item():
     cod_item = request.args.get('cod_item')
     cod_lote = request.args.get('cod_lote')
 
-    first_mov = EstoqueUtils.get_first_mov(cod_item, cod_lote)
+    first_mov = estoqueUtils.get_first_mov(cod_item, cod_lote)
     if first_mov != []:
         first_mov = misc.parse_date_to_html_input(first_mov[0][0])
     else:
@@ -2806,7 +2136,7 @@ def login():
             
             # grava log no telegram
             msg = f'[LOG-IN]\n{cde.format_three_no(user_id)} - {user_nome} {user_snome}\n{request.remote_addr}'
-            misc.tlg_msg(msg)
+            misc.telegram_msg(msg)
 
             # senha temporária
             input_pwd = '12345'
@@ -2930,7 +2260,7 @@ def get_item() -> Response:
 @app.route('/logi/mov/')
 @cde.verify_auth('MOV002', 'logi')
 def mov() -> str:
-    result = EstoqueUtils.get_inv_address_with_batch()
+    result = estoqueUtils.get_inv_address_with_batch()
 
     return render_template(
         'pages/mov/mov.j2', 
@@ -3008,7 +2338,7 @@ def historico_search() -> str:
 @app.route('/logi/mov/faturado/')
 @cde.verify_auth('MOV005', 'logi')
 def faturado() -> str:
-    inv_data = EstoqueUtils.get_inv_address_with_batch_fat()
+    inv_data = estoqueUtils.get_inv_address_with_batch_fat()
 
     return render_template(
         'pages/mov/mov-faturado.j2', 
@@ -3052,6 +2382,8 @@ def moving() -> str | Response:
     
     if operacao == 'E':
         date_fab = request.form['date_fab']
+        if not date_fab:
+            date_fab = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # evita que uma movimentaçao seja realizada com a data de fabricacão
         # caso a data seja preenchida automaticamente (já existia uma entrada no lote)
         data_locked = request.form['data_locked'].lower() == "true"
@@ -3065,7 +2397,7 @@ def moving() -> str | Response:
             lt.debug_log(f'  | DATA FABRICACAO: {date_fab}')
             
             if len(date_fab) == 10:  # 'YYYY/MM/DD' 
-                date_fab += ' 00:00:00' # 'YYYY/MM/DD HH:MM:SS'
+                date_fab += ' 23:59:59' # 'YYYY/MM/DD HH:MM:SS'
             lt.debug_log(f'  | DATA FABRICACAO: {date_fab}')
                 
             timestamp_br = datetime.strptime(date_fab, '%Y/%m/%d %H:%M:%S')
@@ -3104,7 +2436,7 @@ def moving() -> str | Response:
         
         print(f'  | ITEM ÚNICO ({letra}.{numero}): {items}')
 
-        saldo_item  = int(EstoqueUtils.get_saldo_item(numero, letra, cod_item, lote_item))
+        saldo_item  = int(estoqueUtils.get_saldo_item(numero, letra, cod_item, lote_item))
         if operacao in ('S', 'T', 'F') and quantidade > saldo_item:
         # impossibilita estoque negativo
             alert_type = 'OPERAÇÃO CANCELADA'
@@ -3214,7 +2546,7 @@ def moving_req_bulk():
     try:
         for item in sep_carga:
             # verifica se o item e lote (no endereço) ainda tem estoque suficiente
-            haveItem = EstoqueUtils.get_saldo_item(
+            haveItem = estoqueUtils.get_saldo_item(
                 item['rua_numero'],
                 item['rua_letra'],
                 item['cod_item'],
@@ -3257,7 +2589,7 @@ def moving_carga_bulk():
             operacao = item.get('operacao', 'F')
 
             # verifica a quantidade em estoque
-            haveItem = EstoqueUtils.get_saldo_item(
+            haveItem = estoqueUtils.get_saldo_item(
                 item['rua_numero'],
                 item['rua_letra'],
                 item['cod_item'],
@@ -3320,7 +2652,7 @@ def moving_carga_bulk():
 @app.route('/get/stock_items/')
 @cde.verify_auth('MOV002')
 def get_stock_items() -> str:
-    result = EstoqueUtils.get_inv_address_with_batch()
+    result = estoqueUtils.get_inv_address_with_batch()
 
     return jsonify(result)
 
@@ -3395,7 +2727,7 @@ def carga_incomp_id(id_carga) -> str:
         class_alert = 'error'
     
     if cod_item:
-        result_local, columns_local = EstoqueUtils.get_item_inv_locations(cod_item)
+        result_local, columns_local = estoqueUtils.get_item_inv_locations(cod_item)
     else:
         result_local, columns_local = [], []
     
@@ -3928,7 +3260,7 @@ def cadastrar_usuario() -> Response | str:
 
                     msg = \
                     f'[CADASTRO]\n{request.remote_addr}\n{id_user} - {user_name} [+] {nome_user} {sobrenome_user} ({privilege_user})'
-                    misc.tlg_msg(msg)
+                    misc.telegram_msg(msg)
 
         except sqlite3.IntegrityError as e:
             if 'UNIQUE constraint failed' in str(e):
@@ -3972,7 +3304,7 @@ def carga_id(id_carga) -> str:
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            result_local, columns_local = EstoqueUtils.get_item_inv_locations(cod_item)
+            result_local, columns_local = estoqueUtils.get_item_inv_locations(cod_item)
 
         # extrai o primeiro elemento de `id_carga`
         id_carga = cde.split_code_seq(id_carga)[0]
@@ -4101,7 +3433,7 @@ def mov_request_id(id_req) -> str:
         qtde_solic = request.args.get('qtde_solic', '')
         
         if cod_item:
-            result_local, columns_local = EstoqueUtils.get_item_inv_locations(cod_item)
+            result_local, columns_local = estoqueUtils.get_item_inv_locations(cod_item)
 
         result, columns = MovRequestUtils.get_mov_request(id_req)
 
@@ -4308,7 +3640,7 @@ def get_carga_qtde_solic():
             ;
         '''.format(a=id_carga, b=cod_item)
         dsn = 'LOCAL'
-        result, columns = dbUtils.query(query, dsn)
+        result, _ = dbUtils.query(query, dsn)
         
     if result != []:
         qtde_solic = result[0][0]
@@ -4355,7 +3687,7 @@ def get_itens_carga():
     '''.format(a=id_carga)
     try:
         dsn = cde.get_unit()
-        result, columns = dbUtils.query(query, dsn)
+        result, _ = dbUtils.query(query, dsn)
         if result:
             itens = [row[0] for row in result]
         else:
@@ -4744,10 +4076,10 @@ def get_linhas() -> Response | None:
 def estoque() -> str:
     if request.method == 'POST':
         date = request.form['date']
-        inv_data = EstoqueUtils.get_saldo_view(date)
+        inv_data = estoqueUtils.get_saldo_view(date)
     else:
         date = False
-        inv_data = EstoqueUtils.get_saldo_view()
+        inv_data = estoqueUtils.get_saldo_view()
     return render_template(
         'pages/estoque.j2', 
         inv_data=inv_data,
@@ -4760,9 +4092,9 @@ def estoque() -> str:
 def estoque_enderecado() -> str:
     if request.method == 'POST':
         date = request.form['date']
-        result = EstoqueUtils.get_inv_address_with_batch(date)
+        result = estoqueUtils.get_inv_address_with_batch(date)
     else:
-        result = EstoqueUtils.get_inv_address_with_batch()
+        result = estoqueUtils.get_inv_address_with_batch()
         date = False
     return render_template(
         'pages/estoque-enderecado.j2',
@@ -4776,9 +4108,9 @@ def estoque_enderecado() -> str:
 def inv_report() -> str:
     if request.method == 'POST':
         date = request.form['date']
-        result = EstoqueUtils.get_inv_report(date)
+        result = estoqueUtils.get_inv_report(date)
     else:
-        result = EstoqueUtils.get_inv_report()
+        result = estoqueUtils.get_inv_report()
         date = False
     return render_template(
         'pages/inv-report.j2',
@@ -4792,9 +4124,9 @@ def inv_report() -> str:
 def estoque_preset() -> str:
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
-        saldo_preset = EstoqueUtils.get_saldo_preset(preset_id, False)
+        saldo_preset = estoqueUtils.get_saldo_preset(preset_id, False)
     else:
-        saldo_preset = EstoqueUtils.get_saldo_preset(preset_id)
+        saldo_preset = estoqueUtils.get_saldo_preset(preset_id)
     return render_template(
         'pages/estoque-preset.j2',
         inv_data=saldo_preset,
@@ -4807,9 +4139,9 @@ def estoque_preset() -> str:
 def cargas_preset() -> str:
     preset_id = request.form.get('preset_id', 1)
     if request.method == 'POST':
-        cargas_preset = EstoqueUtils.get_saldo_preset(preset_id, False)
+        cargas_preset = estoqueUtils.get_saldo_preset(preset_id, False)
     else:
-        cargas_preset = EstoqueUtils.get_saldo_preset(preset_id)
+        cargas_preset = estoqueUtils.get_saldo_preset(preset_id)
     return render_template(
         'pages/estoque-preset.j2',
         inv_data=cargas_preset,
@@ -4832,17 +4164,17 @@ def export_csv_type(type) -> str | Response:
     elif type == 'produtos':
         data = ProdutoUtils.get_active_itens()
     elif type == 'saldo':
-        data = EstoqueUtils.get_address_lote()
+        data = estoqueUtils.get_address_lote()
     elif type == 'faturado':
-        data = EstoqueUtils.get_address_lote_fat()
+        data = estoqueUtils.get_address_lote_fat()
     elif type == 'estoque':
-        data = EstoqueUtils.get_saldo_view()
+        data = estoqueUtils.get_saldo_view()
     elif type == 'envase':
         data =  Schedule.EnvaseUtils.get_envase()
     elif type == 'producao':
         data =  Schedule.ProcessamentoUtils.get_producao()
     elif type == 'saldo_preset':
-        data = EstoqueUtils.get_saldo_preset(1)
+        data = estoqueUtils.get_saldo_preset(1)
     else:
         alert_type = 'DOWNLOAD IMPEDIDO \n'
         alert_msge = 'A tabela não tem informações suficientes para exportação. \n'
