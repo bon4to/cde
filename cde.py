@@ -9,6 +9,7 @@ from app.services import NotificationManager as nm
 # imported dependencies
 from flask import Flask, Response, request, redirect, render_template, url_for, jsonify, session, abort
 from datetime import datetime, timezone, timedelta
+from dateutil.relativedelta import relativedelta
 from passlib.hash import pbkdf2_sha256
 from dotenv import load_dotenv
 from functools import wraps
@@ -2037,10 +2038,9 @@ class misc:
             date_fab = date_fab.replace('-', '/')
         
         date_fab = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
-        data_vencimento = date_fab.replace(
-            month=(date_fab.month + months - 1) % 12 + 1,
-            year=date_fab.year + (date_fab.month + months - 1) // 12
-        )
+
+        data_vencimento = date_fab + relativedelta(months=months)
+
         remaining = (data_vencimento - datetime.today()).days
         return remaining, None
         
