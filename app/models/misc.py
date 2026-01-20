@@ -1,3 +1,4 @@
+import calendar
 import requests, random, os
 
 from flask import Flask, Response, request, redirect, render_template, url_for, jsonify, session, abort
@@ -12,21 +13,24 @@ db_path = cdeapp.config.get_db_path()
 debug = cdeapp.config.get_debug()
 
 @staticmethod
-def days_to_expire(date_fab: str, months: int, cod_lote: str) -> int | str:
-    if not months or not cod_lote or 'CS' not in cod_lote:
-        return 0, "N/A" # sem prazo de validade, ou não informado
-    months = int(months)
-    
-    if '-' in date_fab:
+def days_to_expire(date_fab: str, months: int, cod_lote: str) -> tuple[int, str | None]:
+        if not months or not cod_lote or 'CS' not in cod_lote:
+            return 0, "N/A" # sem prazo de validade, ou não informado
+
         date_fab = date_fab.replace('-', '/')
-    
-    date_fab = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
-    data_vencimento = date_fab.replace(
-        month=(date_fab.month + months - 1) % 12 + 1,
-        year=date_fab.year + (date_fab.month + months - 1) // 12
-    )
-    remaining = (data_vencimento - datetime.today()).days
-    return remaining, None
+        date_fab = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
+
+        total_months = date_fab.month + months
+        year = date_fab.year + (total_months - 1) // 12
+        month = (total_months - 1) % 12 + 1
+
+        last_day = calendar.monthrange(year, month)[1]
+        day = min(date_fab.day, last_day)
+
+        expiration_date = date_fab.replace(year=year, month=month, day=day)
+        remaining = (expiration_date - datetime.today()).days
+
+        return remaining, None
     
     
 @staticmethod
