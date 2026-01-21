@@ -1103,7 +1103,7 @@ class ProdutoUtils:
     # leitor de código
     # retorna dados do item
     def get_item_json(input_code):
-        if 'EM.' not in input_code:
+        if 'EM.' not in input_code and 'CA' not in input_code:
             input_code = re.sub(r'[^0-9;]', '', (input_code.strip()))
         lt.log(2, f'  | Código fornecido: {input_code}')
         
@@ -1119,7 +1119,7 @@ class ProdutoUtils:
                 }
             )
 
-        else:     
+        else:
             # VALIDAÇÃO P/ CÓDIGO INTERNO SEM ';'
             if len(input_code) == 6 or len(input_code) == 7:
                 input_code = input_code + ';'
@@ -1206,7 +1206,7 @@ class ProdutoUtils:
                     if resultado is not None:
                         desc_item = resultado[0]
                         if 'VINHO' in desc_item:
-                            cod_lote = 'VINHOS'
+                            cod_lote = ''
                     else:
                         desc_item, cod_item, cod_lote = 'ITEM NÃO CADASTRADO OU INATIVO', '', ''
                         print(f'  | {desc_item}')
