@@ -8,15 +8,16 @@ from app.models import logTexts
 # carrega o .env
 load_dotenv()
 
+
 def get_file_text(dir) -> str:
     try:
-        with open(dir, 'r') as file:
+        with open(dir, "r") as file:
             return file.read().strip()
     except Exception as e:
         logTexts.log(3, e)
-        return ''
+        return ""
 
-    
+
 class QueryManager:
     """
     Classe responsável por carregar e manipular queries SQL dinâmicas.
@@ -33,7 +34,7 @@ class QueryManager:
         Parâmetros:
             file_path (str): Caminho do arquivo contendo as queries.
         """
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             lines = file.readlines()
 
         queries = {}
@@ -47,7 +48,9 @@ class QueryManager:
                 continue
 
             if re.match(r"^\d+\s*:", line):  # Nova query encontrada
-                if current_id is not None:  # Salva a query anterior antes de iniciar uma nova
+                if (
+                    current_id is not None
+                ):  # Salva a query anterior antes de iniciar uma nova
                     queries[current_id] = " ".join(current_query).strip()
 
                 parts = line.split(":", 1)
@@ -63,11 +66,9 @@ class QueryManager:
 
         cls.QUERIES = queries
 
-    
     @staticmethod
     def get_all_queries() -> dict:
         return QueryManager.QUERIES
-    
 
     @staticmethod
     def get(query_id: int, **variables) -> str:
@@ -85,18 +86,15 @@ class QueryManager:
             ValueError: Se o 'query_id' não existir no dicionário QUERIES.
         """
         QueryManager.load_queries("db/queries/queries.txt")
-        
+
         query = QueryManager.QUERIES.get(query_id)
-        
+
         if not query:
             raise ValueError(f"Query ID {query_id} not found")
 
         if "{" in query and variables:
-            return query.format(**{
-                k: v
-                for k, v in variables.items()
-            })
-            
+            return query.format(**{k: v for k, v in variables.items()})
+
         return query
 
 
@@ -104,62 +102,78 @@ class QueryManager:
 # conexão e consulta no banco de dados
 def query(query: str, method: str, source: int = 1):
     # TODO: criar métodos de mesclar consultas (ex: dadosNOE + dadosHP)
-    if method == 'API':
-    # busca na api configurada
+    if method == "API":
+        # busca na api configurada
         url, headers = new_api_connection()
-        data = {
-            "query": query,
-            "source": source
-        }
+        data = {"query": query, "source": source}
         try:
             response = requests.post(url, headers=headers, json=data)
-            
+
             if response.status_code == 200:
                 try:
                     response_data = response.json()
 
                     # verifica se a resposta possui as chaves esperadas
-                    if isinstance(response_data, dict) and "columns" in response_data and "data" in response_data:
+                    if (
+                        isinstance(response_data, dict)
+                        and "columns" in response_data
+                        and "data" in response_data
+                    ):
                         # extrai colunas e dados
                         columns = response_data["columns"]
                         data = response_data["data"]
 
                         # converte 'data' em uma lista de listas para exibição tabular
-                        result = [[item.get(col, "") for col in columns] for item in data]
-                        
+                        result = [
+                            [item.get(col, "") for col in columns] for item in data
+                        ]
+
                         # sanitiza a lista result
                         result = [
-                            [str(item).strip() if item is not None else '' for item in row]
+                            [
+                                str(item).strip() if item is not None else ""
+                                for item in row
+                            ]
                             for row in result
                         ]
 
                         # retorna as linhas e colunas
                         return result, columns
                     else:
-                        logTexts.debug_log(f"Formato inesperado da resposta: {response_data}")
+                        logTexts.debug_log(
+                            f"Formato inesperado da resposta: {response_data}"
+                        )
                         return [[f"Erro: Formato inesperado da resposta da API"]], []
 
                 except ValueError:
-                    logTexts.debug_log(f"Resposta inválida (não é JSON): {response.text}")
+                    logTexts.debug_log(
+                        f"Resposta inválida (não é JSON): {response.text}"
+                    )
                     return [[f"Erro: Resposta inválida da API"]], []
             else:
-                logTexts.debug_log(f"Erro na API: {response.status_code} - {response.reason}")
+                logTexts.debug_log(
+                    f"Erro na API: {response.status_code} - {response.reason}"
+                )
                 return [[f"Erro HTTP {response.status_code}: {response.reason}"]], []
 
         except requests.exceptions.ConnectionError as e:
             logTexts.debug_log(f"API offline ou inacessível: {str(e)}")
-            return [[f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."]], []
+            return [
+                [
+                    f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."
+                ]
+            ], []
 
         except Exception as e:
             logTexts.debug_log(f"Erro de conexão com a API: {str(e)}")
             return [[f"Erro: {str(e)}"]], []
 
-    elif method == 'ODBC-DRIVER':
-    # busca nas DSNs configuradas (Fonte de Dados ODBC)
+    elif method == "ODBC-DRIVER":
+        # busca nas DSNs configuradas (Fonte de Dados ODBC)
         # get user credentials
         user, password = get_odbc_user_credentials()
-        
-        dsn = source #TODO: criar metodo que busca dns no .env conforme source
+
+        dsn = source  # TODO: criar metodo que busca dns no .env conforme source
         try:
             connection = pyodbc.connect(f"DSN={dsn}", uid=user, pwd=password)
             cursor = connection.cursor()
@@ -171,12 +185,12 @@ def query(query: str, method: str, source: int = 1):
             connection.close()
         except Exception as e:
             logTexts.log(3, "Erro ao enviar solicitação:", str(e))
-            result = [[f'Erro de consulta: {e}']]
+            result = [[f"Erro de consulta: {e}"]]
             columns = []
-    
-    elif method == 'LOCAL':
-    # busca no arquivo local (.db)
-        try:            
+
+    elif method == "LOCAL":
+        # busca no arquivo local (.db)
+        try:
             with sqlite3.connect(cdeapp.config.get_db_path()) as connection:
                 cursor = connection.cursor()
                 cursor.execute(query)
@@ -187,31 +201,33 @@ def query(query: str, method: str, source: int = 1):
                     result = cursor.fetchall()
                 else:
                     columns = []
-                    result = [["Query executada com sucesso"]]  # Para INSERTs, UPDATEs, DELETEs
+                    result = [
+                        ["Query executada com sucesso"]
+                    ]  # Para INSERTs, UPDATEs, DELETEs
         except Exception as e:
             logTexts.debug_log(f"Erro ao enviar solicitação: {str(e)}")
-            result = [[f'Erro de consulta: {e}']]
+            result = [[f"Erro de consulta: {e}"]]
             columns = []
 
     else:
-        result = [[f'MÉTODO INVÁLIDO: {method}']]
+        result = [[f"MÉTODO INVÁLIDO: {method}"]]
         columns = []
-        
+
     return result, columns
 
 
 @staticmethod
 def new_api_connection():
-    db_api = os.getenv('DB_API')
+    db_api = os.getenv("DB_API")
     url = f"http://{db_api}/query"
     headers = {"Content-Type": "application/json"}
-    
+
     return url, headers
 
 
 @staticmethod
 def get_odbc_user_credentials():
-    uid_pwd = os.getenv('DB_USER').split(';')
+    uid_pwd = os.getenv("DB_USER").split(";")
     return uid_pwd[0], uid_pwd[1]
 
 
@@ -220,9 +236,10 @@ def get_odbc_user_credentials():
 def create_tables(database) -> None:
     with sqlite3.connect(database) as connection:
         cursor = connection.cursor()
-        
+
         # TABELA DE PROGRAMAÇÃO DO ENVASE
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS prog_envase (
                 id_envase       INTEGER PRIMARY KEY AUTOINCREMENT,
                 cod_linha       INTEGER(3),
@@ -234,10 +251,12 @@ def create_tables(database) -> None:
                 observacao      VARCHAR(100),
                 flag_concluido  BOOLEAN DEFAULT FALSE
             );
-        ''')
+        """
+        )
 
         # TABELA DE PROGRAMAÇÃO DA PROCESSAMENTO
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS prog_producao (
                 id_producao     INTEGER PRIMARY KEY AUTOINCREMENT,
                 cod_linha       INTEGER(3),
@@ -251,10 +270,12 @@ def create_tables(database) -> None:
                 observacao      VARCHAR(100),
                 flag_concluido  BOOLEAN DEFAULT FALSE
             );
-        ''')
+        """
+        )
 
         # TABELA HISTÓRICO
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS tbl_transactions (
                 id_mov     INTEGER PRIMARY KEY AUTOINCREMENT,
                 rua_letra  VARCHAR(10),
@@ -268,10 +289,12 @@ def create_tables(database) -> None:
                 id_user    INTEGER,
                 time_mov   DATETIME
             );
-        ''')
-        
+        """
+        )
+
         # TABELA DE CLIENTES
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS clientes (
                 cod_cliente      INTEGER(10) PRIMARY KEY,
                 razao_cliente    VARCHAR(100),
@@ -279,10 +302,12 @@ def create_tables(database) -> None:
                 cidade_cliente   VARCHAR(100),
                 estado_cliente   VARCHAR(30)
             );
-        ''')
-        
+        """
+        )
+
         # TABELA DE CARGAS PENDENTES
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS tbl_carga_incomp (
                 id_log        INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_carga      INTEGER(6),
@@ -291,10 +316,12 @@ def create_tables(database) -> None:
                 qtde_solic    INTEGER(20),
                 flag_pendente BOOLEAN DEFAULT TRUE
             );
-        ''')
+        """
+        )
 
         # TABELA DE USUÁRIOS
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS users (
                 id_user        INTEGER PRIMARY KEY AUTOINCREMENT,
                 login_user     VARCHAR(30) UNIQUE,
@@ -305,50 +332,61 @@ def create_tables(database) -> None:
                 data_cadastro  DATETIME,
                 ult_acesso     DATETIME
             );
-        ''')
+        """
+        )
 
         # TABELA DE PERMISSÕES DE USUÁRIO
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS user_permissions (
                 id_user INTEGER, 
                 id_perm VARCHAR(6)
             );
-        ''')
+        """
+        )
 
         # TABELA DE ITENS
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS itens (
                 cod_item   VARCHAR(6) PRIMARY KEY,
                 desc_item  VARCHAR(100),
                 dun14      INTEGER(14),
                 flag_ativo BOOLEAN DEFAULT TRUE
             );
-        ''')
+        """
+        )
 
         # TABELA AUXILIAR DE PRIVILÉGIOS
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS aux_privilege (
                 id_priv   INTEGER(2) PRIMARY KEY,
                 desc_priv VARCHAR(30) UNIQUE
             );
-        ''')
+        """
+        )
 
         # TABELA AUXILIAR DE PERMISSÕES
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS aux_permissions (
                 id_perm   VARCHAR(6) PRIMARY KEY,
                 desc_perm VARCHAR(100)
             );
-        ''')
-        
+        """
+        )
+
         # TABELA AUXILIAR DE LINHAS
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS aux_linha (
                 cod_linha  INTEGER(3),
                 tipo_embal VARCHAR(10),
                 lit_embal  VARCHAR(10)
             );
-        ''')
+        """
+        )
 
         connection.commit()
     return None
@@ -358,33 +396,32 @@ def create_tables(database) -> None:
 # consulta tabelas do schema
 def db_get_tables(dsn):
     try:
-        if dsn == 'ODBC-DRIVER':
-            query_str = '''
+        if dsn == "ODBC-DRIVER":
+            query_str = """
                 SELECT TABNAME
                 FROM SYSCAT.TABAUTH
                 WHERE GRANTEE = 'CDEADMIN'
                 AND SELECTAUTH = 'Y';
-            '''
-        if dsn == 'API':
-            query_str = '''
+            """
+        if dsn == "API":
+            query_str = """
                 SELECT TABNAME
                 FROM SYSCAT.TABAUTH
                 WHERE GRANTEE = 'CDEADMIN'
                 AND SELECTAUTH = 'Y';
-            '''
-        elif dsn == 'LOCAL':
-            query_str = '''
+            """
+        elif dsn == "LOCAL":
+            query_str = """
                 SELECT name 
                 FROM sqlite_master 
                 WHERE type = 'table' 
                     AND name NOT LIKE 'sqlite_%'
                 ORDER BY name;
-            '''
+            """
         else:
-            return [[f'DSN desconhecida: {dsn}']]
-        
-    except Exception as e:
-        return [[f'Erro de consulta: {e}']]
-    
-    return query(query_str, dsn)[0]
+            return [[f"DSN desconhecida: {dsn}"]]
 
+    except Exception as e:
+        return [[f"Erro de consulta: {e}"]]
+
+    return query(query_str, dsn)[0]

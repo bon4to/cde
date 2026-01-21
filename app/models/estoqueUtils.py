@@ -27,7 +27,7 @@ def get_item_inv_locations(cod_item=None):
     item expiration, balance, batch number, etc.
 
     Args:
-        cod_item (str, optional): Code of the item to search for. If not provided or False, 
+        cod_item (str, optional): Code of the item to search for. If not provided or False,
             returns an empty result. #TODO: use a string.
 
     Returns:
@@ -47,31 +47,37 @@ def get_item_inv_locations(cod_item=None):
     """
     if cod_item:
         query = dbUtils.QueryManager.get(
-            query_id = 2,
-            calc = sql_balance_template,
-            b = str(cod_item)
+            query_id=2, calc=sql_balance_template, b=str(cod_item)
         )
-        
-        dsn = 'LOCAL'
+
+        dsn = "LOCAL"
         result_local, columns_local = dbUtils.query(query, dsn)
-        
+
         result = []
         for row in result_local:
-            validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
+            validade, err = misc.days_to_expire(
+                date_fab=row[6], months=row[7], cod_lote=row[4]
+            )
             if err != None:
                 validade = err
-            result.append({
-                # itera letra e numero da rua com um '.'
-                'address': f'{row[0]}.{row[1]} ', 
-                # adiciona espaço vazio no final para melhorar busca de resultados exatos
-                #   exemplo:
-                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-                #    'A.1 ' -> ['A.1 ']
-                'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                'validade': validade
-            })
-        
+            result.append(
+                {
+                    # itera letra e numero da rua com um '.'
+                    "address": f"{row[0]}.{row[1]} ",
+                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                    #   exemplo:
+                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                    #    'A.1 ' -> ['A.1 ']
+                    "cod_item": row[2],
+                    "desc_item": row[3],
+                    "cod_lote": row[4],
+                    "saldo": row[5],
+                    "date_fab": row[6],
+                    "item_expire_months": row[7],
+                    "validade": validade,
+                }
+            )
+
         return result, columns_local
     else:
         return [], []
@@ -80,14 +86,12 @@ def get_item_inv_locations(cod_item=None):
 @staticmethod
 def get_item_loss(month_str: str, year_str: str):
     query = dbUtils.QueryManager.get(
-        query_id = 3,
-        year = str(year_str),
-        month = str(month_str)
+        query_id=3, year=str(year_str), month=str(month_str)
     )
-    
-    dsn = 'API'
+
+    dsn = "API"
     result, columns = dbUtils.query(query, dsn, source=2)
-    
+
     return result, columns
 
 
@@ -97,10 +101,11 @@ def get_saldo_view(timestamp=False):
     if timestamp:
         timestamp = misc.add_days_to_datetime_str(timestamp, 1)
     timestamp = misc.parse_db_datetime(timestamp)
-    
+
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT 
                 i.cod_item, i.desc_item, 
                 COALESCE(t.saldo, 0) as saldo,
@@ -124,12 +129,21 @@ def get_saldo_view(timestamp=False):
                 t.rn = 1 OR 
                 t.rn IS NULL
             ORDER BY t.time_mov DESC;
-        '''.format(a=sql_balance_template), (timestamp,))
+        """.format(
+                a=sql_balance_template
+            ),
+            (timestamp,),
+        )
 
-        result = [{
-            'cod_item': row[0], 'desc_item': row[1], 
-            'saldo'   : row[2], 'ult_mov'  : row[3]
-        } for row in cursor.fetchall()]
+        result = [
+            {
+                "cod_item": row[0],
+                "desc_item": row[1],
+                "saldo": row[2],
+                "ult_mov": row[3],
+            }
+            for row in cursor.fetchall()
+        ]
 
     return result
 
@@ -138,19 +152,19 @@ def get_saldo_view(timestamp=False):
 # BUSCA SALDO COM UM FILTRO (PRESET)
 def get_saldo_preset(index, timestamp=False):
     itens = get_preset_itens(index)
-    
+
     if not itens:
         return []
-    
+
     if timestamp:
         timestamp = misc.add_days_to_datetime_str(timestamp, 1)
     timestamp = misc.parse_db_datetime(timestamp)
-    
+
     # prepara uma string de placeholders sql (ex.: ?, ?, ?...)
     # e coloca na query
-    placeholders = ','.join(['?'] * len(itens))
-    
-    query = '''
+    placeholders = ",".join(["?"] * len(itens))
+
+    query = """
         SELECT 
             i.cod_item, i.desc_item,
             COALESCE(t.saldo, 0) as saldo
@@ -171,18 +185,20 @@ def get_saldo_preset(index, timestamp=False):
         
         WHERE i.cod_item IN ({b})
         ORDER BY i.cod_item;
-    '''.format(a=sql_balance_template, b=placeholders)
+    """.format(
+        a=sql_balance_template, b=placeholders
+    )
 
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        # executa a query, 
+        # executa a query,
         # passando o timestamp e os itens p/ os placeholders
         cursor.execute(query, (timestamp, *itens))
-    
-        result = [{
-            'cod_item': row[0], 'desc_item': row[1], 
-            'saldo'   : row[2]
-        } for row in cursor.fetchall()]
+
+        result = [
+            {"cod_item": row[0], "desc_item": row[1], "saldo": row[2]}
+            for row in cursor.fetchall()
+        ]
     return result
 
 
@@ -191,9 +207,9 @@ def get_saldo_preset(index, timestamp=False):
 def get_preset_itens(index):
     try:
         with open(
-            f'report/estoque_preset/filtro_{index}.txt', 'r', encoding='utf-8'
+            f"report/estoque_preset/filtro_{index}.txt", "r", encoding="utf-8"
         ) as file:
-            itens = file.read().strip().split(', ')
+            itens = file.read().strip().split(", ")
     except:
         itens = []
     return itens
@@ -201,15 +217,15 @@ def get_preset_itens(index):
 
 @staticmethod
 def get_first_mov(cod_item: str, cod_lote: str):
-    query = f'''
+    query = f"""
         SELECT time_mov
         FROM tbl_transactions
         WHERE cod_item = '{cod_item}'
         AND lote_item = '{cod_lote}'
         ORDER BY time_mov ASC
         LIMIT 1;
-    '''
-    dsn = 'LOCAL'
+    """
+    dsn = "LOCAL"
     result, _ = dbUtils.query(query, dsn)
     return result
 
@@ -220,10 +236,11 @@ def get_inv_address_with_batch(timestamp=False):
     if timestamp:
         timestamp = misc.add_days_to_datetime_str(timestamp, 1)
     timestamp = misc.parse_db_datetime(timestamp)
-    
+
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT  
                 h.rua_letra, h.rua_numero, 
                 i.cod_item, i.desc_item, h.lote_item,
@@ -251,32 +268,47 @@ def get_inv_address_with_batch(timestamp=False):
             ORDER BY 
                 h.rua_letra ASC, h.rua_numero ASC,
                 i.desc_item ASC
-            ;'''.format(a=sql_balance_template),(timestamp,)
+            ;""".format(
+                a=sql_balance_template
+            ),
+            (timestamp,),
         )
 
         result = []
         for row in cursor.fetchall():
-            validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
+            validade, err = misc.days_to_expire(
+                date_fab=row[6], months=row[7], cod_lote=row[4]
+            )
             if err != None:
                 validade = err
-            
-            validade_str = ''
+
+            validade_str = ""
             validade_perc_str = 0
             if type(validade) == int:
                 validade_str = f"{(float(validade) / 30.44):.1f} / {row[7]} meses"
-                validade_perc_str = float(f"{(float(validade) / 30.44 / row[7] * 100):.1f}")
-            
-            result.append({
-                # itera letra e numero da rua com um '.'
-                'address': f'{row[0]}.{row[1]} ', 
-                # adiciona espaço vazio no final para melhorar busca de resultados exatos
-                #   exemplo:
-                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-                #    'A.1 ' -> ['A.1 ']
-                'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str
-            })
+                validade_perc_str = float(
+                    f"{(float(validade) / 30.44 / row[7] * 100):.1f}"
+                )
+
+            result.append(
+                {
+                    # itera letra e numero da rua com um '.'
+                    "address": f"{row[0]}.{row[1]} ",
+                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                    #   exemplo:
+                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                    #    'A.1 ' -> ['A.1 ']
+                    "cod_item": row[2],
+                    "desc_item": row[3],
+                    "cod_lote": row[4],
+                    "saldo": row[5],
+                    "date_fab": row[6],
+                    "item_expire_months": row[7],
+                    "validade": validade,
+                    "validade_str": validade_str,
+                    "validade_perc_str": validade_perc_str,
+                }
+            )
     return result
 
 
@@ -286,10 +318,11 @@ def get_inv_report(timestamp=False):
     if timestamp:
         timestamp = misc.add_days_to_datetime_str(timestamp, 1)
     timestamp = misc.parse_db_datetime(timestamp)
-    
+
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             WITH base AS (
                 SELECT  
                     h.rua_letra,
@@ -340,41 +373,56 @@ def get_inv_report(timestamp=False):
             ORDER BY 
                 rua_letra ASC, rua_numero ASC,
                 desc_item ASC
-                ;'''.format(a=sql_balance_template),
+                ;""".format(
+                a=sql_balance_template
+            ),
         )
 
         result = []
         for row in cursor.fetchall():
-            validade, err = misc.days_to_expire(date_fab=row[6], months=row[7], cod_lote=row[4])
+            validade, err = misc.days_to_expire(
+                date_fab=row[6], months=row[7], cod_lote=row[4]
+            )
             if err != None:
                 validade = err
-            
-            validade_str = ''
+
+            validade_str = ""
             validade_perc_str = 0
             validade_meses = 0
             if type(validade) == int:
-                validade_meses = float(validade) / 30.44 # approximadamente 30.44 dias por mes
+                validade_meses = (
+                    float(validade) / 30.44
+                )  # approximadamente 30.44 dias por mes
                 validade_str = f"{(validade_meses):.1f} / {row[7]} meses"
                 validade_perc_str = float(f"{(validade_meses / row[7] * 100):.1f}")
-            
+
             # checa se a data de vencimento existe
             date_venc = row[8]
-            
+
             if date_venc == None:
-                date_venc = 'N/A'
-            
-            result.append({
-                # itera letra e numero da rua com um '.'
-                'address': f'{row[0]}.{row[1]} ', 
-                # adiciona espaço vazio no final para melhorar busca de resultados exatos
-                #   exemplo:
-                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-                #    'A.1 ' -> ['A.1 ']
-                'cod_item': row[2], 'desc_item': row[3], 'cod_lote': row[4], 
-                'saldo'   : row[5], 'date_fab' : row[6], 'item_expire_months': row[7],
-                'validade': validade, 'validade_str': validade_str, 'validade_perc_str': validade_perc_str, 
-                'validade_meses': float(validade_meses), 'date_venc': date_venc
-            })
+                date_venc = "N/A"
+
+            result.append(
+                {
+                    # itera letra e numero da rua com um '.'
+                    "address": f"{row[0]}.{row[1]} ",
+                    # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                    #   exemplo:
+                    #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                    #    'A.1 ' -> ['A.1 ']
+                    "cod_item": row[2],
+                    "desc_item": row[3],
+                    "cod_lote": row[4],
+                    "saldo": row[5],
+                    "date_fab": row[6],
+                    "item_expire_months": row[7],
+                    "validade": validade,
+                    "validade_str": validade_str,
+                    "validade_perc_str": validade_perc_str,
+                    "validade_meses": float(validade_meses),
+                    "date_venc": date_venc,
+                }
+            )
     return result
 
 
@@ -383,7 +431,8 @@ def get_inv_report(timestamp=False):
 def get_inv_address_with_batch_fat():
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT  
                 h.rua_letra, h.rua_numero, i.cod_item,
                 i.desc_item, h.lote_item, h.id_carga, 
@@ -401,19 +450,27 @@ def get_inv_address_with_batch_fat():
             ORDER BY 
                 h.time_mov DESC, h.id_carga DESC,
                 h.id_request DESC, h.cod_item ASC;
-        ''')
+        """
+        )
 
-        result = [{
-            # itera letra e numero da rua com um '.'
-            'address': f'{row[0]}.{row[1]} ',
-            # adiciona espaço vazio no final para melhorar busca de resultados exatos
-            #   exemplo:
-            #    'A.1'  -> ['A.1', 'A.10', 'A.100']
-            #    'A.1 ' -> ['A.1 ']
-            'cod_item' : row[2],
-            'desc_item': row[3], 'cod_lote': row[4], 'saldo'   : row[7],
-            'id_carga' : row[5], 'id_req'  : row[6], 'time_mov': row[8]
-        } for row in cursor.fetchall()]
+        result = [
+            {
+                # itera letra e numero da rua com um '.'
+                "address": f"{row[0]}.{row[1]} ",
+                # adiciona espaço vazio no final para melhorar busca de resultados exatos
+                #   exemplo:
+                #    'A.1'  -> ['A.1', 'A.10', 'A.100']
+                #    'A.1 ' -> ['A.1 ']
+                "cod_item": row[2],
+                "desc_item": row[3],
+                "cod_lote": row[4],
+                "saldo": row[7],
+                "id_carga": row[5],
+                "id_req": row[6],
+                "time_mov": row[8],
+            }
+            for row in cursor.fetchall()
+        ]
     return result
 
 
@@ -422,7 +479,8 @@ def get_inv_address_with_batch_fat():
 def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT 
                 COALESCE({a}, 0) as saldo
             FROM tbl_transactions h
@@ -431,6 +489,10 @@ def get_saldo_item(rua_numero, rua_letra, cod_item, cod_lote):
                 rua_letra = ? AND
                 cod_item = ? AND
                 lote_item = ?;
-        '''.format(a=sql_balance_template), (rua_numero, rua_letra, cod_item, cod_lote))
+        """.format(
+                a=sql_balance_template
+            ),
+            (rua_numero, rua_letra, cod_item, cod_lote),
+        )
         saldo_item = cursor.fetchone()[0]
     return saldo_item
