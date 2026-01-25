@@ -5,6 +5,7 @@ from app.models import logTexts
 
 IMAGE_SIZE = (400, 400)
 
+
 @staticmethod
 # cria qrcode
 def qr_code(qr_text):
@@ -16,9 +17,10 @@ def qr_code(qr_text):
     )
     qr.add_data(qr_text)
     qr.make(fit=True)
-    qr_image = qr.make_image(fill_color='black', back_color='white')
-    qr_image = qr_image.convert('RGB')
+    qr_image = qr.make_image(fill_color="black", back_color="white")
+    qr_image = qr_image.convert("RGB")
     return qr_image
+
 
 @staticmethod
 def generate(qr_text, desc_item, cod_item, cod_lote) -> str:
@@ -38,7 +40,7 @@ def generate(qr_text, desc_item, cod_item, cod_lote) -> str:
 @staticmethod
 def _create_base_image():
     """cria a imagem base limpa."""
-    return Image.new('RGB', IMAGE_SIZE, color='white')
+    return Image.new("RGB", IMAGE_SIZE, color="white")
 
 
 @staticmethod
@@ -71,26 +73,29 @@ def _draw_text(img, cod_item, desc_item, cod_lote):
         font_small = ImageFont.truetype(font_path, 24)
     except:
         # usa fonte padrão da biblioteca
-        logTexts.log("Erro ao carregar fonte Arial, é recomendável baixar e utilizar a fonte 'arialbd.ttf'")
+        logTexts.log(
+            "Erro ao carregar fonte Arial, é recomendável baixar e utilizar a fonte 'arialbd.ttf'"
+        )
         font_large = ImageFont.load_default()
         font_small = ImageFont.load_default()
 
     # desenha o código do lote
-    cod_lote_text = f'LOTE: {cod_lote}'
+    cod_lote_text = f"LOTE: {cod_lote}"
     lote_bbox = draw.textbbox((0, 0), cod_lote_text, font=font_large)
     lote_x = (width - (lote_bbox[2] - lote_bbox[0])) // 2
+
     lote_y = height // 1.9
-    draw.text((lote_x, lote_y), cod_lote_text, fill='black', font=font_large)
+    draw.text((lote_x, lote_y), cod_lote_text, fill="black", font=font_large)
 
     # desenha a descrição do item em múltiplas linhas
-    desc_text = f'{cod_item} - {desc_item}'
+    desc_text = f"{cod_item} - {desc_item}"
     lines = textwrap.wrap(desc_text, width=25)
     y_text = height - height // 2.8
 
     for line in lines:
         text_width, text_height = draw.textbbox((0, 0), line, font=font_small)[2:]
         line_x = (width - text_width) // 2
-        draw.text((line_x, y_text), line, fill='black', font=font_small)
+        draw.text((line_x, y_text), line, fill="black", font=font_small)
         y_text += text_height
 
 
@@ -98,6 +103,6 @@ def _draw_text(img, cod_item, desc_item, cod_lote):
 def _image_to_base64(img):
     """converte a imagem para base64."""
     img_io = io.BytesIO()
-    img.save(img_io, format='PNG')
+    img.save(img_io, format="PNG")
     img_io.seek(0)
     return base64.b64encode(img_io.getvalue()).decode()

@@ -3,12 +3,7 @@ import sys
 
 from app.utils import cdeapp
 
-TAGS = {
-    1: "[CDE]",
-    2: "[INF]",
-    3: "[ERR]",
-    4: "[STATUS]"
-}
+TAGS = {1: "[CDE]", 2: "[INF]", 3: "[ERR]", 4: "[STATUS]"}
 
 cde_header = """
           CCCCCCCCCCCCCCC   DDDDDDDDDDDDDDD           EEEEEEEEEEEEEEEEEEEEEE
@@ -37,14 +32,14 @@ def start_header(version, release_date):
 """
 
 
-def log(tag_i: int, text: str, tag_2: str="") -> None:
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    tag = TAGS.get(tag_i, '[CDE]') 
-    
+def log(tag_i: int, text: str, tag_2: str = "") -> None:
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    tag = TAGS.get(tag_i, "[CDE]")
+
     if not tag_2:
-        print(f'{tag} ({timestamp}) | {text}')
+        print(f"{tag} ({timestamp}) | {text}")
         return
-    print(f'{tag} ({timestamp}) {tag_2} | {text}')
+    print(f"{tag} ({timestamp}) {tag_2} | {text}")
     return
 
 
@@ -52,7 +47,7 @@ def log(tag_i: int, text: str, tag_2: str="") -> None:
 def debug_log(text: str) -> None:
     debug = cdeapp.config.get_debug()
     if debug:
-        print(f'[DBG] {text}')
+        print(f"[DBG] {text}")
 
 
 error_header = f"""
