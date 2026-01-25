@@ -4,7 +4,7 @@ import sqlite3, json, sys, re, os, time
 # local imports
 from app.utils import cdeapp
 from app.models import dbUtils, stickerUtils, misc, estoqueUtils, logTexts as lt
-from app.services import notificationManager as nm
+from app.services import NotificationManager as nm
 
 # imported dependencies
 from flask import (

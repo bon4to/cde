@@ -37,7 +37,7 @@ def setNotification(userid: int, title: str, message: str) -> tuple[None, str]:
         users.append(userid)
     else:
         try:
-            query = f"""
+            query = """
                 SELECT id_user
                 FROM users
                 ORDER BY id_user ASC;
