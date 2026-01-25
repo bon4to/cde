@@ -29,10 +29,10 @@
                         <th>Item (Código)</th>
                         <th>Item (Descrição)</th>
                         <th>Lote (Código)</th>
-                        <th>Validade (Dias)</th>
+                        <th>VAL (Dias)</th>
                         <th>Self-Life (%)</th>
-                        <th>Fabricacão (Data)</th>
-                        <th>Vencimento (Data)</th>
+                        <th>FAB (Data)</th>
+                        <th>VAL (Data)</th>
                         <th>Saldo (Quant.)</th>
                     </tr>
                 </thead>
@@ -83,13 +83,15 @@
                                     </td>
                                 {% else %}
                                 <td 
+                                    {% set validade_meses = item['validade'] | int / 30  %}
                                     title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
-                                    {% if item['validade_perc_str'] < 50 %}
-                                        style="color: rgb(255, 0, 0); font-weight: bold"
-                                    {% elif item['validade_perc_str'] < 70 %}
-                                        style="color: rgb(255, 145, 0); font-weight: bold"
-                                    {% else %}
-                                        style="color: rgb(10, 128, 10); font-weight: bold"
+                                    
+                                    {% if item['validade_perc_str'] >= 80 %}   {# self life more than 80% #}
+                                        style="color: green; font-weight: bold"
+                                    {% elif item['validade_perc_str'] >= 70 %} {# self life more than 70% #}
+                                        style="color: #daa520; font-weight: bold"
+                                    {% else %}                                {# self life less than 70% #}
+                                        style="color: red; font-weight: bold"
                                     {% endif %}
                                 >
                                     {{ item['validade_perc_str'] }}

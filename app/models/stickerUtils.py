@@ -54,7 +54,7 @@ def _paste_qr_code(img, qr_image):
         qr_image = qr_image.resize((width // 2, height // 2))
 
     qr_x = (width - qr_width) // 2
-    qr_y = (height - qr_height) // 2
+    qr_y = (height - qr_height) // 4
     # Specify the box with (left, top, right, bottom) coordinates
     box = (qr_x, qr_y, qr_x + qr_width, qr_y + qr_height)
     img.paste(qr_image, box)
@@ -83,13 +83,14 @@ def _draw_text(img, cod_item, desc_item, cod_lote):
     cod_lote_text = f"LOTE: {cod_lote}"
     lote_bbox = draw.textbbox((0, 0), cod_lote_text, font=font_large)
     lote_x = (width - (lote_bbox[2] - lote_bbox[0])) // 2
-    lote_y = height // 1.5
+
+    lote_y = height // 1.9
     draw.text((lote_x, lote_y), cod_lote_text, fill="black", font=font_large)
 
     # desenha a descrição do item em múltiplas linhas
     desc_text = f"{cod_item} - {desc_item}"
-    lines = textwrap.wrap(desc_text, width=30)
-    y_text = height - height // 4.6
+    lines = textwrap.wrap(desc_text, width=25)
+    y_text = height - height // 2.8
 
     for line in lines:
         text_width, text_height = draw.textbbox((0, 0), line, font=font_small)[2:]
