@@ -1,0 +1,5 @@
+1: SELECT * FROM users WHERE id = {user_id}
+2: SELECT name, email FROM contacts
+3: SELECT * FROM products
+   WHERE category = '{category}'
+   AND price < {max_price}
