@@ -4,6 +4,7 @@ import sqlite3, json, sys, re, os, time
 # local imports
 from app.utils import cdeapp
 from app.models import dbUtils, stickerUtils, misc, estoqueUtils, logTexts as lt
+from app.models.migrationManager import MigrationManager
 from app.services import NotificationManager as nm
 
 # imported dependencies
@@ -110,6 +111,9 @@ if __name__:
     else:
         print(lt.error_header)
         sys.exit(2)
+
+    # run pending migrations on startup
+    MigrationManager.run_on_startup()
 
 
 class cde:
@@ -587,7 +591,8 @@ class CargaUtils:
         cargas_status = CargaUtils.listed_cargas_status()
 
         cargas_finalizadas = [
-            carga for carga in all_cargas
+            carga
+            for carga in all_cargas
             if carga not in cargas_pendentes and carga not in cargas_status
         ]
 
@@ -3055,13 +3060,15 @@ def cargas_baixas():
         user_result, _ = dbUtils.query(user_query, "LOCAL")
         nome_user = user_result[0][0] if user_result else "Desconhecido"
 
-        result.append({
-            "id_carga": row[0],
-            "status": row[1],
-            "justificativa": row[2] or "-",
-            "usuario": nome_user,
-            "timestamp": row[4],
-        })
+        result.append(
+            {
+                "id_carga": row[0],
+                "status": row[1],
+                "justificativa": row[2] or "-",
+                "usuario": nome_user,
+                "timestamp": row[4],
+            }
+        )
 
     return render_template(
         "pages/mov/mov-carga/mov-carga-baixas.j2",
@@ -4595,6 +4602,42 @@ def export_csv_type(type) -> str | Response:
             url_return=url_for("index"),
         )
     return misc.CSVUtils.export_csv(data, filename, header)
+
+
+@app.route("/admin/migrations/")
+@cde.verify_auth("DEV000")
+def admin_migrations():
+    """Admin page for database migrations (admin only)."""
+    migrations = MigrationManager.get_migrations_status()
+    return render_template("pages/admin/migrations.j2", migrations=migrations)
+
+
+@app.route("/api/migrations/run", methods=["POST"])
+@cde.verify_auth("DEV000")
+def api_run_migrations():
+    """Run pending migrations."""
+    try:
+        results = MigrationManager.run_pending_migrations()
+        return jsonify({"success": True, "results": results})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/migrations/rollback", methods=["POST"])
+@cde.verify_auth("DEV000")
+def api_rollback_migration():
+    """Rollback a specific migration."""
+    data = request.get_json()
+    name = data.get("name")
+
+    if not name:
+        return jsonify({"success": False, "error": "Nome da migração não informado"})
+
+    try:
+        result = MigrationManager.rollback_migration(name)
+        return jsonify({"success": result["status"] == "success", "result": result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 
 # __main__
