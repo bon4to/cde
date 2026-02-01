@@ -196,6 +196,93 @@ def down():
         status = MigrationManager.get_migrations_status()
         self.assertEqual(status[1]['status'], 'pending')
 
+    def test_down_code_stored(self):
+        """Test that down() code is stored when migration is applied."""
+        self._create_migration('20250101000000_store', down_code="pass  # stored")
+
+        MigrationManager.run_pending_migrations()
+
+        with sqlite3.connect(self.temp_db) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT down_code FROM tbl_migrations WHERE filename = ?",
+                          ('20250101000000_store',))
+            row = cursor.fetchone()
+
+        self.assertIsNotNone(row[0])
+        self.assertIn('stored', row[0])
+
+    def test_rollback_orphaned_migration(self):
+        """Test rollback of migration when file is deleted (orphaned)."""
+        # Create and apply migration
+        self._create_migration(
+            '20250101000000_orphan',
+            up_code=f"sqlite3.connect('{self.temp_db}').execute('CREATE TABLE orphan_test (id INTEGER)')",
+            down_code=f"sqlite3.connect('{self.temp_db}').execute('DROP TABLE orphan_test')"
+        )
+        MigrationManager.run_pending_migrations()
+
+        # Verify table exists
+        with sqlite3.connect(self.temp_db) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='orphan_test'")
+            self.assertIsNotNone(cursor.fetchone())
+
+        # Delete migration file (simulating branch switch)
+        os.remove(os.path.join(self.temp_migrations, '20250101000000_orphan.py'))
+
+        # Run orphaned rollback
+        results = MigrationManager.rollback_orphaned_migrations()
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['status'], 'success')
+
+        # Verify table was dropped using stored down code
+        with sqlite3.connect(self.temp_db) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='orphan_test'")
+            self.assertIsNone(cursor.fetchone())
+
+    def test_orphaned_shown_in_status(self):
+        """Test that orphaned migrations are shown in status."""
+        self._create_migration('20250101000000_will_orphan')
+        MigrationManager.run_pending_migrations()
+
+        # Delete file
+        os.remove(os.path.join(self.temp_migrations, '20250101000000_will_orphan.py'))
+
+        status = MigrationManager.get_migrations_status()
+
+        self.assertEqual(len(status), 1)
+        self.assertEqual(status[0]['status'], 'orphaned')
+
+    def test_run_on_startup_handles_orphaned(self):
+        """Test that run_on_startup rolls back orphaned and applies pending."""
+        # Create and apply first migration
+        self._create_migration(
+            '20250101000000_old',
+            up_code=f"sqlite3.connect('{self.temp_db}').execute('CREATE TABLE old_table (id INTEGER)')",
+            down_code=f"sqlite3.connect('{self.temp_db}').execute('DROP TABLE old_table')"
+        )
+        MigrationManager.run_pending_migrations()
+
+        # Delete old, create new (simulating branch switch)
+        os.remove(os.path.join(self.temp_migrations, '20250101000000_old.py'))
+        self._create_migration(
+            '20250102000000_new',
+            up_code=f"sqlite3.connect('{self.temp_db}').execute('CREATE TABLE new_table (id INTEGER)')"
+        )
+
+        # Run on startup
+        MigrationManager.run_on_startup()
+
+        # Old table should be gone, new table should exist
+        with sqlite3.connect(self.temp_db) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='old_table'")
+            self.assertIsNone(cursor.fetchone())
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='new_table'")
+            self.assertIsNotNone(cursor.fetchone())
+
 
 if __name__ == '__main__':
     unittest.main()
