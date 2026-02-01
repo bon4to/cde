@@ -348,38 +348,6 @@ def create_tables(database) -> None:
         """
         )
 
-        # TABELA MOCK DE CARGAS (simula dados da API)
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS mock_cargas (
-                NRO_CARGA    INTEGER PRIMARY KEY,
-                NRO_PEDIDO   INTEGER,
-                COD_CLIENTE  INTEGER,
-                FANT_CLIENTE VARCHAR(100),
-                DT_EMISSAO   DATETIME,
-                DT_ENTREGA   DATETIME,
-                OBS_CARGA    TEXT
-            );
-        """
-        )
-
-        # TABELA MOCK DE ITENS DA CARGA (simula dados da API)
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS mock_carga_itens (
-                id           INTEGER PRIMARY KEY AUTOINCREMENT,
-                NRO_CARGA    INTEGER,
-                NRO_PEDIDO   INTEGER,
-                NROPED_SEQ   VARCHAR(20),
-                COD_ITEM     VARCHAR(10),
-                DESC_ITEM    VARCHAR(100),
-                QTDE_SOLIC   INTEGER,
-                OBS_CARGA    TEXT,
-                FOREIGN KEY (NRO_CARGA) REFERENCES mock_cargas(NRO_CARGA)
-            );
-        """
-        )
-
         # TABELA DE USUÁRIOS
         cursor.execute(
             """

@@ -573,18 +573,7 @@ function excludeCarga() {
 
 function baixaCarga() {
     const justificativa = prompt('Informe a justificativa para a baixa desta carga:');
-    if (justificativa === null) {
-        return;
-    }
-    if (!justificativa.trim()) {
-        showToast('A justificativa é obrigatória.', 'error', 5);
-        return;
-    }
-    if (!verifyCaptcha(nroCarga)) {
-        showToast('O captcha foi cancelado ou preenchido incorretamente.', 'error', 10);
-        return;
-    }
-    toggleBaixaCarga(justificativa);
+    toggleBaixaCarga(justificativa.trim());
 }
 
 
