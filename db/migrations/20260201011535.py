@@ -10,7 +10,9 @@ from app.utils.cdeapp import config
 
 FILTRO_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    'report', 'cargas_preset', 'filtro_1.txt'
+    "report",
+    "cargas_preset",
+    "filtro_1.txt",
 )
 
 
@@ -19,14 +21,15 @@ def up():
     if not os.path.exists(FILTRO_PATH):
         raise Exception(f"File not found: {FILTRO_PATH}")
 
-    with open(FILTRO_PATH, 'r') as f:
+    with open(FILTRO_PATH, "r") as f:
         content = f.read().strip()
 
-    ids = [int(x.strip()) for x in content.split(',') if x.strip()]
+    ids = [int(x.strip()) for x in content.split(",") if x.strip()]
 
     with sqlite3.connect(config.get_db_path()) as conn:
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS tbl_carga_status (
                 id_log        INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_carga      INTEGER(6),
@@ -36,12 +39,16 @@ def up():
                 timestamp     DATETIME DEFAULT CURRENT_TIMESTAMP,
                 flag_ativo    BOOLEAN DEFAULT TRUE
             )
-        """)
+        """
+        )
         for id_carga in ids:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO tbl_carga_status (id_carga, status, justificativa, id_user)
-                VALUES (?, 'excluida', 'Importado de filtro_1.txt', 0)
-            """, (id_carga,))
+                VALUES (?, 'excluida', 'Importado automaticamente', 0)
+            """,
+                (id_carga,),
+            )
         conn.commit()
 
 
@@ -49,8 +56,10 @@ def down():
     """Rollback migration - remove imported cargas."""
     with sqlite3.connect(config.get_db_path()) as conn:
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE FROM tbl_carga_status
-            WHERE justificativa = 'Importado de filtro_1.txt'
-        """)
+            WHERE justificativa = 'Importado automaticamente'
+        """
+        )
         conn.commit()
