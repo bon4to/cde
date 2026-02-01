@@ -102,12 +102,18 @@ class QueryManager:
 # conexão e consulta no banco de dados
 def query(query: str, method: str, source: int = 1):
     # TODO: criar métodos de mesclar consultas (ex: dadosNOE + dadosHP)
+
+    # Timeout padrão para conexões externas (em segundos)
+    API_TIMEOUT = int(os.getenv("API_TIMEOUT", 30))
+    ODBC_TIMEOUT = int(os.getenv("ODBC_TIMEOUT", 15))
     if method == "API":
         # busca na api configurada
         url, headers = new_api_connection()
         data = {"query": query, "source": source}
         try:
-            response = requests.post(url, headers=headers, json=data)
+            response = requests.post(
+                url, headers=headers, json=data, timeout=API_TIMEOUT
+            )
 
             if response.status_code == 200:
                 try:
@@ -156,13 +162,15 @@ def query(query: str, method: str, source: int = 1):
                 )
                 return [[f"Erro HTTP {response.status_code}: {response.reason}"]], []
 
+        except requests.exceptions.Timeout as e:
+            logTexts.debug_log(f"Timeout na requisição à API: {str(e)}")
+            return [
+                [f"Erro: Timeout - A API não respondeu em {API_TIMEOUT} segundos."]
+            ], []
+
         except requests.exceptions.ConnectionError as e:
             logTexts.debug_log(f"API offline ou inacessível: {str(e)}")
-            return [
-                [
-                    f"Erro: A API está offline ou inacessível no momento. Consulte o suporte."
-                ]
-            ], []
+            return [[f"Erro: A API está offline ou inacessível no momento."]], []
 
         except Exception as e:
             logTexts.debug_log(f"Erro de conexão com a API: {str(e)}")
@@ -175,7 +183,9 @@ def query(query: str, method: str, source: int = 1):
 
         dsn = source  # TODO: criar metodo que busca dns no .env conforme source
         try:
-            connection = pyodbc.connect(f"DSN={dsn}", uid=user, pwd=password)
+            connection = pyodbc.connect(
+                f"DSN={dsn}", uid=user, pwd=password, timeout=ODBC_TIMEOUT
+            )
             cursor = connection.cursor()
             cursor.execute(query)
             columns = [str(column[0]) for column in cursor.description]
@@ -183,6 +193,10 @@ def query(query: str, method: str, source: int = 1):
 
             cursor.close()
             connection.close()
+        except pyodbc.OperationalError as e:
+            logTexts.log(3, "Timeout ou erro de conexão ODBC:", str(e))
+            result = [[f"Erro: Timeout na conexão com o banco de dados."]]
+            columns = []
         except Exception as e:
             logTexts.log(3, "Erro ao enviar solicitação:", str(e))
             result = [[f"Erro de consulta: {e}"]]
@@ -315,6 +329,21 @@ def create_tables(database) -> None:
                 qtde_atual    INTEGER(20),
                 qtde_solic    INTEGER(20),
                 flag_pendente BOOLEAN DEFAULT TRUE
+            );
+        """
+        )
+
+        # TABELA DE STATUS DE CARGAS
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS tbl_carga_status (
+                id_log        INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_carga      INTEGER(6),
+                status        VARCHAR(20),
+                justificativa TEXT,
+                id_user       INTEGER,
+                timestamp     DATETIME DEFAULT CURRENT_TIMESTAMP,
+                flag_ativo    BOOLEAN DEFAULT TRUE
             );
         """
         )

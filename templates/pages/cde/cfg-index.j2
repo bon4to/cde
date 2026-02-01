@@ -78,14 +78,25 @@
                     <hr>
                     <p>Developer Tools</p>
                     <div class="container-grid cfg" style="margin-bottom: 32px; padding: 10px 0">
-                        <div class="item featured" onclick="window.location.href='{{ url_for('cde_query_list') }}';" >
+                        <div class="item featured" onclick="window.location.href='{{ url_for('permissions') }}';" >
                             <div class="split-h algn-cntr">
                                 <div style="text-align: left">
-                                    <h2 class="text-default">Permissões</h2>
+                                    <h2 class="text-default">Contratos</h2>
                                     <p class="text-default bold">Gerencie os IDs das páginas</p>
                                 </div>
                                 <a class="btn-fancy button-mini">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="item featured" onclick="window.location.href='{{ url_for('admin_migrations') }}';" >
+                            <div class="split-h algn-cntr">
+                                <div style="text-align: left">
+                                    <h2 class="text-default">Migrations</h2>
+                                    <p class="text-default bold">Gerencie as migrations</p>
+                                </div>
+                                <a class="btn-fancy button-mini">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/database.svg') }}" alt="">
                                 </a>
                             </div>
                         </div>
