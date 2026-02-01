@@ -584,12 +584,108 @@ class CargaUtils:
     def get_cargas_finalizadas():
         all_cargas = CargaUtils.get_all_cargas()
         cargas_pendentes = CargaUtils.listed_carga_incomp()
+        cargas_status = CargaUtils.listed_cargas_status()
 
         cargas_finalizadas = [
-            carga for carga in all_cargas if carga not in cargas_pendentes
+            carga for carga in all_cargas
+            if carga not in cargas_pendentes and carga not in cargas_status
         ]
 
         return cargas_finalizadas
+
+    @staticmethod
+    def _ensure_status_table():
+        """Cria tabela de status se não existir"""
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tbl_carga_status (
+                    id_log        INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_carga      INTEGER(6),
+                    status        VARCHAR(20),
+                    justificativa TEXT,
+                    id_user       INTEGER,
+                    timestamp     DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    flag_ativo    BOOLEAN DEFAULT TRUE
+                );
+                """
+            )
+            connection.commit()
+
+    @staticmethod
+    def set_carga_status(id_carga, status, id_user, justificativa=None):
+        """Insere ou atualiza status de uma carga (excluida, baixa)"""
+        CargaUtils._ensure_status_table()
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            # desativa status anterior se existir
+            cursor.execute(
+                """
+                UPDATE tbl_carga_status
+                SET flag_ativo = FALSE
+                WHERE id_carga = ? AND flag_ativo = TRUE;
+                """,
+                (id_carga,),
+            )
+            # insere novo status
+            cursor.execute(
+                """
+                INSERT INTO tbl_carga_status (
+                    id_carga, status, justificativa, id_user
+                ) VALUES (?, ?, ?, ?);
+                """,
+                (id_carga, status, justificativa, id_user),
+            )
+            connection.commit()
+
+    @staticmethod
+    def revert_carga_status(id_carga):
+        """Remove status ativo de uma carga (torna disponível novamente)"""
+        CargaUtils._ensure_status_table()
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                UPDATE tbl_carga_status
+                SET flag_ativo = FALSE
+                WHERE id_carga = ? AND flag_ativo = TRUE;
+                """,
+                (id_carga,),
+            )
+            connection.commit()
+
+    @staticmethod
+    def get_cargas_with_status():
+        """Retorna cargas com status ativo (excluida ou baixa)"""
+        CargaUtils._ensure_status_table()
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                SELECT id_carga, status, justificativa, id_user, timestamp
+                FROM tbl_carga_status
+                WHERE flag_ativo = TRUE;
+                """
+            )
+            rows = cursor.fetchall()
+            return rows
+
+    @staticmethod
+    def listed_cargas_status():
+        """Retorna lista de IDs de cargas com status ativo"""
+        CargaUtils._ensure_status_table()
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                SELECT DISTINCT id_carga
+                FROM tbl_carga_status
+                WHERE flag_ativo = TRUE;
+                """
+            )
+            rows = cursor.fetchall()
+            return [row[0] for row in rows]
 
     @staticmethod
     # BUSCA CARGAS DO HISTÓRICO
@@ -2945,6 +3041,44 @@ def carga_incomp_id(id_carga) -> str:
     )
 
 
+@app.route("/logi/cargas/baixas/", methods=["GET"])
+@cde.verify_auth("MOV006", "logi")
+def cargas_baixas():
+    """Página para visualizar cargas com baixa ou excluídas"""
+    cargas = CargaUtils.get_cargas_with_status()
+
+    # formata os dados para exibição
+    result = []
+    for row in cargas:
+        # busca nome do usuário
+        user_query = f"SELECT nome_user FROM users WHERE id_user = {row[3]}"
+        user_result, _ = dbUtils.query(user_query, "LOCAL")
+        nome_user = user_result[0][0] if user_result else "Desconhecido"
+
+        result.append({
+            "id_carga": row[0],
+            "status": row[1],
+            "justificativa": row[2] or "-",
+            "usuario": nome_user,
+            "timestamp": row[4],
+        })
+
+    return render_template(
+        "pages/mov/mov-carga/mov-carga-baixas.j2",
+        cargas=result,
+    )
+
+
+@app.route("/api/revert-carga/<string:id_carga>/", methods=["POST"])
+@cde.verify_auth("MOV006", "logi")
+def revert_carga(id_carga) -> Response:
+    try:
+        CargaUtils.revert_carga_status(id_carga)
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(success=False, error=str(e))
+
+
 @app.route("/api/insert_carga_incomp/", methods=["POST"])
 @cde.verify_auth("MOV006", "logi")
 def api_insert_carga_incomp() -> Response:
@@ -2984,8 +3118,24 @@ def route_get_carga_incomp(id_carga) -> Response:
 @app.route("/api/conclude-carga/<string:id_carga>/", methods=["POST"])
 @cde.verify_auth("MOV006", "logi")
 def conclude_carga(id_carga) -> Response:
+    """Marca carga como excluída"""
     try:
-        CargaUtils.excluir_carga(id_carga)
+        id_user = session.get("id_user")
+        CargaUtils.set_carga_status(id_carga, "excluida", id_user)
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(success=False, error=str(e))
+
+
+@app.route("/api/baixa-carga/<string:id_carga>/", methods=["POST"])
+@cde.verify_auth("MOV006", "logi")
+def baixa_carga(id_carga) -> Response:
+    """Marca carga como baixa com justificativa"""
+    try:
+        data = request.get_json()
+        justificativa = data.get("justificativa", "")
+        id_user = session.get("id_user")
+        CargaUtils.set_carga_status(id_carga, "baixa", id_user, justificativa)
         return jsonify(success=True)
     except Exception as e:
         return jsonify(success=False, error=str(e))

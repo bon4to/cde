@@ -15,6 +15,7 @@
             ],
             aux_buttons=[
                 {'type': 'link', 'url': 'carga_incomp', 'icon': 'svg/package-badge.svg', 'title': 'INCOMPLETAS'},
+                {'type': 'link', 'url': 'cargas_baixas', 'icon': 'svg/package-minus.svg', 'title': 'BAIXAS'},
                 {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS'},
                 {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS', 'active': True},
                 {'type': 'divider'},
@@ -62,8 +63,8 @@
                                         <tbody>
                                             {% for row in result %}
                                                 {% if class_alert != 'error' %}
-                                                    <tr 
-                                                        class="selectable-row js_query_selector" 
+                                                    <tr
+                                                        class="selectable-row js_query_selector"
                                                         data-id="{{ row[columns.index('NRO_CARGA')] }}"
                                                         style="vertical-align: baseline;"
                                                     >
@@ -252,10 +253,13 @@
                                     <div class="button-mini btn-fancy" onclick="excludeCarga()" title="APAGAR CARGA">
                                         <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
                                     </div>
+                                    <div class="button-mini btn-fancy" onclick="baixaCarga()" title="FAZER BAIXA COM JUSTIFICATIVA">
+                                        <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/package-minus.svg') }}" alt="">
+                                    </div>
                                 </div>
-                                <div 
-                                    class="btn-fancy featured" 
-                                    style="height: 45px; margin: 0; max-width: 200px;" 
+                                <div
+                                    class="btn-fancy featured"
+                                    style="height: 45px; margin: 0; max-width: 200px;"
                                     onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
                                     <span>VISUALIZAR</span>
                                 </div>
