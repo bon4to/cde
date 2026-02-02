@@ -46,7 +46,7 @@
                 </div>
 
                 {% if cargas | length > 0 %}
-                <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                <div class="table-overflow">
                     <table>
                         <thead>
                             <tr>
@@ -69,16 +69,16 @@
                                 <td>{{ carga.timestamp }}</td>
                                 <td>
                                     {% if carga.status == 'baixa' %}
-                                        <span style="color: var(--warning-color); font-weight: bold;">BAIXA</span>
+                                        <span style="font-weight: bold;">BAIXA</span>
                                     {% elif carga.status == 'excluida' %}
-                                        <span style="color: var(--error-color); font-weight: bold;">EXCLUÍDA</span>
+                                        <span style="font-weight: bold;">EXCLUÍDA</span>
                                     {% else %}
                                         <span>{{ carga.status | upper }}</span>
                                     {% endif %}
                                 </td>
                                 <td style="text-align: center;">
-                                    <a class="hyperlink" onclick="revertCarga('{{ carga.id_carga }}')" title="Reverter carga">
-                                        <img class="svg-gray" style="height: 16px; width: 16px; vertical-align: middle;"
+                                    <a class="hyperlink" onclick="revertCarga('{{ carga.id_carga }}')" title="Reverter">
+                                        <img class="svg-gray" style="height: 12px; width: 12px; vertical-align: middle;"
                                              src="{{ url_for('static', filename='svg/undo.svg') }}" alt="">
                                     </a>
                                 </td>

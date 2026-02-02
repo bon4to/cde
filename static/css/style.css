@@ -312,9 +312,11 @@ div.back-modal {
 }
 
 .table-overflow {
+    flex: 1;
+    width: 100%;
     text-wrap: wrap;
     overflow-y: auto;
-    max-height: 660px;
+    min-height: 200px;
     overflow-x: hidden;
 }
 

@@ -37,6 +37,7 @@
                                         <div class="submenu-content">
                                             <a href="{{ url_for('estoque') }}">AGRUPADO</a>
                                             <a href="{{ url_for('estoque_enderecado') }}">ENDEREÇADO</a>
+                                            <a href="{{ url_for('inv_report') }}">RELATÓRIO</a>
                                             <a href="{{ url_for('estoque_preset') }}">PRESET</a>
                                         </div>
                                     </div>
@@ -49,6 +50,7 @@
                                         </a>
                                         <div class="submenu-content">
                                             <a href="{{ url_for('cargas') }}">CARGAS</a>
+                                            <a href="{{ url_for('cargas_baixas') }}">BAIXAS</a>
                                             <a href="{{ url_for('carga_incomp') }}">INCOMPLETAS</a>
                                             <a href="{{ url_for('faturado') }}">FATURADAS</a>
                                             <a href="{{ url_for('carga_sep_done', id_carga=0) }}">SEPARAÇÃO</a>

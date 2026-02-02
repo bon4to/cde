@@ -43,9 +43,11 @@ td {
 }
 
 .table-overflow {
+    flex: 1;
+    width: 100%;
     text-wrap: wrap;
     overflow-y: auto;
-    max-height: 600px;
+    min-height: 200px;
     overflow-x: hidden;
 }
 
