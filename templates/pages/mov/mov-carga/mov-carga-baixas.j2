@@ -55,7 +55,7 @@
                                 <th>Usuário</th>
                                 <th>Data/Hora</th>
                                 <th>Status</th>
-                                <th>Ações</th>
+                                <th style="width: 50px;"></th>
                             </tr>
                         </thead>
                         <tbody id="baixasTable">
@@ -76,14 +76,11 @@
                                         <span>{{ carga.status | upper }}</span>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <button
-                                        class="button-mini btn-fancy"
-                                        onclick="revertCarga('{{ carga.id_carga }}')"
-                                        title="REVERTER - Tornar carga disponível novamente">
-                                        <img class="svg-inv" style="height: 18px; width: 18px;"
-                                             src="{{ url_for('static', filename='svg/undo.svg') }}" alt="Reverter">
-                                    </button>
+                                <td style="text-align: center;">
+                                    <a class="hyperlink" onclick="revertCarga('{{ carga.id_carga }}')" title="Reverter carga">
+                                        <img class="svg-gray" style="height: 16px; width: 16px; vertical-align: middle;"
+                                             src="{{ url_for('static', filename='svg/undo.svg') }}" alt="">
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}

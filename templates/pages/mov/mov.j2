@@ -133,26 +133,7 @@
                     <div id="IconsField" class="inputs">
                         <div class="flex-h" style="justify-content: center; align-items: center">
                             <img id="svg-operation" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
-                            <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="togglePopUp()">
-                        </div>
-                        <div id="popup-field" style="display: none; right: 25px">
-                            <div class="back-modal" onclick="togglePopUp()"></div>
-                            <div class="form-filter default">
-                                <div class="split-h" style="background-color: var(--strong-dark-m); border-radius: 12px 12px 0 0">
-                                    <h1 style="text-align: left; margin: auto 14px; padding-left: 0; color: var(--light-text)" class="subtitle">Configurações de Operação</h1>
-                                    <img class="svg-inv" style="height: 30px; width: 30px; padding: 8px" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="" onclick="togglePopUp()">
-                                </div>
-                                <div id="enderecoCompletoContainer" style="border-radius: 0 0 12px 12px; padding: 14px">
-                                    <p style="justify-content: left">
-                                        <input type="checkbox" class="check" style="margin: 0 4px 0 0" id="is_end_completo" name="is_end_completo" onchange="handleCheckChange()">
-                                        Movimentação COMPLETA de Endereço.
-                                    </p>
-                                    <label>EXEMPLOS: 
-                                        <br>• TODOS os itens em A.1 vão para o endereço A.2
-                                        <br>• TODOS os itens em A.1 são faturados (funcionalidade desativada)
-                                    </label>
-                                </div>
-                            </div>
+                            <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="Modal.open('opConfigModal')">
                         </div>
                     </div>
                     <div id="ParamsField" class="glow-logi" style="padding: 8px 22px; margin: 8px 16px; border-radius: 16px">
@@ -373,6 +354,27 @@
                         onclick="concludeBundle()" 
                     >
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {# Operation Config Modal #}
+    <div id="opConfigModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('opConfigModal')">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <h2>Configurações de Operação</h2>
+                <button class="modal-close" onclick="Modal.close('opConfigModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" class="check" style="margin-top: 3px;" id="is_end_completo" name="is_end_completo" onchange="handleCheckChange()">
+                    <span>Movimentação COMPLETA de Endereço.</span>
+                </label>
+                <p class="field-hint" style="margin-top: 12px; font-size: 12px; color: #888;">
+                    <strong>Exemplos:</strong><br>
+                    • TODOS os itens em A.1 vão para o endereço A.2<br>
+                    • TODOS os itens em A.1 são faturados
+                </p>
             </div>
         </div>
     </div>

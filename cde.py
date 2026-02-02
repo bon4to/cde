@@ -581,7 +581,7 @@ class CargaUtils:
             """
             )
             rows = cursor.fetchall()
-            return [row[0] for row in rows]
+            return [str(row[0]) for row in rows]
 
     @staticmethod
     # RETORNA CARGAS FINALIZADAS
@@ -595,6 +595,8 @@ class CargaUtils:
             for carga in all_cargas
             if carga not in cargas_pendentes and carga not in cargas_status
         ]
+
+        cargas_finalizadas.extend(cargas_status)
 
         return cargas_finalizadas
 
@@ -799,8 +801,8 @@ class CargaUtils:
             )
             rows = cursor.fetchall()
 
-            # Converte os resultados da consulta em uma lista de inteiros
-            cargas_db = [row[0] for row in rows] if rows else []
+            # Converte os resultados da consulta em uma lista de strings
+            cargas_db = [str(row[0]) for row in rows] if rows else []
 
         # Combina as cargas do banco de dados com as do preset
         combined_cargas = cargas_db + cargas_preset
@@ -1732,8 +1734,8 @@ class UserUtils:
             cursor.execute(
                 """
                 SELECT  privilege_user, nome_user,
-                        sobrenome_user, id_user, 
-                        ult_acesso
+                        sobrenome_user, id_user,
+                        ult_acesso, login_user
                 FROM users
                 WHERE id_user = ?;
             """,
@@ -1747,6 +1749,7 @@ class UserUtils:
                     "sobrenome_user": row[2],
                     "id_user": row[3],
                     "ult_acesso": row[4],
+                    "login_user": row[5],
                 }
                 for row in cursor.fetchall()
             ]
@@ -2089,6 +2092,86 @@ def api_get_first_mov_item():
     else:
         first_mov = ""
     return jsonify({"first_mov": first_mov})
+
+
+@app.route("/api/custom_date_fab", methods=["GET"])
+def api_get_custom_date_fab():
+    cod_item = request.args.get("cod_item")
+    cod_lote = request.args.get("cod_lote")
+
+    if not cod_item or not cod_lote:
+        return jsonify({"error": "cod_item and cod_lote are required"}), 400
+
+    # Get custom date_fab if exists
+    custom_date_fab = estoqueUtils.get_custom_date_fab(cod_item, cod_lote)
+    if custom_date_fab:
+        custom_date_fab = misc.parse_date_to_html_input(custom_date_fab)
+
+    # Get first_mov (original date)
+    first_mov_result = estoqueUtils.get_first_mov(cod_item, cod_lote)
+    if first_mov_result:
+        # If custom exists, get original from transactions directly
+        if custom_date_fab:
+            query = f"""
+                SELECT time_mov FROM tbl_transactions
+                WHERE cod_item = '{cod_item}' AND lote_item = '{cod_lote}'
+                ORDER BY time_mov ASC LIMIT 1
+            """
+            from app.models import dbUtils
+
+            result, _ = dbUtils.query(query, "LOCAL")
+            first_mov = misc.parse_date_to_html_input(result[0][0]) if result else ""
+        else:
+            first_mov = misc.parse_date_to_html_input(first_mov_result[0][0])
+    else:
+        first_mov = ""
+
+    return jsonify({"custom_date_fab": custom_date_fab, "first_mov": first_mov})
+
+
+@app.route("/api/custom_date_fab", methods=["POST"])
+def api_set_custom_date_fab():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Request body is required"}), 400
+
+    cod_item = data.get("cod_item")
+    cod_lote = data.get("cod_lote")
+    date_fab = data.get("date_fab")
+
+    if not cod_item or not cod_lote or not date_fab:
+        return jsonify({"error": "cod_item, cod_lote, and date_fab are required"}), 400
+
+    # Validate date is not in future
+    from datetime import datetime
+
+    try:
+        date_obj = datetime.strptime(date_fab, "%Y-%m-%d")
+        if date_obj > datetime.now():
+            return jsonify({"error": "Data de fabricação não pode ser no futuro"}), 400
+    except ValueError:
+        return jsonify({"error": "Formato de data inválido (use YYYY-MM-DD)"}), 400
+
+    # Format date for storage
+    date_fab_formatted = f"{date_fab} 00:00:00"
+
+    id_user = session.get("id_user", 0)
+    estoqueUtils.set_custom_date_fab(cod_item, cod_lote, date_fab_formatted, id_user)
+
+    return jsonify({"success": True})
+
+
+@app.route("/api/custom_date_fab", methods=["DELETE"])
+def api_delete_custom_date_fab():
+    cod_item = request.args.get("cod_item")
+    cod_lote = request.args.get("cod_lote")
+
+    if not cod_item or not cod_lote:
+        return jsonify({"error": "cod_item and cod_lote are required"}), 400
+
+    estoqueUtils.delete_custom_date_fab(cod_item, cod_lote)
+
+    return jsonify({"success": True})
 
 
 @app.route("/api/log/", methods=["POST"])
@@ -2460,6 +2543,29 @@ def reset_password() -> Response:
     UserUtils.set_password(id_user, password)
 
     return redirect(url_for("index"))
+
+
+@app.route("/api/users/set-password", methods=["POST"])
+@cde.verify_auth("CDE019")
+def api_set_user_password():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Request body is required"}), 400
+
+    id_user = data.get("id_user")
+    password = data.get("password")
+
+    if not id_user or not password:
+        return jsonify({"error": "id_user and password are required"}), 400
+
+    if len(password) < 6:
+        return jsonify({"error": "A senha deve ter no mínimo 6 caracteres"}), 400
+
+    try:
+        UserUtils.set_password(id_user, password)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/users/forgot-password/<int:id_user>/")

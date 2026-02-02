@@ -418,7 +418,6 @@ function getQtdeItemLS(storageKey, cod_item) {
 
 
 function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit) {
-    const popup = document.getElementById('quantityPopup');
     const obsv = document.getElementById('popupObs');
     const info = document.getElementById('popupFaltante');
     const msge = document.getElementById('popupMessage');
@@ -444,10 +443,10 @@ function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit)
 
     // verifica se o input de quantidade está satisfazendo a quantidade solicitada
     if (qtde_faltante <= 0) {
-        alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`)
+        Modal.alert(`O item ${codItem} já possui quantidade suficiente.\nRemova suas separações, caso precise substituir.`);
     } else {
         // mostra o popup
-        popup.classList.remove('hidden');
+        Modal.open('quantityPopup');
 
         submitBtn.onclick = function() {
             const value = parseInt(input.value);
@@ -455,13 +454,13 @@ function showQuantityPopup(qtde_solic, maxEstoque, this_qtde_separada, onSubmit)
             // validacao para verificar se o input foi preenchido corretamente
             if (value > 0 && value <= input.max) {
                 // oculta o popup
-                popup.classList.add('hidden');
+                Modal.close('quantityPopup');
                 // adiciona o item na separação
                 onSubmit(value);
                 // carregar totais e subtotais na tabela
                 reloadItemSubtotal();
             } else {
-                alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
+                Modal.alert(`Por favor, insira uma quantidade válida (entre 1 e ${input.max}).`);
             }
         };
     }
