@@ -38,7 +38,7 @@
                 </thead>
                 <tbody>
                     {% for item in inv_data %}
-                        <tr>
+                        <tr class="selectable-row" data-item-index="{{ loop.index0 }}">
                             <td>{{ item['address'] }} </td>
                             <td class="number">{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
@@ -82,10 +82,11 @@
                                         {{ item['validade'] }}
                                     </td>
                                 {% else %}
-                                <td 
+                                <td
+                                    class="keep-color"
                                     {% set validade_meses = item['validade'] | int / 30  %}
                                     title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
-                                    
+
                                     {% if item['validade_perc_str'] >= 80 %}   {# self life more than 80% #}
                                         style="color: green; font-weight: bold"
                                     {% elif item['validade_perc_str'] >= 70 %} {# self life more than 70% #}
@@ -100,20 +101,21 @@
                                 {% set data_fab = item['date_fab'].split(' ') %}
                                 <td>{{ data_fab[0] }}</td>
                                 {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
-                                <td 
+                                <td
                                     style="color:rgb(113, 113, 113);"
                                     title="Validade não informada!"
                                 >
                                     -
                                 </td>
                                 {% elif '/' in item['validade']|string %}
-                                    <td 
+                                    <td
                                         style="color:rgb(113, 113, 113);"
                                     >
                                     N/A
                                     </td>
                                 {% else %}
-                                <td 
+                                <td
+                                    class="keep-color"
                                     title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
                                     style="color: var(--cde-color); font-weight: bold"
                                 >
@@ -128,4 +130,223 @@
                 </tbody>
             </table>
         </div>
+
+        {# Item Details Modal #}
+        <div id="itemModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('itemModal')">
+            <div class="modal modal-lg">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Detalhes do Item</h2>
+                    <button class="modal-close" onclick="Modal.close('itemModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-info">
+                        <span class="modal-info-label">Código</span>
+                        <span class="modal-info-value" id="modalCodItem"></span>
+                    </div>
+                    <div class="modal-info">
+                        <span class="modal-info-label">Descrição</span>
+                        <span class="modal-info-value" id="modalDescItem"></span>
+                    </div>
+                    <div class="modal-info">
+                        <span class="modal-info-label">Lote</span>
+                        <span class="modal-info-value" id="modalCodLote"></span>
+                    </div>
+                    <div class="modal-info">
+                        <span class="modal-info-label">Endereço</span>
+                        <span class="modal-info-value" id="modalAddress"></span>
+                    </div>
+                    <div class="modal-info">
+                        <span class="modal-info-label">Quantidade</span>
+                        <span class="modal-info-value" id="modalSaldo"></span>
+                    </div>
+                    <div class="modal-info">
+                        <span class="modal-info-label">Validade</span>
+                        <span class="modal-info-value" id="modalValidade"></span>
+                    </div>
+                    <div class="modal-info">
+                        <span class="modal-info-label">Data de Vencimento</span>
+                        <span class="modal-info-value" id="modalDateVenc"></span>
+                    </div>
+
+                    <hr style="margin: 16px 0; border: none; border-top: 1px solid #eee;">
+
+                    <div class="modal-info">
+                        <span class="modal-info-label">Data de Fabricação</span>
+                        <span class="modal-info-value">
+                            <span id="modalDateFabDisplay">-</span>
+                            <span id="modalDateFabCustomBadge" class="badge-custom hidden" title="Data customizada">(editado)</span>
+                        </span>
+                    </div>
+
+                    <div id="dateFabEditSection">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="date" id="modalDateFab" style="flex: 1;">
+                            <button class="modal-btn modal-btn-primary" onclick="saveDateFab()" title="Salvar">
+                                <img src="{{ url_for('static', filename='svg/circle-check.svg') }}" alt="Salvar" style="width: 16px; height: 16px; filter: invert(1);">
+                            </button>
+                            <button id="btnClearDateFab" class="modal-btn modal-btn-secondary hidden" onclick="clearDateFab()" title="Limpar override">
+                                <img src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="Limpar" style="width: 16px; height: 16px;">
+                            </button>
+                        </div>
+                        <p class="field-hint" style="margin-top: 6px; font-size: 12px; color: #888;">
+                            1º movimento: <span id="modalFirstMov">-</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .badge-custom {
+                font-size: 11px;
+                color: var(--main-color);
+                font-weight: 500;
+            }
+            #dateFabEditSection {
+                margin-top: 12px;
+                padding: 12px;
+                border-radius: 8px;
+                background: #f8f8f8;
+            }
+            html.dark #dateFabEditSection {
+                background: #333;
+            }
+            html.dark #dateFabEditSection input {
+                background: #2a2a2a;
+                border-color: #444;
+                color: #eee;
+            }
+            html.dark #itemModal hr {
+                border-top-color: #444;
+            }
+        </style>
+
+        <script>
+            const itemsData = {{ inv_data | tojson | safe }};
+            let currentItem = null;
+
+            // Format YYYY-MM-DD or YYYY-MM-DD HH:MM:SS to DD/MM/YYYY
+            function formatDateBR(dateStr) {
+                if (!dateStr || dateStr === '-') return '-';
+                const datePart = dateStr.split(' ')[0];
+                const parts = datePart.split('-');
+                if (parts.length !== 3) return dateStr;
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+
+            // Event delegation for row clicks
+            document.getElementById('filterTable').addEventListener('click', function(e) {
+                const row = e.target.closest('tr[data-item-index]');
+                if (row) {
+                    const index = parseInt(row.dataset.itemIndex);
+                    openItemModal(itemsData[index]);
+                }
+            });
+
+            function openItemModal(item) {
+                currentItem = item;
+
+                // Populate modal with item data
+                document.getElementById('modalTitle').textContent = item.desc_item;
+                document.getElementById('modalCodItem').textContent = item.cod_item;
+                document.getElementById('modalDescItem').textContent = item.desc_item;
+                document.getElementById('modalCodLote').textContent = item.cod_lote;
+                document.getElementById('modalAddress').textContent = item.address.trim();
+                document.getElementById('modalSaldo').textContent = item.saldo + ' un';
+
+                // Validade display
+                let validadeText = '-';
+                if (typeof item.validade === 'number') {
+                    validadeText = `${item.validade} dias (${item.validade_str})`;
+                } else if (item.validade) {
+                    validadeText = item.validade;
+                }
+                document.getElementById('modalValidade').textContent = validadeText;
+
+                // Date venc display
+                document.getElementById('modalDateVenc').textContent = item.date_venc || '-';
+
+                // Date fab display
+                document.getElementById('modalDateFabDisplay').textContent = formatDateBR(item.date_fab) || '-';
+                document.getElementById('modalDateFab').value = '';
+                document.getElementById('modalFirstMov').textContent = 'Carregando...';
+                document.getElementById('modalDateFabCustomBadge').classList.add('hidden');
+                document.getElementById('btnClearDateFab').classList.add('hidden');
+
+                Modal.open('itemModal');
+
+                // Fetch custom date_fab info
+                fetch(`/api/custom_date_fab?cod_item=${encodeURIComponent(item.cod_item)}&cod_lote=${encodeURIComponent(item.cod_lote)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('modalFirstMov').textContent = formatDateBR(data.first_mov) || '-';
+
+                        if (data.custom_date_fab) {
+                            document.getElementById('modalDateFab').value = data.custom_date_fab;
+                            document.getElementById('modalDateFabCustomBadge').classList.remove('hidden');
+                            document.getElementById('btnClearDateFab').classList.remove('hidden');
+                        } else if (data.first_mov) {
+                            document.getElementById('modalDateFab').value = data.first_mov;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching date_fab:', err);
+                        document.getElementById('modalFirstMov').textContent = 'Erro';
+                    });
+            }
+
+            function saveDateFab() {
+                const dateFab = document.getElementById('modalDateFab').value;
+                if (!dateFab) {
+                    Modal.alert('Por favor, selecione uma data.');
+                    return;
+                }
+
+                fetch('/api/custom_date_fab', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cod_item: currentItem.cod_item,
+                        cod_lote: currentItem.cod_lote,
+                        date_fab: dateFab
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        Modal.alert(data.error || 'Erro ao salvar data de fabricação.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving date_fab:', err);
+                    Modal.alert('Erro ao salvar data de fabricação.');
+                });
+            }
+
+            function clearDateFab() {
+                Modal.confirm(
+                    'Remover data customizada? Voltará a usar a data do primeiro movimento.',
+                    () => {
+                        fetch(`/api/custom_date_fab?cod_item=${encodeURIComponent(currentItem.cod_item)}&cod_lote=${encodeURIComponent(currentItem.cod_lote)}`, {
+                            method: 'DELETE'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                Modal.alert(data.error || 'Erro ao limpar data de fabricação.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error clearing date_fab:', err);
+                            Modal.alert('Erro ao limpar data de fabricação.');
+                        });
+                    },
+                    { title: 'Limpar Override', confirmText: 'Limpar', danger: true }
+                );
+            }
+        </script>
     {% endblock table %}

@@ -55,8 +55,13 @@ td {
 
 .selectable-row:hover td,
 .hover-related td {
-    color: var(--main-color) !important;
+    color: var(--main-color);
     background-color: #e7e7e7;
+}
+
+.selectable-row:hover td.keep-color,
+.hover-related td.keep-color {
+    color: inherit;
 }
 
 .selectable-row.active td {

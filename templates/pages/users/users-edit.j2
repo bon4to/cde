@@ -34,8 +34,11 @@
                                 </div>
                             </div>
                             <h3>{{ item['nome_user'] }} {{ item['sobrenome_user'] }}</h3>
-                            <h4 style="margin-top: 0; margin-bottom: 18px; text-align: center">
+                            <h4 style="margin-top: 0; margin-bottom: 8px; text-align: center">
                                 {{ 'Administrador' if item['privilege_user'] <= 2 else 'Usuário Padrão' }}
+                            </h4>
+                            <h4 style="margin: 0 0 18px 0; text-align: center; color: #888; font-size: 13px;">
+                                Login: {{ item['login_user'] }}
                             </h4>
                         </div>
                     </div>
@@ -96,33 +99,98 @@
         </div>
     </div>
 
+    {# Password Reset Modal #}
+    <div id="passwordModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('passwordModal')">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Redefinir Senha</h2>
+                <button class="modal-close" onclick="Modal.close('passwordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label for="newPassword">Nova senha</label>
+                    <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres...">
+                </div>
+                <div class="modal-field">
+                    <label for="confirmPassword">Confirmar senha</label>
+                    <input type="password" id="confirmPassword" placeholder="Repita a senha...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="Modal.close('passwordModal')">Cancelar</button>
+                <button class="modal-btn modal-btn-primary" onclick="submitPassword()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 
 {% block route_script %}
 
     <script>
+        let currentUserId = null;
+
         function redefinePassword(idUser) {
-            if (confirm("Você tem certeza que deseja redefinir a senha do usuário?")) {
-                window.location.href = "/users/redefine-password/" + idUser
+            currentUserId = idUser;
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            Modal.open('passwordModal');
+        }
+
+        function submitPassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword.length < 6) {
+                Modal.alert('A senha deve ter no mínimo 6 caracteres.');
+                return;
             }
+
+            if (newPassword !== confirmPassword) {
+                Modal.alert('As senhas não coincidem.');
+                return;
+            }
+
+            fetch('/api/users/set-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id_user: currentUserId,
+                    password: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Modal.close('passwordModal');
+                    Modal.alert('Senha redefinida com sucesso!');
+                } else {
+                    Modal.alert(data.error || 'Erro ao redefinir senha.');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                Modal.alert('Erro ao redefinir senha.');
+            });
         }
 
         function confirmRemover(idUser, idPerm, checkbox) {
-            if (confirm("Você tem certeza que deseja remover esta permissão?")) {
-                window.location.href = "/users/remove-perm/" + idUser + "/" + idPerm
-            } else {
-                checkbox.checked = true;
-            }
+            Modal.confirm("Você tem certeza que deseja remover esta permissão?", () => {
+                window.location.href = "/users/remove-perm/" + idUser + "/" + idPerm;
+            }, { title: 'Remover Permissão', confirmText: 'Remover', danger: true });
+
+            // Reset checkbox if modal is closed without confirming
+            checkbox.checked = true;
         }
 
         function confirmAdicionar(idUser, idPerm, checkbox) {
-            if (confirm("Você tem certeza que deseja adicionar esta permissão?")) {
+            Modal.confirm("Você tem certeza que deseja adicionar esta permissão?", () => {
                 window.location.href = "/users/add-perm/" + idUser + "/" + idPerm;
-            } else {
-                checkbox.checked = false;
-            }
-        }
+            }, { title: 'Adicionar Permissão', confirmText: 'Adicionar' });
 
+            // Reset checkbox if modal is closed without confirming
+            checkbox.checked = false;
+        }
     </script>
 
 {% endblock route_script %}
