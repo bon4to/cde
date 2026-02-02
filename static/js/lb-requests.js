@@ -623,8 +623,7 @@ function addItem(nroreq, cod_item, lote_item, rua_letra, rua_numero, qtde_sep) {
 
 
 function hidePopUp() {
-    const popup = document.getElementById('quantityPopup');
-    popup.classList.add('hidden');
+    Modal.close('quantityPopup');
 }
 
 

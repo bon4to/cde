@@ -140,7 +140,8 @@
                                         </a>
                                         <div class="submenu-content" style="left: unset; right: 100%; border-left: unset; border-right: 6px solid var(--dark-or-white);">
                                             {% if session['user_grant'] <= 2 %}
-                                                <a href="{{ url_for('permissions') }}">CDE018 | PERMISSÕES</a>
+                                                <a href="{{ url_for('permissions') }}">CDE018 | CONTRATOS</a>
+                                                <a href="{{ url_for('admin_migrations') }}">DEV000 | MIGRATIONS</a>
                                             {% endif %}
                                             <a href="{{ url_for('api') }}">DEV000 | DATABASE</a>
                                             <a href="{{ url_for('cde_query_list') }}">DEV000 | QUERIES</a>

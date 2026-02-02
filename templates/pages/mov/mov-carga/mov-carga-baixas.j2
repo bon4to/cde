@@ -1,0 +1,138 @@
+{% extends 'base.j2' %}
+
+{% block title %}Cargas - Baixas{% endblock title %}
+
+{% block content %}
+
+    <div class="titles-ruler">
+
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'LOGI', 'url': 'home_logi', 'title': 'LOGISTICA'},
+                {'text': 'CARGAS', 'url': 'cargas', 'title': 'CARGAS'},
+                {'text': 'BAIXAS'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'carga_incomp', 'icon': 'svg/package-badge.svg', 'title': 'INCOMPLETAS'},
+                {'type': 'link', 'url': 'cargas_baixas', 'icon': 'svg/package-minus.svg', 'title': 'BAIXAS', 'active': True},
+                {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS'},
+                {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS'},
+                {'type': 'divider'},
+                {'type': 'form', 'url': 'cargas', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)'},
+                {'type': 'divider'},
+                {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
+    </div>
+
+    <div id="divContent" style="flex-wrap: wrap;">
+
+        {% if 'user_grant' in session %}
+            <div class="tables-container" style="min-width: 70%;">
+                <div class="flex-v">
+                    <h1 class="subtitle">
+                        {% if cargas | length > 0 %}
+                            <span class="text-main-color">{{ cargas | length }}</span> carga(s) com status
+                        {% else %}
+                            Nenhuma carga com baixa ou exclusão
+                        {% endif %}
+                    </h1>
+                </div>
+
+                {% if cargas | length > 0 %}
+                <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Carga</th>
+                                <th>Justificativa</th>
+                                <th>Usuário</th>
+                                <th>Data/Hora</th>
+                                <th>Status</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="baixasTable">
+                            {% for carga in cargas %}
+                            <tr data-id="{{ carga.id_carga }}">
+                                <td>{{ carga.id_carga }}</td>
+                                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ carga.justificativa }}
+                                </td>
+                                <td>{{ carga.usuario }}</td>
+                                <td>{{ carga.timestamp }}</td>
+                                <td>
+                                    {% if carga.status == 'baixa' %}
+                                        <span style="color: var(--warning-color); font-weight: bold;">BAIXA</span>
+                                    {% elif carga.status == 'excluida' %}
+                                        <span style="color: var(--error-color); font-weight: bold;">EXCLUÍDA</span>
+                                    {% else %}
+                                        <span>{{ carga.status | upper }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    <a class="hyperlink" onclick="revertCarga('{{ carga.id_carga }}')" title="Reverter carga">
+                                        <img class="svg-gray" style="height: 16px; width: 16px; vertical-align: middle;"
+                                             src="{{ url_for('static', filename='svg/undo.svg') }}" alt="">
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="msg-success">
+                    <p>Nenhuma carga com baixa ou exclusão encontrada.</p>
+                </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock content %}
+
+{% block route_script %}
+<script>
+async function revertCarga(idCarga) {
+    const confirmation = confirm(`Deseja reverter a carga ${idCarga}? Ela voltará a ficar disponível para separação.`);
+    if (!confirmation) return;
+
+    try {
+        const response = await fetch(`/api/revert-carga/${idCarga}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Carga revertida com sucesso!', 'success', 5);
+            // remove a linha da tabela
+            const row = document.querySelector(`tr[data-id="${idCarga}"]`);
+            if (row) row.remove();
+
+            // verifica se a tabela ficou vazia
+            const tbody = document.getElementById('baixasTable');
+            if (tbody && tbody.children.length === 0) {
+                location.reload();
+            }
+        } else {
+            showToast(`Erro ao reverter: ${data.error}`, 'error', 10);
+        }
+    } catch (error) {
+        console.error('Erro ao reverter carga:', error);
+        showToast(`Erro ao reverter: ${error}`, 'error', 10);
+    }
+}
+</script>
+{% endblock route_script %}

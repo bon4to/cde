@@ -571,6 +571,50 @@ function excludeCarga() {
 }
 
 
+function baixaCarga() {
+    const justificativa = prompt('Informe a justificativa para a baixa desta carga:');
+    toggleBaixaCarga(justificativa.trim());
+}
+
+
+async function toggleBaixaCarga(justificativa) {
+    try {
+        const response = await fetch(`/api/baixa-carga/${nroCarga}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ justificativa: justificativa }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('Baixa realizada com sucesso.', 'success', 5);
+            for (const key of Object.keys(localStorage)) {
+                if (key.startsWith(`sep_${nroCarga}_`)) {
+                    localStorage.removeItem(key);
+                }
+            }
+            document.getElementById('cargaContainer').innerHTML = `
+            <div style="display: flex; justify-content: center; height: 100%;">
+                <p class="disabled">
+                    Baixa realizada com sucesso.
+                </p>
+            </div>
+            `;
+            stockTable = document.getElementById('stockTable');
+            if (stockTable) stockTable.style.display = 'none';
+        } else {
+            showToast(`Erro ao realizar baixa: ${data.error}`, 'error', 10);
+        }
+    } catch (error) {
+        console.error('Erro ao realizar baixa:', error);
+        showToast(`Erro ao realizar baixa: ${error}`, 'error', 10);
+    }
+}
+
+
 function excludeCargaIncompleta() {
     const confirmation = confirm('Você tem certeza que deseja limpar TODOS os itens incompletos? Esta ação não pode ser desfeita.');
     if (confirmation) {
@@ -761,8 +805,7 @@ function addItem(nrocarga, cod_item, lote_item, rua_letra, rua_numero, qtde_sep)
 
 
 function hidePopUp() {
-    const popup = document.getElementById('quantityPopup');
-    popup.classList.add('hidden');
+    Modal.close('quantityPopup');
 }
 
 

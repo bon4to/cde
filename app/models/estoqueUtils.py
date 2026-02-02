@@ -217,6 +217,16 @@ def get_preset_itens(index):
 
 @staticmethod
 def get_first_mov(cod_item: str, cod_lote: str):
+    # Check for custom date_fab first
+    custom_query = f"""
+        SELECT date_fab FROM tbl_custom_date_fab
+        WHERE cod_item = '{cod_item}' AND cod_lote = '{cod_lote}'
+    """
+    result, _ = dbUtils.query(custom_query, "LOCAL")
+    if result:
+        return result  # Return custom date if exists
+
+    # Fallback to original logic - first transaction date
     query = f"""
         SELECT time_mov
         FROM tbl_transactions
@@ -231,6 +241,39 @@ def get_first_mov(cod_item: str, cod_lote: str):
 
 
 @staticmethod
+def get_custom_date_fab(cod_item: str, cod_lote: str):
+    """Get custom date_fab if it exists, otherwise None."""
+    query = f"""
+        SELECT date_fab FROM tbl_custom_date_fab
+        WHERE cod_item = '{cod_item}' AND cod_lote = '{cod_lote}'
+    """
+    result, _ = dbUtils.query(query, "LOCAL")
+    if result:
+        return result[0][0]
+    return None
+
+
+@staticmethod
+def set_custom_date_fab(cod_item: str, cod_lote: str, date_fab: str, id_user: int):
+    """Set or update custom date_fab for an item+batch."""
+    query = f"""
+        INSERT OR REPLACE INTO tbl_custom_date_fab (cod_item, cod_lote, date_fab, id_user, time_updated)
+        VALUES ('{cod_item}', '{cod_lote}', '{date_fab}', {id_user}, CURRENT_TIMESTAMP)
+    """
+    dbUtils.query(query, "LOCAL")
+
+
+@staticmethod
+def delete_custom_date_fab(cod_item: str, cod_lote: str):
+    """Delete custom date_fab, reverting to first movement date."""
+    query = f"""
+        DELETE FROM tbl_custom_date_fab
+        WHERE cod_item = '{cod_item}' AND cod_lote = '{cod_lote}'
+    """
+    dbUtils.query(query, "LOCAL")
+
+
+@staticmethod
 # RETORNA ENDEREÇAMENTO POR LOTES
 def get_inv_address_with_batch(timestamp=False):
     if timestamp:
@@ -241,31 +284,39 @@ def get_inv_address_with_batch(timestamp=False):
         cursor = connection.cursor()
         cursor.execute(
             """
-            SELECT  
-                h.rua_letra, h.rua_numero, 
+            SELECT
+                h.rua_letra, h.rua_numero,
                 i.cod_item, i.desc_item, h.lote_item,
                 {a} as saldo,
-                (
-                    SELECT time_mov
-                    FROM tbl_transactions
-                    WHERE cod_item = i.cod_item
-                    AND lote_item = h.lote_item
-                    ORDER BY time_mov ASC
-                    LIMIT 1
+                COALESCE(
+                    (
+                        SELECT date_fab
+                        FROM tbl_custom_date_fab
+                        WHERE cod_item = i.cod_item
+                        AND cod_lote = h.lote_item
+                    ),
+                    (
+                        SELECT time_mov
+                        FROM tbl_transactions
+                        WHERE cod_item = i.cod_item
+                        AND lote_item = h.lote_item
+                        ORDER BY time_mov ASC
+                        LIMIT 1
+                    )
                 ) as first_mov,
                 i.validade
             FROM tbl_transactions h
-            
-            JOIN itens i 
+
+            JOIN itens i
             ON h.cod_item = i.cod_item
-            
+
             WHERE h.time_mov <= ?
-            GROUP BY 
-                h.rua_numero, h.rua_letra, 
+            GROUP BY
+                h.rua_numero, h.rua_letra,
                 h.cod_item, h.lote_item
-                
+
             HAVING saldo != 0
-            ORDER BY 
+            ORDER BY
                 h.rua_letra ASC, h.rua_numero ASC,
                 i.desc_item ASC
             ;""".format(
@@ -324,35 +375,43 @@ def get_inv_report(timestamp=False):
         cursor.execute(
             """
             WITH base AS (
-                SELECT  
+                SELECT
                     h.rua_letra,
-                    h.rua_numero, 
-                    i.cod_item, 
-                    i.desc_item, 
+                    h.rua_numero,
+                    i.cod_item,
+                    i.desc_item,
                     h.lote_item,
 
                     {a} saldo,
 
-                    (
-                        SELECT REPLACE(time_mov, '/', '-')
-                        FROM tbl_transactions
-                        WHERE cod_item = i.cod_item
-                        AND lote_item = h.lote_item
-                        ORDER BY time_mov ASC
-                        LIMIT 1
+                    COALESCE(
+                        (
+                            SELECT REPLACE(date_fab, '/', '-')
+                            FROM tbl_custom_date_fab
+                            WHERE cod_item = i.cod_item
+                            AND cod_lote = h.lote_item
+                        ),
+                        (
+                            SELECT REPLACE(time_mov, '/', '-')
+                            FROM tbl_transactions
+                            WHERE cod_item = i.cod_item
+                            AND lote_item = h.lote_item
+                            ORDER BY time_mov ASC
+                            LIMIT 1
+                        )
                     ) AS first_mov_raw,
 
                     i.validade
 
                 FROM tbl_transactions h
                 JOIN itens i ON h.cod_item = i.cod_item
-                
-                GROUP BY 
-                    h.rua_numero, h.rua_letra, 
+
+                GROUP BY
+                    h.rua_numero, h.rua_letra,
                     h.cod_item, h.lote_item
             )
 
-            SELECT 
+            SELECT
                 rua_letra,
                 rua_numero,
                 cod_item,
@@ -361,16 +420,16 @@ def get_inv_report(timestamp=False):
                 saldo,
                 first_mov_raw AS first_mov,
                 validade,
-                CASE 
-                    WHEN validade IS NOT NULL 
+                CASE
+                    WHEN validade IS NOT NULL
                     THEN datetime(first_mov_raw, '+' || validade || ' months')
                     ELSE 'N/A'
                 END AS data_vencimento
 
             FROM base
             WHERE saldo != 0
-            
-            ORDER BY 
+
+            ORDER BY
                 rua_letra ASC, rua_numero ASC,
                 desc_item ASC
                 ;""".format(

@@ -1,0 +1,315 @@
+/* Modal Component System */
+
+.modal-overlay {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: flex;
+    position: fixed;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.2s ease;
+    overflow: hidden;
+}
+
+.modal-overlay.active .modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Modal Sizes */
+.modal.modal-sm {
+    max-width: 360px;
+}
+
+.modal.modal-lg {
+    max-width: 640px;
+}
+
+.modal.modal-xl {
+    max-width: 800px;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s ease;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-body p {
+    margin: 0 0 12px 0;
+    color: #555;
+}
+
+.modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.modal-footer.modal-footer-stack {
+    flex-direction: column;
+}
+
+.modal-footer.modal-footer-end {
+    justify-content: flex-end;
+}
+
+.modal-footer.modal-footer-center {
+    justify-content: center;
+}
+
+.modal-footer.modal-footer-between {
+    justify-content: space-between;
+}
+
+/* Modal Form Elements */
+.modal-field {
+    margin-bottom: 16px;
+}
+
+.modal-field:last-child {
+    margin-bottom: 0;
+}
+
+.modal-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.modal-field input,
+.modal-field select,
+.modal-field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.modal-field input:focus,
+.modal-field select:focus,
+.modal-field textarea:focus {
+    outline: none;
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 3px rgba(var(--cde-color-rgb), 0.1);
+}
+
+.modal-field textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal-field .field-hint {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* Info Row */
+.modal-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-info:last-child {
+    border-bottom: none;
+}
+
+.modal-info-label {
+    color: #888;
+    font-size: 14px;
+}
+
+.modal-info-value {
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Button Styles */
+.modal-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.modal-btn:active {
+    transform: scale(0.98);
+}
+
+.modal-btn-primary {
+    background-color: var(--main-color);
+    color: white;
+}
+
+.modal-btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.modal-btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.modal-btn-secondary:hover {
+    background-color: #e5e5e5;
+}
+
+.modal-btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.modal-btn-danger:hover {
+    background-color: #c82333;
+}
+
+.modal-btn-link {
+    background: none;
+    color: var(--main-color);
+    padding: 10px 12px;
+}
+
+.modal-btn-link:hover {
+    text-decoration: underline;
+}
+
+.modal-btn-block {
+    width: 100%;
+}
+
+/* Dark Mode */
+html.dark .modal {
+    background: #1e1e1e;
+}
+
+html.dark .modal-header {
+    border-bottom-color: #333;
+}
+
+html.dark .modal-header h2 {
+    color: #eee;
+}
+
+html.dark .modal-close {
+    color: #888;
+}
+
+html.dark .modal-close:hover {
+    color: #eee;
+}
+
+html.dark .modal-body p {
+    color: #ccc;
+}
+
+html.dark .modal-footer {
+    border-top-color: #333;
+}
+
+html.dark .modal-field label {
+    color: #ddd;
+}
+
+html.dark .modal-field input,
+html.dark .modal-field select,
+html.dark .modal-field textarea {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #eee;
+}
+
+html.dark .modal-info {
+    border-bottom-color: #333;
+}
+
+html.dark .modal-info-label {
+    color: #999;
+}
+
+html.dark .modal-info-value {
+    color: #eee;
+}
+
+html.dark .modal-btn-secondary {
+    background-color: #333;
+    color: #eee;
+}
+
+html.dark .modal-btn-secondary:hover {
+    background-color: #444;
+}

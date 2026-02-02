@@ -130,6 +130,10 @@ html.dark .selectable-row:hover td {
     background-color: #1d1d1d;
 }
 
+html.dark .selectable-row:hover td.keep-color {
+    color: inherit;
+}
+
 html.dark p.alert {
     color: #f12b2b;
 }

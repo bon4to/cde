@@ -1,0 +1,121 @@
+{% extends "base.j2" %}
+
+{% block title %}Migrations{% endblock %}
+
+{% block content %}
+<div class="titles-ruler">
+    {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'AJUSTES', 'url': 'cde_cfg', 'title': 'AJUSTES'},
+                {'text': 'MIGRATIONS'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL'},
+                {'type': 'divider'},
+                {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+</div>
+
+<div id="divContent" style="flex-wrap: wrap;">
+    {% if 'user_grant' in session %}
+        <div class="tables-container" style="min-width: 70%;">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <button class="btn btn-primary btn-sm" onclick="runPending()">
+                            <i class="fas fa-play"></i> Executar Pendentes
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Status</th>
+                                    <th>Aplicado em</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for migration in migrations %}
+                                <tr>
+                                    <td><code>{{ migration.name }}</code></td>
+                                    <td>
+                                        {% if migration.status == 'success' %}
+                                            <span class="badge bg-success">Aplicado</span>
+                                        {% elif migration.status == 'failed' %}
+                                            <span class="badge bg-danger">Falhou</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pendente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ migration.applied_at or '-' }}</td>
+                                    <td>
+                                        {% if migration.status == 'success' %}
+                                            <button class="btn btn-outline-danger btn-sm"
+                                                    onclick="rollback('{{ migration.name }}')">
+                                                <i class="fas fa-undo"></i> Rollback
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        Nenhuma migração encontrada em db/migrations/
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block route_script %}
+<script>
+function runPending() {
+    if (!confirm('Executar todas as migrações pendentes?')) return;
+
+    fetch('/api/migrations/run', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Migrações executadas: ' + data.results.length);
+                location.reload();
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        });
+}
+
+function rollback(name) {
+    if (!confirm('Reverter migração ' + name + '?')) return;
+
+    fetch('/api/migrations/rollback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name })
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Migração revertida');
+                location.reload();
+            } else {
+                alert('Erro: ' + data.error);
+            }
+        });
+}
+</script>
+{% endblock %}

@@ -11,6 +11,11 @@ dbg_cde.db
 /db/queries/queries.txt
 app/presets/item-whitelist.txt
 
+# testing
+.coverage
+.pytest_cache/
+htmlcov/
+
 # others
 __pycache__
 .history
