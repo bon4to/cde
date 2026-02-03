@@ -53,6 +53,13 @@
         flex-wrap: nowrap;
     }
 }
+
+
+@media screen and (max-width: 800px) {
+    .tables-container {
+        min-width: 100vw;
+    }
+}
 /*
 @media screen and (max-width: 1300px) {
     
