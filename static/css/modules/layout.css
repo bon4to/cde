@@ -63,6 +63,7 @@
 .sidebar-container,
 .forms-container {
     flex: 1;
+    max-height: 75vh;
     min-height: 75vh;
     padding: 34px;
     border-radius: 24px;
@@ -79,8 +80,17 @@
 }
 
 .tables-container {
-    max-height: 130%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 75vh;
     transition: width 0.3s ease-out;
+}
+
+.tables-container > .table-overflow {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
 }
 
 .forms-container {

@@ -313,3 +313,10 @@ html.dark .modal-btn-secondary {
 html.dark .modal-btn-secondary:hover {
     background-color: #444;
 }
+
+.modal-overlay .tooltiptext,
+.modal-overlay [title],
+.modal-overlay div.tooltip {
+    z-index: 2100;
+}
+

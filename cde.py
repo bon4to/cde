@@ -672,7 +672,8 @@ class CargaUtils:
                 """
                 SELECT id_carga, status, justificativa, id_user, timestamp
                 FROM tbl_carga_status
-                WHERE flag_ativo = TRUE;
+                WHERE flag_ativo = TRUE
+                ORDER BY timestamp DESC, id_carga DESC;
                 """
             )
             rows = cursor.fetchall()

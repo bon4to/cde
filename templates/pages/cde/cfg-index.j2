@@ -27,80 +27,62 @@
     <div id="divContent" style="flex-wrap: wrap;">
         {% include "components/advert.j2" %}
         {% if 'user_grant' in session %}
-            <div class="tables-container flex-v" style="border-radius: 44px; min-height: unset; height: fit-content; padding: 24px;">
-                <div style="display: flex; flex-direction: column; justify-content: space-between">
-                    <div class="container-grid cfg" style="margin-bottom: 32px; padding: 10px 0">
-                        <div class="item featured" onclick="window.location.href='{{ url_for('api') }}';">
-                            <div class="split-h algn-cntr">
-                                <div style="text-align: left">
-                                    <h2 class="text-default">Database</h2>
-                                    <p class="text-default bold">Faça consultas no banco de dados</p>
-                                </div>
-                                <a class="btn-fancy button-mini">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/database-zap.svg') }}" alt="">
-                                </a>
-                            </div>
+            <div class="forms-container" style="max-width: 500px; min-height: unset; border: none;">
+                <div class="settings-list">
+                    <a href="{{ url_for('api') }}" class="settings-item">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/database-zap.svg') }}" alt="">
+                        <div class="settings-item-text">
+                            <span class="settings-item-title">Database</span>
+                            <span class="settings-item-desc">Faça consultas no banco de dados</span>
                         </div>
-                        <div class="item featured" onclick="window.location.href='{{ url_for('cde_notifications') }}';">
-                            <div class="split-h algn-cntr">
-                                <div style="text-align: left">
-                                    <h2 class="text-default">Notificações</h2>
-                                    <p class="text-default bold">Verifique suas notificações</p>
-                                </div>
-                                <a class="btn-fancy button-mini">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/bell.svg') }}" alt="">
-                                </a>
-                            </div>
+                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </a>
+                    <a href="{{ url_for('cde_notifications') }}" class="settings-item">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/bell.svg') }}" alt="">
+                        <div class="settings-item-text">
+                            <span class="settings-item-title">Notificações</span>
+                            <span class="settings-item-desc">Verifique suas notificações</span>
                         </div>
-                        <div class="item featured" onclick="window.location.href='{{ url_for('cde_query_list') }}';" >
-                            <div class="split-h algn-cntr">
-                                <div style="text-align: left">
-                                    <h2 class="text-default">Queries</h2>
-                                    <p class="text-default bold">Listagem de queries</p>
-                                </div>
-                                <a class="btn-fancy button-mini">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/database-zap.svg') }}" alt="">
-                                </a>
-                            </div>
+                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </a>
+                    <a href="{{ url_for('cde_query_list') }}" class="settings-item">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list.svg') }}" alt="">
+                        <div class="settings-item-text">
+                            <span class="settings-item-title">Queries</span>
+                            <span class="settings-item-desc">Listagem de queries</span>
                         </div>
-                        <div class="item featured" onclick="window.location.href='{{ url_for('users') }}';" >
-                            <div class="split-h algn-cntr">
-                                <div style="text-align: left">
-                                    <h2 class="text-default">Usuários</h2>
-                                    <p class="text-default bold">Gerencie os usuários e suas permissões</p>
-                                </div>
-                                <a class="btn-fancy button-mini">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                                </a>
-                            </div>
+                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </a>
+                    <a href="{{ url_for('users') }}" class="settings-item">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
+                        <div class="settings-item-text">
+                            <span class="settings-item-title">Usuários</span>
+                            <span class="settings-item-desc">Gerencie usuários e permissões</span>
                         </div>
-                    </div>
-                    <hr>
-                    <p>Developer Tools</p>
-                    <div class="container-grid cfg" style="margin-bottom: 32px; padding: 10px 0">
-                        <div class="item featured" onclick="window.location.href='{{ url_for('permissions') }}';" >
-                            <div class="split-h algn-cntr">
-                                <div style="text-align: left">
-                                    <h2 class="text-default">Contratos</h2>
-                                    <p class="text-default bold">Gerencie os IDs das páginas</p>
-                                </div>
-                                <a class="btn-fancy button-mini">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
-                                </a>
-                            </div>
+                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </a>
+                </div>
+
+                <h3 style="margin-top: 24px; color: #888;">Developer Tools</h3>
+
+                <div class="settings-list">
+                    <a href="{{ url_for('permissions') }}" class="settings-item">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
+                        <div class="settings-item-text">
+                            <span class="settings-item-title">Contratos</span>
+                            <span class="settings-item-desc">Gerencie os IDs das páginas</span>
                         </div>
-                        <div class="item featured" onclick="window.location.href='{{ url_for('admin_migrations') }}';" >
-                            <div class="split-h algn-cntr">
-                                <div style="text-align: left">
-                                    <h2 class="text-default">Migrations</h2>
-                                    <p class="text-default bold">Gerencie as migrations</p>
-                                </div>
-                                <a class="btn-fancy button-mini">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/database.svg') }}" alt="">
-                                </a>
-                            </div>
+                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </a>
+                    <a href="{{ url_for('admin_migrations') }}" class="settings-item">
+                        <img class="svg-gray" src="{{ url_for('static', filename='svg/database.svg') }}" alt="">
+                        <div class="settings-item-text">
+                            <span class="settings-item-title">Migrations</span>
+                            <span class="settings-item-desc">Gerencie as migrations</span>
                         </div>
-                    </div>
+                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                    </a>
+
                 </div>
             </div>
         {% endif %}
