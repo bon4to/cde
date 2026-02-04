@@ -51,9 +51,8 @@
                                     <table>
                                         <thead>
                                             <tr>
-                                                <th>Carga (Código)</th>
-                                                <th>Pedido (Código)</th>
-                                                <th>Cliente (Código)</th>
+                                                <th>Carga (Cód.)</th>
+                                                <th>Pedido (Cód.)</th>
                                                 <th>Cliente (Descrição)</th>
                                                 <th>Emissão (Data)</th>
                                                 <th>Entrega (Data)</th>
@@ -70,8 +69,7 @@
                                                     >
                                                         <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
                                                         <td class="number r second-plan">{{ row[columns.index('NRO_PEDIDO')] }}</td>
-                                                        <td class="number r second-plan">{{ row[columns.index('COD_CLIENTE')] }}</td>
-                                                        <td style="text-wrap: none;">{{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                                        <td style="text-wrap: none;">({{ row[columns.index('COD_CLIENTE')] }}) {{ row[columns.index('FANT_CLIENTE')] }}</td>
                                                         <td class="second-plan c">{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
                                                         <td class="second-plan c">{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
                                                         <td class="c">
@@ -248,7 +246,7 @@
                         </div>
                         <br>
                         {% if id_carga %}
-                            <div class="split-h">
+                            <div class="split-h flex-h" style="margin: 8px 0">
                                 <div class="flex-h">
                                     <div class="button-mini btn-fancy" onclick="excludeCarga()" title="APAGAR CARGA">
                                         <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
@@ -294,7 +292,6 @@
                                     <thead>
                                         <tr>
                                             <th>Endereço</th>
-                                            <th>Item (Código)</th>
                                             <th>Lote (Código)</th>
                                             <th>Validade (Dias)</th>
                                             <th>QTDE (Efetiva)</th>
@@ -308,7 +305,6 @@
                                                 '{{ row['address'] }}', '{{ row['cod_lote'] }}'
                                             )">
                                                 <td>{{ row['address'] }}</td>
-                                                <td>{{ row['cod_item'] }}</td>
                                                 <td>{{ row['cod_lote'] }}</td>
                                                 <td title="Data Fab.: {{ row['date_fab'] }}">{{ row['validade'] }}</td>
                                                 <td {% if qtde_solic|int <= row['saldo'] %} style="color: green"{% else %} style="color: red"{% endif %}>

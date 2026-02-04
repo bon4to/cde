@@ -63,7 +63,7 @@
 .sidebar-container,
 .forms-container {
     flex: 1;
-    max-height: 75vh;
+    /* max-height: 75vh; */
     min-height: 75vh;
     padding: 34px;
     border-radius: 24px;
@@ -83,7 +83,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    max-height: 75vh;
+    /* max-height: 75vh; */
     transition: width 0.3s ease-out;
 }
 

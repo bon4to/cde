@@ -94,22 +94,9 @@ def add_days_to_datetime_str(date_str, qtde_days) -> str:
 
 
 @staticmethod
-# mensagem do telegram
+# mensagem do telegram (desabilitado)
 def telegram_msg(msg):
-    if not session.get("user_grant") == 1:
-        if debug == True:
-            lt.debug_log("[ERRO] A mensagem não pôde ser enviada em modo debug")
-            return False
-
-        bot_token = os.getenv("TLG_BOT_TOKEN")
-        chat_id = os.getenv("TLG_CHAT_ID")
-
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-        params = {"chat_id": chat_id, "text": msg}
-
-        if requests.post(url, params=params):
-            return True
-    return False
+    return True
 
 
 @staticmethod

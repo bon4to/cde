@@ -2746,7 +2746,11 @@ def moving() -> str | Response:
             lt.debug_log(f"  | DATA FABRICACAO: {date_fab}")
 
             if len(date_fab) == 10:  # 'YYYY/MM/DD'
-                date_fab += " 23:59:59"  # 'YYYY/MM/DD HH:MM:SS'
+                today_str = datetime.now().strftime("%Y/%m/%d")
+                if date_fab == today_str:
+                    date_fab = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+                else:
+                    date_fab += " 23:59:59"  # 'YYYY/MM/DD HH:MM:SS'
             lt.debug_log(f"  | DATA FABRICACAO: {date_fab}")
 
             timestamp_br = datetime.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
