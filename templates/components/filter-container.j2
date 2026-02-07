@@ -14,14 +14,15 @@
 
 <div id="filter-container">
     {% if type == "default" %}
-        <div id="table-filter" class="table-filter" style="display: none">
+        <div id="table-filter" class="table-filter hidden">
             <div class="inputs" style="margin: 0; gap: 6px">
-                <input 
-                    id="{{ filter_input_id }}" 
-                    class="address-two" 
-                    type="text" 
-                    oninput="filterTable()" 
+                <input
+                    id="{{ filter_input_id }}"
+                    class="address-two"
+                    type="text"
+                    oninput="filterTable()"
                     placeholder="Filtrar por..."
+                    autocomplete="off"
                 >
                 <select 
                     id="{{ filter_select_id }}" 
@@ -37,16 +38,17 @@
             </div>
         </div>
     {% elif type == "form" %}
-        <div id="table-filter" class="table-filter" style="display: none">
+        <div id="table-filter" class="table-filter hidden">
             <form method="post" action="{{ form_endpoint }}">
                 <div class="inputs" style="margin: 0; gap: 6px">
-                    <input 
-                        id="{{ filter_input_id }}" 
+                    <input
+                        id="{{ filter_input_id }}"
                         name="search_term"
-                        class="address-two" 
-                        type="text" 
-                        oninput="filterTable()" 
+                        class="address-two"
+                        type="text"
+                        oninput="filterTable()"
                         placeholder="Filtrar por..."
+                        autocomplete="off"
                     >
                     <select 
                         id="{{ filter_select_id }}" 
@@ -67,10 +69,10 @@
             </form>
         </div>
     {% elif type == "date" %}
-        <div class="table-filter" style="display: none">
+        <div class="table-filter hidden">
             <form action="{{ date_action }}" method="post">
                 <div class="flex-h">
-                    <input type="date" class="address" id="date" name="date" value="{{ date_value }}">
+                    <input type="date" class="address" id="date" name="date" value="{{ date_value }}" autocomplete="off">
                     <button class="button-mini btn-fancy" type="submit">
                         <img class="svg-invert" src="{{ url_for('static', filename='svg/' + button_icon) }}" title="{{ date_button_title }}">
                     </button>

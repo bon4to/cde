@@ -50,7 +50,7 @@
         
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
 
         <div class="split-h" style="gap: 20px;">
             
@@ -194,43 +194,7 @@
 {% endblock content %}
 
 {% block route_script %}
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.0/mode/sql/sql.min.js"></script>
-
-    <script>
-        var currentQuery = "";
-
-        var editor = CodeMirror.fromTextArea(document.getElementById('sql_query'), {
-            lineNumbers: true,
-            mode: "text/x-sql",
-            theme: "material-darker"
-        });
-
-        function restoreLastQuery() {
-            undoButton = document.getElementById("undoButton").style.display = "none";
-            editor.setValue(currentQuery);
-        }
-
-        function addTableToQuery(table) {
-            sel_schema = document.getElementById("sel_schema").value;
-            undoButton = document.getElementById("undoButton").style.display = "block";
-
-            currentQuery = editor.getValue();
-
-            schema = "";
-            if (sel_schema == "ODBC-DRIVER" || sel_schema == "API") {
-                schema = "DB2ADMIN.";
-            }
-
-            editor.setValue(`SELECT * FROM ${schema}${table};`);
-        }
-    
-        document.getElementById("form-field").addEventListener("submit", function() {
-            document.getElementById("submitform").disabled = true;
-
-        });
-
-    </script>
-
+    <script src="{{ url_for('static', filename='js/pages/cde/data-fetcher.js') }}"></script>
 {% endblock route_script %}

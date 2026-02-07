@@ -51,6 +51,17 @@ def parse_date_to_html_input(date: str) -> str:
 
 
 @staticmethod
+def get_salute_text() -> str:
+    hour = datetime.now().hour
+    if 5 <= hour < 12:
+        return "Bom dia"
+    elif 12 <= hour < 18:
+        return "Boa tarde"
+    else:
+        return "Boa noite"
+
+
+@staticmethod
 # busca frase para /index
 def get_frase() -> str:
     with open("static/frases.txt", "r", encoding="utf-8") as file:

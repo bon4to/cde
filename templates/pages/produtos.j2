@@ -42,7 +42,7 @@
                     {% if class_alert == 'error' %}
                         <div class="forms-container" style="height: max-content;" class="disabled">
                             <h1>Novo desc_item...</h1>
-                            <form style="width: 100%" method="post" action="{{ url_for('produtos') }}">
+                            <form class="w-100" method="post" action="{{ url_for('produtos') }}">
                                 <div>
                                     <label for="desc_item">Item (Descrição)</label>
                                     <input type="text" name="desc_item" placeholder="Descrição do Item..." required>
@@ -58,7 +58,7 @@
                                     </div>
                                 </div>
                                 <br>
-                                <input class="btn-fancy" type="submit" value="Cadastrar" style="width: 100%">
+                                <input class="btn-fancy" type="submit" value="Cadastrar" class="w-100">
                             </form>
                         </div>
                     {% endif %}
@@ -75,16 +75,16 @@
                     </div>
                 {% elif class_alert == 'success' %}
                     <div class="msg-success flex-v" style="margin: 0; gap: 0">
-                        <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
-                        <span style="font-size: 12px">
+                        <span class="font-semibold">A lista foi atualizada com sucesso!</span>
+                        <span class="text-sm">
                             {{ alert | safe }}
                         </span>
                     </div>
                 {% endif %}
             {% else %}
                 <div class="msg-info flex-v" style="margin: 0; gap: 0">
-                    <span style="font-weight: 600">Esta lista pode estar desatualizada.</span>
-                    <span style="font-size: 12px">Caso necessário, inative itens sem movimentação prévia.</span>
+                    <span class="font-semibold">Esta lista pode estar desatualizada.</span>
+                    <span class="text-sm">Caso necessário, inative itens sem movimentação prévia.</span>
                 </div>
             {% endif %}
                 <div style="max-height: 600px; overflow-y: auto;">

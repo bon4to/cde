@@ -31,10 +31,10 @@
 
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
 
         {% if 'user_grant' in session %}
-            <div class="tables-container" style="min-width: 70%;">
+            <div class="tables-container" style="min-width: 70%;  max-height: 75vh;">
                 <div class="flex-v">
                     <h1 class="subtitle">
                         {% if cargas | length > 0 %}
@@ -100,39 +100,5 @@
 {% endblock content %}
 
 {% block route_script %}
-<script>
-async function revertCarga(idCarga) {
-    const confirmation = confirm(`Deseja reverter a carga ${idCarga}? Ela voltará a ficar disponível para separação.`);
-    if (!confirmation) return;
-
-    try {
-        const response = await fetch(`/api/revert-carga/${idCarga}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showToast('Carga revertida com sucesso!', 'success', 5);
-            // remove a linha da tabela
-            const row = document.querySelector(`tr[data-id="${idCarga}"]`);
-            if (row) row.remove();
-
-            // verifica se a tabela ficou vazia
-            const tbody = document.getElementById('baixasTable');
-            if (tbody && tbody.children.length === 0) {
-                location.reload();
-            }
-        } else {
-            showToast(`Erro ao reverter: ${data.error}`, 'error', 10);
-        }
-    } catch (error) {
-        console.error('Erro ao reverter carga:', error);
-        showToast(`Erro ao reverter: ${error}`, 'error', 10);
-    }
-}
-</script>
+    <script src="{{ url_for('static', filename='js/pages/mov/mov-carga/mov-carga-baixas.js') }}"></script>
 {% endblock route_script %}

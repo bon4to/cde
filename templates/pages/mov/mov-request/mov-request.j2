@@ -27,14 +27,14 @@
         
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
         {% if id_req %}
             <div class="tables-container" style="max-width: 55%; min-width: 55%;">
                 <div class="flex-v">
                     <div class="split-h">
                         <h1 style="margin-bottom: 8px">Número de Requisição <input id="idCargaContainer" class="text-main-color" value="{{ id_req }}"></h1>
                         <div class="flex-h" style="gap: 30px">
-                            <div class="cart-container" style="display: none">
+                            <div class="cart-container hidden">
                                 <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
                                 <div class="cart-dropdown hidden" id="cart-dropdown">
                                     <ul class="cart-items">
@@ -46,7 +46,7 @@
                             <div style="display: flex; flex-direction: column; gap: 6px">
                                 <form action="{{ url_for('mov_request') }}" method="post">
                                     <button type="submit" style="all: unset" onclick="showLoading()">
-                                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('mov_request') }}';" title="FECHAR">
+                                        <a class="button-mini btn-fancy m-0" onclick="window.location.href='{{ url_for('mov_request') }}';" title="FECHAR">
                                             <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                                         </a>
                                     </button>
@@ -207,7 +207,7 @@
                                                 <td>{{ row['cod_item'] }}</td>
                                                 <td>{{ row['cod_lote'] }}</td>
                                                 <td title="Data Fab.: {{ row['date_fab'] }}">{{ row['validade'] }}</td>
-                                                <td {% if qtde_solic|int <= row['saldo'] %} style="color: green"{% else %} style="color: red"{% endif %}>
+                                                <td {% if qtde_solic|int <= row['saldo'] %} style="color: green"{% else %} class="text-red"{% endif %}>
                                                     {{ row['saldo'] }}
                                                 </td>    
                                             </tr>
@@ -242,8 +242,8 @@
                         </div>
                         {% elif class_alert == 'success' %}
                         <div class="msg-success flex-v" style="margin: 0; gap: 0">
-                            <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
-                            <span style="font-size: 12px">
+                            <span class="font-semibold">A lista foi atualizada com sucesso!</span>
+                            <span class="text-sm">
                                 {{ alert | safe }}
                             </span>
                         </div>
@@ -291,9 +291,9 @@
                                                 {% for row in items %}
                                                     <tr class="selectable-row js_query_selector" data-id="{{ row[columns.index('DOC_ORIGEM')] }}">
                                                         <td>{{ row[columns.index('DOC_ORIGEM')] }}</td>
-                                                        <td style="text-align: right">{{ row[columns.index('COD_ITEM')] }}</td>
+                                                        <td class="text-right">{{ row[columns.index('COD_ITEM')] }}</td>
                                                         <td>{{ row[columns.index('DESC_ITEM')] }}</td>
-                                                        <td style="text-align: right">{{ row[columns.index('QTDE')] | int }}</td>
+                                                        <td class="text-right">{{ row[columns.index('QTDE')] | int }}</td>
                                                     </tr>
                                                 {% endfor %}
                                                 <tr class="unselectable-row sub-total">
@@ -312,10 +312,10 @@
         {% endif %}
         {% if not cod_item %}
             <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
+                <h1 class="subtitle m-0">Buscar separações...</h1>
                 <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/req/separacao/f/{{ id_req | default(0) }}'">
                     <option style="color: var(--main-color);">Pendentes</option>
-                    <option style="color: green;">Finalizadas</option>
+                    <option class="text-green">Finalizadas</option>
                 </select>
                 {% block all_separation_status %}
                 

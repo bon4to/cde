@@ -24,7 +24,7 @@
         ) }}
         
         <div id="filter-container">
-            <div style="display: none;" class="flex-h" id="table-filter">
+            <div class="hidden flex-h" id="table-filter">
                 <input type="date" class="address" id="filterDate1" onchange="filterByDate()">
                 <div id="period-date" style="display: contents">
                     <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
@@ -57,7 +57,7 @@
                             </div>
                             <hr>
                         </form>
-                        <form style="display: flex;" id="form-field" method="post" action="/envase/insert">
+                        <form class="flex" id="form-field" method="post" action="/envase/insert">
                             <div>
                                 <label for="desc_item">Produto<img id="label-desc" class="svg-label" src="{{ url_for('static', filename='svg/lock.svg') }}" alt=""><br></label>
                                 <input name="desc_item" id="desc_item" type="text" value="{{ json_desc_item }}" required readonly placeholder="Produto...">
@@ -100,7 +100,7 @@
                                 <textarea class="address-observ" id="observacao" name="observacao" placeholder="Observações..."></textarea>
                             </div>
                             <div style="display: flex;width: 100%;">
-                                <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
+                                <input class="btn-fancy max-w-none" type="submit" value="Registrar...">
                                 {% if 'user_grant' in session %}
                                     {% if session['user_grant'] <= 2 %}
                                         <img class="btn-fancy" style="height: 30px; width: 30px; padding: 15px; margin-left: 15px" src="{{ url_for('static', filename='svg/pen-line.svg') }}" alt="" onclick="toggleEdit()">

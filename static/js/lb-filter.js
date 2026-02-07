@@ -2,6 +2,15 @@
 
 const suplementstat_flt = ("Suplemento: [lb-filter v1.2]: ")
 
+// Initialize filter on page load
+document.addEventListener('DOMContentLoaded', function() {
+    var filterInput = document.getElementById('filterInput');
+    if (filterInput) {
+        // Clear filter value on page load to prevent browser autocomplete persistence
+        filterInput.value = '';
+    }
+});
+
 //FILTRO DE TABELA
 function filterTable() {
     let input, table, select, filter, tbody, tr, td, i, txtValue;

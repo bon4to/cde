@@ -23,7 +23,7 @@
             ]
         ) }}
         <div id="filter-container">
-            <div id="table-filter" class="table-filter" style="display: none">
+            <div id="table-filter" class="table-filter hidden">
                 <form method="post" action="/perdas-insumos/">
                     <div class="inputs" style="margin: 0; gap: 6px">
                         <input 
@@ -56,7 +56,7 @@
 
     </div>
     
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
         <div id="tables-container" class="tables-container" style="max-height: 600px">
             {% if not result %}
                 <div style="display: flex; justify-content: center; height: 100%;">

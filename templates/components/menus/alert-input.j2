@@ -7,7 +7,7 @@
         <div class="form-login" style="max-width: 460px; max-height: 400px; padding: 32px">
             <h1 class="text-main-color">{{ alert_type | safe }}</h1>
             <p class="alert-more" style="wra">{{ alert_msge | safe }}</p>
-            <form style="display: flex;" id="form-field" method="post" action="{{ alert_more }}">
+            <form class="flex" id="form-field" method="post" action="{{ alert_more }}">
                 <div class="split-v">
                     <div class="inputs">
                         <input style="font-size: 14px;" id="input" name="input" type="password" minlength="6" maxlength="30" placeholder="{{ url_return }}" required>

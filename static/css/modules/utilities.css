@@ -1,4 +1,6 @@
 /* Utility classes */
+
+/* State */
 .disabled {
     opacity: 0.6;
     pointer-events: none;
@@ -8,6 +10,11 @@
     background-color: var(--main-color);
 }
 
+.readonly {
+    color: #818181;
+}
+
+/* Layout */
 .centralizado {
     display: flex;
     align-items: center;
@@ -18,43 +25,76 @@
     align-items: center;
 }
 
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.m-0 {
+    margin: 0;
+}
+
+.gap-0 {
+    gap: 0;
+}
+
+/* Text alignment */
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Text colors */
+.text-main-color {
+    color: var(--main-color);
+}
+
+.text-red {
+    color: red;
+}
+
+.text-green {
+    color: green;
+}
+
+.text-muted {
+    color: rgb(113, 113, 113);
+}
+
+/* Typography */
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.text-sm {
+    font-size: 12px;
+}
+
+.text-xs {
+    font-size: 10px;
+}
+
+/* Size constraints */
 .limit-lenght {
     max-width: 256px;
 }
 
-.readonly {
-    color: #818181;
+.max-w-none {
+    max-width: none;
 }
 
-/* Message styles */
-div.msg-error {
-    margin: 8px;
-    padding: 12px;
-    color: maroon;
-    border: 1px solid rgba(255, 0, 0, 0.6);
-    background-color: rgba(240, 128, 128, 0.5);
-}
-
-div.msg-success {
-    margin: 8px;
-    padding: 12px;
-    color: rgb(0, 128, 21);
-    border: 1px solid rgba(11, 192, 11, 0.6);
-    background-color: rgba(128, 240, 143, 0.5);
-}
-
-div.msg-info {
-    margin: 8px;
-    padding: 12px;
-    color: rgb(0, 51, 128);
-    border: 1px solid rgba(0, 68, 255, 0.6);
-    background-color: rgba(128, 180, 240, 0.5);
-}
-
-div.msg-alert {
-    margin: 8px;
-    padding: 12px;
-    color: rgb(212, 129, 5);
-    border: 1px solid rgba(255, 145, 0, 0.6);
-    background-color: rgba(240, 204, 128, 0.5);
-}
+/* Message styles moved to modules/elements.css */

@@ -26,7 +26,7 @@
         ) }}
         
         <div id="filter-container">
-            <div style="display: none;" class="flex-h" id="table-filter">
+            <div class="hidden flex-h" id="table-filter">
                 <input type="date" class="address" id="filterDate1" onchange="filterByDate()">
                 <div id="period-date" style="display: contents">
                     <input type="date" class="address" id="filterDate2" onchange="filterByDate()">
@@ -50,7 +50,7 @@
             <div class="centralizado">
                 <div>
                     <div>
-                        <form style="display: flex;" id="form-field" method="post" action="/processamento/insert">
+                        <form class="flex" id="form-field" method="post" action="/processamento/insert">
                             <hr>
                             <label for="liq_tipo"></label>
                             <select id="liq_tipo" name="liq_tipo">
@@ -58,7 +58,7 @@
                                 <option>NECTAR</option>
                             </select>
                             <hr>
-                            <div class="two-split" id="two_split_field" style="width: 100%">
+                            <div class="two-split" id="two_split_field" class="w-100">
                                 <div>
                                     <label for="liq_linha">Produto<br></label>
                                     <select class="address" name="liq_linha" id="liq_linha" onchange="updateCorOptions()" required>
@@ -117,7 +117,7 @@
                                 </div>
                             </div>
                             <div style="display: flex;width: 100%;">
-                                <input class="btn-fancy" style="max-width: none;" type="submit" value="Registrar...">
+                                <input class="btn-fancy max-w-none" type="submit" value="Registrar...">
                                 {% if 'user_grant' in session %}
                                     {% if 'PRC010' in user_perm or 'PRC013' in user_perm or session['user_grant'] <= 2 %}
                                         <img class="btn-fancy" style="height: 30px;width: 30px; padding: 15px;margin-left: 15px" src="{{ url_for('static', filename='svg/pen-line.svg') }}" alt="" onclick="toggleEdit()">
@@ -216,183 +216,5 @@
 {% endblock content %}
 
 {% block route_script %}
-
-    <script>
-
-        getSemana()
-
-        function updateLinhaOptions() {
-            var embalagem = document.getElementById("embalagem").value;
-            var linhaSelect = document.getElementById("linha");
-
-            linhaSelect.innerHTML = "";
-
-            if (embalagem === "PET") {
-                addOption(linhaSelect, "2", "2");
-                addOption(linhaSelect, "5", "5");
-            } else if (embalagem === "VIDRO") {
-                addOption(linhaSelect, "1", "1");
-                addOption(linhaSelect, "3", "3");
-            } else if (embalagem === "BAG") {
-                addOption(linhaSelect, "4", "4");
-            }
-        }
-
-        function updateCorOptions() {
-            var liqLinha = document.getElementById("liq_linha");
-            var corSelect = document.getElementById("liq_cor");
-            var corField = document.getElementById("liq_cor_field");
-            var twoSplitField = document.getElementById("two_split_field");
-
-            corSelect.innerHTML = "";
-            liqLinha.classList.remove('address');
-
-            if (liqLinha.value === "UVA") {
-                addOption(corSelect, "TINTO", "TINTO");
-                addOption(corSelect, "BRANCO", "BRANCO");
-                addOption(corSelect, "ROSE", "ROSÉ");
-
-                corField.style.display = "inline-block";
-                liqLinha.classList.add('address');
-                twoSplitField.classList.add('two-split');
-
-            } else if (liqLinha.value === "MISTO") { // criar tabela aux
-                addOption(corSelect, "UVA / MACA", "UVA / MACA");
-                addOption(corSelect, "MACA / UVA", "MACA / UVA");
-                addOption(corSelect, "MACA / LARANJA", "MACA / LARANJA");
-                addOption(corSelect, "LARANJA / MACA", "LARANJA / MACA");
-                addOption(corSelect, "TANGERINA / MACA", "TANGERINA / MACA");
-                addOption(corSelect, "MACA / TANGERINA", "MACA / TANGERINA");
-                addOption(corSelect, "LIMAO / MACA", "LIMAO / MACA");
-                addOption(corSelect, "MACA / UVAS BRANCAS", "MACA / UVAS BRANCAS");
-                addOption(corSelect, "MACA / TANGERINA / ACEROLA", "MACA / TANGERINA / ACEROLA");
-                addOption(corSelect, "MACA / MANGA", "MACA / MANGA");
-                addOption(corSelect, "MACA / MARACUJA", "MACA / MARACUJA");
-                addOption(corSelect, "TANGERINA / MACA", "TANGERINA / MACA");
-                addOption(corSelect, "UVA / MIRTILO", "UVA / MIRTILO");
-                addOption(corSelect, "UVAS BRANCAS / FRAMBOESA", "UVAS BRANCAS / FRAMBOESA");
-                addOption(corSelect, "UVA / AMORA", "UVA / AMORA");
-                addOption(corSelect, "UVA / ACAI", "UVA / ACAI");
-
-                corField.style.display = "inline-block";
-                liqLinha.classList.add('address');
-                twoSplitField.classList.add('two-split');
-
-            } else {
-                addOption(corSelect, " ", " ");
-                corField.style.display = 'none';
-                twoSplitField.classList.remove('two-split');
-            }
-        }
-
-        function addOption(selectElement, value, text) {
-            var option = document.createElement("option");
-            option.value = value;
-            option.text = text;
-            selectElement.appendChild(option);
-        }
-
-        function redirectToEdit(idProducao) {
-            window.location.href = "/processamento/edit?id_producao=" + idProducao;
-        }
-
-        function confirmConcluir(codProducao, checkbox) {
-            if (confirm("Você tem certeza que deseja concluir esta programação?")) {
-                window.location.href = "/processamento/done/" + codProducao;
-            } else {
-                checkbox.checked = false;
-            }
-        }
-
-        function filterByDate() {
-            let filterDate1 = document.getElementById('filterDate1').value;
-            let filterDate2 = document.getElementById('filterDate2').value;
-            const tables = document.querySelectorAll('.table-overflow');
-            if (!filterDate2) { // se data final é nula, considera a data inicial
-                filterDate2 = filterDate1
-            }
-            tables.forEach(table => {
-                const rows = table.querySelectorAll('tr');
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length > 5) {
-                        const dataProducao = cells[4].textContent.trim(); // seleciona apenas visíveis // cells[4] = coluna de dataProducao
-                        const isVisible = isDateInRange(dataProducao, filterDate1, filterDate2);
-                        row.style.display = isVisible ? 'table-row' : 'none';
-                    }
-                });
-            });
-        }
-
-        function isDateInRange(date, startDate, endDate) {
-
-            if (!startDate && !endDate) {
-                return true
-            } else if (!startDate) {
-                endDate.value = startDate.value
-            } else if (!endDate) {
-                startDate.value = endDate.value
-            }
-
-            const dateObj = new Date(date);
-            const startDateObj = new Date(startDate);
-            const endDateObj = new Date(endDate);
-
-            if (!isNaN(dateObj.getTime()) && !isNaN(startDateObj.getTime()) && !isNaN(endDateObj.getTime())) {
-                return dateObj >= startDateObj && dateObj <= endDateObj;
-            }
-
-            return false;
-        }
-
-        function getHoje() {
-            const today = new Date();
-            const periodDateField = document.getElementById("period-date");
-
-            document.getElementById('filterDate1').value = today.toISOString().split('T')[0];
-            document.getElementById('filterDate2').value = ''
-            periodDateField.style.display = 'none';
-
-            filterByDate();
-            document.getElementById('filterDate1').focus()
-        }
-
-        function limpaData() {
-            document.getElementById('filterDate1').value = "";
-            document.getElementById('filterDate2').value = "";
-            filterByDate();
-            document.getElementById('filterDate1').focus()
-        }
-
-        function getSemana() {
-            const today = new Date();
-            const firstDayOfWeek = new Date(today);
-            const lastDayOfWeek = new Date(today);
-            const periodDateField = document.getElementById("period-date");
-
-            const diff = today.getDay();
-            firstDayOfWeek.setDate(today.getDate() - diff);
-            lastDayOfWeek.setDate(today.getDate() + (6 - diff));
-
-            document.getElementById('filterDate1').value = formatDate(firstDayOfWeek);
-            document.getElementById('filterDate2').value = formatDate(lastDayOfWeek);
-            periodDateField.style.display = 'contents';
-
-            filterByDate();
-            document.getElementById('filterDate1').focus();
-        }
-
-        function formatDate(date) {
-            const year = date.getFullYear();
-            let month = date.getMonth() + 1;
-            let day = date.getDate();
-
-            month = month < 10 ? '0' + month : month;
-            day = day < 10 ? '0' + day : day;
-
-            return `${year}-${month}-${day}`;
-        }
-
-    </script>
-
+    <script src="{{ url_for('static', filename='js/pages/processamento/processamento.js') }}"></script>
 {% endblock route_script %}

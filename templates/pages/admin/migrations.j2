@@ -22,7 +22,7 @@
         ) }}
 </div>
 
-<div id="divContent" style="flex-wrap: wrap;">
+<div id="divContent" class="flex-wrap">
     {% if 'user_grant' in session %}
         <div class="tables-container" style="min-width: 70%;">
             <div class="container-fluid">
@@ -83,39 +83,5 @@
 {% endblock %}
 
 {% block route_script %}
-<script>
-function runPending() {
-    if (!confirm('Executar todas as migrações pendentes?')) return;
-
-    fetch('/api/migrations/run', { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                alert('Migrações executadas: ' + data.results.length);
-                location.reload();
-            } else {
-                alert('Erro: ' + data.error);
-            }
-        });
-}
-
-function rollback(name) {
-    if (!confirm('Reverter migração ' + name + '?')) return;
-
-    fetch('/api/migrations/rollback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name })
-    })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                alert('Migração revertida');
-                location.reload();
-            } else {
-                alert('Erro: ' + data.error);
-            }
-        });
-}
-</script>
+    <script src="{{ url_for('static', filename='js/pages/admin/migrations.js') }}"></script>
 {% endblock %}

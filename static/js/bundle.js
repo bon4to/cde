@@ -117,15 +117,18 @@ function toggleBundleContainer() {
     if (bundleContainer.style.display === 'none') {
         bundleContainer.style.display = 'block';
         bundleBtn.classList.add('active');
-        showToast('Modo: Pacote (Bundle)', 'info', 1.5)
+        showToast('Modo: Pacote (Bundle)', 'info', 1.5);
+
+        // Reset bundle operation to default and ensure address fields are hidden
+        document.getElementById("bundleOperation").value = 'S';
+        toggleBundleEndereco();
     } else {
         bundleContainer.style.display = 'none';
         bundleBtn.classList.remove('active');
-        showToast('Modo: Unitário (Single)', 'info', 1.5)
+        showToast('Modo: Unitário (Single)', 'info', 1.5);
     }
 
-    toggleColumnVisibility()
-
+    toggleColumnVisibility();
 }
 
 function addToBundle(rowIndex) {

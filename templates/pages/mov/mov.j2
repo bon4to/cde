@@ -36,7 +36,7 @@
 
     </div>
     
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
 
         {% from 'components/sidebar.j2' import sidebar %}
         {{ sidebar([
@@ -57,7 +57,7 @@
                 <hr>
             </form>
 
-            <form id="form-field" class="split-v" method="post" action="/logi/mov/moving">
+            <form id="form-field" class="split-v" method="post" action="/logi/mov/moving" autocomplete="off">
                 <div class="flex-v">
                     <div id="produtoField">
                         <div class="flex-v">
@@ -80,7 +80,7 @@
                             <div class="inputs">
                                 <div class="flex-v">
                                     {% from 'components/lock-label.j2' import lock_label %}
-                                    {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_item_no"></span>' | safe) }}
+                                    {{ lock_label('Código', 'cod_item', '<span class="text-red" id="json_item_no"></span>' | safe) }}
                                     <select 
                                         id="cod_item" 
                                         name="cod_item" 
@@ -165,7 +165,7 @@
                             </div>
                         </div>
 
-                        <div id="TransfFields" class="inputs" style="display: none;">
+                        <div id="TransfFields" class="inputs hidden">
                             
                                 <div class="flex-v">
                                     <label for="destino_end_letra">End. de Destino</label>
@@ -183,11 +183,11 @@
                                 </div>
                         </div>
 
-                        <div id="FaturaFields" class="inputs" style="display: none;">
+                        <div id="FaturaFields" class="inputs hidden">
                             <div style="text-align: center;">
                                 <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
                             </div>
-                            <div style="display: flex;">
+                            <div class="flex">
                                 <div>
                                     <label for="id_carga">Número de Carga</label>
                                     <input type="number" id="id_carga" name="id_carga" step="any" min="1000" max="99999" class="address-three" placeholder="Carga...">
@@ -247,21 +247,21 @@
                                 <td 
                                     title="Data Fab.: {{ item['date_fab'] }}"
                                     {% if 'CS' not in item['cod_lote']|string %}
-                                        style="color:rgb(113, 113, 113);"
+                                        class="text-muted"
                                     {% endif %}
                                 >
                                     {{ item['cod_lote'] }}
                                 </td>
                                 {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
                                     <td 
-                                        style="color:rgb(113, 113, 113);"
+                                        class="text-muted"
                                         title="Validade não informada!"
                                     >
                                         -
                                     </td>
                                 {% elif '/' in item['validade']|string %}
                                         <td 
-                                            style="color:rgb(113, 113, 113);"
+                                            class="text-muted"
                                         >
                                         {{ item['validade'] }}
                                         </td>
@@ -313,7 +313,7 @@
                     </div>
                 </div>
                 <div class="split-h">
-                    <div style="display: flex;">
+                    <div class="flex">
                         <select style="height: 40px" name="operacao" id="bundleOperation" class="address-four" onchange="toggleBundleEndereco()">
                             <option value="S">S</option>
                             <option value="T">T</option>
@@ -322,35 +322,31 @@
                             <option value="F">F</option> 
                             -->
                         </select>
-                        <div id="bundleEnderecoContainer" style="display: none;">
+                        <div id="bundleEnderecoContainer" class="hidden">
                             <p style="margin-left: 10px; font-family: 'Inter', sans-serif;">Transferir para:</p>
-                            <select style="height: 40px" class="address-four" id="bundleLetra" required>
+                            <select style="height: 40px" class="address-four" id="bundleLetra">
                                 {% include "shared/elements/address-select.j2" %}
                             </select>
-                            <input 
-                                id="bundleNumero" 
-                                type="number" 
-                                step="any" 
-                                min="1" 
-                                max="999" 
-                                required 
+                            <input
+                                id="bundleNumero"
+                                type="number"
+                                step="any"
+                                min="1"
+                                max="999"
                                 placeholder="1"
-                                class="address-four" 
-                                style="height: 40px" 
+                                class="address-four"
+                                style="height: 40px"
                             >
                         </div>
                     </div>
 
-                    <input 
+                    <input
                         id="registrarBtn"
-                        value="REGISTRAR" 
-                        class="address-two" 
-                        style="
-                            height: 40px; 
-                            cursor: pointer;
-                        " 
-                        type="submit" 
-                        onclick="concludeBundle()" 
+                        value="REGISTRAR"
+                        class="address-two"
+                        style="height: 40px; cursor: pointer;"
+                        type="button"
+                        onclick="concludeBundle()"
                     >
                 </div>
             </div>
@@ -381,131 +377,8 @@
 {% endblock content%}
 
 {% block route_script %}
-    <!-- script para transacoes em pacote (bundle) -->
     <script src="{{ url_for('static', filename='js/bundle.js') }}"></script>
-
-    <!-- script para container flutuante -->
     <script src="{{ url_for('static', filename='js/lb-float-cont.js') }}"></script>
-
-    <!-- script geral -->
-    <script>
-        let isColumnVisible = false;
-        let ultimoCodigo = '';
-        let userID = '{{ session['id_user'] }}';
-        var tableData = [];
-
-        $(function() {
-            $("#formBuscarItens").submit(function(event) {
-                event.preventDefault();
-                var codigo = $("#input_code").val();
-                buscarItens(codigo);
-                $("#input_code").val('');
-            });
-        });
-
-        $("#cod_item").change(function(event) {
-            event.preventDefault();
-            var codigo = $("#cod_item").val();
-            buscarItens(codigo);
-            $("#input_code").val(ultimoCodigo);
-        });
-
-        function buscarItens(codigo) {
-            $.ajax({
-                type: "POST",
-                url: "/get/item",
-                data: { input_code: codigo },
-                success: function(response) {
-                    // descrição do item
-                    $("#desc_item").val(response.json_desc_item);
-
-                    $("#cod_item").empty();
-                    // número de ocorrência de código de item
-                    if (response.json_cod_item.length != 1) {
-                        $("#json_item_no").text('( ' + response.json_cod_item.length + ' )');
-                    } else {
-                        $("#json_item_no").text('');
-                    }
-
-                    // se houver mais de um código de item, esconde o lock-label de código de item
-                    if (response.json_cod_item.length > 1) {
-                        hideLockLabel("label-cod_item");
-                        ultimoCodigo = codigo;
-                    }
-
-                    if (response.json_cod_item) {
-                        response.json_cod_item.forEach(function(item) {
-                            $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
-                        });
-                        if (response.json_cod_item && response.json_cod_item.length > 0) {
-                            $("#filterInput").val(response.json_cod_item[0]);
-                            filterTable();
-                        }
-                    } else {
-                        $("#cod_item").append("<option value=''></option>");
-                    }
-                    $("#lote_item").val(response.json_cod_lote);
-                    
-                    if (response.json_cod_lote === "") {
-                        hideLockLabel("label-cod_lote")
-                        $("#lote_item").prop("readonly", false);
-                    } else {
-                        $("#lote_item").prop("readonly", true);
-                        getItemFirstMov(response.json_cod_lote)
-                    }
-                },
-                error: function(error) {
-                    console.error("Erro ao buscar itens:", error);
-                }
-            });
-        }
-
-        document.getElementById("form-field").addEventListener("submit", function() {
-            document.getElementById("submitform").disabled = true;
-        });
-        
-        function getItemFirstMov(loteItem) {
-            const selectedItem = document.getElementById("cod_item").value;
-            const dataFabInput = document.getElementById("date_fab");
-            const dataLockedInput = document.getElementById("data_locked");
-
-            function setDataFab(date=null) {
-                if (date) {
-                    dataFabInput.value = date;
-                    dataFabInput.setAttribute('readonly', true);
-                    dataLockedInput.value = true;
-
-                    dataFabInput.onclick = function() {
-                        alert("O lote deste item foi registrado pela primeira vez em " + data.first_mov);
-                    }
-                    return
-                }
-                dataFabInput.value = '';
-                dataFabInput.removeAttribute('readonly');
-                dataLockedInput.value = false;
-
-                dataFabInput.onclick = ''
-                return
-            }
-
-            // busca apenas se a string for maior de 4 caracteres
-            if (loteItem.length <= 3 || !/^[A-Z]{2}\d{4}$/.test(loteItem)) {
-                setDataFab()
-                return
-            }
-            
-            // impede datas futuras na data de fabricação
-            dataFabInput.max = new Date().toISOString().split('T')[0];
-        
-            fetch(`/api/get_item_first_mov?cod_item=${selectedItem}&cod_lote=${loteItem}`)
-                .then(response => response.json())
-                .then(data => {
-                    setDataFab(data.first_mov)
-                    return
-                })
-                .catch(error => {
-                    console.error('Erro ao obter data de fabricação:', error);
-                });
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/pages/mov/mov.js') }}"></script>
+    <script>initMov('{{ session['id_user'] }}');</script>
 {% endblock route_script %}

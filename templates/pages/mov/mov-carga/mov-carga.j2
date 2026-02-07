@@ -30,7 +30,7 @@
 
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
         <!-- prevent access to this page if user is not logged -->
         {% if 'user_grant' in session %}
             <!-- if 'id_carga' is selected -->
@@ -87,8 +87,8 @@
                                 {% endif %}
                             </div>
                             <div class="msg-success flex-v" style="margin: 0; gap: 0">
-                                <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
-                                <span style="font-size: 12px">
+                                <span class="font-semibold">A lista foi atualizada com sucesso!</span>
+                                <span class="text-sm">
                                     {{ alert | safe }}
                                 </span>
                             </div>
@@ -109,7 +109,7 @@
                         <div class="split-h">
                             <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}"></h1>
                             <div class="flex-h" style="gap: 30px">
-                                <div class="cart-container" style="display: none">
+                                <div class="cart-container hidden">
                                     <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
                                     <div class="cart-dropdown hidden" id="cart-dropdown">
                                         <ul class="cart-items">
@@ -121,7 +121,7 @@
                                 <div style="display: flex; flex-direction: column; gap: 6px">
                                     <form action="{{ url_for('cargas') }}" method="post">
                                         <button type="submit" style="all: unset" onclick="showLoading()">
-                                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
+                                            <a class="button-mini btn-fancy m-0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
                                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
                                             </a>
                                         </button>
@@ -307,7 +307,7 @@
                                                 <td>{{ row['address'] }}</td>
                                                 <td>{{ row['cod_lote'] }}</td>
                                                 <td title="Data Fab.: {{ row['date_fab'] }}">{{ row['validade'] }}</td>
-                                                <td {% if qtde_solic|int <= row['saldo'] %} style="color: green"{% else %} style="color: red"{% endif %}>
+                                                <td {% if qtde_solic|int <= row['saldo'] %} style="color: green"{% else %} class="text-red"{% endif %}>
                                                     {{ row['saldo'] }}
                                                 </td>   
                                             </tr>
@@ -324,10 +324,10 @@
 
             {% if not cod_item %}
                 <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                    <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
+                    <h1 class="subtitle m-0">Buscar separações...</h1>
                     <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
                         <option style="color: var(--main-color);">Pendentes</option>
-                        <option style="color: green;">Finalizadas</option>
+                        <option class="text-green">Finalizadas</option>
                     </select>
                     {% block all_separation_status %}
                     
@@ -363,8 +363,11 @@
 {% endblock content %}
 
 {% block route_script %}
-
-    <script>
+    <script src="{{ url_for('static', filename='js/pages/mov/mov-carga/mov-carga.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
+    <script>initMovCarga({ nroCarga: '{{ id_carga }}', codItem: '{{ cod_item }}', userId: '{{ session['id_user'] }}' });</script>
+    <!-- Inline JS moved to external file -->
+    <!--<script>
         const nroCarga = '{{ id_carga }}';
 
         var codItem = '{{ cod_item }}';
@@ -516,9 +519,5 @@
             }
         });
 
-    </script>
-
-    <!-- lib for carga logic -->
-    <script src="{{ url_for('static', filename='js/lb-cargas.js') }}"></script>
-
+    </script>-->
 {% endblock route_script %}

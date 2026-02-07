@@ -49,7 +49,7 @@
                 {% if search_term %}
                     <div class="split-h">
                         <h1 style="font-size: 22px">Critério de pesquisa: <span class="text-main-color">"{{ search_term }}"</span> em <span class="text-main-color">{{ search_row_text }}</span>.</h1>
-                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
+                        <a class="button-mini btn-fancy m-0" onclick="window.location.href='{{ url_for('historico') }}';" title="Limpar">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                         </a>
                     </div>
@@ -72,12 +72,12 @@
                         <tr>
                             <td>{{ item['address'] }}</td>
                             <td style="text-align: center">{{ item['operacao'] }}</td>  
-                            <td style="text-align: right">{{ item['cod_item'] }}</td>
+                            <td class="text-right">{{ item['cod_item'] }}</td>
                             <td>{{ item['desc_item'] }}</td>
                             <td>{{ item['cod_lote'] }}</td>
-                            <td style="text-align: right">{{ item['quantidade'] }}</td>
+                            <td class="text-right">{{ item['quantidade'] }}</td>
                             <td>{{ item['user_name'] }}</td>
-                            <td style="text-align: right">{{ item['timestamp'] }}</td>
+                            <td class="text-right">{{ item['timestamp'] }}</td>
                         </tr>
                         {% endfor %}
                     {% else %}

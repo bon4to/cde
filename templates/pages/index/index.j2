@@ -24,7 +24,7 @@
         
     </div>
         
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
         {% include "components/advert.j2" %}
         {% if 'user_grant' in session %}
             {% if not about %}
@@ -36,7 +36,7 @@
                 
                         <div class="split-v">
                             <div class="salute-text">
-                                <h1 class="salute-text" id="salute-text"></h1>
+                                <h1 class="salute-text" id="salute-text">{{ salute }}, <span class="text-main-color">{{ session.get('user_name') }}</span>!</h1>
                                 <p class="phrase disabled" id="frase-motivacional">``{{ frase }}``</p>
                             </div>
                             <div class="container-grid" style="margin-bottom: 32px; padding: 10px 0">
@@ -111,35 +111,5 @@
 {% endblock content %}
         
 {% block route_script %}
-    <script>
-        function getSaluteText() {
-            let saluteText;
-            let horaAtual = new Date().getHours();
-
-            if (horaAtual >= 5 && horaAtual < 12) {
-                saluteText = "Bom dia";
-            } else if (horaAtual >= 12 && horaAtual < 18) {
-                saluteText = "Boa tarde";
-            } else {
-                saluteText = "Boa noite";
-            }
-            return saluteText;
-        }
-
-        function updateSaluteText() {
-            let saluteHTML = getSaluteText() + ", " + getUserHTML() + "!";
-            document.getElementById("salute-text").innerHTML = saluteHTML;
-        }
-
-        function getUserHTML() {
-            return `<span class='text-main-color'>{{ session.get('user_name') }}</span>`
-        }
-
-        updateSaluteText();
-
-    </script>
-
-    <script>
-        loadRecentPages();
-    </script>
+    <script src="{{ url_for('static', filename='js/pages/index.js') }}"></script>
 {% endblock route_script %}

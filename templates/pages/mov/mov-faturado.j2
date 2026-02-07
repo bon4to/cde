@@ -65,7 +65,7 @@
                         <td>{{ item['cod_item'] }}</td>
                         <td>{{ item['desc_item'] }}</td>
                         <td>{{ item['cod_lote'] }}</td>
-                        <td style="text-align: right">{{ item['saldo'] }}</td>
+                        <td class="text-right">{{ item['saldo'] }}</td>
                         <td>{{ item['time_mov'] }}</td>
                         <td>{{ item['id_carga'] }} </td>
                         <td>{{ item['id_req'] }} </td>
@@ -82,66 +82,5 @@
 {% endblock content %}
 
 {% block route_script %}
-
-    <script>
-
-        $("#formBuscarItens").submit(function(event) {
-            event.preventDefault();
-            buscarItens();
-        });
-
-        function buscarItens() {
-            var codigo = $("#input_code").val();
-
-            $.ajax({
-                type: "POST",
-                url: "/get/item",
-                data: { input_code: codigo },
-                success: function(response) {
-
-                    $("#desc_item").val(response.json_desc_item);
-                    $("#input_code").val("");
-                    $("#cod_item").empty();
-
-                    if (response.json_cod_item.length > 1) {
-                        hideLockLabel("label-cod_item");
-                    }
-
-                    if (response.json_cod_item) {
-                        response.json_cod_item.forEach(function(item) {
-
-                            $("#cod_item").append("<option value='" + item + "'>" + item + "</option>");
-                        });
-                    } else {
-                        $("#cod_item").append("<option value=''></option>");
-                    }
-
-                    $("#lote_item").val(response.json_cod_lote);
-
-                    if (response.json_cod_lote === "") {
-                        hideLockLabel("label-cod_lote")
-
-                        $("#lote_item").prop("readonly", false);
-                    } else {
-
-                        $("#lote_item").prop("readonly", true);
-                    }
-                },
-
-                error: function(error) {
-                    console.error("Erro ao buscar itens:", error);
-                }
-            });
-        }
-
-        document.getElementById("form-field").addEventListener("submit", function() {
-                document.getElementById("submitform").disabled = true;
-
-            });
-
-
-
-
-    </script>
-
+    <script src="{{ url_for('static', filename='js/pages/mov/mov-faturado.js') }}"></script>
 {% endblock route_script %}

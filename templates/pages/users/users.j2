@@ -30,7 +30,7 @@
                     <form action="/users/inserting" method="post">
                         <div class="inputs">
                             <div>
-                                <label for="login_user">Login: <span style="color: red">*</span></label>
+                                <label for="login_user">Login: <span class="text-red">*</span></label>
                                 <input 
                                     class="address-one"
                                     type="text" 
@@ -43,7 +43,7 @@
                         </div>
                         <div class="inputs">
                             <div>
-                                <label for="password_user">Senha: <span style="color: red">*</span></label>
+                                <label for="password_user">Senha: <span class="text-red">*</span></label>
                                 <input 
                                     class="address-one disabled" 
                                     id="password_user" 
@@ -57,17 +57,17 @@
 
                         <div class="inputs">
                             <div>
-                                <label for="nome_user">Nome: <span style="color: red">*</span></label>
+                                <label for="nome_user">Nome: <span class="text-red">*</span></label>
                                 <input class="address-two" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
                             </div>
                             <div>
-                                <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label>
+                                <label for="sobrenome_user">Sobrenome: <span class="text-red">*</span></label>
                                 <input class="address-two" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
                             </div>
                         </div>
                         <div class="inputs">
                             <div>
-                                <label for="privilege_user">Privilégios: <span style="color: red">*</span></label>
+                                <label for="privilege_user">Privilégios: <span class="text-red">*</span></label>
                                 <select 
                                 class="address-one"
                                     id="privilege_user" 
@@ -78,15 +78,15 @@
                                         <option value="3">Padrão</option>
                                         <option value="2">Administrador</option>
                                         {% if session['user_grant'] <= 1 %}
-                                            <option value="1" style="color: red">Desenvolvedor</option>
+                                            <option value="1" class="text-red">Desenvolvedor</option>
                                         {% endif %}
                                     {% endif %}
                                 </select>
                             </div>
                         </div>
-                        <p style="color: red">Campos com * são obrigatórios.</p>
+                        <p class="text-red">Campos com * são obrigatórios.</p>
                         <div style="display: flex;width: 100%;">
-                            <input class="btn-fancy" style="max-width: none;" type="submit" value="CADASTRAR">
+                            <input class="btn-fancy max-w-none" type="submit" value="CADASTRAR">
                         </div>
                     </form>
                 </div>
@@ -112,7 +112,7 @@
                                     <td class="number">{{ item['cod_user'] }}</td>
                                     <td>{{ item['user_name'] }}</td>
                                     <td>{{ item['user_grant'] }}</td>
-                                    <td style="text-align: right">{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
+                                    <td class="text-right">{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
                                     <td class="td-more hidden-button" data-toggle="tooltip" style="background-color: transparent">
                                         <img 
                                             title="EDITAR USUÁRIO"
@@ -134,9 +134,5 @@
 {% endblock content %}
 
 {% block route_script %}
-    <script>
-        function redirectToEdit(idUser) {
-            window.location.href = "/users/edit?id_user=" + idUser;
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/pages/users/users.js') }}"></script>
 {% endblock route_script %}

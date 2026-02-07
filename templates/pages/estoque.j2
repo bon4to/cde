@@ -44,7 +44,7 @@
         ) }}
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
         
         {% from 'components/sidebar.j2' import sidebar %}
         {{ sidebar([
@@ -54,7 +54,7 @@
             {'url': 'estoque_preset', 'icon': 'svg/blend.svg', 'title': 'ESTOQUE (PRESET)', 'active': request.endpoint == 'estoque_preset'}
         ]) }}
 
-        <div class="tables-container" style="max-width: 100vw;">
+        <div class="tables-container" style="max-width: 100vw; max-height: 75vh;">
             {% block table %}
                 <div class="split-h">
                     
@@ -62,7 +62,7 @@
                 {% if search_term %}
                     <div class="split-h">
                         <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
-                        <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
+                        <a class="button-mini btn-fancy m-0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
                             <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                         </a>
                     </div>

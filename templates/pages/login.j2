@@ -10,21 +10,21 @@
                     <img class="side-banner login" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
                 </div>
                 {% if 'logged_in' not in session %}
-                    <div class="log" style="width: 100%">
+                    <div class="log w-100">
                         <h1 style="font-size: 46px; margin-bottom: 10px" class="text-main-color title">Entrar</h1>
                         <form id="form-field" action="/login" method="post" onsubmit="showLoading()">
                             <div class="flex-v">
 
                                 <div class="inputs">
                                     <div class="flex-v">
-                                        <label for="login_user">Usuário <span style="color: red">*</span></label>
+                                        <label for="login_user">Usuário <span class="text-red">*</span></label>
                                         <input type="text" id="login_user" name="login_user" placeholder="usuário / seu@email.com" required>
                                     </div>
                                 </div>
 
                                 <div class="inputs">
                                     <div class="flex-v">
-                                        <label for="password_user">Senha <span style="color: red">*</span></label>
+                                        <label for="password_user">Senha <span class="text-red">*</span></label>
                                         <input type="password" id="password_user" name="password_user" placeholder="*****" required>
                                     </div>
                                 </div>
@@ -49,9 +49,5 @@
 {% endblock content%}
 
 {% block route_script %}
-    <script>
-        document.getElementById("form-field").addEventListener("submit", function() {
-            document.getElementById("submitform").disabled = true;
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/pages/login.js') }}"></script>
 {% endblock route_script %}

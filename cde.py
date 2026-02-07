@@ -2044,19 +2044,19 @@ def debug_page() -> str:
 @app.route("/cde/home/")
 @cde.verify_auth("CDE001")
 def home() -> str:
-    return render_template("pages/index/cde-index.j2", frase=misc.get_frase())
+    return render_template("pages/index/cde-index.j2", frase=misc.get_frase(), salute=misc.get_salute_text())
 
 
 @app.route("/logi/home/")
 @cde.verify_auth("CDE001", "logi")
 def home_logi() -> str:
-    return render_template("pages/index/tl-index.j2", frase=misc.get_frase())
+    return render_template("pages/index/tl-index.j2", frase=misc.get_frase(), salute=misc.get_salute_text())
 
 
 @app.route("/prod/home/")
 @cde.verify_auth("CDE001", "prod")
 def home_prod() -> str:
-    return render_template("pages/index/hp-index.j2", frase=misc.get_frase())
+    return render_template("pages/index/hp-index.j2", frase=misc.get_frase(), salute=misc.get_salute_text())
 
 
 @app.route("/in-dev/")

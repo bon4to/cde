@@ -31,7 +31,7 @@
 
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="flex-wrap">
         <div class="tables-container" id="sepContainer" style="min-width: 40vw; min-height: 40vh;">
             <div style="{% if id_carga == '0' %}display: none;{% endif %}">
                 <div class="split-h">
@@ -100,7 +100,7 @@
             {% endif %}
         </div>
         <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-            <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
+            <h1 class="subtitle m-0">Buscar separações...</h1>
             {% block all_separation_status %}
             
             {% endblock all_separation_status %}

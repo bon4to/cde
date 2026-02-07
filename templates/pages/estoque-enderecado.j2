@@ -16,7 +16,7 @@
         {% if search_term %}
             <div class="split-h">
                 <h1 style="font-size: 22px">Estoque na data <span class="text-main-color">{{ search_term }}</span>.</h1>
-                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';" title="Limpar">
+                <a class="button-mini btn-fancy m-0" onclick="window.location.href='{{ url_for('estoque_enderecado') }}';" title="Limpar">
                     <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
                 </a>
             </div>
@@ -42,7 +42,7 @@
                             <td 
                                 title="Data Fab.: {{ item['date_fab'] }}"
                                 {% if 'CS' not in item['cod_lote']|string %}
-                                    style="color:rgb(113, 113, 113);"
+                                    class="text-muted"
                                 {% endif %}
                             >
                                 {{ item['cod_lote'] }}
@@ -61,7 +61,7 @@
                                 {# N/A #}
                                     <td
                                         colspan="2"
-                                        style="color:rgb(113, 113, 113);"
+                                        class="text-muted"
                                         title="Item não possui validade."
                                     >
                                     {{ item['validade'] }}
@@ -189,124 +189,6 @@
             }
         </style>
 
-        <script>
-            const itemsData = {{ inv_data | tojson | safe }};
-            let currentItem = null;
-
-            // Format YYYY-MM-DD or YYYY-MM-DD HH:MM:SS to DD/MM/YYYY
-            function formatDateBR(dateStr) {
-                if (!dateStr || dateStr === '-') return '-';
-                const datePart = dateStr.split(' ')[0];
-                const parts = datePart.split('-');
-                if (parts.length !== 3) return dateStr;
-                return `${parts[2]}/${parts[1]}/${parts[0]}`;
-            }
-
-            document.getElementById('filterTable').addEventListener('click', function(e) {
-                const row = e.target.closest('tr[data-item-index]');
-                if (row) {
-                    const index = parseInt(row.dataset.itemIndex);
-                    openItemModal(itemsData[index]);
-                }
-            });
-
-            function openItemModal(item) {
-                currentItem = item;
-
-                document.getElementById('modalTitle').textContent = item.desc_item;
-                document.getElementById('modalCodItem').textContent = item.cod_item;
-                document.getElementById('modalDescItem').textContent = item.desc_item;
-                document.getElementById('modalCodLote').textContent = item.cod_lote;
-                document.getElementById('modalAddress').textContent = item.address.trim();
-                document.getElementById('modalSaldo').textContent = item.saldo + ' un';
-
-                let validadeText = '-';
-                if (typeof item.validade === 'number') {
-                    validadeText = `${item.validade} dias (${item.validade_str})`;
-                } else if (item.validade) {
-                    validadeText = item.validade;
-                }
-                document.getElementById('modalValidade').textContent = validadeText;
-
-                document.getElementById('modalDateFabDisplay').textContent = formatDateBR(item.date_fab) || '-';
-                document.getElementById('modalDateFab').value = '';
-                document.getElementById('modalFirstMov').textContent = 'Carregando...';
-                document.getElementById('modalDateFabCustomBadge').classList.add('hidden');
-                document.getElementById('btnClearDateFab').classList.add('hidden');
-
-                Modal.open('itemModal');
-
-                fetch(`/api/custom_date_fab?cod_item=${encodeURIComponent(item.cod_item)}&cod_lote=${encodeURIComponent(item.cod_lote)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('modalFirstMov').textContent = formatDateBR(data.first_mov) || '-';
-
-                        if (data.custom_date_fab) {
-                            document.getElementById('modalDateFab').value = data.custom_date_fab;
-                            document.getElementById('modalDateFabCustomBadge').classList.remove('hidden');
-                            document.getElementById('btnClearDateFab').classList.remove('hidden');
-                        } else if (data.first_mov) {
-                            document.getElementById('modalDateFab').value = data.first_mov;
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error fetching date_fab:', err);
-                        document.getElementById('modalFirstMov').textContent = 'Erro';
-                    });
-            }
-
-            function saveDateFab() {
-                const dateFab = document.getElementById('modalDateFab').value;
-                if (!dateFab) {
-                    Modal.alert('Por favor, selecione uma data.');
-                    return;
-                }
-
-                fetch('/api/custom_date_fab', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        cod_item: currentItem.cod_item,
-                        cod_lote: currentItem.cod_lote,
-                        date_fab: dateFab
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.reload();
-                    } else {
-                        Modal.alert(data.error || 'Erro ao salvar data de fabricação.');
-                    }
-                })
-                .catch(err => {
-                    console.error('Error saving date_fab:', err);
-                    Modal.alert('Erro ao salvar data de fabricação.');
-                });
-            }
-
-            function clearDateFab() {
-                Modal.confirm(
-                    'Remover data customizada? Voltará a usar a data do primeiro movimento.',
-                    () => {
-                        fetch(`/api/custom_date_fab?cod_item=${encodeURIComponent(currentItem.cod_item)}&cod_lote=${encodeURIComponent(currentItem.cod_lote)}`, {
-                            method: 'DELETE'
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.reload();
-                            } else {
-                                Modal.alert(data.error || 'Erro ao limpar data de fabricação.');
-                            }
-                        })
-                        .catch(err => {
-                            console.error('Error clearing date_fab:', err);
-                            Modal.alert('Erro ao limpar data de fabricação.');
-                        });
-                    },
-                    { title: 'Limpar Override', confirmText: 'Limpar', danger: true }
-                );
-            }
-        </script>
+        <script src="{{ url_for('static', filename='js/pages/estoque-enderecado.js') }}"></script>
+        <script>initEstoqueEnderecado({{ inv_data | tojson | safe }});</script>
     {% endblock table %}

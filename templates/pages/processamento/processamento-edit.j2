@@ -34,7 +34,7 @@
                 <div class="centralizado">
                     <div>
                         {% for item in prod_edit %}
-                            <form style="display: flex;" id="form-field" method="post" action="/processamento/edit">
+                            <form class="flex" id="form-field" method="post" action="/processamento/edit">
                                 <hr>
                                 <label for="liq_tipo"></label>
                                 <input id="liq_tipo" name="liq_tipo" value="{{ item['liq_tipo'] }}" disabled readonly>
@@ -86,10 +86,10 @@
                                     {% endif %}
 
                                 </div>
-                                <label for="id_producao" style="display: none"></label>
-                                <input value="{{ item['id_producao'] }}" name="id_producao" id="id_producao" style="display: none">
+                                <label for="id_producao" class="hidden"></label>
+                                <input value="{{ item['id_producao'] }}" name="id_producao" id="id_producao" class="hidden">
                                 <div style="display: flex;width: 100%;">
-                                    <input class="btn-fancy" style="max-width: none;" type="submit" value="Confirmar edição...">
+                                    <input class="btn-fancy max-w-none" type="submit" value="Confirmar edição...">
 
                                     {% if 'user_grant' in session %}
                                         {% if session['user_grant'] <= 2 %}

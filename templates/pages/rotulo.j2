@@ -101,7 +101,7 @@
                             <hr>
                             <h3 id="resposta1" class="alert">Calculadora</h3>
                             <p id="resposta2">Digite os parâmetros...</p>
-                            <div style="display: none" class="split-h">
+                            <div class="hidden split-h">
                                 <input class="btn-fancy" type="submit" value="Calcular...">
                             </div>
                         </form>
@@ -122,90 +122,6 @@
 {% endblock content %}
 
 {% block route_script %}
-
-    <script>
-        var static_path = "{{ url_for('static', filename='') }}";
-        var input1 = document.getElementById("espessura_fita");
-        var input2 = document.getElementById("diametro_inicial");
-        var input3 = document.getElementById("diametro_minimo");
-        var input4 = document.getElementById("espessura_papelao");
-        var input5 = document.getElementById("compr_rotulo");
-
-        var dynamicImage = document.getElementById("dynamicImage");
-
-        input1.addEventListener("focus", function() {
-            dynamicImage.src = static_path + "img/rotulo/rotulo_esp_rot.jpg";
-        });
-        input2.addEventListener("focus", function() {
-            dynamicImage.src = static_path + "img/rotulo/rotulo_diam_total.jpg";
-        });
-        input3.addEventListener("focus", function() {
-            dynamicImage.src = static_path + "img/rotulo/rotulo_diam_int.jpg";
-        });
-        input4.addEventListener("focus", function() {
-            dynamicImage.src = static_path + "img/rotulo/rotulo_esp_tub.jpg";
-        });
-        input5.addEventListener("focus", function() {
-            dynamicImage.src = static_path + "img/rotulo/rotulo_dist_rot.jpg";
-        });
-
-        $("#field").submit(function(event) {
-            event.preventDefault();
-            var espessura_fita = $("#espessura_fita").val();
-            var diametro_inicial = $("#diametro_inicial").val();
-            var diametro_minimo = $("#diametro_minimo").val();
-            var espessura_papelao = $("#espessura_papelao").val();
-            var compr_rotulo = $("#compr_rotulo").val();
-            calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo);
-        });
-
-        $(document).ready(function() {
-            var timeout;
-
-            $("input[type='number']").on('input', function() {
-                clearTimeout(timeout);
-
-                timeout = setTimeout(function() {
-                    var espessura_fita = $("#espessura_fita").val();
-                    var diametro_inicial = $("#diametro_inicial").val();
-                    var diametro_minimo = $("#diametro_minimo").val();
-                    var espessura_papelao = $("#espessura_papelao").val();
-                    var compr_rotulo = $("#compr_rotulo").val();
-                    calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo);
-                }, 1000);
-            });
-        });
-
-        function calculaRotulo(espessura_fita, diametro_inicial, diametro_minimo, espessura_papelao, compr_rotulo) {
-            $.ajax({
-                type: "POST",
-                url: "/rotulo",
-                data: { espessura_fita: espessura_fita, diametro_inicial: diametro_inicial, diametro_minimo: diametro_minimo, espessura_papelao: espessura_papelao, compr_rotulo: compr_rotulo },
-                success: function(response) {
-                    $("#resposta1").text(response.num_rotulos_str + " rótulos");
-                    $("#resposta2").text(response.comprimento_mtrs + " metros");
-                    $("#resposta3").text("O tubo de rótulo tem " + response.num_voltas + " voltas");
-                },
-                error: function(error) {
-                    console.error("Erro ao exibir o valor", error);
-                }
-            });
-        }
-
-        function verificarComprimento(input) {
-            if (input.value.length > input.maxLength) {
-                input.value = input.value.slice(0, input.maxLength);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var inputs = document.querySelectorAll('.address');
-            inputs.forEach(function(input) {
-                input.addEventListener('input', function() {
-                    verificarComprimento(this);
-                });
-            });
-        });
-    </script>
-
+    <script src="{{ url_for('static', filename='js/pages/rotulo.js') }}"></script>
+    <script>initRotulo("{{ url_for('static', filename='') }}");</script>
 {% endblock route_script %}

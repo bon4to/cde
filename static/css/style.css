@@ -24,66 +24,7 @@
     background-color: #000;
 }
 
-/* cart styles */ 
-/* todo: remove (obsolete) */
-
-.cart-button {
-    height: 40px;
-    border: none;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    text-wrap: nowrap;
-    width: min-content;
-    position: relative;
-    padding: 10px 20px;
-    border-radius: 12px;
-    transition: background-color 0.3s;
-    background-color: rgba(52, 49, 50, 1);
-}
-
-.cart-button:hover {
-    background-color: #3e5ea6;
-}
-
-.item-count {
-    top: -10px;
-    width: 20px;
-    height: 20px;
-    right: -10px;
-    padding: 2px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 50%;
-    position: absolute;
-    align-content: center;
-    border: 2px solid #fff;
-    background-color: var(--main-color);
-}
-
-.cart-dropdown {
-    right: 0;
-    top: 45px;
-    z-index: 1;
-    padding: 12px;
-    min-width: 200px;
-    position: absolute;
-    border-radius: 20px;
-    background-color: white;
-    box-shadow: 0 0 16px rgba(0, 0, 0, 0.2);
-}
-
-.cart-container {
-    position: relative;
-    display: inline-block;
-}
-
 /* standard tags */
-
-.readonly {
-    color: #818181
-}
 
 label {
     width: 100%;
@@ -173,51 +114,6 @@ select#operacao {
 
 select#operacao option {
     font-weight: bold;
-}
-
-.btn-fancy, .btn-fancy-sober {
-    width: 100%;
-    height: 60px;
-    border: none;
-    color: #fff;
-    display: flex;
-    cursor: pointer;
-    font-size: 16px;
-    user-select: none;
-    border-radius: 8px;
-    font-weight: bolder;
-    align-items: center;
-    letter-spacing: 1px;
-    justify-content: center;
-    background-color: #333132;
-    font-family: 'Inter', sans-serif;
-    transition: box-shadow 0.3s ease-out, background-color 0.3s, letter-spacing 0.3s, border-radius 0.2s, opacity 0.2s;
-}
-
-.btn-fancy:focus {
-    border-bottom: none !important;
-}
-
-.btn-fancy.safe:hover {
-    color: #ffffff;
-    background-color: rgb(128, 212, 58);
-    box-shadow: 0 0 6px rgb(92, 180, 19);
-}
-
-.btn-fancy.critical:hover {
-    color: #ffffff;
-    background-color: rgb(212, 58, 58);
-    box-shadow: 0 0 6px rgb(180, 19, 19);
-}
-
-.btn-fancy.featured:hover {
-    color: #ffffff;
-    background-color: rgb(25, 130, 201);
-    box-shadow: 0 0 6px rgb(19, 75, 180);
-}
-
-.limit-lenght {
-    max-width: 256px;
 }
 
 .btn-fancy:hover, .btn-fancy:focus {
@@ -311,24 +207,9 @@ div.back-modal {
     font-size: 12px;
 }
 
-.table-overflow {
-    flex: 1;
-    width: 100%;
-    text-wrap: wrap;
-    overflow-y: auto;
-    min-height: 200px;
-    overflow-x: hidden;
-}
-
 .logo-container {
     display: flex;
     margin-left: 5%;
-    justify-content: center;
-}
-
-.flex-center-all {
-    display: flex;
-    align-items: center;
     justify-content: center;
 }
 
@@ -344,10 +225,6 @@ header {
     font-size: 2.4em;
     text-align: left;
     font-weight: bold;
-    align-items: center;
-}
-
-.algn-cntr {
     align-items: center;
 }
 
@@ -515,26 +392,6 @@ div.log {
     width: 450px; 
     height: 450px;
     margin-left: unset;
-}
-
-.checked {
-    background-color: var(--main-color);
-}
-
-.container-grid {
-    width: 650px;
-    display: grid;
-    padding: 10px 20px;
-    grid-gap: 20px;
-    margin: 0 auto;
-    grid-template-columns: 1.2fr 1.2fr 1.2fr;
-    grid-template-rows: 1.2fr 1.2fr 1.2fr;
-}
-
-.container-grid.cfg {
-    width: 1000px;
-    grid-template-columns: 1.2fr 1.2fr 1.2fr 1.2fr 1.2fr 1.2fr;
-    grid-template-rows: 1.2fr 1.2fr 1.2fr;
 }
 
 .item:hover .btn-fancy {
@@ -708,15 +565,6 @@ p.phrase {
 .dialog-box button {
     cursor: pointer;
     padding: 10px 20px;
-}
-
-.hidden {
-    display: none;
-}
-
-.hidden-opacity {
-    opacity: 0 !important;
-    pointer-events: none !important;
 }
 
 .checkout-button {
