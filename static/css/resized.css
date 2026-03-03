@@ -237,9 +237,7 @@
     .tables-container td {
         padding: 6px 4px;
     }
-
-    .tables-container th:nth-child(3),
-    .tables-container td:nth-child(3),
+    
     .tables-container th:nth-child(5),
     .tables-container td:nth-child(5) {
         display: none;
