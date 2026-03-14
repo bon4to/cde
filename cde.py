@@ -317,16 +317,14 @@ class CargaUtils:
             lt.debug_log(f"DSN: {dsn}")
 
             if dsn == "ODBC-DRIVER":
-                static_list = ", ".join(map(str, all_cargas))
-
                 query = """
-                    SELECT DISTINCT 
+                    SELECT DISTINCT
                         icrg.CODIGO_GRUPOPED AS NRO_CARGA,
                         icrg.NRO_PEDIDO      AS NRO_PEDIDO,
                         ped.CODIGO_CLIENTE   AS COD_CLIENTE,
                         cl.FANTASIA          AS FANT_CLIENTE,
                         crg.DATA_EMISSAO     AS DT_EMISSAO,
-                        iped.DT_ENTREGA      AS DT_ENTREGA, 
+                        iped.DT_ENTREGA      AS DT_ENTREGA,
                         crg.OBSERVACAO       AS OBS_CARGA
 
                     FROM DB2ADMIN.ITEMPED iped
@@ -337,34 +335,30 @@ class CargaUtils:
 
                     JOIN DB2ADMIN.PEDIDO ped
                     ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
-                    
+
                     JOIN DB2ADMIN.GRUPOPED crg
                     ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
                     JOIN DB2ADMIN.CLIENTE cl
                     ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
 
-                    JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+                    JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
                     ON i.ITEM = iped.ITEM
 
                     WHERE icrg.QTDE_FATUR != 0
-                    AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
-                    ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-                """.format(
-                    a=static_list
-                )
+                    ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC
+                    FETCH FIRST 5000 ROWS ONLY;
+                """
             elif dsn == "API":
-                static_list = ", ".join(map(str, all_cargas))
-
                 query = """
-                    SELECT DISTINCT 
+                    SELECT DISTINCT
                         icrg.CODIGO_GRUPOPED AS NRO_CARGA,
                         icrg.NRO_PEDIDO      AS NRO_PEDIDO,
                         ped.CODIGO_CLIENTE   AS COD_CLIENTE,
                         cl.FANTASIA          AS FANT_CLIENTE,
                         crg.DATA_EMISSAO     AS DT_EMISSAO,
-                        iped.DT_ENTREGA      AS DT_ENTREGA, 
+                        iped.DT_ENTREGA      AS DT_ENTREGA,
                         crg.OBSERVACAO       AS OBS_CARGA
 
                     FROM DB2ADMIN.ITEMPED iped
@@ -375,27 +369,30 @@ class CargaUtils:
 
                     JOIN DB2ADMIN.PEDIDO ped
                     ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
-                    
+
                     JOIN DB2ADMIN.GRUPOPED crg
                     ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
                     JOIN DB2ADMIN.CLIENTE cl
                     ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
 
-                    JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+                    JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
                     ON i.ITEM = iped.ITEM
 
                     WHERE icrg.QTDE_FATUR != 0
-                    AND icrg.CODIGO_GRUPOPED NOT IN ({a})
 
-                    ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC;
-                """.format(
-                    a=static_list
-                )
+                    ORDER BY icrg.CODIGO_GRUPOPED DESC, crg.DATA_EMISSAO DESC
+                    FETCH FIRST 5000 ROWS ONLY;
+                """
         else:
             query = """SELECT 'SEM CARGAS' AS MSG;"""
 
         result, columns = dbUtils.query(query, dsn)
+
+        if all_cargas and result and columns:
+            excluded = set(str(c) for c in all_cargas)
+            result = [row for row in result if str(row[0]) not in excluded]
+
         return result, columns
 
     @staticmethod
@@ -862,39 +859,43 @@ class MovRequestUtils:
 
         all_requests = MovRequestUtils.get_all_requests()
 
-        request_except_query = ", ".join(map(str, all_requests))  # TODO: fix
-
         query = """
             SELECT DISTINCT
                 M.DOCUMENTO           AS LOG_PROMOB,
                 M.DOC_ORIGEM          AS DOC_ORIGEM,
-                M.TIPO_TRANSACAO      AS TIPO_TRANSACAO, 
+                M.TIPO_TRANSACAO      AS TIPO_TRANSACAO,
                 M.TIPO_MOVIMENTO      AS TIPO_MOVIMENTO,
                 M.DEPOSITO            AS DEPOSITO,
                 I.ITEM                AS COD_ITEM,
-                I.ITEM_DESCRICAO      AS DESC_ITEM, 
+                I.ITEM_DESCRICAO      AS DESC_ITEM,
                 I.UNIDADE_DESCRICAO   AS UNIDADE,
                 CAST(QTDE AS INTEGER) AS QTDE,
                 USUARIO               AS USUARIO,
                 M.DATA_MOVIMENTACAO   AS DATA,
                 M.OBS                 AS OBS
-            FROM 
+            FROM
                 DB2ADMIN.HUGO_PIETRO_VIEW_MOVIMENTOS M
-            JOIN 
+            JOIN
                 DB2ADMIN.HUGO_PIETRO_VIEW_ITEM I
                 ON I.ITEM = M.ITEM
-                
-            WHERE M.DOC_ORIGEM NOT IN ({b})
+
+            WHERE 1=1
             {a}
-            
+
             ORDER BY
-                DOCUMENTO DESC, I.ITEM;
+                DOCUMENTO DESC, I.ITEM
+            FETCH FIRST 5000 ROWS ONLY;
         """.format(
-            a=where_clause, b=request_except_query
+            a=where_clause
         )
 
         dsn = cde.get_unit()
         result, columns = dbUtils.query(query, dsn)
+
+        if all_requests and result and columns:
+            excluded = set(str(r) for r in all_requests)
+            doc_col = columns.index("DOC_ORIGEM")
+            result = [row for row in result if str(row[doc_col]) not in excluded]
 
         return result, columns
 
@@ -3842,44 +3843,42 @@ def carga_id(id_carga) -> str:
         fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
         all_cargas = CargaUtils.get_cargas_finalizadas()
 
-        # sanitiza a lista all_cargas para garantir que contenha apenas inteiros
-        static_list = ", ".join(
-            str(int(carga)) for carga in all_cargas if str(carga).isdigit()
-        )
-
         query = f"""
-            SELECT DISTINCT 
+            SELECT DISTINCT
                 icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
                 icrg.NRO_PEDIDO                       AS NRO_PEDIDO,
                 (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
-                CAST(iped.ITEM AS VARCHAR(255))       AS COD_ITEM,
+                CAST(iped.ITEM AS VARCHAR(255))        AS COD_ITEM,
                 i.ITEM_DESCRICAO                      AS DESC_ITEM,
-                CAST(iped.QTDE_SOLICITADA AS INTEGER) AS QTDE_SOLIC,
+                CAST(iped.QTDE_SOLICITADA AS INTEGER)  AS QTDE_SOLIC,
                 crg.OBSERVACAO                        AS OBS_CARGA
-                
+
             FROM DB2ADMIN.ITEMPED iped
 
             JOIN DB2ADMIN.IGRUPOPE icrg
             ON icrg.NRO_PEDIDO = iped.NRO_PEDIDO
             AND icrg.SEQ = iped.SEQ
 
-            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i 
+            JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
             ON i.ITEM = iped.ITEM
-            
+
             JOIN DB2ADMIN.GRUPOPED crg
             ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
 
             WHERE icrg.CODIGO_GRUPOPED = {id_carga}
-            AND icrg.CODIGO_GRUPOPED NOT IN ({static_list})
 
             ORDER BY COD_ITEM
-
-            LIMIT 100;
+            FETCH FIRST 5000 ROWS ONLY;
         """
 
         # executa a consulta de forma segura
         dsn = cde.get_unit()
         result, columns = dbUtils.query(query, dsn)
+
+        if all_cargas and result and columns:
+            excluded = set(str(c) for c in all_cargas if str(c).isdigit())
+            nro_col = columns.index("NRO_CARGA")
+            result = [row for row in result if str(row[nro_col]) not in excluded]
 
         if columns:
             # cria lista dos itens da carga (p/ validação de necessidade no jinja)
