@@ -2096,6 +2096,43 @@ def api_get_first_mov_item():
     return jsonify({"first_mov": first_mov})
 
 
+@app.route("/api/get_expiry_date", methods=["GET"])
+def api_get_expiry_date():
+    from calendar import monthrange
+    from datetime import datetime as dt
+
+    cod_item = request.args.get("cod_item")
+    cod_lote = request.args.get("cod_lote")
+
+    if not cod_item or not cod_lote or "CS" not in cod_lote:
+        return jsonify({"date_exp": "N/A"})
+
+    query = f"""
+        SELECT
+            (SELECT REPLACE(time_mov, '/', '-') FROM tbl_transactions
+             WHERE cod_item = '{cod_item}' AND lote_item = '{cod_lote}'
+             ORDER BY time_mov ASC LIMIT 1) AS first_mov_raw,
+            validade
+        FROM itens
+        WHERE cod_item = '{cod_item}'
+        LIMIT 1
+    """
+
+    try:
+        result, _ = dbUtils.query(query, "LOCAL")
+        date_fab = result[0][0].replace("-", "/")
+        months = int(result[0][1])
+        date_fab_dt = dt.strptime(date_fab, "%Y/%m/%d %H:%M:%S")
+        total_months = date_fab_dt.month + months
+        year = date_fab_dt.year + (total_months - 1) // 12
+        month = (total_months - 1) % 12 + 1
+        day = min(date_fab_dt.day, monthrange(year, month)[1])
+        exp_date = date_fab_dt.replace(year=year, month=month, day=day)
+        return jsonify({"date_exp": exp_date.strftime("%d/%m/%Y")})
+    except Exception:
+        return jsonify({"date_exp": "N/A"})
+
+
 @app.route("/api/custom_date_fab", methods=["GET"])
 def api_get_custom_date_fab():
     cod_item = request.args.get("cod_item")

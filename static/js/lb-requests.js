@@ -148,24 +148,26 @@ async function genRequestReport() {
             tableData.push(rowData);
         });
 
-        const columns = ["Endereço", "Item (Código)", "Item (Descrição)", "Lote (Código)", "Qtde (Sep.)"];
+        const columns = ["Endereço", "Item (Código)", "Item (Descrição)", "Lote (Código)", "Validade", "Qtde (Sep.)"];
 
         const data = tableData.map(row => ({
             rua_letra_end : row[0],
             cod_item      : row[1],
             desc_item     : row[2],
             lote_item     : row[3],
-            qtde_solic    : row[4]
+            validade      : row[4],
+            qtde_solic    : row[5]
         }));
 
-        const filteredData = data.filter(item => !item.lote_item.startsWith('Subtotal:'));
+        const filteredData = data.filter(item => !item.validade?.startsWith('Subtotal:'));
         const totalQtdeSolic = filteredData.reduce((total, item) => total + parseFloat(item.qtde_solic), 0);
 
         data.push({
             rua_letra_end : '',
             cod_item      : '',
             desc_item     : '',
-            lote_item     : 'Total:',
+            lote_item     : '',
+            validade      : 'Total:',
             qtde_solic    : totalQtdeSolic
         });
 
@@ -175,7 +177,7 @@ async function genRequestReport() {
 
         const startX       = 10;
         const marginBottom = 20;
-        const colWidths    = [25, 30, 80, 30, 25];
+        const colWidths    = [25, 30, 63, 30, 22, 20];
         const pageHeight   = report.internal.pageSize.height;
 
         const drawHeader = () => {
@@ -255,11 +257,12 @@ async function genRequestReport() {
                     item.cod_item,
                     item.desc_item,
                     item.lote_item,
+                    item.validade,
                     item.qtde_solic.toString()
                 ];
 
-                const isSubtotal = item.lote_item && item.lote_item.startsWith('Subtotal:');
-                const isTotal    = item.lote_item === 'Total:';
+                const isSubtotal = item.validade?.startsWith('Subtotal:');
+                const isTotal    = item.validade === 'Total:';
 
                 const descLines = report.splitTextToSize(item.desc_item, colWidths[2] - 2 * cellPadding);
                 const cellLines = Math.max(descLines.length, 1);
@@ -785,6 +788,21 @@ const fetchItemDescription = async (cod_item) => {
         console.error('Erro:', error);
         // Retorna uma string vazia
         return '';
+    }
+};
+
+
+const fetchValidade = async (cod_item, cod_lote) => {
+    try {
+        const response = await fetch(`/api/get_expiry_date?cod_item=${cod_item}&cod_lote=${cod_lote}`);
+        if (!response.ok) {
+            throw new Error('Erro ao obter validade');
+        }
+        const data = await response.json();
+        return data.date_exp;
+    } catch (error) {
+        console.error('Erro:', error);
+        return 'N/A';
     }
 };
 

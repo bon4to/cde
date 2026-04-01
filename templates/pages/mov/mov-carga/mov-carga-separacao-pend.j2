@@ -69,6 +69,15 @@
             const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
             const statusElements = document.getElementsByClassName('separation_status');
             itemsTable.innerHTML = '';
+            const tableEl = itemsTable.closest('table');
+            tableEl.style.display = 'none';
+            const skeletonRow = (n) => `<tr>${Array.from({length: n}, () =>
+                `<td><span class="skeleton" style="width:80%;height:12px;"></span></td>`
+            ).join('')}</tr>`;
+            const tableLoader = document.createElement('table');
+            tableLoader.style.cssText = 'width:100%;border-collapse:collapse;';
+            tableLoader.innerHTML = `<tbody>${Array.from({length: 5}, () => skeletonRow(6)).join('')}</tbody>`;
+            tableEl.parentNode.insertBefore(tableLoader, tableEl);
 
             try {
                 const sepCarga = await getSeparacao();
@@ -103,12 +112,13 @@
                     return acc;
                 }, {});
 
+
                 // Iterar sobre os grupos de itens
+                const allPendingCells = [];
                 for (const [cod_item, items] of Object.entries(groupedItems)) {
                     let subtotal = 0;
 
                     for (const [index, item] of items.entries()) {
-                        await visualDelay(100);
                         await getSeparadorName(item.user_id);
 
                         const row = itemsTable.insertRow();
@@ -117,37 +127,50 @@
 
                         const descCell = row.insertCell(2);
                         row.insertCell(3).textContent = item.lote_item;
-                        row.insertCell(4).textContent = item.qtde_sep;
+                        const validadeCell = row.insertCell(4);
+                        row.insertCell(5).textContent = item.qtde_sep;
 
                         subtotal += item.qtde_sep;
+                        allPendingCells.push({ item, descCell, validadeCell });
+                    }
 
+                    await Promise.allSettled(allPendingCells.map(async ({ item, descCell, validadeCell }) => {
                         try {
-                            const descricao = await fetchItemDescription(item.cod_item);
+                            const [descricao, validade] = await Promise.all([
+                                fetchItemDescription(item.cod_item),
+                                fetchValidade(item.cod_item, item.lote_item)
+                            ]);
                             descCell.style.textWrap = "pretty";
                             descCell.textContent = descricao;
+                            validadeCell.textContent = validade;
                         } catch (error) {
                             console.error('Erro ao obter descrição:', error);
                             descCell.textContent = 'Erro ao obter descrição';
+                            validadeCell.textContent = '';
                         }
-                    }
+                    }));
 
                     const qtde_solic = await fetchQtdeSolic(nroCarga, cod_item);
                     const subtotalRow = itemsTable.insertRow();
 
                     subtotalRow.insertCell(0);
                     subtotalRow.insertCell(1);
-                    const cell0 = subtotalRow.insertCell(2);
+                    subtotalRow.insertCell(2);
+                    const cell0 = subtotalRow.insertCell(3);
 
                     cell0.textContent = cod_item;
                     cell0.style.textAlign = 'right';
 
-                    const cell1 = subtotalRow.insertCell(3);
+                    const cell1 = subtotalRow.insertCell(4);
                     cell1.textContent = 'Subtotal:';
-                    subtotalRow.insertCell(4).innerHTML = `<span class="text-main-color">${subtotal}</span> / ${qtde_solic}`;
+                    subtotalRow.insertCell(5).innerHTML = `<span class="text-main-color">${subtotal}</span> / ${qtde_solic}`;
         
                     subtotalRow.classList.add('sub-total');
                 }
         
+                tableLoader.remove();
+                tableEl.style.display = '';
+
                 // Criar linhas de subtotal para itens zerados que não estão em sepCarga
                 for (const item of itens_carga) {
                     if (!groupedItems[item]) {
@@ -155,16 +178,17 @@
 
                         subtotalRow.insertCell(0);
                         subtotalRow.insertCell(1);
-                        const cell0 = subtotalRow.insertCell(2);
+                        subtotalRow.insertCell(2);
+                        const cell0 = subtotalRow.insertCell(3);
 
                         cell0.textContent = item;
                         cell0.style.textAlign = 'right';
 
-                        const cell1 = subtotalRow.insertCell(3);
+                        const cell1 = subtotalRow.insertCell(4);
                         cell1.textContent = 'Subtotal:';
 
                         const qtde_solic = await fetchQtdeSolic(nroCarga, item);
-                        subtotalRow.insertCell(4).innerHTML = '<span class="text-main-color">0</span> / ' + qtde_solic;
+                        subtotalRow.insertCell(5).innerHTML = '<span class="text-main-color">0</span> / ' + qtde_solic;
 
                         subtotalRow.classList.add('sub-total');
                     }

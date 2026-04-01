@@ -227,8 +227,8 @@ async function genCargaReport() {
     const pdf = new jsPDF();
     const btnReport = document.getElementById('btnGenCargaReport');
     const operatorName = document.getElementById('separador-info').innerText;
-    const tableHeaders = ["Endereço", "Código", "Descrição", "Lote", "Qtde"];
-    const columnWidths = [20, 20, 100, 24, 26];
+    const tableHeaders = ["Endereço", "Código", "Descrição", "Lote", "Validade", "Qtde"];
+    const columnWidths = [20, 20, 74, 24, 28, 24];
     const tableStartX = 10, footerMargin = 20, cellPadding = 4;
     let tableStartY = 48, defaultCellHeight = 10;
     const pageHeight = pdf.internal.pageSize.height;
@@ -251,11 +251,12 @@ async function genCargaReport() {
             itemCode: row[1],
             itemDescription: row[2],
             batchCode: row[3],
-            quantity: row[4]
+            validade: row[4],
+            quantity: row[5]
         }));
 
         // Filters out subtotal rows and calculates the total quantity
-        const filteredItems = items.filter(item => !item.batchCode.startsWith('Subtotal:'));
+        const filteredItems = items.filter(item => !item.validade?.startsWith('Subtotal:'));
         const totalQuantity = filteredItems.reduce((sum, item) => sum + parseFloat(item.quantity), 0);
 
         // Adds a total row at the end
@@ -263,7 +264,8 @@ async function genCargaReport() {
             address: '',
             itemCode: '',
             itemDescription: '',
-            batchCode: 'Total:',
+            batchCode: '',
+            validade: 'Total:',
             quantity: totalQuantity
         });
         
@@ -339,12 +341,13 @@ async function genCargaReport() {
                     item.itemCode,
                     item.itemDescription,
                     item.batchCode,
+                    item.validade,
                     item.quantity.toString()
                 ];
 
                 // Check if this is a subtotal or total row for special formatting
-                const isSubtotal = item.batchCode && item.batchCode.startsWith('Subtotal:');
-                const isTotal = item.batchCode === 'Total:';
+                const isSubtotal = item.validade?.startsWith('Subtotal:');
+                const isTotal = item.validade === 'Total:';
 
                 // Calculate cell height for multi-line descriptions
                 const descLines = pdf.splitTextToSize(item.itemDescription, columnWidths[2] - 2 * cellPadding);
@@ -1133,6 +1136,21 @@ const fetchItemDescription = async (cod_item) => {
         console.error('Erro:', error);
         // Retorna uma string vazia
         return '';
+    }
+};
+
+
+const fetchValidade = async (cod_item, cod_lote) => {
+    try {
+        const response = await fetch(`/api/get_expiry_date?cod_item=${cod_item}&cod_lote=${cod_lote}`);
+        if (!response.ok) {
+            throw new Error('Erro ao obter validade');
+        }
+        const data = await response.json();
+        return data.date_exp;
+    } catch (error) {
+        console.error('Erro:', error);
+        return 'N/A';
     }
 };
 

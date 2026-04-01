@@ -29,6 +29,20 @@
     transform: rotate(270deg);
 }
 
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-secondary, #696969) 25%, var(--bg-tertiary, #7c7c7c) 50%, var(--bg-secondary, rgb(124, 124, 124)) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s infinite;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+
 @keyframes matrix {
     0% {
         background-position: 0 100%, 50% 100%, 100% 100%
