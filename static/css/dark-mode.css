@@ -179,27 +179,31 @@ html.dark label {
 }
 
 html.dark .btn-fancy,
-html.dark .btn-fancy-sober  {
-    background-color: #1a1a1a;
+html.dark .btn-fancy-sober {
+    background-color: #2a2a2a;
 }
 
-html.dark .btn-fancy:hover {
+html.dark .btn-fancy-sober {
+    color: #eee;
+}
+
+html.dark .btn-fancy.featured {
     background-color: var(--main-color);
 }
 
-html.dark .btn-fancy.safe:hover {
+html.dark .btn-fancy.safe {
     color: #ffffff;
-    background-color: rgb(118, 209, 44);
+    background-color: #4f9f35;
 }
 
-html.dark .btn-fancy.critical:hover {
+html.dark .btn-fancy.critical {
     color: #ffffff;
-    background-color: rgb(212, 58, 58);
+    background-color: #dc3545;
 }
 
-html.dark .btn-fancy.featured:hover {
-    color: #ffffff;
-    background-color: rgb(32, 96, 214);
+html.dark .btn-fancy:hover,
+html.dark .btn-fancy-sober:hover {
+    filter: brightness(1.12);
 }
 
 html.dark button.checked {

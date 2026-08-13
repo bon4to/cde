@@ -30,8 +30,8 @@ class config:
         app.config["APP_UNIT"] = ""  # sets a default value
         app.config["CDE_SESSION_LIFETIME"] = timedelta(minutes=90)
         app.config["APP_VERSION"] = [
-            "1.13.1",
-            "Fev/2026",
+            "1.14.0",
+            "Ago/2026",
             False,
         ]  # 'versão', 'release-date', 'debug-mode'
 

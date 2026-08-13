@@ -1,11 +1,13 @@
 /* Tooltip styles */
-div.tooltip {
+div.tooltip,
+body > div[style*="pointer-events: none"][style*="position: absolute"] {
     position: absolute;
+    z-index: 9999 !important;
     background: black;
     color: white;
     padding: 5px;
     border-radius: 4px;
-    display: none;
+    display: block;
     font-size: 12px;
     white-space: nowrap;
 }

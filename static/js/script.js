@@ -108,6 +108,7 @@ document.addEventListener("mouseover", (e) => {
 
     // cria o tooltip
     let tooltip = document.createElement("div");
+    tooltip.className = "tooltip";
     tooltip.textContent = title;
     with (tooltip.style) {
         position =      "absolute";
@@ -118,7 +119,7 @@ document.addEventListener("mouseover", (e) => {
         fontSize =      "12px";
         whiteSpace =    "nowrap";
         pointerEvents = "none";
-        zIndex =        "1000";
+        zIndex =        "9999";
     }    
     document.body.appendChild(tooltip);
 

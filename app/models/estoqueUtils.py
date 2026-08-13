@@ -1,9 +1,12 @@
+import os
+import re
 import sqlite3
 
 from app.utils import cdeapp
 from app.models import dbUtils, logTexts, misc
 
 db_path = cdeapp.config.get_db_path()
+PRESET_DIR = os.path.join("report", "estoque_preset")
 
 sql_balance_template = dbUtils.QueryManager.get(query_id=1)
 """
@@ -205,14 +208,139 @@ def get_saldo_preset(index, timestamp=False):
 @staticmethod
 # BUSCA ITENS DE PRESETS
 def get_preset_itens(index):
+    preset = get_preset(index)
+    if not preset:
+        return []
+    return preset["items"]
+
+
+def normalize_preset_items(raw_items):
+    """Return a deduplicated item-code list from comma, space, or newline input."""
+    if isinstance(raw_items, str):
+        candidates = re.split(r"[\s,;]+", raw_items)
+    else:
+        candidates = raw_items or []
+
+    items = []
+    seen = set()
+    for item in candidates:
+        item = str(item).strip()
+        if item and item not in seen:
+            items.append(item)
+            seen.add(item)
+    return items
+
+
+def _ensure_preset_dir():
+    os.makedirs(PRESET_DIR, exist_ok=True)
+
+
+def _normalize_preset_id(index):
     try:
-        with open(
-            f"report/estoque_preset/filtro_{index}.txt", "r", encoding="utf-8"
-        ) as file:
-            itens = file.read().strip().split(", ")
-    except:
-        itens = []
-    return itens
+        preset_id = int(index)
+    except (TypeError, ValueError):
+        raise ValueError("Preset inválido.")
+
+    if preset_id <= 0:
+        raise ValueError("Preset inválido.")
+    return preset_id
+
+
+def _preset_path(index):
+    preset_id = _normalize_preset_id(index)
+    return os.path.join(PRESET_DIR, f"filtro_{preset_id}.txt")
+
+
+def get_preset(index):
+    try:
+        preset_id = _normalize_preset_id(index)
+    except ValueError:
+        return None
+
+    path = _preset_path(preset_id)
+    if not os.path.exists(path):
+        return None
+
+    with open(path, "r", encoding="utf-8") as file:
+        items = normalize_preset_items(file.read())
+
+    return {
+        "id": str(preset_id),
+        "id_int": preset_id,
+        "name": f"Preset {preset_id:02d}",
+        "items": items,
+        "items_text": ", ".join(items),
+        "item_count": len(items),
+    }
+
+
+def list_presets():
+    _ensure_preset_dir()
+    presets = []
+    for filename in os.listdir(PRESET_DIR):
+        match = re.fullmatch(r"filtro_(\d+)\.txt", filename)
+        if match:
+            preset = get_preset(match.group(1))
+            if preset:
+                presets.append(preset)
+    return sorted(presets, key=lambda preset: preset["id_int"])
+
+
+def save_preset(index, raw_items):
+    preset_id = _normalize_preset_id(index)
+    items = normalize_preset_items(raw_items)
+
+    if not items:
+        raise ValueError("Informe pelo menos um item para o preset.")
+
+    _ensure_preset_dir()
+    with open(_preset_path(preset_id), "w", encoding="utf-8") as file:
+        file.write(", ".join(items))
+    return get_preset(preset_id)
+
+
+def create_preset(raw_items):
+    presets = list_presets()
+    next_id = max((preset["id_int"] for preset in presets), default=0) + 1
+    save_preset(next_id, raw_items)
+    return str(next_id)
+
+
+def delete_preset(index):
+    path = _preset_path(index)
+    if os.path.exists(path):
+        os.remove(path)
+        return True
+    return False
+
+
+def get_preset_item_details(raw_items):
+    items = normalize_preset_items(raw_items)
+    if not items:
+        return []
+
+    placeholders = ",".join(["?"] * len(items))
+    query = f"""
+        SELECT cod_item, desc_item
+        FROM itens
+        WHERE flag_ativo = 1
+        AND cod_item IN ({placeholders});
+    """
+
+    with sqlite3.connect(db_path) as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, items)
+        rows = cursor.fetchall()
+
+    descriptions = {str(row[0]): row[1] for row in rows}
+    return [
+        {
+            "cod_item": item,
+            "desc_item": descriptions.get(item, "ITEM NÃO CADASTRADO OU INATIVO"),
+            "found": item in descriptions,
+        }
+        for item in items
+    ]
 
 
 @staticmethod

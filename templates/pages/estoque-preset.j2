@@ -1,4 +1,6 @@
 {% extends "pages/estoque.j2" %}
+{% set presets = preset_list|default([]) %}
+{% set can_manage_presets = request.endpoint == 'estoque_preset' %}
 
     {% block svg %}
         <a class="aux-button {% if request.endpoint == 'estoque' %}active{% endif %}">
@@ -13,31 +15,468 @@
     {% endblock svg %}
 
     {% block table %}
-        {% if search_term %}
-            <div class="split-h">
-                <div>
-                    <form action="/estoque/presets" method="post">
-                        <div class="flex-h" style="align-items: center;">
-                            <select class="address" id="preset_id" name="preset_id" value="{{ search_term }}">
-                                <option value="{{ search_term }}">Preset 0{{ search_term }} (Atual)</option>
-                                <hr>
-                                <!-- TODO for preset in preset_list  -->
-                                <option value="1">Preset 01</option>
-                                <option value="2">Preset 02</option>
-                                <option value="3">Preset 03</option>
-                                <option value="4">Preset 04</option>
-                            </select>
-                            <button class="button-mini btn-fancy" type="submit">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/list-restart.svg') }}" title="CARREGAR ESTOQUE DOS ITENS">
-                            </button>
+        <style>
+            .preset-manager {
+                margin-bottom: 14px;
+            }
+
+            .preset-panel {
+                border: 1px solid rgba(var(--logi-color-rgb), .35);
+                border-radius: 8px;
+                padding: 14px 16px;
+                background: rgba(var(--alt-color-4), .08);
+            }
+
+            .preset-panel-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+            }
+
+            .preset-panel h2 {
+                font-size: 18px;
+                line-height: 1.15;
+                margin: 0;
+            }
+
+            .preset-current {
+                color: var(--main-color);
+                font-size: 16px;
+                font-weight: 700;
+                line-height: 1.2;
+                text-align: right;
+                white-space: nowrap;
+            }
+
+            .preset-meta,
+            .preset-empty,
+            .preset-modal-count {
+                color: var(--white-or-dark);
+                font-size: 12px;
+                line-height: 1.4;
+                opacity: .74;
+            }
+
+            .preset-status {
+                font-weight: bold;
+                margin: 0 0 10px;
+            }
+
+            .preset-status.error,
+            .preset-modal-message.error {
+                color: #b00020;
+            }
+
+            .preset-status.success,
+            .preset-modal-message.success {
+                color: var(--main-color);
+            }
+
+            .preset-toolbar {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                width: 100%;
+            }
+
+            .preset-toolbar select {
+                min-width: 0;
+            }
+
+            .preset-wide-button {
+                flex: 0 0 220px;
+                width: auto;
+                min-height: 42px;
+                margin: 0 0 0 auto;
+                max-width: none;
+            }
+
+            .preset-controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+
+            .preset-left-controls {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex: 0 1 auto;
+                min-width: 0;
+            }
+
+            .preset-select-form {
+                flex: 0 1 440px;
+                margin: 0;
+                min-width: 260px;
+                max-width: 440px;
+            }
+
+            .preset-actions {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            .preset-actions .button-mini {
+                width: 42px !important;
+                height: 42px !important;
+                min-width: 42px;
+                min-height: 42px;
+                margin: 0;
+            }
+
+            .preset-actions form {
+                flex: 0 0 auto;
+                margin: 0;
+                max-width: none;
+            }
+
+            .preset-modal-items {
+                display: grid;
+                gap: 6px;
+                max-height: 48vh;
+                overflow-y: auto;
+                padding-right: 4px;
+            }
+
+            .preset-item-row {
+                display: grid;
+                grid-template-columns: minmax(76px, 96px) minmax(0, 1fr) 42px;
+                gap: 8px;
+                align-items: center;
+                min-height: 50px;
+                padding: 6px 8px 6px 12px;
+                border: 1px solid rgba(0, 0, 0, .08);
+                border-radius: 8px;
+                background: var(--dark-or-white);
+            }
+
+            .preset-item-row.missing {
+                border-color: rgba(176, 0, 32, .35);
+            }
+
+            .preset-item-code {
+                color: var(--main-color);
+                font-size: 14px;
+                font-weight: bold;
+                font-family: monospace;
+                letter-spacing: 0;
+                overflow-wrap: anywhere;
+            }
+
+            .preset-item-name {
+                color: var(--white-or-dark);
+                font-size: 13px;
+                line-height: 1.25;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .preset-remove-button {
+                width: 42px !important;
+                height: 42px !important;
+                min-width: 42px;
+                min-height: 42px;
+                max-width: 42px;
+                max-height: 42px;
+                margin: 0;
+                padding: 0;
+            }
+
+            .preset-remove-icon {
+                font-size: 32px;
+                font-weight: 300;
+                line-height: 1;
+            }
+
+            .preset-crud-modal .modal {
+                width: min(92vw, 820px);
+                max-width: 820px;
+                border-radius: 8px;
+            }
+
+            .preset-crud-modal .modal-header {
+                padding: 18px 24px;
+            }
+
+            .preset-crud-modal .modal-body {
+                padding: 18px 24px 16px;
+            }
+
+            .preset-crud-modal .modal-footer {
+                padding: 14px 24px;
+            }
+
+            #presetCrudForm {
+                width: 100%;
+                align-items: stretch;
+            }
+
+            #presetCrudForm .modal-field,
+            #presetCrudForm .preset-modal-head,
+            #presetCrudForm .preset-modal-items,
+            #presetCrudForm .preset-empty {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .preset-add-field {
+                margin-bottom: 8px;
+            }
+
+            .preset-add-field label {
+                margin-bottom: 8px;
+                font-size: 12px;
+                letter-spacing: 0;
+                text-transform: uppercase;
+            }
+
+            .preset-add-controls {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 8px;
+                align-items: center;
+                width: 100%;
+            }
+
+            .preset-add-controls input.address-two {
+                flex: 1 1 calc(100% - 54px);
+                min-width: 0;
+                max-width: none;
+                height: 42px;
+                margin: 0;
+                width: calc(100% - 54px) !important;
+                font-size: 15px;
+                padding: 0 12px;
+            }
+
+            .preset-add-controls .button-mini {
+                flex: 0 0 46px !important;
+                width: 46px !important;
+                height: 46px !important;
+                min-width: 46px;
+                min-height: 46px;
+                max-width: 46px;
+                max-height: 46px;
+                margin: 0;
+                padding: 7px;
+            }
+
+            .preset-add-controls .button-mini img {
+                width: 30px;
+                height: 30px;
+            }
+
+            .preset-modal-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                min-height: 28px;
+                margin: 8px 0 10px;
+                padding-top: 8px;
+                border-top: 1px solid rgba(0, 0, 0, .08);
+            }
+
+            .preset-modal-message {
+                max-width: 65%;
+                min-height: 0;
+                margin: 0;
+                font-size: 12px;
+                font-weight: bold;
+                text-align: right;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .preset-empty {
+                margin: 0;
+                padding: 14px;
+                border: 1px dashed rgba(0, 0, 0, .18);
+                border-radius: 8px;
+                text-align: center;
+            }
+
+            html.dark .preset-panel {
+                background: rgba(234, 90, 38, .06);
+            }
+
+            html.dark .preset-item-row {
+                border-color: rgba(255, 255, 255, .12);
+            }
+
+            html.dark .preset-modal-head {
+                border-top-color: rgba(255, 255, 255, .12);
+            }
+
+            html.dark .preset-empty {
+                border-color: rgba(255, 255, 255, .18);
+            }
+
+            @media (max-width: 980px) {
+                .preset-panel-header {
+                    align-items: flex-start;
+                }
+
+                .preset-current {
+                    text-align: left;
+                }
+            }
+
+            @media (max-width: 560px) {
+                .preset-panel-header,
+                .preset-left-controls,
+                .preset-controls,
+                .preset-toolbar {
+                    align-items: stretch;
+                    flex-direction: column;
+                }
+
+                .preset-select-form,
+                .preset-wide-button {
+                    flex-basis: auto;
+                    min-width: 0;
+                    max-width: none;
+                    margin-left: 0;
+                    width: 100%;
+                }
+
+                .preset-current {
+                    white-space: normal;
+                }
+
+                .preset-actions {
+                    justify-content: flex-start;
+                }
+
+                .preset-item-row {
+                    grid-template-columns: 1fr auto;
+                }
+
+                .preset-item-code {
+                    grid-column: 1 / 2;
+                }
+
+                .preset-item-name {
+                    grid-column: 1 / -1;
+                }
+
+                .preset-remove-button {
+                    grid-column: 2 / 3;
+                    grid-row: 1;
+                }
+            }
+        </style>
+
+        {% if preset_message %}
+            <p class="preset-status success">{{ preset_message }}</p>
+        {% endif %}
+        {% if preset_error %}
+            <p class="preset-status error">{{ preset_error }}</p>
+        {% endif %}
+
+        <div class="preset-manager">
+            <div class="preset-panel">
+                <div class="preset-panel-header">
+                    <div>
+                        <h2>Presets</h2>
+                        <div class="preset-meta">
+                            {{ presets|length }} cadastrados{% if active_preset %} | <span id="activePresetCount">{{ active_preset.item_count }} itens cadastrados</span>{% endif %}
                         </div>
-                    </form>
+                    </div>
+                    <div class="preset-current">
+                        {% if active_preset %}{{ active_preset.name }}{% else %}Nenhum preset{% endif %}
+                    </div>
                 </div>
-                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('estoque') }}';" title="Limpar">
-                    <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
-                </a>
+
+                <div class="preset-controls">
+                    <div class="preset-left-controls">
+                        <form class="preset-select-form" action="{{ url_for(request.endpoint) }}" method="get">
+	                            <div class="preset-toolbar">
+	                                <select class="address" id="preset_id" name="preset_id" onchange="this.form.submit()" title="SELECIONAR PRESET" {% if not presets %}disabled{% endif %}>
+	                                    {% for preset in presets %}
+	                                        <option value="{{ preset.id }}" {% if active_preset and preset.id == active_preset.id %}selected{% endif %}>
+	                                            {{ preset.name }} - {{ preset.item_count }} itens
+	                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                        {% if active_preset and can_manage_presets %}
+                            <div class="preset-actions">
+                                <button class="button-mini btn-fancy" type="button" onclick="openPresetModal('edit')" title="EDITAR PRESET">
+                                    <img class="svg" src="{{ url_for('static', filename='svg/pen-to-square.svg') }}" alt="">
+                                </button>
+                                <form id="presetDeleteForm" action="{{ url_for('estoque_preset') }}" method="post">
+                                    <input type="hidden" name="preset_action" value="delete">
+                                    <input type="hidden" name="preset_id" value="{{ active_preset.id }}">
+                                    <button class="button-mini btn-fancy critical" type="button" onclick="confirmPresetDelete()" title="EXCLUIR PRESET">
+                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if can_manage_presets %}
+                        <button class="btn-fancy featured preset-wide-button" type="button" onclick="openPresetModal('create')">
+                            <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-plus.svg') }}" alt="">
+                            <span>Novo preset</span>
+                        </button>
+                    {% endif %}
+                </div>
+
+                {% if not active_preset %}
+                    <p class="preset-empty">Nenhum preset cadastrado.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if can_manage_presets %}
+            <div id="presetCrudModal" class="modal-overlay preset-crud-modal" onclick="if (event.target === this) closePresetModal()">
+                <div class="modal modal-lg">
+                    <div class="modal-header">
+                        <h2 id="presetModalTitle">Preset</h2>
+                        <button class="modal-close" type="button" onclick="closePresetModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="presetCrudForm" action="{{ url_for('estoque_preset') }}" method="post">
+                            <input id="presetCrudAction" type="hidden" name="preset_action" value="create">
+                            <input id="presetCrudId" type="hidden" name="preset_id" value="">
+                            <div class="modal-field preset-add-field">
+                                <label for="presetItemCode">Item</label>
+                                <div class="preset-add-controls">
+                                    <input class="address-two" id="presetItemCode" type="text" autocomplete="off" placeholder="Código do item">
+                                    <button class="button-mini btn-fancy featured" id="presetAddButton" type="button" onclick="addPresetItem()" title="ADICIONAR ITEM">
+                                        <img class="svg-invert" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="preset-modal-head">
+                                <span class="preset-modal-count" id="presetModalCount">0 itens</span>
+                                <span id="presetModalMessage" class="preset-modal-message"></span>
+                            </div>
+                            <div id="presetModalItems" class="preset-modal-items"></div>
+                            <div id="presetHiddenItems"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer modal-footer-end">
+                        <button class="modal-btn modal-btn-secondary" id="presetCloseButton" type="button" onclick="closePresetModal()">Cancelar</button>
+                        <button class="modal-btn modal-btn-primary" id="presetSaveButton" type="button" onclick="submitPresetModal()">Criar</button>
+                    </div>
+                </div>
             </div>
         {% endif %}
+
         <div class="table-overflow">
             <table id="filterTable">
                 <thead>
@@ -59,3 +498,325 @@
             </table>
         </div>
     {% endblock table %}
+
+    {% block route_script %}
+        {{ super() }}
+        {% if can_manage_presets %}
+            {% set current_items = active_preset.item_details if active_preset is defined and active_preset else [] %}
+            {% set current_preset_id = active_preset.id if active_preset is defined and active_preset else "" %}
+            {% set current_preset_name = active_preset.name if active_preset is defined and active_preset else "" %}
+            <script>
+                const presetLookupUrl = {{ url_for('api_estoque_preset_item') | tojson }};
+                const presetSaveUrlTemplate = {{ url_for('api_estoque_preset_save', preset_id='__preset_id__') | tojson }};
+                const presetPageUrl = {{ url_for('estoque_preset') | tojson }};
+                const activePresetId = {{ current_preset_id | tojson }};
+                const activePresetName = {{ current_preset_name | tojson }};
+                let activePresetItems = {{ current_items | tojson }};
+                let presetModalItems = [];
+                let presetModalMode = 'create';
+                let presetPageShouldReload = false;
+                let presetAutoSaving = false;
+
+                function setPresetModalMessage(message, type) {
+                    const messageEl = document.getElementById('presetModalMessage');
+                    messageEl.textContent = message || '';
+                    messageEl.className = 'preset-modal-message';
+                    if (type) {
+                        messageEl.classList.add(type);
+                    }
+                }
+
+                function updatePresetHiddenInputs() {
+                    const hiddenItems = document.getElementById('presetHiddenItems');
+                    hiddenItems.innerHTML = '';
+
+                    presetModalItems.forEach(item => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'preset_items';
+                        input.value = item.cod_item;
+                        hiddenItems.appendChild(input);
+                    });
+                }
+
+                function clonePresetItems() {
+                    return presetModalItems.map(item => ({ ...item }));
+                }
+
+                function setPresetControlsDisabled(disabled) {
+                    document.getElementById('presetAddButton').disabled = disabled;
+                    document.getElementById('presetCloseButton').disabled = disabled;
+                    document.querySelectorAll('.preset-remove-button').forEach(button => {
+                        button.disabled = disabled;
+                    });
+                }
+
+                function updateActivePresetCount(itemCount) {
+                    const countText = `${itemCount} ${itemCount === 1 ? 'item cadastrado' : 'itens cadastrados'}`;
+                    const countEl = document.getElementById('activePresetCount');
+                    if (countEl) {
+                        countEl.textContent = countText;
+                    }
+
+                    const presetSelect = document.getElementById('preset_id');
+                    if (presetSelect) {
+                        const option = Array.from(presetSelect.options).find(option => option.value === activePresetId);
+                        if (option) {
+                            option.textContent = `${activePresetName} - ${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`;
+                        }
+                    }
+                }
+
+                async function autoSavePreset(previousItems) {
+                    if (presetModalMode !== 'edit') {
+                        return true;
+                    }
+
+                    if (presetModalItems.length === 0) {
+                        presetModalItems = previousItems;
+                        renderPresetModalItems();
+                        setPresetModalMessage('Preset precisa ter pelo menos um item.', 'error');
+                        return false;
+                    }
+
+                    setPresetControlsDisabled(true);
+                    presetAutoSaving = true;
+                    setPresetModalMessage('Salvando...', 'success');
+
+                    try {
+                        const response = await fetch(
+                            presetSaveUrlTemplate.replace('__preset_id__', encodeURIComponent(activePresetId)),
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    preset_items: presetModalItems.map(item => item.cod_item)
+                                })
+                            }
+                        );
+                        const data = await response.json();
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.error || 'save failed');
+                        }
+
+                        activePresetItems = data.preset.item_details.map(item => ({ ...item }));
+                        presetModalItems = activePresetItems.map(item => ({ ...item }));
+                        presetPageShouldReload = true;
+                        renderPresetModalItems();
+                        updateActivePresetCount(data.preset.item_count);
+                        setPresetModalMessage('Salvo.', 'success');
+                        return true;
+                    } catch (error) {
+                        presetModalItems = previousItems;
+                        renderPresetModalItems();
+                        setPresetModalMessage('Não foi possível salvar.', 'error');
+                        return false;
+                    } finally {
+                        presetAutoSaving = false;
+                        setPresetControlsDisabled(false);
+                    }
+                }
+
+                function renderPresetModalItems() {
+                    const list = document.getElementById('presetModalItems');
+                    const count = document.getElementById('presetModalCount');
+                    const saveButton = document.getElementById('presetSaveButton');
+
+                    list.innerHTML = '';
+                    count.textContent = `${presetModalItems.length} ${presetModalItems.length === 1 ? 'item' : 'itens'}`;
+                    saveButton.disabled = presetModalMode === 'create' && presetModalItems.length === 0;
+
+                    if (presetModalItems.length === 0) {
+                        const empty = document.createElement('p');
+                        empty.className = 'preset-empty';
+                        empty.textContent = 'Nenhum item adicionado.';
+                        list.appendChild(empty);
+                        updatePresetHiddenInputs();
+                        return;
+                    }
+
+                    presetModalItems.forEach((item, index) => {
+                        const row = document.createElement('div');
+                        row.className = `preset-item-row${item.found ? '' : ' missing'}`;
+
+                        const code = document.createElement('span');
+                        code.className = 'preset-item-code';
+                        code.textContent = item.cod_item;
+
+                        const name = document.createElement('span');
+                        name.className = 'preset-item-name';
+                        name.textContent = item.desc_item;
+                        name.title = item.desc_item;
+
+                        const remove = document.createElement('button');
+                        remove.className = 'button-mini btn-fancy critical preset-remove-button';
+                        remove.type = 'button';
+                        remove.title = 'REMOVER ITEM';
+                        remove.innerHTML = '<span class="preset-remove-icon">&times;</span>';
+                        remove.addEventListener('click', async () => {
+                            if (presetModalMode === 'edit' && presetModalItems.length === 1) {
+                                setPresetModalMessage('Preset precisa ter pelo menos um item.', 'error');
+                                return;
+                            }
+
+                            const previousItems = clonePresetItems();
+                            presetModalItems.splice(index, 1);
+                            renderPresetModalItems();
+                            if (presetModalMode === 'edit') {
+                                await autoSavePreset(previousItems);
+                            } else {
+                                setPresetModalMessage('', '');
+                            }
+                        });
+
+                        row.appendChild(code);
+                        row.appendChild(name);
+                        row.appendChild(remove);
+                        list.appendChild(row);
+                    });
+
+                    updatePresetHiddenInputs();
+                }
+
+                function openPresetModal(mode) {
+                    const title = document.getElementById('presetModalTitle');
+                    const action = document.getElementById('presetCrudAction');
+                    const presetId = document.getElementById('presetCrudId');
+                    const itemInput = document.getElementById('presetItemCode');
+                    const closeButton = document.getElementById('presetCloseButton');
+                    const saveButton = document.getElementById('presetSaveButton');
+
+                    presetModalMode = mode;
+                    presetPageShouldReload = false;
+
+                    if (mode === 'edit') {
+                        title.textContent = `Editar ${activePresetName}`;
+                        action.value = 'update';
+                        presetId.value = activePresetId;
+                        presetModalItems = activePresetItems.map(item => ({ ...item }));
+                        closeButton.textContent = 'Fechar';
+                        saveButton.style.display = 'none';
+                    } else {
+                        title.textContent = 'Criar preset';
+                        action.value = 'create';
+                        presetId.value = '';
+                        presetModalItems = [];
+                        closeButton.textContent = 'Cancelar';
+                        saveButton.style.display = '';
+                    }
+
+                    itemInput.value = '';
+                    setPresetModalMessage('', '');
+                    renderPresetModalItems();
+                    Modal.open('presetCrudModal');
+                    setTimeout(() => itemInput.focus(), 80);
+                }
+
+                async function addPresetItem() {
+                    const input = document.getElementById('presetItemCode');
+                    const addButton = document.getElementById('presetAddButton');
+                    const parts = input.value.trim().split(/[\s,;]+/).filter(Boolean);
+
+                    if (parts.length === 0) {
+                        setPresetModalMessage('Informe um código de item.', 'error');
+                        return;
+                    }
+
+                    if (parts.length > 1) {
+                        setPresetModalMessage('Adicione um item por vez.', 'error');
+                        return;
+                    }
+
+                    const codItem = parts[0];
+                    if (presetModalItems.some(item => item.cod_item === codItem)) {
+                        setPresetModalMessage(`${codItem} já está no preset.`, 'error');
+                        input.value = '';
+                        input.focus();
+                        return;
+                    }
+
+                    const previousItems = clonePresetItems();
+                    addButton.disabled = true;
+                    setPresetModalMessage('Buscando item...', 'success');
+
+                    try {
+                        const url = `${presetLookupUrl}?cod_item=${encodeURIComponent(codItem)}`;
+                        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+                        if (!response.ok) {
+                            throw new Error('lookup failed');
+                        }
+
+                        const item = await response.json();
+                        if (!item.found) {
+                            setPresetModalMessage(`${codItem} não encontrado ou inativo.`, 'error');
+                            input.focus();
+                            return;
+                        }
+
+                        presetModalItems.push(item);
+                        input.value = '';
+                        renderPresetModalItems();
+                        if (presetModalMode === 'edit') {
+                            await autoSavePreset(previousItems);
+                        } else {
+                            setPresetModalMessage('Item adicionado.', 'success');
+                        }
+                        input.focus();
+                    } catch (error) {
+                        setPresetModalMessage('Não foi possível buscar o item.', 'error');
+                    } finally {
+                        addButton.disabled = false;
+                    }
+                }
+
+                function submitPresetModal() {
+                    if (presetModalMode === 'edit') {
+                        closePresetModal();
+                        return;
+                    }
+
+                    if (presetModalItems.length === 0) {
+                        setPresetModalMessage('Adicione pelo menos um item.', 'error');
+                        return;
+                    }
+
+                    updatePresetHiddenInputs();
+                    document.getElementById('presetCrudForm').submit();
+                }
+
+                function closePresetModal() {
+                    if (presetAutoSaving) {
+                        setPresetModalMessage('Aguarde salvar...', 'success');
+                        return;
+                    }
+
+                    Modal.close('presetCrudModal');
+                    if (presetPageShouldReload) {
+                        window.location.href = `${presetPageUrl}?preset_id=${encodeURIComponent(activePresetId)}&preset_msg=updated`;
+                    }
+                }
+
+                function confirmPresetDelete() {
+                    Modal.confirm(
+                        `Excluir ${activePresetName}?`,
+                        () => document.getElementById('presetDeleteForm').submit(),
+                        {
+                            title: 'Excluir preset',
+                            confirmText: 'Excluir',
+                            danger: true
+                        }
+                    );
+                }
+
+                document.getElementById('presetItemCode').addEventListener('keydown', event => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        addPresetItem();
+                    }
+                });
+            </script>
+        {% endif %}
+    {% endblock route_script %}

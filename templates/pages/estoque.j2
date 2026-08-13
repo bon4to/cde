@@ -90,9 +90,15 @@
                     </table>
                 </div>
             {% endblock table %}
+            {% set exports_current_preset = request.endpoint in ['estoque_preset', 'cargas_preset'] and active_preset is defined and active_preset %}
+            {% if exports_current_preset %}
+                {% set csv_export_url = url_for('export_csv_type', type='saldo_preset', preset_id=active_preset.id) %}
+            {% else %}
+                {% set csv_export_url = url_for('export_csv_type', type='estoque') %}
+            {% endif %}
             <p>
                 <span>{{ inv_data|length }} registros |</span>
-                <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ url_for('export_csv_type', type='estoque') }}">Exportar (CSV)</a>
+                <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="{{ csv_export_url }}">Exportar (CSV)</a>
                 <span>|</span>
                 <a style="font-size: unset; margin-left: 5px; margin-right: 5px" href="#" onclick="exportTableToXLSX('exp_{{request.endpoint}}.xlsx')">Exportar (Excel)</a>
                 <span>|</span>

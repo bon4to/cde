@@ -177,54 +177,70 @@ select#operacao option {
 
 .btn-fancy, .btn-fancy-sober {
     width: 100%;
-    height: 60px;
+    min-height: 42px;
+    height: auto;
     border: none;
     color: #fff;
     display: flex;
+    gap: 8px;
+    padding: 10px 16px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     user-select: none;
     border-radius: 8px;
-    font-weight: bolder;
+    font-weight: 600;
     align-items: center;
-    letter-spacing: 1px;
+    letter-spacing: 0;
+    box-sizing: border-box;
     justify-content: center;
     background-color: #333132;
     font-family: 'Inter', sans-serif;
-    transition: box-shadow 0.3s ease-out, background-color 0.3s, letter-spacing 0.3s, border-radius 0.2s, opacity 0.2s;
+    transition: background-color 0.15s ease, filter 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-fancy-sober {
+    color: #333;
+    background-color: #f0f0f0;
+}
+
+.button-mini.btn-fancy,
+.button-mini.btn-fancy-sober {
+    padding: 9px;
 }
 
 .btn-fancy:focus {
     border-bottom: none !important;
 }
 
-.btn-fancy.safe:hover {
+.btn-fancy.safe {
     color: #ffffff;
-    background-color: rgb(128, 212, 58);
-    box-shadow: 0 0 6px rgb(92, 180, 19);
+    background-color: #4f9f35;
 }
 
-.btn-fancy.critical:hover {
+.btn-fancy.critical {
     color: #ffffff;
-    background-color: rgb(212, 58, 58);
-    box-shadow: 0 0 6px rgb(180, 19, 19);
+    background-color: #dc3545;
 }
 
-.btn-fancy.featured:hover {
+.btn-fancy.featured {
     color: #ffffff;
-    background-color: rgb(25, 130, 201);
-    box-shadow: 0 0 6px rgb(19, 75, 180);
+    background-color: var(--main-color);
 }
 
 .limit-lenght {
     max-width: 256px;
 }
 
-.btn-fancy:hover, .btn-fancy:focus {
-    color: #fff;
-    border-radius: 14px;
-    letter-spacing: 3px;
+.btn-fancy:hover,
+.btn-fancy:focus,
+.btn-fancy-sober:hover,
+.btn-fancy-sober:focus {
     opacity: 0.8;
+}
+
+.btn-fancy:active,
+.btn-fancy-sober:active {
+    transform: scale(0.98);
 }
 
 .btn-fancy.active {
@@ -539,10 +555,7 @@ div.log {
 
 .item:hover .btn-fancy {
     color: #fff;
-    border-radius: 12px;
-    letter-spacing: 3px;
     background-color: var(--main-color);
-    box-shadow: 0 0 6px var(--main-color);
 }
 
 .featured {

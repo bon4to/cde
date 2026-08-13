@@ -317,6 +317,5 @@ html.dark .modal-btn-secondary:hover {
 .modal-overlay .tooltiptext,
 .modal-overlay [title],
 .modal-overlay div.tooltip {
-    z-index: 2100;
+    z-index: 9999;
 }
-

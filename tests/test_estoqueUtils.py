@@ -254,6 +254,133 @@ class TestCargaStatusFiltering:
             assert result[0] == 0  # FALSE
 
 
+class TestPresetCrud:
+    """Tests for file-backed estoque presets."""
+
+    def test_normalize_preset_items_splits_and_deduplicates(self):
+        """Should accept comma, space, semicolon, and newline separated codes."""
+        from app.models import estoqueUtils
+
+        result = estoqueUtils.normalize_preset_items("001, 002\n003;001 004")
+
+        assert result == ["001", "002", "003", "004"]
+
+    def test_normalize_preset_items_accepts_repeated_form_values(self):
+        """Should accept modal form values posted as one input per item."""
+        from app.models import estoqueUtils
+
+        result = estoqueUtils.normalize_preset_items(["001", "002", "", "001"])
+
+        assert result == ["001", "002"]
+
+    def test_list_presets_reads_sorted_files(self, tmp_path):
+        """Should list filtro files ordered by numeric preset ID."""
+        (tmp_path / "filtro_2.txt").write_text("EM.1, EM.2", encoding="utf-8")
+        (tmp_path / "filtro_1.txt").write_text("001, 002", encoding="utf-8")
+        (tmp_path / "notes.txt").write_text("ignored", encoding="utf-8")
+
+        with patch("app.models.estoqueUtils.PRESET_DIR", str(tmp_path)):
+            from app.models import estoqueUtils
+
+            presets = estoqueUtils.list_presets()
+
+        assert [preset["id"] for preset in presets] == ["1", "2"]
+        assert presets[0]["items"] == ["001", "002"]
+        assert presets[1]["item_count"] == 2
+
+    def test_create_preset_uses_next_available_id(self, tmp_path):
+        """Should create the next filtro_N file."""
+        (tmp_path / "filtro_1.txt").write_text("001", encoding="utf-8")
+
+        with patch("app.models.estoqueUtils.PRESET_DIR", str(tmp_path)):
+            from app.models import estoqueUtils
+
+            preset_id = estoqueUtils.create_preset("002, 003, 002")
+            created = estoqueUtils.get_preset(preset_id)
+
+        assert preset_id == "2"
+        assert created["items"] == ["002", "003"]
+        assert (tmp_path / "filtro_2.txt").read_text(encoding="utf-8") == "002, 003"
+
+    def test_save_preset_updates_existing_file(self, tmp_path):
+        """Should rewrite the selected preset file."""
+        (tmp_path / "filtro_3.txt").write_text("001", encoding="utf-8")
+
+        with patch("app.models.estoqueUtils.PRESET_DIR", str(tmp_path)):
+            from app.models import estoqueUtils
+
+            preset = estoqueUtils.save_preset("3", "004\n005")
+
+        assert preset["items_text"] == "004, 005"
+        assert (tmp_path / "filtro_3.txt").read_text(encoding="utf-8") == "004, 005"
+
+    def test_save_preset_rejects_empty_items(self, tmp_path):
+        """Should not create empty presets."""
+        with patch("app.models.estoqueUtils.PRESET_DIR", str(tmp_path)):
+            from app.models import estoqueUtils
+
+            with pytest.raises(ValueError):
+                estoqueUtils.save_preset("1", " , \n")
+
+    def test_delete_preset_removes_file(self, tmp_path):
+        """Should remove the backing filtro file."""
+        preset_file = tmp_path / "filtro_1.txt"
+        preset_file.write_text("001", encoding="utf-8")
+
+        with patch("app.models.estoqueUtils.PRESET_DIR", str(tmp_path)):
+            from app.models import estoqueUtils
+
+            deleted = estoqueUtils.delete_preset("1")
+
+        assert deleted is True
+        assert not preset_file.exists()
+
+    def test_get_preset_item_details_preserves_order_and_flags_missing(self, tmp_path):
+        """Should render preset item codes with active item descriptions."""
+        temp_db = tmp_path / "preset_items.db"
+        with sqlite3.connect(temp_db) as conn:
+            conn.execute("""
+                CREATE TABLE itens (
+                    cod_item VARCHAR(6) PRIMARY KEY,
+                    desc_item VARCHAR(100),
+                    dun14 INTEGER(14),
+                    flag_ativo BOOLEAN DEFAULT TRUE
+                )
+            """)
+            conn.execute("""
+                INSERT INTO itens (cod_item, desc_item, flag_ativo)
+                VALUES ('001', 'Item Um', 1)
+            """)
+            conn.execute("""
+                INSERT INTO itens (cod_item, desc_item, flag_ativo)
+                VALUES ('002', 'Item Dois', 1)
+            """)
+            conn.execute("""
+                INSERT INTO itens (cod_item, desc_item, flag_ativo)
+                VALUES ('003', 'Item Inativo', 0)
+            """)
+
+        with patch("app.models.estoqueUtils.db_path", str(temp_db)):
+            from app.models import estoqueUtils
+
+            details = estoqueUtils.get_preset_item_details(["002", "001", "003", "999"])
+
+        assert details == [
+            {"cod_item": "002", "desc_item": "Item Dois", "found": True},
+            {"cod_item": "001", "desc_item": "Item Um", "found": True},
+            {
+                "cod_item": "003",
+                "desc_item": "ITEM NÃO CADASTRADO OU INATIVO",
+                "found": False,
+            },
+            {
+                "cod_item": "999",
+                "desc_item": "ITEM NÃO CADASTRADO OU INATIVO",
+                "found": False,
+            },
+        ]
+
+
 class TestInventoryCalculations:
     """Tests for inventory balance calculations."""
 

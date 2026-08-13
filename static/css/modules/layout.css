@@ -52,7 +52,7 @@
     flex-wrap: wrap;
     min-width: 500px;
     min-height: 75vh;
-    padding: 20px 100px;
+    padding: 20px;
     height: max-content;
     justify-content: flex-start;
 }

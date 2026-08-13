@@ -1959,6 +1959,11 @@ def inject_unit() -> dict:
     return dict(app_unit=app.config["APP_UNIT"])
 
 
+@app.context_processor
+def inject_current_year() -> dict:
+    return dict(current_year=datetime.now().year)
+
+
 @app.errorhandler(403)
 def page_not_found(e) -> tuple[str, 403]:
     return render_template("403.j2", error_code=403, error=e), 403
@@ -4685,29 +4690,130 @@ def inv_report() -> str:
     return render_template("pages/inv-report.j2", inv_data=result, search_term=date)
 
 
+def _get_preset_form_items():
+    items = request.form.getlist("preset_items")
+    return items or request.form.get("preset_items", "")
+
+
+def _attach_preset_item_details(preset):
+    if not preset:
+        return None
+
+    preset = dict(preset)
+    preset["item_details"] = estoqueUtils.get_preset_item_details(preset["items"])
+    return preset
+
+
+@app.route("/api/estoque/preset-item/", methods=["GET"])
+@cde.verify_auth("MOV004", "logi")
+def api_estoque_preset_item() -> Response:
+    cod_item = request.args.get("cod_item", "").strip()
+    details = estoqueUtils.get_preset_item_details([cod_item]) if cod_item else []
+
+    if details:
+        return jsonify(details[0])
+    return jsonify(
+        {
+            "cod_item": cod_item,
+            "desc_item": "ITEM NÃO CADASTRADO OU INATIVO",
+            "found": False,
+        }
+    )
+
+
+@app.route("/api/estoque/preset/<string:preset_id>/", methods=["POST"])
+@cde.verify_auth("MOV004", "logi")
+def api_estoque_preset_save(preset_id) -> Response:
+    payload = request.get_json(silent=True) or {}
+    preset_items = payload.get("preset_items", [])
+
+    try:
+        preset = estoqueUtils.save_preset(preset_id, preset_items)
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+    preset = _attach_preset_item_details(preset)
+    return jsonify({"success": True, "preset": preset})
+
+
 @app.route("/estoque/presets/", methods=["GET", "POST"])
 @cde.verify_auth("MOV004", "logi")
 def estoque_preset() -> str:
-    preset_id = request.form.get("preset_id", 1)
+    preset_id = request.values.get("preset_id")
+    preset_error = None
+
     if request.method == "POST":
-        saldo_preset = estoqueUtils.get_saldo_preset(preset_id, False)
-    else:
-        saldo_preset = estoqueUtils.get_saldo_preset(preset_id)
+        preset_action = request.form.get("preset_action", "load")
+        try:
+            if preset_action == "create":
+                preset_id = estoqueUtils.create_preset(_get_preset_form_items())
+                return redirect(
+                    url_for("estoque_preset", preset_id=preset_id, preset_msg="created")
+                )
+            elif preset_action == "update":
+                preset_id = request.form.get("preset_id")
+                estoqueUtils.save_preset(preset_id, _get_preset_form_items())
+                return redirect(
+                    url_for("estoque_preset", preset_id=preset_id, preset_msg="updated")
+                )
+            elif preset_action == "delete":
+                preset_id = request.form.get("preset_id")
+                estoqueUtils.delete_preset(preset_id)
+                remaining_presets = estoqueUtils.list_presets()
+                next_id = remaining_presets[0]["id"] if remaining_presets else None
+                if next_id:
+                    return redirect(
+                        url_for("estoque_preset", preset_id=next_id, preset_msg="deleted")
+                    )
+                return redirect(url_for("estoque_preset", preset_msg="deleted"))
+        except ValueError as e:
+            preset_error = str(e)
+
+    presets = estoqueUtils.list_presets()
+    if not preset_id and presets:
+        preset_id = presets[0]["id"]
+
+    active_preset = estoqueUtils.get_preset(preset_id)
+    if not active_preset and presets:
+        active_preset = presets[0]
+        preset_id = active_preset["id"]
+    active_preset = _attach_preset_item_details(active_preset)
+
+    saldo_preset = estoqueUtils.get_saldo_preset(preset_id) if active_preset else []
+    preset_messages = {
+        "created": "Preset criado.",
+        "updated": "Preset atualizado.",
+        "deleted": "Preset excluído.",
+    }
     return render_template(
-        "pages/estoque-preset.j2", inv_data=saldo_preset, search_term=preset_id
+        "pages/estoque-preset.j2",
+        inv_data=saldo_preset,
+        search_term="",
+        preset_list=presets,
+        active_preset=active_preset,
+        preset_message=preset_messages.get(request.args.get("preset_msg")),
+        preset_error=preset_error,
     )
 
 
 @app.route("/cargas-presets/", methods=["GET", "POST"])
 @cde.verify_auth("MOV006", "logi")
 def cargas_preset() -> str:
-    preset_id = request.form.get("preset_id", 1)
+    preset_id = request.values.get("preset_id", 1)
+    presets = estoqueUtils.list_presets()
+    active_preset = _attach_preset_item_details(estoqueUtils.get_preset(preset_id))
     if request.method == "POST":
         cargas_preset = estoqueUtils.get_saldo_preset(preset_id, False)
     else:
         cargas_preset = estoqueUtils.get_saldo_preset(preset_id)
     return render_template(
-        "pages/estoque-preset.j2", inv_data=cargas_preset, search_term=preset_id
+        "pages/estoque-preset.j2",
+        inv_data=cargas_preset,
+        search_term="",
+        preset_list=presets,
+        active_preset=active_preset,
+        preset_message=None,
+        preset_error=None,
     )
 
 
@@ -4736,7 +4842,12 @@ def export_csv_type(type) -> str | Response:
     elif type == "producao":
         data = Schedule.ProcessamentoUtils.get_producao()
     elif type == "saldo_preset":
-        data = estoqueUtils.get_saldo_preset(1)
+        try:
+            preset_id = int(request.args.get("preset_id", 1))
+        except (TypeError, ValueError):
+            preset_id = 1
+        filename = f"exp_saldo_preset_{preset_id:02d}"
+        data = estoqueUtils.get_saldo_preset(preset_id)
     else:
         alert_type = "DOWNLOAD IMPEDIDO \n"
         alert_msge = "A tabela não tem informações suficientes para exportação. \n"
