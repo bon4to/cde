@@ -1,19 +1,25 @@
+{% from 'components/icon.j2' import icon as ui_icon %}
+
 {% macro title_container(title, id_page, breadcrumbs, aux_buttons=None) %}
 <div class="titles-container flex-h title-centerer">
-    <h1>
-        <a class="id-page filled" style="margin: 0 16px 0 0;" href="{{ url_for('home') }}">CDE</a>
-        {% for crumb in breadcrumbs %}
-            {% if crumb.url %}
-                <a href="{{ url_for(crumb.url) }}" {% if crumb.title %}title="{{ crumb.title }}"{% endif %}>{{ crumb.text }}</a>
-            {% else %}
-                <span>{{ crumb.text }}</span>
-            {% endif %}
-            {% if not loop.last %}
-                <span class="dash">/</span>
-            {% endif %}
-        {% endfor %}
+    <h1 class="breadcrumb-line">
+        <a class="id-page filled breadcrumb-home" href="{{ url_for('home') }}" aria-label="Página inicial">CDE</a>
+        <span class="breadcrumb-trail" role="navigation" aria-label="Navegação estrutural">
+            {% for crumb in breadcrumbs %}
+                <span class="breadcrumb-item{% if loop.last %} current{% endif %}"{% if loop.last %} aria-current="page"{% endif %}>
+                    {% if crumb.url %}
+                        <a href="{{ url_for(crumb.url) }}" {% if crumb.title %}title="{{ crumb.title }}"{% endif %}>{{ crumb.text }}</a>
+                    {% else %}
+                        <span>{{ crumb.text }}</span>
+                    {% endif %}
+                </span>
+                {% if not loop.last %}
+                    <span class="dash" aria-hidden="true">›</span>
+                {% endif %}
+            {% endfor %}
+        </span>
         {% if id_page %}
-            <span class="id-page">{{ id_page }}</span>
+            <span class="id-page breadcrumb-page-id" title="Identificador da página">{{ id_page }}</span>
         {% endif %}
     </h1>
     {% if aux_buttons %}
@@ -29,21 +35,21 @@
                             href="{{ url_for(button.url) }}"
                         {% endif %}
                     >
-                        <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="">
+                        {{ ui_icon(button.icon, button.title, 'ui-icon-md') }}
                     </a>
                 {% elif button.type == 'action' %}
-                    <a class="aux-button">
-                        <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}" alt="" onclick="{{ button.onclick }}">
+                    <a class="aux-button" onclick="{{ button.onclick }}" role="button" tabindex="0">
+                        {{ ui_icon(button.icon, button.title, 'ui-icon-md') }}
                     </a>
                 {% elif button.type == 'disabled' %}
                     <div class="aux-button disabled">
-                        <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }} (INATIVO)" alt="">
+                        {{ ui_icon(button.icon, button.title ~ ' (INATIVO)', 'ui-icon-md') }}
                     </div>
                 {% elif button.type == 'form' %}
                     <a class="aux-button">
                         <form action="{{ url_for(button.url) }}" method="{{ button.method or 'post' }}">
                             <button type="submit" style="all: unset" onclick="showLoading()">
-                                <img class="svg-gray" src="{{ url_for('static', filename=button.icon) }}" title="{{ button.title }}">
+                                {{ ui_icon(button.icon, button.title, 'ui-icon-md') }}
                             </button>
                         </form>
                     </a>

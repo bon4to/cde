@@ -14,7 +14,7 @@
         </title>
 
         <link rel="icon" href="{{ url_for('static', filename='cde-logo-only.svg') }}" type="image/x-icon">
-        {% include 'components/model-header.j2' %}
+        {% include 'components/head.j2' %}
 
         {% if session['module'] == 'logi' %}
             <style>
@@ -40,14 +40,16 @@
         {% endblock custom_style %}
 
     </head>
-    <body>
+    <body class="app-shell module-{{ session.get('module', 'cde') }} {% block body_class %}{% endblock body_class %}">
+        <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+        {% include 'components/app-runtime.j2' %}
         {% include 'components/dropdown/dropdown-cde.j2' %}
 
-        <div class="view-width">
+        <main class="view-width" id="main-content">
             <div class="container">
                 {% block content %}{% endblock content %}
             </div>
-        </div>
+        </main>
         
         <!-- footer -->
         {% include 'shared/footer.j2' %}
@@ -56,4 +58,4 @@
             <!-- additional scripts here if needed -->
         {% endblock route_script %}
     </body>
-</html> 
+</html>

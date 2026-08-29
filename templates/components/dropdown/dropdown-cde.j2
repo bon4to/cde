@@ -1,53 +1,68 @@
-            <div class="navigation-bar">
-                <div style="height: 48px;width: auto;display: flex;justify-content: center;align-items: center; padding-right: 10px; cursor: pointer;" onclick="window.location.href='{{ url_for('home') }}';">
-                    <img style="height: 20px; width: auto;" class="svg" src="{{ url_for('static', filename='img/cde-logo-w.png') }}" alt="">
+            {% from 'components/icon.j2' import icon as ui_icon %}
+            {% macro nav_link(endpoint, label, page_id=None) %}
+                {% if page_id and paid_feature_locked(page_id) %}
+                    <span class="dropdown-disabled" aria-disabled="true">
+                        <span>{{ label }}</span>
+                    </span>
+                {% else %}
+                    <a href="{{ url_for(endpoint) }}">{{ label }}</a>
+                {% endif %}
+            {% endmacro %}
+            {% macro submenu_title(endpoint, label, page_id=None) %}
+                {% if page_id and paid_feature_locked(page_id) %}
+                    <span class="submenu-title dropdown-disabled" aria-disabled="true">
+                        <div class="split-h" style="align-items: center;">
+                            <span>{{ label }}</span>
+                        </div>
+                    </span>
+                {% else %}
+                    <a class="submenu-title" href="{{ url_for(endpoint) }}">
+                        <div class="split-h" style="align-items: center;">
+                            <span>{{ label }}</span>
+                            {{ ui_icon('svg/chevron-right.svg', class_name='chevron chevron-submenu ui-icon-sm') }}
+                        </div>
+                    </a>
+                {% endif %}
+            {% endmacro %}
+            <nav class="navigation-bar" aria-label="Navegação principal">
+                <div class="navigation-brand" onclick="window.location.href='{{ url_for('home') }}';">
+                    <img class="svg" src="{{ url_for('static', filename='img/cde-logo-w.png') }}" alt="CDE">
                 </div>
-                <div style="margin: 4px;display: flex;">
-                    <hr class="vert" style="width: 0;">
-                </div>
-                
                 {% if 'user_grant' in session %}
-                    <div class="split-h">
-                        <div style="display: flex;flex-wrap: nowrap;">
+                    <button class="navigation-toggle" type="button" aria-expanded="false" aria-controls="navigation-menu">
+                        <span class="navigation-toggle-label">Menu</span>
+                        <span class="navigation-toggle-icon" aria-hidden="true"></span>
+                    </button>
+                    <div class="navigation-divider">
+                        <hr class="vert" style="width: 0;">
+                    </div>
+                    <div class="split-h navigation-menu" id="navigation-menu">
+                        <div class="navigation-sections">
                             <div class="dropdown">
                                 <button class="dropbtn" onclick="window.location.href='{{ url_for('home_logi') }}';">
                                     <span class="hyperlink">LOGÍSTICA</span>
-                                    <img style="height: 15px; width: 15px; padding: 0" class="chevron svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                    {{ ui_icon('svg/chevron-down.svg', class_name='chevron ui-icon-sm') }}
                                 </button>
                                 <div class="dropdown-content">
                                     <div class="submenu">
-                                        <a class="submenu-title" href="{{ url_for('mov') }}">
-                                            <div class="split-h" style="align-items: center;">
-                                                <span>MOV002 | MOVIMENTAR</span>
-                                                <img style="height: 12px; width: 11px; padding: 0;" class="chevron svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
-                                            </div>
-                                        </a>
+                                        {{ submenu_title('mov', 'MOV002 | MOVIMENTAR') }}
                                         <div class="submenu-content">
                                             <a href="{{ url_for('mov') }}">MOVIMENTAR</a>
                                             <a href="{{ url_for('historico') }}">HISTÓRICO</a>
                                         </div>
                                     </div>
                                     <div class="submenu">
-                                        <a class="submenu-title" href="{{ url_for('estoque') }}">
-                                            <div class="split-h" style="align-items: center;">
-                                                <span>MOV004 | ESTOQUE</span>
-                                                <img style="height: 12px; width: 11px; padding: 0;" class="chevron svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
-                                            </div>
-                                        </a>
+                                        {{ submenu_title('estoque', 'MOV004 | ESTOQUE') }}
                                         <div class="submenu-content">
                                             <a href="{{ url_for('estoque') }}">AGRUPADO</a>
                                             <a href="{{ url_for('estoque_enderecado') }}">ENDEREÇADO</a>
                                             <a href="{{ url_for('inv_report') }}">RELATÓRIO</a>
                                             <a href="{{ url_for('estoque_preset') }}">PRESET</a>
+                                            {{ nav_link('stock_map', 'MOV008 | MAPA (ENDEREÇOS)', 'MOV008') }}
                                         </div>
                                     </div>
                                     <div class="submenu">
-                                        <a class="submenu-title" href="{{ url_for('cargas') }}">
-                                            <div class="split-h" style="align-items: center;">
-                                                <span>MOV006 | CARGAS</span>
-                                                <img style="height: 12px; width: 11px; padding: 0;" class="chevron svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
-                                            </div>
-                                        </a>
+                                        {{ submenu_title('cargas', 'MOV006 | CARGAS') }}
                                         <div class="submenu-content">
                                             <a href="{{ url_for('cargas') }}">CARGAS</a>
                                             <a href="{{ url_for('cargas_baixas') }}">BAIXAS</a>
@@ -57,12 +72,7 @@
                                         </div>
                                     </div>
                                     <div class="submenu">
-                                        <a class="submenu-title" href="{{ url_for('mov_request') }}">
-                                            <div class="split-h" style="align-items: center;">
-                                                <span>MOV007 | REQUISIÇÕES</span>
-                                                <img style="height: 12px; width: 11px; padding: 0;" class="chevron svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
-                                            </div>
-                                        </a>
+                                        {{ submenu_title('mov_request', 'MOV007 | REQUISIÇÕES') }}
                                         <div class="submenu-content">
                                             <a href="{{ url_for('mov_request') }}">REQUISIÇÕES</a>
                                             <a href="{{ url_for('req_sep_done', id_req=0) }}">SEPARAÇÃO</a>
@@ -73,31 +83,21 @@
                             <div class="dropdown">
                                 <button class="dropbtn" onclick="window.location.href='{{ url_for('home_prod') }}';">
                                     <span class="hyperlink">PRODUÇÃO</span>
-                                    <img style="height: 15px; width: 15px; padding: 0" class="chevron svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                    {{ ui_icon('svg/chevron-down.svg', class_name='chevron ui-icon-sm') }}
                                 </button>
                                 <div class="dropdown-content">
                                     <div class="submenu">
-                                        <a class="submenu-title" href="{{ url_for('producao') }}">
-                                            <div class="split-h" style="align-items: center;">
-                                                <span>PRC010 | PROCESSAMENTO</span>
-                                                <img style="height: 12px; width: 11px; padding: 0;" class="chevron svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
-                                            </div>
-                                        </a>
+                                        {{ submenu_title('producao', 'PRC010 | PROCESSAMENTO', 'PRC010') }}
                                         <div class="submenu-content">
-                                            <a href="{{ url_for('producao') }}">PROGRAMAÇÃO</a>
-                                            <a href="{{ url_for('calendar_producao') }}">CALENDÁRIO</a>
+                                            {{ nav_link('producao', 'PROGRAMAÇÃO', 'PRC010') }}
+                                            {{ nav_link('calendar_producao', 'CALENDÁRIO', 'PRC010') }}
                                         </div>
                                     </div>
                                     <div class="submenu">
-                                        <a class="submenu-title" href="{{ url_for('envase') }}">
-                                            <div class="split-h" style="align-items: center;">
-                                                <span>ENV006 | ENVASE</span>
-                                                <img style="height: 12px; width: 11px; padding: 0;" class="chevron svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
-                                            </div>
-                                        </a>
+                                        {{ submenu_title('envase', 'ENV006 | ENVASE', 'ENV006') }}
                                         <div class="submenu-content">
-                                            <a href="{{ url_for('envase') }}">PROGRAMAÇÃO</a>
-                                            <a href="{{ url_for('calendar_envase') }}">CALENDÁRIO</a>
+                                            {{ nav_link('envase', 'PROGRAMAÇÃO', 'ENV006') }}
+                                            {{ nav_link('calendar_envase', 'CALENDÁRIO', 'ENV006') }}
                                         </div>
                                     </div>
                                     <a href="{{ url_for('produtos') }}">ITE005 | PRODUTOS</a>
@@ -106,7 +106,7 @@
                             <div class="dropdown">
                                 <button class="dropbtn">
                                     <span>OUTROS</span>
-                                    <img style="height: 15px; width: 15px; padding: 0" class="chevron svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                    {{ ui_icon('svg/chevron-down.svg', class_name='chevron ui-icon-sm') }}
                                 </button>
                                 <div class="dropdown-content">
                                     <a href="{{ url_for('etiqueta') }}">OUT014 | ETIQUETA</a>
@@ -115,29 +115,26 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-h" style="gap: 0">
-                            <div style="display: flex; justify-content: center; align-items: center; height: 48px; width: 48px;">
-                                <img id="toggle-theme" title="Alterar Tema" style="height: 16px; width: 16px; cursor: pointer;" onclick="toggleTheme()" class="svg-inv" src="{{ url_for('static', filename='svg/moon.svg') }}" alt="">
-                            </div>
+                        <div class="flex-h navigation-actions">
                             <div class="dropdown">
                                 <button class="dropbtn" style="cursor: pointer;" onclick="window.location.href='{{ url_for('cde_notifications') }}';">
-                                    <img id="svg-notification" style="height: 15px; width: 15px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/bell.svg') }}" alt="">
+                                    {{ ui_icon('svg/bell.svg', 'Notificações', 'navigation-notification-icon ui-icon-sm', 'svg-notification') }}
                                 </button>
-                                <div class="dropdown-content" id="notifications-container" style="right: 0; left: unset; background-color: var(--light-white-m); ">
+                                <div class="dropdown-content" id="notifications-container" style="right: 0; left: unset;">
                                     <!-- notifications will be automatically added here -->
                                 </div>
                             </div>
-                            <div class="dropdown">
+                            <div class="dropdown" id="system-menu">
                                 <button class="dropbtn">
                                     <span>SISTEMA</span>
-                                    <img style="height: 15px; width: 15px; padding: 0" class="chevron svg-inv" src="{{ url_for('static', filename='svg/chevron-down.svg') }}" alt="">
+                                    {{ ui_icon('svg/chevron-down.svg', class_name='chevron ui-icon-sm') }}
                                 </button>
                                 <div class="dropdown-content" style="right: 0; left:unset">
                                     <div class="submenu">
                                         <a class="submenu-title" href="{{ url_for('cde_cfg') }}">
                                             <div class="split-h" style="align-items: center;">
                                                 <span>AJUSTES</span>
-                                                <img style="height: 12px; width: 11px; padding: 0;" class="chevron svg-inv" src="{{ url_for('static', filename='svg/bottom-point.svg') }}" alt="">
+                                                {{ ui_icon('svg/chevron-right.svg', class_name='chevron chevron-submenu ui-icon-sm') }}
                                             </div>
                                         </a>
                                         <div class="submenu-content" style="left: unset; right: 100%; border-left: unset; border-right: 6px solid var(--dark-or-white);">
@@ -150,21 +147,25 @@
                                             <a href="{{ url_for('users') }}">CDE016 | USUÁRIOS</a>
                                         </div>
                                     </div>
-                                    <a href="{{ url_for('cde_profile') }}">PERFIL</a>
+                                    <button class="dropdown-menu-action" type="button" onclick="toggleTheme(); dismissDropdown(this)">
+                                        <span>MODO ESCURO</span>
+                                        <span id="toggle-theme" class="theme-switch" aria-hidden="true"></span>
+                                    </button>
                                     <a href="{{ url_for('about') }}">AJUDA</a>
-                                    <a href="{{ url_for('logout') }}">SAIR</a>
                                 </div>
                             </div>
-                            <div style="margin: 4px; display: flex;">
-                                <hr class="vert" style="width: 0;">
-                            </div>
-                            <div class="user-params-button flex-h" style="margin-left: 10px;" onclick="window.location.href='{{ url_for('cde_profile') }}';">
-                                <p style="margin: auto 8px; max-height: 14px" class="id-page white-filled">{{ app_unit }}</p>
-                                <div style="margin: auto 4px auto auto;" class="user-button">
-                                    {{ session.get('user_initials', '') }}
+                            <div class="dropdown user-menu" id="user-menu">
+                                <button class="dropbtn user-params-button" type="button" aria-label="Menu do usuário">
+                                    <span class="id-page white-filled user-unit">{{ app_unit }}</span>
+                                    <span class="user-button">{{ session.get('user_initials', '') }}</span>
+                                    {{ ui_icon('svg/chevron-down.svg', class_name='chevron ui-icon-sm') }}
+                                </button>
+                                <div class="dropdown-content user-menu-content">
+                                    <a href="{{ url_for('cde_profile') }}">PERFIL</a>
+                                    <a class="logout-link" href="{{ url_for('logout') }}">SAIR</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 {% endif %}
-            </div>
+            </nav>

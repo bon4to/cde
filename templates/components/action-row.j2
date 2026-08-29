@@ -1,0 +1,12 @@
+{% from 'components/icon.j2' import icon as ui_icon %}
+
+{% macro action_row(endpoint, title, description, icon, class_name='') -%}
+    <a class="action-row{% if class_name %} {{ class_name }}{% endif %}" href="{{ url_for(endpoint) }}">
+        <span class="action-row-icon">{{ ui_icon(icon, class_name='ui-icon-sm') }}</span>
+        <span class="action-row-content">
+            <strong>{{ title }}</strong>
+            <small>{{ description }}</small>
+        </span>
+        {{ ui_icon('svg/chevron-right.svg', class_name='action-row-arrow ui-icon-sm') }}
+    </a>
+{%- endmacro %}

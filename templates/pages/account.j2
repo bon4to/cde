@@ -1,4 +1,6 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
+{% from 'components/action-row.j2' import action_row %}
 
 {% block title %}Perfil{% endblock title %}
 
@@ -12,6 +14,8 @@
                 {'text': 'PERFIL'}
             ],
             aux_buttons=[
+                {'type': 'link', 'url': 'cde_profile', 'icon': 'svg/circle-user.svg', 'title': 'PERFIL', 'active': True},
+                {'type': 'divider'},
                 {'type': 'link', 'url': 'about', 'icon': 'svg/circle-help.svg', 'title': 'AJUDA'},
                 {'type': 'divider'},
                 {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
@@ -20,31 +24,82 @@
 
     </div>
 
-    <div id="divContent">
-        <div class="centralizado" style="width: 100%;">
-            <div class="form-login" style="padding: 20px">
-                <div class="split-h" style="grid-gap: 30px">
-                    <div class="side-banner" style="width: 450px; height: 450px; border-radius: 20px; margin-left: unset;" id="tables-container">
-                        <img class="side-banner" style="width: 450px; height: 450px; border-radius: 20px; margin-left: unset;" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
-                    </div>
-                    <div class="log">
-                        <h1 class="text-main-color title">MEUS DADOS</h1>
-                        <div>
-                            <div style="margin-bottom: 10px; margin-top: 8px;" class="centralizado">
-                                <div class="user-button">
-                                    {{ session.get('user_initials', '?') }}
-                                </div>
-                            </div>
-                            <h3>{{ session.get('user_name') }}</h3>
-                            <h4 class="c">{{ 'Administrador' if session.get('user_grant') <= 2 else 'Usuário Padrão' }}</h4>
-                        </div>
-                        <a class="hyperlink" onclick="window.location.href='/cde/profile/change-password'">EDITAR SENHA</a>
-                        <a class="btn-fancy" href="{{ url_for('logout') }}">
-                            <img class="svg-invert" src="{{ url_for('static', filename='svg/exit.svg') }}" alt="">
-                        </a>
-                    </div>
+    <div id="divContent" class="profile-page">
+        <section class="profile-overview" aria-labelledby="profile-name">
+            <div class="profile-identity">
+                <div class="profile-avatar" aria-label="Iniciais do usuário">
+                    {{ session.get('user_initials', '?') }}
+                </div>
+                <div>
+                    <p class="profile-kicker">CONTA CDE</p>
+                    <h1 id="profile-name">{{ session.get('user_name') }}</h1>
+                    <span class="profile-role">
+                        {{ 'Administrador' if session.get('user_grant', 99) <= 2 else 'Usuário Padrão' }}
+                    </span>
                 </div>
             </div>
+
+            <div class="profile-session-mark" aria-label="Sessão autenticada">
+                <span class="profile-session-icon">
+                    {{ ui_icon('svg/user.svg', class_name='ui-icon-md') }}
+                </span>
+                <span>
+                    <small>SESSÃO AUTENTICADA</small>
+                    <strong>Usuário #{{ session.get('id_user', '—') }}</strong>
+                </span>
+            </div>
+        </section>
+
+        <div class="profile-layout">
+            <section class="profile-card" aria-labelledby="profile-details-title">
+                <header class="profile-card-header">
+                    <div>
+                        <p class="profile-kicker">IDENTIFICAÇÃO</p>
+                        <h2 id="profile-details-title">Informações da conta</h2>
+                    </div>
+                    <span class="profile-card-icon">
+                        {{ ui_icon('svg/circle-user.svg', class_name='ui-icon-md') }}
+                    </span>
+                </header>
+
+                <dl class="profile-details">
+                    <div>
+                        <dt>Nome de exibição</dt>
+                        <dd>{{ session.get('user_name') }}</dd>
+                    </div>
+                    <div>
+                        <dt>Identificador</dt>
+                        <dd class="profile-data">#{{ session.get('id_user', '—') }}</dd>
+                    </div>
+                    <div>
+                        <dt>Perfil de acesso</dt>
+                        <dd>{{ 'Administrador' if session.get('user_grant', 99) <= 2 else 'Usuário Padrão' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Ambiente</dt>
+                        <dd class="profile-data">CDE v{{ app_version[0] }} (beta)</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="profile-card profile-security" aria-labelledby="profile-security-title">
+                <header class="profile-card-header">
+                    <div>
+                        <p class="profile-kicker">SEGURANÇA</p>
+                        <h2 id="profile-security-title">Acesso e sessão</h2>
+                    </div>
+                    <span class="profile-card-icon">
+                        {{ ui_icon('svg/lock.svg', class_name='ui-icon-md') }}
+                    </span>
+                </header>
+
+                <p class="profile-security-copy">Gerencie sua credencial ou encerre esta sessão com segurança.</p>
+
+                <div class="profile-actions">
+                    {{ action_row('change_password', 'Alterar senha', 'Atualize sua credencial de acesso.', 'svg/lock.svg', 'profile-action') }}
+                    {{ action_row('logout', 'Sair da conta', 'Encerre a sessão neste dispositivo.', 'svg/exit.svg', 'profile-action profile-action-danger') }}
+                </div>
+            </section>
         </div>
     </div>
 {% endblock content %}

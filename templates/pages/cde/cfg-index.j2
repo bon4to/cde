@@ -1,11 +1,11 @@
 {% extends 'base.j2' %}
+{% from 'components/settings/setting-card.j2' import setting_card %}
 
 {% block title %}Ajustes{% endblock title %}
 
 {% block content %}
 
     <div class="titles-ruler">
-        
         {% from 'components/title-route.j2' import title_container %}
         {{ title_container(
             id_page=session['id_page'],
@@ -21,70 +21,57 @@
                 {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
             ]
         ) }}
-        
     </div>
-    
-    <div id="divContent" style="flex-wrap: wrap;">
+
+    <div id="divContent" class="settings-page">
         {% include "components/advert.j2" %}
         {% if 'user_grant' in session %}
-            <div class="forms-container" style="max-width: 500px; min-height: unset; border: none;">
-                <div class="settings-list">
-                    <a href="{{ url_for('api') }}" class="settings-item">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/database-zap.svg') }}" alt="">
-                        <div class="settings-item-text">
-                            <span class="settings-item-title">Database</span>
-                            <span class="settings-item-desc">Faça consultas no banco de dados</span>
-                        </div>
-                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                    </a>
-                    <a href="{{ url_for('cde_notifications') }}" class="settings-item">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/bell.svg') }}" alt="">
-                        <div class="settings-item-text">
-                            <span class="settings-item-title">Notificações</span>
-                            <span class="settings-item-desc">Verifique suas notificações</span>
-                        </div>
-                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                    </a>
-                    <a href="{{ url_for('cde_query_list') }}" class="settings-item">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/list.svg') }}" alt="">
-                        <div class="settings-item-text">
-                            <span class="settings-item-title">Queries</span>
-                            <span class="settings-item-desc">Listagem de queries</span>
-                        </div>
-                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                    </a>
-                    <a href="{{ url_for('users') }}" class="settings-item">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/user-gear.svg') }}" alt="">
-                        <div class="settings-item-text">
-                            <span class="settings-item-title">Usuários</span>
-                            <span class="settings-item-desc">Gerencie usuários e permissões</span>
-                        </div>
-                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                    </a>
+            <section class="settings-overview">
+                <div>
+                    <p class="settings-kicker">CENTRAL DE CONTROLE</p>
+                    <h1>Ajustes do sistema</h1>
+                    <p>Administre dados, acessos e ferramentas internas em um único lugar.</p>
                 </div>
-
-                <h3 style="margin-top: 24px; color: #888;">Developer Tools</h3>
-
-                <div class="settings-list">
-                    <a href="{{ url_for('permissions') }}" class="settings-item">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
-                        <div class="settings-item-text">
-                            <span class="settings-item-title">Contratos</span>
-                            <span class="settings-item-desc">Gerencie os IDs das páginas</span>
-                        </div>
-                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                    </a>
-                    <a href="{{ url_for('admin_migrations') }}" class="settings-item">
-                        <img class="svg-gray" src="{{ url_for('static', filename='svg/database.svg') }}" alt="">
-                        <div class="settings-item-text">
-                            <span class="settings-item-title">Migrations</span>
-                            <span class="settings-item-desc">Gerencie as migrations</span>
-                        </div>
-                        <img class="svg-gray settings-arrow" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                    </a>
-
+                <div class="settings-overview-mark" aria-label="Versão atual do CDE">
+                    <span class="settings-overview-icon">
+                        <img src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
+                    </span>
+                    <span>
+                        <small>AMBIENTE CDE</small>
+                        <strong>v{{ app_version[0] }} (beta)</strong>
+                    </span>
                 </div>
-            </div>
+            </section>
+
+            <section class="settings-group" aria-labelledby="settings-system-title">
+                <header class="settings-group-header">
+                    <div>
+                        <p class="settings-kicker">SISTEMA E ACESSO</p>
+                        <h2 id="settings-system-title">Configurações principais</h2>
+                    </div>
+                    <p>Ferramentas de operação e administração.</p>
+                </header>
+                <div class="settings-grid">
+                    {{ setting_card('api', 'Database', 'Faça consultas no banco de dados.', 'svg/database-zap.svg', 'DADOS') }}
+                    {{ setting_card('cde_notifications', 'Notificações', 'Consulte mensagens e avisos do sistema.', 'svg/bell.svg', 'PESSOAL') }}
+                    {{ setting_card('cde_query_list', 'Queries', 'Visualize a biblioteca de consultas.', 'svg/file-text.svg', 'DADOS') }}
+                    {{ setting_card('users', 'Usuários', 'Gerencie usuários e permissões.', 'svg/user-gear.svg', 'ACESSO') }}
+                </div>
+            </section>
+
+            <section class="settings-group settings-group-advanced" aria-labelledby="settings-dev-title">
+                <header class="settings-group-header">
+                    <div>
+                        <p class="settings-kicker">FERRAMENTAS AVANÇADAS</p>
+                        <h2 id="settings-dev-title">Desenvolvimento e manutenção</h2>
+                    </div>
+                    <span class="settings-warning-badge">USO RESTRITO</span>
+                </header>
+                <div class="settings-grid settings-grid-compact">
+                    {{ setting_card('permissions', 'Contratos', 'Gerencie os identificadores das páginas.', 'svg/cog.svg', 'DEV') }}
+                    {{ setting_card('admin_migrations', 'Migrations', 'Acompanhe e execute migrações do sistema.', 'svg/database.svg', 'DEV') }}
+                </div>
+            </section>
         {% endif %}
     </div>
 

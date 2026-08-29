@@ -1,0 +1,33 @@
+<div id="loading-content" aria-hidden="true">
+    <div class="back-modal"></div>
+    <div class="loader-fullscreen"></div>
+</div>
+
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+<script>
+    idPage = '{{ session.get('id_page', '') }}';
+
+    function trackRecentPages(pageId, pageName) {
+        let recentPages = JSON.parse(localStorage.getItem('recentPages')) || [];
+
+        if (pageId === '' || pageId === 'CDE001' || pageId === 'CDE017') {
+            return;
+        }
+
+        recentPages = recentPages.filter(page => page.pageId !== pageId);
+        recentPages.push({
+            pageId: pageId,
+            pageName: pageName,
+            pageLink: window.location.href
+        });
+
+        if (recentPages.length > 10) {
+            recentPages.shift();
+        }
+
+        localStorage.setItem('recentPages', JSON.stringify(recentPages));
+    }
+
+    trackRecentPages(idPage, document.title);
+</script>

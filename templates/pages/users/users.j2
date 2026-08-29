@@ -1,11 +1,13 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
+{% from 'components/users/user-avatar.j2' import user_avatar %}
 
 {% block title %}Usuários{% endblock title %}
 
 {% block content %}
+    {% set can_create_user = 'CDE014' in user_perm or session['user_grant'] <= 2 %}
 
     <div class="titles-ruler">
-        
         {% from 'components/title-route.j2' import title_container %}
         {{ title_container(
             id_page=session['id_page'],
@@ -13,122 +15,152 @@
                 {'text': 'USUÁRIOS'}
             ],
             aux_buttons=[
-                {'type': 'action', 'icon': 'svg/pen-line.svg', 'title': 'EDITAR USUÁRIOS', 'onclick': 'toggleEdit()'},
+                {'type': 'link', 'url': 'users', 'icon': 'svg/user-gear.svg', 'title': 'USUÁRIOS', 'active': True},
+                {'type': 'action', 'icon': 'svg/pen-line.svg', 'title': 'MOSTRAR OU OCULTAR EDIÇÃO', 'onclick': 'toggleUserEditActions()'},
                 {'type': 'divider'},
                 {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
             ]
         ) }}
-        
     </div>
 
-    <div id="divContent">
-        <div class="forms-container">
-            {% if 'CDE014' in user_perm or session['user_grant'] <= 2 %}
-                <div>
-                    <h1 class="subtitle">Cadastrar Usuário</h1>
-                    <hr>
-                    <form action="/users/inserting" method="post">
-                        <div class="inputs">
-                            <div>
-                                <label for="login_user">Login: <span style="color: red">*</span></label>
-                                <input 
-                                    class="address-one"
-                                    type="text" 
-                                    id="login_user" 
-                                    name="login_user" 
-                                    placeholder="E-mail, telefone ou usuário..." 
-                                    required
-                                >
-                            </div>
-                        </div>
-                        <div class="inputs">
-                            <div>
-                                <label for="password_user">Senha: <span style="color: red">*</span></label>
-                                <input 
-                                    class="address-one disabled" 
-                                    id="password_user" 
-                                    name="password_user" 
-                                    value="12345" 
-                                    disabled 
-                                    required
-                                >
-                            </div>
-                        </div>
+    <div id="divContent" class="users-page">
+        <section class="users-overview">
+            <div>
+                <p class="users-kicker">CONTROLE DE ACESSO</p>
+                <h1>Gestão de usuários</h1>
+                <p>Cadastre contas, acompanhe acessos e administre permissões em um único lugar.</p>
+            </div>
+            <div class="users-overview-stack">
+                <div class="users-overview-mark" aria-label="Total de usuários cadastrados">
+                    <span class="users-overview-icon">{{ ui_icon('svg/user-gear.svg', class_name='ui-icon-md') }}</span>
+                    <span>
+                        <small>CONTAS CADASTRADAS</small>
+                        <strong>{{ users|length }} {{ 'usuário' if users|length == 1 else 'usuários' }}</strong>
+                    </span>
+                </div>
+                {% if can_create_user %}
+                    <button class="users-open-create" type="button" onclick="openCreateUserModal()">
+                        {{ ui_icon('svg/circle-plus.svg', class_name='ui-icon-sm') }}
+                        <span>Cadastrar usuário</span>
+                    </button>
+                {% endif %}
+            </div>
+        </section>
 
-                        <div class="inputs">
-                            <div>
-                                <label for="nome_user">Nome: <span style="color: red">*</span></label>
-                                <input class="address-two" type="text" id="nome_user" name="nome_user" placeholder="Nome..." required>
-                            </div>
-                            <div>
-                                <label for="sobrenome_user">Sobrenome: <span style="color: red">*</span></label>
-                                <input class="address-two" type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome..." required>
-                            </div>
-                        </div>
-                        <div class="inputs">
-                            <div>
-                                <label for="privilege_user">Privilégios: <span style="color: red">*</span></label>
-                                <select 
-                                class="address-one"
-                                    id="privilege_user" 
-                                    name="privilege_user" 
-                                    required
-                                >
-                                    {% if 'user_grant' in session %}
-                                        <option value="3">Padrão</option>
-                                        <option value="2">Administrador</option>
-                                        {% if session['user_grant'] <= 1 %}
-                                            <option value="1" style="color: red">Desenvolvedor</option>
-                                        {% endif %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-                        <p style="color: red">Campos com * são obrigatórios.</p>
-                        <div style="display: flex;width: 100%;">
-                            <input class="btn-fancy" style="max-width: none;" type="submit" value="CADASTRAR">
-                        </div>
-                    </form>
-                </div>
-            {% else %}
-                <div style="margin-top: 50%; padding: 0 80px;">
-                    <p class="disabled">Seu usuário não possui privilégios para esta ação.</p>
-                </div>
-            {% endif %}
-        </div>
-        <div draggable="false" class="tables-container" style="width: 600px">
-            <div class="split-h">
-                <div style="width: 100%;">
-                    <div class="table-overflow">
-                        <table id="filterTable">
+        <div class="users-layout users-layout-directory">
+            <section class="users-panel users-directory" aria-labelledby="users-directory-title">
+                <header class="users-directory-header">
+                    <div>
+                        <p class="users-kicker">DIRETÓRIO</p>
+                        <h2 id="users-directory-title">Usuários cadastrados</h2>
+                    </div>
+                    <label class="users-search" for="users-search-input">
+                        {{ ui_icon('svg/search.svg', class_name='ui-icon-sm') }}
+                        <input id="users-search-input" type="search" placeholder="Buscar usuário..." oninput="filterUsers()">
+                    </label>
+                </header>
+
+                <div class="users-table-wrap">
+                    <table id="users-table" class="users-table">
+                        <thead>
                             <tr>
-                                <th>Usuário (Cód.)</th>
-                                <th>Usuário (Desc.)</th>
-                                <th>Usuário (Tipo)</th>
-                                <th>Último Acesso (Data)</th>
+                                <th>Usuário</th>
+                                <th>Código</th>
+                                <th>Perfil</th>
+                                <th>Status</th>
+                                <th>Último acesso</th>
+                                <th class="user-row-action" aria-label="Ações"></th>
                             </tr>
+                        </thead>
+                        <tbody>
                             {% for item in users %}
-                                <tr>
-                                    <td class="number">{{ item['cod_user'] }}</td>
-                                    <td>{{ item['user_name'] }}</td>
-                                    <td>{{ item['user_grant'] }}</td>
-                                    <td style="text-align: right">{% if not item['ult_acesso'] %} - {% else %} {{ item['ult_acesso'] }} {% endif %} </td>
-                                    <td class="td-more hidden-button" data-toggle="tooltip" style="background-color: transparent">
-                                        <img 
-                                            title="EDITAR USUÁRIO"
-                                            alt=""
-                                            class="svg-link"
-                                            onclick="redirectToEdit('{{ item['cod_user'] }}')" 
-                                            src="{{ url_for('static', filename='svg/edit-link.svg') }}" 
-                                        >
+                                <tr data-user-row>
+                                    <td>
+                                        <div class="users-person">
+                                            {{ user_avatar(item['user_name']) }}
+                                            <strong>{{ item['user_name'] }}</strong>
+                                        </div>
+                                    </td>
+                                    <td class="users-code">#{{ item['cod_user'] }}</td>
+                                    <td><span class="users-role-badge">{{ item['user_grant'] }}</span></td>
+                                    <td>
+                                        {% if item['privilege_user'] > 2 and item['permission_count'] == 0 %}
+                                            <span class="users-status-badge users-status-deactivated">Desativado</span>
+                                        {% else %}
+                                            <span class="users-status-badge users-status-active">Ativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="users-last-access">{{ item['ult_acesso'] or 'Nunca acessou' }}</td>
+                                    <td class="user-row-action">
+                                        <button type="button" onclick="redirectToEdit('{{ item['cod_user'] }}')" aria-label="Editar {{ item['user_name'] }}" title="Editar usuário">
+                                            {{ ui_icon('svg/pen-to-square.svg', class_name='ui-icon-sm') }}
+                                        </button>
                                     </td>
                                 </tr>
                             {% endfor %}
-                        </table>
+                        </tbody>
+                    </table>
+                    <div id="users-empty-search" class="users-empty-search" hidden>
+                        <strong>Nenhum usuário encontrado</strong>
+                        <span>Tente buscar por nome, código ou perfil.</span>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
+
+        {% if can_create_user %}
+            <div id="createUserModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('createUserModal')">
+                <div class="modal users-create-modal" role="dialog" aria-modal="true" aria-labelledby="users-create-title">
+                    <div class="modal-header">
+                        <div>
+                            <p class="users-kicker">NOVA CONTA</p>
+                            <h2 id="users-create-title">Cadastrar usuário</h2>
+                        </div>
+                        <span class="users-panel-icon">{{ ui_icon('svg/circle-plus.svg', class_name='ui-icon-md') }}</span>
+                        <button class="modal-close" type="button" onclick="Modal.close('createUserModal')" aria-label="Fechar">&times;</button>
+                    </div>
+
+                    <form class="users-create-form" action="{{ url_for('cadastrar_usuario') }}" method="post">
+                        <div class="users-field">
+                            <label for="login_user">Login <span>*</span></label>
+                            <input type="text" id="login_user" name="login_user" placeholder="E-mail, telefone ou usuário" autocomplete="off" required>
+                        </div>
+
+                        <div class="users-form-row">
+                            <div class="users-field">
+                                <label for="nome_user">Nome <span>*</span></label>
+                                <input type="text" id="nome_user" name="nome_user" placeholder="Nome" required>
+                            </div>
+                            <div class="users-field">
+                                <label for="sobrenome_user">Sobrenome <span>*</span></label>
+                                <input type="text" id="sobrenome_user" name="sobrenome_user" placeholder="Sobrenome" required>
+                            </div>
+                        </div>
+
+                        <div class="users-field">
+                            <label for="privilege_user">Perfil de acesso <span>*</span></label>
+                            <select id="privilege_user" name="privilege_user" required>
+                                <option value="3">Padrão</option>
+                                <option value="2">Administrador</option>
+                                {% if session['user_grant'] <= 1 %}
+                                    <option value="1">Desenvolvedor</option>
+                                {% endif %}
+                            </select>
+                        </div>
+
+                        <div class="users-password-note">
+                            <span>{{ ui_icon('svg/lock.svg', class_name='ui-icon-sm') }}</span>
+                            <p><strong>Senha inicial: 12345</strong>O usuário deverá substituí-la no primeiro acesso.</p>
+                        </div>
+
+                        <button class="users-primary-action" type="submit">
+                            {{ ui_icon('svg/circle-plus.svg', class_name='ui-icon-sm') }}
+                            <span>Cadastrar usuário</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
 {% endblock content %}
@@ -136,7 +168,32 @@
 {% block route_script %}
     <script>
         function redirectToEdit(idUser) {
-            window.location.href = "/users/edit?id_user=" + idUser;
+            window.location.href = "/users/edit?id_user=" + encodeURIComponent(idUser);
+        }
+
+        function openCreateUserModal() {
+            Modal.open('createUserModal');
+            requestAnimationFrame(() => document.getElementById('login_user')?.focus());
+        }
+
+        function toggleUserEditActions() {
+            document.querySelectorAll('.user-row-action').forEach(element => {
+                element.classList.toggle('is-hidden');
+            });
+        }
+
+        function filterUsers() {
+            const term = document.getElementById('users-search-input').value.trim().toLocaleLowerCase('pt-BR');
+            const rows = document.querySelectorAll('[data-user-row]');
+            let visibleRows = 0;
+
+            rows.forEach(row => {
+                const matches = !term || row.textContent.toLocaleLowerCase('pt-BR').includes(term);
+                row.hidden = !matches;
+                if (matches) visibleRows++;
+            });
+
+            document.getElementById('users-empty-search').hidden = visibleRows !== 0;
         }
     </script>
 {% endblock route_script %}

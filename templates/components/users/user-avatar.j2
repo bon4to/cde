@@ -1,0 +1,6 @@
+{% macro user_avatar(name, class_name='') -%}
+    {% set words = (name|default('', true)|trim).split() %}
+    <span class="user-avatar{% if class_name %} {{ class_name }}{% endif %}" aria-hidden="true">
+        {% if words %}{{ words[0][0] }}{% if words|length > 1 %}{{ words[-1][0] }}{% endif %}{% else %}?{% endif %}
+    </span>
+{%- endmacro %}

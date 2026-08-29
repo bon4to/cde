@@ -401,7 +401,8 @@ def create_tables(database) -> None:
             """
             CREATE TABLE IF NOT EXISTS aux_permissions (
                 id_perm   VARCHAR(6) PRIMARY KEY,
-                desc_perm VARCHAR(100)
+                desc_perm VARCHAR(100),
+                paid_feature INTEGER NOT NULL DEFAULT 0
             );
         """
         )

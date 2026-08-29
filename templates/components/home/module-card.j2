@@ -1,0 +1,13 @@
+{% from 'components/icon.j2' import icon as ui_icon %}
+
+{% macro home_module_card(label, icon, tagline=None, alt='') %}
+    <aside class="home-module-card" aria-label="{{ label }}">
+        <span class="home-module-icon">
+            {{ ui_icon(icon, label=alt or None, class_name='home-module-glyph') }}
+        </span>
+        <div>
+            <span>{{ label }}</span>
+            {% if tagline %}<strong>{{ tagline }}</strong>{% endif %}
+        </div>
+    </aside>
+{% endmacro %}

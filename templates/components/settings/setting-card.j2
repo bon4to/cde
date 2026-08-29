@@ -1,0 +1,17 @@
+{% from 'components/icon.j2' import icon as ui_icon %}
+
+{% macro setting_card(endpoint, title, description, icon, badge=None) %}
+    <a href="{{ url_for(endpoint) }}" class="settings-card">
+        <span class="settings-card-icon" aria-hidden="true">
+            {{ ui_icon(icon, class_name='ui-icon-md') }}
+        </span>
+        <span class="settings-card-content">
+            <span class="settings-card-heading">
+                <strong>{{ title }}</strong>
+                {% if badge %}<span class="settings-card-badge">{{ badge }}</span>{% endif %}
+            </span>
+            <span>{{ description }}</span>
+        </span>
+        {{ ui_icon('svg/arrow-right.svg', class_name='settings-card-arrow ui-icon-sm') }}
+    </a>
+{% endmacro %}

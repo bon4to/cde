@@ -20,8 +20,6 @@
                 {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS'},
                 {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS'},
                 {'type': 'divider'},
-                {'type': 'form', 'url': 'cargas', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
-                {'type': 'divider'},
                 {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)', 'active': True},
                 {'type': 'divider'},
                 {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
@@ -53,10 +51,7 @@
                     {% set obs_carga = obs_carga|trim %}
                     {% if obs_carga and obs_carga | length > 0 %}
                         <div class="msg-info">
-                            <details>
-                                <summary>A carga possui uma observação!</summary>
-                                <span id="obs_carga">{{ obs_carga }}</span>
-                            </details>
+                            <span id="obs_carga">Observação: {{ obs_carga }}</span>
                         </div>
                     {% endif %}
                 {% endif %}

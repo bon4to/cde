@@ -1,3 +1,5 @@
+{% from 'components/icon.j2' import icon as ui_icon %}
+
 {% macro filter_container(
     type="default", 
     filter_id="table-filter", 
@@ -61,7 +63,7 @@
                     {% endif %}
                     </select>
                     <button class="button-mini btn-fancy" type="submit">
-                        <img src="{{ url_for('static', filename='svg/' + button_icon) }}" alt="">
+                        {{ ui_icon('svg/' + button_icon, class_name='ui-icon-md') }}
                     </button>
                 </div>
             </form>
@@ -72,7 +74,7 @@
                 <div class="flex-h">
                     <input type="date" class="address" id="date" name="date" value="{{ date_value }}">
                     <button class="button-mini btn-fancy" type="submit">
-                        <img class="svg-invert" src="{{ url_for('static', filename='svg/' + button_icon) }}" title="{{ date_button_title }}">
+                        {{ ui_icon('svg/' + button_icon, date_button_title, 'ui-icon-md') }}
                     </button>
                 </div>
             </form>
@@ -80,4 +82,4 @@
     {% endif %}
 </div>
 
-{% endmacro %} 
+{% endmacro %}
