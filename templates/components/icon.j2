@@ -1,0 +1,8 @@
+{% macro icon(filename, label=None, class_name='', element_id=None) -%}
+    <span
+        {% if element_id %}id="{{ element_id }}"{% endif %}
+        class="ui-icon{% if class_name %} {{ class_name }}{% endif %}"
+        style="--ui-icon-source: url('{{ url_for('static', filename=filename) }}');"
+        {% if label %}role="img" aria-label="{{ label }}" title="{{ label }}"{% else %}aria-hidden="true"{% endif %}
+    ></span>
+{%- endmacro %}

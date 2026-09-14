@@ -19,8 +19,6 @@
                 {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS'},
                 {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS', 'active': True},
                 {'type': 'divider'},
-                {'type': 'form', 'url': 'cargas', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
-                {'type': 'divider'},
                 {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)'},
                 {'type': 'divider'},
                 {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
@@ -30,12 +28,53 @@
 
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="carga-ops-page">
         <!-- prevent access to this page if user is not logged -->
         {% if 'user_grant' in session %}
+            <section class="carga-ops-shell">
+                <header class="carga-ops-header">
+                    <div>
+                        <p class="carga-ops-kicker">
+                            {% if id_carga %}
+                                SEPARAÇÃO OPERACIONAL
+                            {% else %}
+                                FILA DE EXPEDIÇÃO
+                            {% endif %}
+                        </p>
+                        {% if id_carga %}
+                            <h1>Carga: <span class="carga-title-code">{{ id_carga }}</span></h1>
+                        {% else %}
+                            <h1>Cargas para separação</h1>
+                        {% endif %}
+                    </div>
+                    <div class="carga-header-aside">
+                        <p>
+                            {% if id_carga %}
+                                Confira os itens, selecione o produto e escolha o endereço de estoque para separar.
+                            {% else %}
+                                Atualize a lista, selecione uma carga e avance para o fluxo de separação.
+                            {% endif %}
+                        </p>
+                        {% if id_carga %}
+                            <form action="{{ url_for('cargas') }}" method="post">
+                                <button type="submit" class="button-mini btn-fancy carga-close-action" onclick="showLoading()" title="FECHAR">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('cargas') }}" method="post">
+                                <button type="submit" class="button-mini btn-fancy carga-close-action" onclick="showLoading()" title="RECARREGAR LISTA DE CARGAS">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/list-restart.svg') }}" alt="">
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </header>
+
+                <div class="carga-ops-layout {% if id_carga %}is-detail{% else %}is-list{% endif %} {% if not id_carga and not cod_item %}rail-collapsed{% endif %}" id="cargaOpsLayout">
             <!-- if 'id_carga' is selected -->
             {% if not id_carga %}
-                <div class="tables-container" id="sepContainer" style="min-width: 40vw;">
+                <div class="carga-ops-panel carga-queue-panel" id="sepContainer">
                     {% if alert %}
                         {% if class_alert == 'error' %}
                             <div class="msg-error">
@@ -45,8 +84,14 @@
                                 </details>
                             </div>
                         {% elif class_alert == 'success' %}
-                            <h1 class="subtitle">Selecione a <span class="text-main-color">carga</span> para iniciar a <span class="text-main-color">separação</span>:</h1>
-                            <div style="max-height: 540px; overflow-y: auto; width: 100%;">
+                            <div class="carga-section-heading">
+                                <span>01</span>
+                                <div>
+                                    <h2>Selecionar carga</h2>
+                                    <p><strong>{{ result | length }}</strong> carga(s) disponíveis nesta consulta.</p>
+                                </div>
+                            </div>
+                            <div class="table-overflow carga-table-frame">
                                 {% if result %}
                                     <table>
                                         <thead>
@@ -54,9 +99,11 @@
                                                 <th>Carga (Cód.)</th>
                                                 <th>Pedido (Cód.)</th>
                                                 <th>Cliente (Descrição)</th>
+                                                <th>Transportadora</th>
                                                 <th>Emissão (Data)</th>
                                                 <th>Entrega (Data)</th>
-                                                <th>OBS.</th>
+                                                <th>OBS. Cliente</th>
+                                                <th>OBS. Carga</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -70,8 +117,19 @@
                                                         <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
                                                         <td class="number r second-plan">{{ row[columns.index('NRO_PEDIDO')] }}</td>
                                                         <td style="text-wrap: none;">({{ row[columns.index('COD_CLIENTE')] }}) {{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                                        <td style="text-wrap: none;">
+                                                            {% if row[columns.index('COD_TRANSP')] %}({{ row[columns.index('COD_TRANSP')] }}){% endif %}
+                                                            {{ row[columns.index('FANT_TRANSP')] or 'Não informada' }}
+                                                        </td>
                                                         <td class="second-plan c">{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
                                                         <td class="second-plan c">{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
+                                                        <td class="c">
+                                                            {% if row[columns.index('OBS_CLIENTE')] | trim | length > 1 %}
+                                                                <span title="{{ row[columns.index('OBS_CLIENTE')] }}">🟢</span>
+                                                            {% else %}
+                                                                <span>🔴</span>
+                                                            {% endif %}
+                                                        </td>
                                                         <td class="c">
                                                             {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
                                                                 <span title="{{ row[columns.index('OBS_CARGA')] }}">🟢</span>
@@ -86,7 +144,7 @@
                                     </table>
                                 {% endif %}
                             </div>
-                            <div class="msg-success flex-v" style="margin: 0; gap: 0">
+                            <div class="msg-success flex-v carga-sync-status">
                                 <span style="font-weight: 600">A lista foi atualizada com sucesso!</span>
                                 <span style="font-size: 12px">
                                     {{ alert | safe }}
@@ -94,42 +152,50 @@
                             </div>
                         {% endif %}
                     {% else %}
-                        <div style="display: flex; justify-content: center; height: 100%;">
+                        <div class="carga-empty-panel">
+                            <span>01</span>
+                            <h2>Aguardando lista de cargas</h2>
                             <p class="disabled">
-                                Carregue a lista de cargas clicando no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/list-restart.svg') }}"> acima...
+                                Recarregue para buscar a fila operacional.
                             </p>
+                            <form class="carga-empty-action" action="{{ url_for('cargas') }}" method="post">
+                                <button type="submit" class="btn-fancy featured" onclick="showLoading()">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/list-restart.svg') }}" alt="">
+                                    <span>RECARREGAR CARGAS</span>
+                                </button>
+                            </form>
                         </div>
                     {% endif %}
                 </div>
             {% endif %}
 
             {% if id_carga %}
-                <div id="cargaContainer" class="tables-container" style="max-width: 55%; min-width: 55%;">
-                    <div class="flex-v">
-                        <div class="split-h">
-                            <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}"></h1>
-                            <div class="flex-h" style="gap: 30px">
-                                <div class="cart-container" style="display: none">
-                                    <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
-                                    <div class="cart-dropdown hidden" id="cart-dropdown">
-                                        <ul class="cart-items">
-                                            <!-- Itens serão renderizados aqui -->
-                                        </ul>
-                                        <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
-                                    </div>
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 6px">
-                                    <form action="{{ url_for('cargas') }}" method="post">
-                                        <button type="submit" style="all: unset" onclick="showLoading()">
-                                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas') }}';" title="FECHAR">
-                                                <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                                            </a>
-                                        </button>
-                                    </form>
+                <div id="cargaContainer" class="carga-ops-panel carga-detail-panel">
+                    <div class="carga-active-summary">
+                        <div>
+                            <p class="carga-ops-kicker">CLIENTE</p>
+                            <h2>{{ fant_cliente }}</h2>
+                        </div>
+                        {% if cod_transportadora or transportadora %}
+                            <div>
+                                <p class="carga-ops-kicker">TRANSPORTADORA</p>
+                                <h2>
+                                    {% if cod_transportadora %}({{ cod_transportadora }}){% endif %}
+                                    {{ transportadora or 'Não informada' }}
+                                </h2>
+                            </div>
+                        {% endif %}
+                        <div class="carga-active-actions">
+                            <div class="cart-container" style="display: none">
+                                <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                                <div class="cart-dropdown hidden" id="cart-dropdown">
+                                    <ul class="cart-items">
+                                        <!-- Itens serão renderizados aqui -->
+                                    </ul>
+                                    <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
                                 </div>
                             </div>
                         </div>
-                        <h1 class="subtitle">Cliente: <span class="text-main-color">{{ fant_cliente }}</span></h1>
                     </div>
 
                     <div class="hidden" id="alert-message">
@@ -139,23 +205,34 @@
                         {% set obs_carga = result[0][columns.index('OBS_CARGA')]|trim %}
                         {% if obs_carga and obs_carga | length > 0 %}
                             <div class="msg-info">
-                                <details>
-                                    <summary>A carga possui uma observação!</summary>
-                                    <span id="obs_carga">{{ obs_carga }}</span>
-                                </details>
+                                <span id="obs_carga">Observação: {{ obs_carga }}</span>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if obs_cliente %}
+                        {% set obs_cliente = obs_cliente|trim %}
+                        {% if obs_cliente and obs_cliente | length > 0 %}
+                            <div class="msg-info">
+                                <span>Observação do cliente: {{ obs_cliente }}</span>
                             </div>
                         {% endif %}
                     {% endif %}
 
                     {% if result and columns %}
                         <div id="detailedTable" class="hidden">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                                <p>Lista Detalhada</p>
-                                <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <div class="carga-section-heading compact">
+                                <span>02</span>
+                                <div>
+                                    <h2>Lista detalhada</h2>
+                                    <p>Itens abertos por pedido e sequência.</p>
+                                </div>
+                                <div class="btn-fancy carga-mode-button" onclick="toggleTableSubtotal()">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
                                 </div>
                             </div>
-                            <table style="max-height: 500px; overflow-y: auto;">
+                            <div class="table-overflow carga-table-frame detail">
+                            <table>
                                 <thead>
                                     <tr>
                                         <th>Pedido SEQ</th>
@@ -197,15 +274,21 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                         <div id="standardTable">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                                <p>Lista Subtotal</p>
-                                <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <div class="carga-section-heading compact">
+                                <span>01</span>
+                                <div>
+                                    <h2>Lista subtotal</h2>
+                                    <p>Itens agrupados para iniciar a separação.</p>
+                                </div>
+                                <div class="btn-fancy carga-mode-button" onclick="toggleTableSubtotal()">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
                                 </div>
                             </div>
-                            <table style="max-height: 500px; overflow-y: auto;">
+                            <div class="table-overflow carga-table-frame detail">
+                            <table>
                                 <thead>
                                     <tr>
                                         <th>Item (Código)</th>
@@ -243,10 +326,11 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                         <br>
                         {% if id_carga %}
-                            <div class="split-h flex-h" style="margin: 8px 0">
+                            <div class="carga-action-strip">
                                 <div class="flex-h">
                                     <div class="button-mini btn-fancy" onclick="excludeCarga()" title="APAGAR CARGA">
                                         <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
@@ -275,11 +359,16 @@
                 
                 <!-- prevent non listed item (outside from list) to be selected -->
                 {% if cod_item and cod_item in cod_item_list %}
-                    <div id="stockTable" class="tables-container glow-logi">
-                        <span>
-                            <h1>Item <span class="text-main-color">{{ cod_item }}</span> em Estoque:</h1>
-                        </span>
+                    <div id="stockTable" class="carga-ops-panel carga-stock-panel">
+                        <div class="carga-section-heading compact">
+                            <span>02</span>
+                            <div>
+                                <h2>Estoque do item</h2>
+                                <p class="carga-code-label"><span>Código</span><strong class="text-main-color">{{ cod_item }}</strong></p>
+                            </div>
+                        </div>
                         {% if result %}
+                            <div class="table-overflow carga-table-frame stock">
                             <table>
                                 {% if not result_local %}
                                     <div class="msg-error">
@@ -292,9 +381,9 @@
                                     <thead>
                                         <tr>
                                             <th>Endereço</th>
-                                            <th>Lote (Código)</th>
+                                            <th>Lote</th>
                                             <th>Validade (Dias)</th>
-                                            <th>QTDE (Efetiva)</th>
+                                            <th>QTDE</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -316,39 +405,73 @@
                                     <div id="inputContainer" class="hidden"></div>
                                 {% endif %}
                             </table>
+                            </div>
                         {% endif %}
                         <br>
+                    </div>
+                {% elif not cod_item %}
+                    <div class="carga-ops-panel carga-stock-panel carga-item-placeholder">
+                        <div class="carga-section-heading compact">
+                            <span>03</span>
+                            <div>
+                                <h2>Estoque do item</h2>
+                                <p>Aguardando seleção na lista subtotal.</p>
+                            </div>
+                        </div>
+                        <div class="carga-empty-panel">
+                            <h2>Selecione um item</h2>
+                            <p class="disabled">
+                                Clique em uma linha da lista para consultar o estoque disponível e iniciar a separação.
+                            </p>
+                        </div>
                     </div>
                 {% endif %}
             {% endif %}
 
-            {% if not cod_item %}
-                <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-                    <h1 class="subtitle" style="margin: 0;">Buscar separações...</h1>
-                    <select class="address-three inline-input" style="color: var(--main-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
-                        <option style="color: var(--main-color);">Pendentes</option>
-                        <option style="color: green;">Finalizadas</option>
-                    </select>
+            {% if not id_carga and not cod_item %}
+                <div class="carga-ops-panel carga-rail-panel" id="sepListContainer">
+                    <button type="button" class="carga-rail-tab" onclick="toggleCargasRail()" aria-controls="sepListContainer" aria-expanded="false" title="Mostrar separações">
+                        <strong>Separações</strong>
+                    </button>
+                    <div class="carga-rail-content">
+                    <div class="carga-section-heading compact">
+                        <div>
+                            <h2>Separações</h2>
+                            <p>Atalhos e histórico local.</p>
+                        </div>
+                        <button type="button" class="carga-rail-collapse" onclick="toggleCargasRail()" title="Recolher separações" aria-label="Recolher separações">
+                            ›
+                        </button>
+                    </div>
+                    <div class="carga-rail-controls">
+                        <label for="cargaSepStatus">Status</label>
+                        <select id="cargaSepStatus" class="address-three inline-input" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
+                            <option style="color: var(--main-color);">Pendentes</option>
+                            <option style="color: green;">Finalizadas</option>
+                        </select>
+                    </div>
                     {% block all_separation_status %}
                     
                     {% endblock all_separation_status %}
-                    <div class="table-overflow" style="max-height: 700px">
+                    <div class="table-overflow carga-rail-list">
                         <form onsubmit="preQuickRouting('cargas'); return false;">
-                            <div class="flex-h" style="margin: 8px 0; width: 100%;">
-                                <input class="address-one" style="margin: 0; height: 32px" type="number" id="navigatorInput" min="1" placeholder="Carga...">
-                                <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
+                            <div class="carga-rail-search">
+                                <input class="address-one" type="number" id="navigatorInput" min="1" placeholder="Carga...">
+                                <button type="submit" class="button-mini btn-fancy" title="IR PARA CARGA..." >
                                     <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
                                 </button>
                             </div>
                         </form>
-                        <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
+                        <table id="allSeparationsTable">
                             <tbody>
                                 <!-- executa listCargasLocalStorage(); -->
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
             {% endif %}
+                </div>
 
             <form class="hidden" id="cod_item_form" method="GET" action="">
                 <input type="hidden" id="cod_item_input" name="cod_item">
@@ -357,6 +480,7 @@
             </form>
             <!-- PopUp -->
             {% include "components/menus/quantity-popup.j2" %}
+            </section>
         {% endif %}
     </div>
 
@@ -389,10 +513,8 @@
                                 errorMessage = 
                                 `
                                     <div class="msg-alert">
-                                        <details>
-                                            <summary>A separação foi finalizada, mas está incompleta.</summary>
-                                            Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
-                                        </details>
+                                        Ainda existem itens pendentes nesta carga.
+                                        <a class="hyperlink" href="{{ url_for('carga_incomp_id', id_carga=id_carga) }}">Ver carga incompleta</a>
                                     </div>
                                 `;
                                 const alert = document.getElementById('alert-message');
@@ -427,10 +549,8 @@
                                 errorMessage = 
                                 `
                                     <div class="msg-alert">
-                                        <details>
-                                            <summary>A separação foi finalizada, mas está incompleta.</summary>
-                                            Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
-                                        </details>
+                                        Ainda existem itens pendentes nesta carga.
+                                        <a class="hyperlink" href="{{ url_for('carga_incomp_id', id_carga=id_carga) }}">Ver carga incompleta</a>
                                     </div>
                                 `;
                                 const alert = document.getElementById('alert-message');
@@ -458,6 +578,23 @@
 
             detailedTable.classList.toggle('hidden');
             standardTable.classList.toggle('hidden');
+        }
+
+        function toggleCargasRail() {
+            const layout = document.getElementById('cargaOpsLayout');
+            const tab = document.querySelector('.carga-rail-tab');
+
+            if (!layout) {
+                return;
+            }
+
+            layout.classList.toggle('rail-collapsed');
+
+            if (tab) {
+                const isExpanded = !layout.classList.contains('rail-collapsed');
+                tab.setAttribute('aria-expanded', String(isExpanded));
+                tab.setAttribute('title', isExpanded ? 'Ocultar separações' : 'Mostrar separações');
+            }
         }
 
 

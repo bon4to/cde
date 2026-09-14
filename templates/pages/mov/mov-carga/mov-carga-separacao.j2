@@ -20,8 +20,6 @@
                 {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS'},
                 {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS'},
                 {'type': 'divider'},
-                {'type': 'form', 'url': 'cargas', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
-                {'type': 'divider'},
                 {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)', 'active': True},
                 {'type': 'divider'},
                 {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
@@ -31,15 +29,18 @@
 
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="carga-separation-page" style="flex-wrap: wrap;">
         <div class="tables-container" id="sepContainer" style="min-width: 40vw; min-height: 40vh;">
             <div style="{% if id_carga == '0' %}display: none;{% endif %}">
-                <div class="split-h">
-                    <div class="flex-v">
-                        <h1 class="flex-h" style="align-items: center;">Número de Carga {% block switch %}<input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}">{% endblock switch %}</h1>
-                        {% if result %}
-                            <h1 class="subtitle">Responsável: <span class="text-main-color">{{ result[0][columns.index('USUARIO')] }}</span></h1>
-                        {% endif %}
+                <div class="carga-separation-header">
+                    <div>
+                        <p class="carga-ops-kicker">SEPARAÇÃO DE CARGA</p>
+                        <div class="carga-separation-title">
+                            <h1>Número da carga</h1>
+                            <div class="carga-separation-switch">
+                                {% block switch %}<input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}">{% endblock switch %}
+                            </div>
+                        </div>
                     </div>
                     <div class="cart-container">
                         <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
@@ -49,23 +50,51 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="carga-active-summary carga-separation-parties">
+                    <div>
+                        <p class="carga-ops-kicker">CLIENTE</p>
+                        <h2>{{ fant_cliente }}</h2>
+                    </div>
+                    <div>
+                        <p class="carga-ops-kicker">TRANSPORTADORA</p>
+                        <h2>
+                            {% if cod_transportadora %}({{ cod_transportadora }}){% endif %}
+                            {{ transportadora or 'Não informada' }}
+                        </h2>
+                    </div>
+                </div>
+
+                {% if obs_cliente %}
+                    {% set obs_cliente = obs_cliente|trim %}
+                    {% if obs_cliente and obs_cliente | length > 0 %}
+                        <div class="msg-info">
+                            <span>Observação do cliente: {{ obs_cliente }}</span>
+                        </div>
+                    {% endif %}
+                {% endif %}
                 {% if obs_carga %}
                     {% set obs_carga = obs_carga|trim %}
                     {% if obs_carga and obs_carga | length > 0 %}
                         <div class="msg-info">
-                            <details>
-                                <summary>A carga possui uma observação!</summary>
-                                <span id="obs_carga">{{ obs_carga }}</span>
-                            </details>
+                            <span id="obs_carga">Observação da carga: {{ obs_carga }}</span>
                         </div>
                     {% endif %}
                 {% endif %}
-                <div class="split-h">
-                    <p style="justify-content: flex-start">
-                        Status:<span class="separation_status" style="color: var(--logi-color); margin-left: 4px">Pendente</span>
+                <div class="carga-separation-meta">
+                    {% if result %}
+                        <p>
+                            <span>RESPONSÁVEL</span>
+                            <strong>{{ result[0][columns.index('USUARIO')] }}</strong>
+                        </p>
+                    {% endif %}
+                    <p>
+                        <span>STATUS</span>
+                        <strong class="separation_status">Pendente</strong>
                     </p>
-                    <p style="justify-content: flex-start">
-                        Separador: <span id="separador-info" style="color: var(--logi-color); margin-left: 4px">carregando...</span>
+                    <p>
+                        <span>SEPARADOR</span>
+                        <strong id="separador-info">carregando...</strong>
                     </p>
                 </div>
                 <div class="hidden" id="alert-message"></div>

@@ -1,196 +1,242 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
+{% from 'components/users/user-avatar.j2' import user_avatar %}
+{% from 'components/switch.j2' import switch_control %}
 
-{% block title %}Usuários{% endblock title %}
+{% block title %}Editar usuário{% endblock title %}
 
 {% block content %}
 
     <div class="titles-ruler">
-        
         {% from 'components/title-route.j2' import title_container %}
         {{ title_container(
             id_page=session['id_page'],
             breadcrumbs=[
-                {'text': 'USUÁRIOS'}
+                {'text': 'USUÁRIOS', 'url': 'users'},
+                {'text': 'EDITAR'}
             ],
             aux_buttons=[
-                {'type': 'link', 'url': 'users', 'icon': 'svg/pen-line.svg', 'title': 'EDITAR USUÁRIOS', 'active': True},
+                {'type': 'link', 'url': 'users', 'icon': 'svg/user-gear.svg', 'title': 'USUÁRIOS', 'active': True},
                 {'type': 'divider'},
                 {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
             ]
         ) }}
-        
     </div>
 
-    <div id="divContent">
-        <div draggable="false" class="forms-container" style="display: unset; max-height: 480px; min-height: unset;">
-            <form style="justify-content: space-between">
-                <h1 class="text-main-color">Editar Usuário</h1>
-                {% for item in user_data %}
-                    <div style="min-width: 100%">
+    <div id="divContent" class="user-edit-page">
+        {% for item in user_data %}
+            <section class="user-edit-overview" aria-labelledby="edited-user-name">
+                <div class="user-edit-identity">
+                    {{ user_avatar(item['nome_user'] ~ ' ' ~ item['sobrenome_user'], 'user-avatar-lg') }}
+                    <div>
+                        <p class="users-kicker">CONTA DE USUÁRIO</p>
+                        <h1 id="edited-user-name">{{ item['nome_user'] }} {{ item['sobrenome_user'] }}</h1>
+                        <span class="users-role-badge">{{ 'Administrador' if item['privilege_user'] <= 2 else 'Usuário Padrão' }}</span>
+                    </div>
+                </div>
+                <div class="user-edit-overview-actions">
+                    {% if session.get('user_grant', 99) <= 2 %}
+                        <button class="user-password-trigger" type="button" onclick="redefinePassword('{{ req_id_user }}')">
+                            {{ ui_icon('svg/lock.svg', class_name='ui-icon-sm') }}
+                            <span>Redefinir senha</span>
+                        </button>
+                        {% if item['privilege_user'] > 2 %}
+                            <button class="user-deactivate-trigger" type="button" onclick="deactivateUser('{{ req_id_user }}')">
+                                {{ ui_icon('svg/circle-minus.svg', class_name='ui-icon-sm') }}
+                                <span>Desativar acesso</span>
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </section>
+
+            <div class="user-edit-layout">
+                <section class="users-panel user-account-card" aria-labelledby="user-account-title">
+                    <header class="users-panel-header">
                         <div>
-                            <div style="margin-bottom: 10px; margin-top: 8px;" class="centralizado">
-                                <div class="user-button bigger">
-                                    {{ item['nome_user'][0] }}{{ item['sobrenome_user'][0] }}
-                                </div>
-                            </div>
-                            <h3>{{ item['nome_user'] }} {{ item['sobrenome_user'] }}</h3>
-                            <h4 style="margin-top: 0; margin-bottom: 8px; text-align: center">
-                                {{ 'Administrador' if item['privilege_user'] <= 2 else 'Usuário Padrão' }}
-                            </h4>
-                            <h4 style="margin: 0 0 18px 0; text-align: center; color: #888; font-size: 13px;">
-                                Login: {{ item['login_user'] }}
-                            </h4>
+                            <p class="users-kicker">IDENTIFICAÇÃO</p>
+                            <h2 id="user-account-title">Dados da conta</h2>
+                        </div>
+                        <span class="users-panel-icon">{{ ui_icon('svg/circle-user.svg', class_name='ui-icon-md') }}</span>
+                    </header>
+                    <dl class="user-account-details">
+                        <div><dt>Nome</dt><dd>{{ item['nome_user'] }} {{ item['sobrenome_user'] }}</dd></div>
+                        <div><dt>Login</dt><dd class="users-code">{{ item['login_user'] }}</dd></div>
+                        <div><dt>Identificador</dt><dd class="users-code">#{{ item['id_user'] }}</dd></div>
+                        <div><dt>Perfil</dt><dd>{{ 'Administrador' if item['privilege_user'] <= 2 else 'Usuário Padrão' }}</dd></div>
+                        <div><dt>Último acesso</dt><dd class="users-code">{{ item['ult_acesso'] or 'Nunca acessou' }}</dd></div>
+                    </dl>
+                </section>
+
+                <section class="users-panel user-permissions-card" aria-labelledby="user-permissions-title">
+                    <header class="users-directory-header">
+                        <div>
+                            <p class="users-kicker">CONTRATOS DE ACESSO</p>
+                            <h2 id="user-permissions-title">Permissões do sistema</h2>
+                            <p>{{ user_perm|length }} de {{ permissions|length }} permissões atribuídas.</p>
+                        </div>
+                        <label class="users-search" for="permission-search-input">
+                            {{ ui_icon('svg/search.svg', class_name='ui-icon-sm') }}
+                            <input id="permission-search-input" type="search" placeholder="Buscar permissão..." oninput="filterPermissions()">
+                        </label>
+                    </header>
+
+                    {% set perm_ids = user_perm|map(attribute='id_perm')|list %}
+                    <div class="user-permissions-wrap">
+                        <table id="permissions-table" class="users-table user-permissions-table">
+                            <thead>
+                                <tr><th>Permissão</th><th>Descrição</th><th>Acesso</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for permission in permissions %}
+                                    {% set toggle_handler = 'confirmRemover' if permission['id_perm'] in perm_ids else 'confirmAdicionar' %}
+                                    <tr data-permission-row>
+                                        <td class="users-code">{{ permission['id_perm'] }}</td>
+                                        <td>{{ permission['desc_perm'] }}</td>
+                                        <td class="user-permission-toggle">
+                                            {{ switch_control(
+                                                'Acesso a ' ~ permission['desc_perm'],
+                                                permission['id_perm'] in perm_ids,
+                                                toggle_handler ~ "('" ~ req_id_user ~ "', '" ~ permission['id_perm'] ~ "', this)"
+                                            ) }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div id="permissions-empty-search" class="users-empty-search" hidden>
+                            <strong>Nenhuma permissão encontrada</strong>
+                            <span>Revise o código ou a descrição pesquisada.</span>
                         </div>
                     </div>
-                    <a style="font-size: 14px" class="hyperlink" onclick="redefinePassword('{{ req_id_user }}')">REDEFINIR SENHA</a>
-                    <a class="btn-fancy" href="{{ url_for('users') }}">Voltar</a>
-                {% endfor %}
-            </form>
-        </div>
-        <div draggable="false" class="tables-container" style="width: 600px">
-            <div style="width: 100%; max-height: 535px;">
-                <h1>Permissões do Sistema</h1>
-                <div class="table-overflow" style="max-height: 540px;">
-                    <table id="filterTable">
-                        <tr>
-                            <th>Permissão (Cód.)</th>
-                            <th>Permissão (Desc.)</th>
-                            <th>Acesso</th>
-                        </tr>
-                        {% for permission in permissions %}
-                            <tr>
-                                <td>{{ permission['id_perm'] }}</td>
-                                <td>{{ permission['desc_perm'] }}</td>
-                                <td class="tb-checkbox">
-                                    {% if user_perm %}
-                                        {% set perm_ids = user_perm|map(attribute='id_perm')|list %}
-                                        {% if permission['id_perm'] in perm_ids %}
-                                            <input 
-                                                checked
-                                                type="checkbox" 
-                                                class="check" 
-                                                oninput="confirmRemover(
-                                                    '{{ req_id_user }}',
-                                                    '{{ permission['id_perm'] }}', 
-                                                    this
-                                                )"
-                                            >
-                                        {% else %}
-                                            <input 
-                                                type="checkbox" 
-                                                class="check" 
-                                                oninput="confirmAdicionar(
-                                                    '{{ req_id_user }}',
-                                                    '{{ permission['id_perm'] }}', 
-                                                    this
-                                                )"
-                                            >
-                                        {% endif %}
-                                    {% else %}
-                                        <input type="checkbox" class="check" oninput="confirmAdicionar('{{ req_id_user }}','{{ permission['id_perm'] }}', this)">
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
+                </section>
             </div>
-            <br>
-        </div>
-    </div>
 
-    {# Password Reset Modal #}
-    <div id="passwordModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('passwordModal')">
-        <div class="modal modal-sm">
-            <div class="modal-header">
-                <h2>Redefinir Senha</h2>
-                <button class="modal-close" onclick="Modal.close('passwordModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-field">
-                    <label for="newPassword">Nova senha</label>
-                    <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres...">
+            {% if session.get('user_grant', 99) <= 2 %}
+                <div id="passwordModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('passwordModal')">
+                    <div class="modal modal-sm user-password-modal" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+                        <div class="modal-header">
+                            <div>
+                                <p class="users-kicker">SEGURANÇA DA CONTA</p>
+                                <h2 id="password-modal-title">Redefinir senha</h2>
+                            </div>
+                            <button class="modal-close" type="button" onclick="Modal.close('passwordModal')" aria-label="Fechar">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="user-password-account">
+                                {{ user_avatar(item['nome_user'] ~ ' ' ~ item['sobrenome_user']) }}
+                                <span><small>ALTERANDO A SENHA DE</small><strong>{{ item['nome_user'] }} {{ item['sobrenome_user'] }}</strong></span>
+                            </div>
+                            <div class="modal-field">
+                                <label for="newPassword">Nova senha</label>
+                                <input type="password" id="newPassword" placeholder="Mínimo de 6 caracteres" autocomplete="new-password">
+                            </div>
+                            <div class="modal-field">
+                                <label for="confirmPassword">Confirmar nova senha</label>
+                                <input type="password" id="confirmPassword" placeholder="Repita a nova senha" autocomplete="new-password">
+                            </div>
+                            <p class="user-password-hint">A nova senha passa a valer imediatamente.</p>
+                            <p id="password-feedback" class="user-password-feedback" role="alert" hidden></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="modal-btn modal-btn-secondary" type="button" onclick="Modal.close('passwordModal')">Cancelar</button>
+                            <button id="save-password-button" class="modal-btn modal-btn-primary" type="button" onclick="submitPassword()">Salvar nova senha</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-field">
-                    <label for="confirmPassword">Confirmar senha</label>
-                    <input type="password" id="confirmPassword" placeholder="Repita a senha...">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" onclick="Modal.close('passwordModal')">Cancelar</button>
-                <button class="modal-btn modal-btn-primary" onclick="submitPassword()">Salvar</button>
-            </div>
-        </div>
+            {% endif %}
+        {% endfor %}
     </div>
 
 {% endblock content %}
 
 {% block route_script %}
-
     <script>
         let currentUserId = null;
+
+        function setPasswordFeedback(message) {
+            const feedback = document.getElementById('password-feedback');
+            if (!feedback) return;
+            feedback.textContent = message;
+            feedback.hidden = !message;
+        }
 
         function redefinePassword(idUser) {
             currentUserId = idUser;
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
+            setPasswordFeedback('');
             Modal.open('passwordModal');
+            requestAnimationFrame(() => document.getElementById('newPassword').focus());
         }
 
-        function submitPassword() {
+        async function submitPassword() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const saveButton = document.getElementById('save-password-button');
 
             if (newPassword.length < 6) {
-                Modal.alert('A senha deve ter no mínimo 6 caracteres.');
+                setPasswordFeedback('A senha deve ter no mínimo 6 caracteres.');
                 return;
             }
-
             if (newPassword !== confirmPassword) {
-                Modal.alert('As senhas não coincidem.');
+                setPasswordFeedback('As senhas não coincidem.');
                 return;
             }
 
-            fetch('/api/users/set-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id_user: currentUserId,
-                    password: newPassword
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Modal.close('passwordModal');
-                    Modal.alert('Senha redefinida com sucesso!');
-                } else {
-                    Modal.alert(data.error || 'Erro ao redefinir senha.');
-                }
-            })
-            .catch(err => {
-                console.error('Error:', err);
-                Modal.alert('Erro ao redefinir senha.');
+            setPasswordFeedback('');
+            saveButton.disabled = true;
+            saveButton.textContent = 'Salvando...';
+
+            try {
+                const response = await fetch('/api/users/set-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_user: currentUserId, password: newPassword })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.error || 'Erro ao redefinir senha.');
+
+                Modal.close('passwordModal');
+                Modal.alert('Senha redefinida com sucesso.');
+            } catch (error) {
+                setPasswordFeedback(error.message || 'Erro ao redefinir senha.');
+            } finally {
+                saveButton.disabled = false;
+                saveButton.textContent = 'Salvar nova senha';
+            }
+        }
+
+        function filterPermissions() {
+            const term = document.getElementById('permission-search-input').value.trim().toLocaleLowerCase('pt-BR');
+            const rows = document.querySelectorAll('[data-permission-row]');
+            let visibleRows = 0;
+            rows.forEach(row => {
+                const matches = !term || row.textContent.toLocaleLowerCase('pt-BR').includes(term);
+                row.hidden = !matches;
+                if (matches) visibleRows++;
             });
+            document.getElementById('permissions-empty-search').hidden = visibleRows !== 0;
         }
 
         function confirmRemover(idUser, idPerm, checkbox) {
-            Modal.confirm("Você tem certeza que deseja remover esta permissão?", () => {
-                window.location.href = "/users/remove-perm/" + idUser + "/" + idPerm;
-            }, { title: 'Remover Permissão', confirmText: 'Remover', danger: true });
-
-            // Reset checkbox if modal is closed without confirming
+            Modal.confirm('Remover esta permissão do usuário?', () => {
+                window.location.href = '/users/remove-perm/' + idUser + '/' + idPerm;
+            }, { title: 'Remover permissão', confirmText: 'Remover', danger: true });
             checkbox.checked = true;
         }
 
         function confirmAdicionar(idUser, idPerm, checkbox) {
-            Modal.confirm("Você tem certeza que deseja adicionar esta permissão?", () => {
-                window.location.href = "/users/add-perm/" + idUser + "/" + idPerm;
-            }, { title: 'Adicionar Permissão', confirmText: 'Adicionar' });
-
-            // Reset checkbox if modal is closed without confirming
+            Modal.confirm('Adicionar esta permissão ao usuário?', () => {
+                window.location.href = '/users/add-perm/' + idUser + '/' + idPerm;
+            }, { title: 'Adicionar permissão', confirmText: 'Adicionar' });
             checkbox.checked = false;
         }
-    </script>
 
+        function deactivateUser(idUser) {
+            Modal.confirm('Remover todas as permissões deste usuário?', () => {
+                window.location.href = '/users/deactivate/' + idUser + '/';
+            }, { title: 'Desativar acesso', confirmText: 'Desativar', danger: true });
+        }
+    </script>
 {% endblock route_script %}

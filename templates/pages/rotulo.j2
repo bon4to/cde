@@ -24,99 +24,89 @@
 
     </div>
 
-    <div id="divContent">
-        <div draggable="false" style="display: flex; align-items: center;" class="form-login">
-            <div class="flex-h">
-                <div class="log">
-                    <div style="max-width: 400px; justify-content: flex-start; margin: auto">
-                        <form style="max-width: 400px; justify-content: flex-start; margin: auto" id="form-field" method="post" action="{{ url_for('rotulo') }}">
-                            <div class="two-split">
-                                <div>
-                                    <label for="diametro_inicial" >Diâmetro (Externo)</label>
-                                    <br>
-                                    <input 
-                                        class="address" 
-                                        maxlength="6" 
-                                        id="diametro_inicial" 
-                                        type="number" 
-                                        name="diametro_minimo"  
-                                        required placeholder="Diâmetro..."
-                                    >
-                                </div>
-                                <div>
-                                    <label for="diametro_minimo">Diâmetro (Interno)</label>
-                                    <br>
-                                    <input 
-                                    class="address" 
-                                    maxlength="6" 
-                                    id="diametro_minimo" 
-                                    type="number" 
-                                    name="diametro_minimo"
-                                    required 
-                                    placeholder="Diâmetro..."
-                                >
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="two-split">
-                                <div>
-                                    <label for="espessura_fita">Rótulo (Espessura)</label>
-                                    <br>
-                                    <input 
-                                        class="address" 
-                                        maxlength="6" 
-                                        name="espessura_fita" 
-                                        id="espessura_fita" 
-                                        type="number"  
-                                        required 
-                                        placeholder="Espessura..."
-                                    >
-                                </div>
-                                <div>
-                                    <label for="espessura_papelao">Tubete (Espessura)</label>
-                                    <br>
-                                    <input 
-                                        class="address" 
-                                        maxlength="6" 
-                                        type="number" 
-                                        id="espessura_papelao" 
-                                        name="espessura_papelao"  
-                                        required 
-                                        placeholder="Espessura..."
-                                    >
-                                </div>
-                            </div>
-                                <div>
-                                    <label for="compr_rotulo">Rótulo (Comprimento)</label>
-                                    <br>
-                                    <input 
-                                        type="number" 
-                                        maxlength="6" 
-                                        id="compr_rotulo" 
-                                        name="compr_rotulo" 
-                                        required 
-                                        placeholder="Distância do início de um rótulo ao início de outro..."
-                                    >
-                                </div>
-                            <hr>
-                            <h3 id="resposta1" class="alert">Calculadora</h3>
-                            <p id="resposta2">Digite os parâmetros...</p>
-                            <div style="display: none" class="split-h">
-                                <input class="btn-fancy" type="submit" value="Calcular...">
-                            </div>
-                        </form>
-                    </div>
+    <div id="divContent" class="label-calculator-page">
+        <section draggable="false" class="label-calculator-shell">
+            <header class="label-calculator-header">
+                <div>
+                    <p class="label-calculator-kicker">CONVERSÃO DE BOBINAS</p>
+                    <h1>Calculadora de rótulos</h1>
                 </div>
-                <div id="tables-container" style="margin: 40px;">
-                    <div class="centralizado">
-                        <div class="centralizado" style="background-color: var(--main-color); border-radius: 20px; width: 450px; height: 450px;">
-                            <img class="side-banner" id="dynamicImage"  style="height: 450px; width: 450px; border-radius: 20px;" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="">
+                <p>Informe as cinco medidas para estimar o rendimento da bobina.</p>
+            </header>
+
+            <div class="label-calculator-layout">
+                <form class="label-calculator-form" id="form-field" method="post" action="{{ url_for('rotulo') }}">
+                    <div class="label-calculator-section-heading">
+                        <span>01</span>
+                        <div>
+                            <h2>Dimensões da bobina</h2>
+                            <p>Diâmetros externo e interno.</p>
                         </div>
                     </div>
-                    <p id="resposta3" style="font-weight: 500; color: var(--main-color);">Aguardando dados...</p>
-                </div>
+
+                    <div class="label-calculator-grid">
+                        <label class="label-calculator-field" for="diametro_inicial">
+                            <span>Diâmetro externo</span>
+                            <input class="address" maxlength="6" id="diametro_inicial" type="number" name="diametro_minimo" required placeholder="0">
+                        </label>
+                        <label class="label-calculator-field" for="diametro_minimo">
+                            <span>Diâmetro interno</span>
+                            <input class="address" maxlength="6" id="diametro_minimo" type="number" name="diametro_minimo" required placeholder="0">
+                        </label>
+                    </div>
+
+                    <div class="label-calculator-section-heading">
+                        <span>02</span>
+                        <div>
+                            <h2>Material e passo</h2>
+                            <p>Espessuras e comprimento de repetição.</p>
+                        </div>
+                    </div>
+
+                    <div class="label-calculator-grid">
+                        <label class="label-calculator-field" for="espessura_fita">
+                            <span>Espessura do rótulo</span>
+                            <input class="address" maxlength="6" name="espessura_fita" id="espessura_fita" type="number" required placeholder="0">
+                        </label>
+                        <label class="label-calculator-field" for="espessura_papelao">
+                            <span>Espessura do tubete</span>
+                            <input class="address" maxlength="6" type="number" id="espessura_papelao" name="espessura_papelao" required placeholder="0">
+                        </label>
+                        <label class="label-calculator-field label-calculator-field-wide" for="compr_rotulo">
+                            <span>Comprimento do rótulo</span>
+                            <input type="number" maxlength="6" id="compr_rotulo" name="compr_rotulo" required placeholder="Distância entre o início de dois rótulos">
+                        </label>
+                    </div>
+
+                    <div class="label-calculator-result" aria-live="polite">
+                        <p>RESULTADO ESTIMADO</p>
+                        <h3 id="resposta1">Calculadora pronta</h3>
+                        <span id="resposta2">Digite os parâmetros para calcular.</span>
+                    </div>
+
+                    <div style="display: none" class="split-h">
+                        <input class="btn-fancy" type="submit" value="Calcular...">
+                    </div>
+                </form>
+
+                <aside id="tables-container" class="label-calculator-preview">
+                    <div class="label-calculator-preview-heading">
+                        <div>
+                            <p class="label-calculator-kicker">REFERÊNCIA VISUAL</p>
+                            <h2>Medida selecionada</h2>
+                        </div>
+                        <span>FOCO DINÂMICO</span>
+                    </div>
+                    <figure>
+                        <div class="label-calculator-image-frame">
+                            <img id="dynamicImage" src="{{ url_for('static', filename='img/rotulo/rotulo.jpg') }}" alt="Bobina de rótulos usada como referência para as medidas">
+                        </div>
+                        <figcaption>Selecione um campo para destacar sua medida.</figcaption>
+                    </figure>
+                    <p id="resposta3" class="label-calculator-turns">Aguardando dados...</p>
+                </aside>
             </div>
-        </div>
+        </section>
     </div>
 
 {% endblock content %}

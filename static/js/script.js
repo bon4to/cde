@@ -58,8 +58,8 @@ function toggleFields() {
             'F' : "/static/svg/package-check.svg"
         };
 
-        // atualiza o SVG da operação
-        svgOperation.src = svgPaths[operacao];
+        // atualiza o ícone da operação
+        svgOperation.style.setProperty('--ui-icon-source', `url('${svgPaths[operacao]}')`);
     }
 
     // atualiza o SVG da operação
@@ -111,22 +111,40 @@ document.addEventListener("mouseover", (e) => {
     tooltip.className = "tooltip";
     tooltip.textContent = title;
     with (tooltip.style) {
-        position =      "absolute";
+        position =      "fixed";
         background =    "black";
         color =         "white";
-        padding =       "5px";
-        borderRadius =  "4px";
+        padding =       "7px 9px";
+        borderRadius =  "6px";
         fontSize =      "12px";
-        whiteSpace =    "nowrap";
+        maxWidth =      "min(240px, calc(100vw - 16px))";
+        whiteSpace =    "normal";
         pointerEvents = "none";
         zIndex =        "9999";
-    }    
+    }
     document.body.appendChild(tooltip);
 
     // move o tooltip
     const moveTooltip = (event) => {
-        tooltip.style.left = event.pageX + 10 + "px";
-        tooltip.style.top = event.pageY + 10 + "px";
+        const gap = 12;
+        const edge = 8;
+        const viewportWidth = document.documentElement.clientWidth;
+        const viewportHeight = document.documentElement.clientHeight;
+        const rect = tooltip.getBoundingClientRect();
+
+        let left = event.clientX + gap;
+        let top = event.clientY + gap;
+
+        if (left + rect.width + edge > viewportWidth) {
+            left = event.clientX - rect.width - gap;
+        }
+
+        if (top + rect.height + edge > viewportHeight) {
+            top = event.clientY - rect.height - gap;
+        }
+
+        tooltip.style.left = Math.max(edge, Math.min(left, viewportWidth - rect.width - edge)) + "px";
+        tooltip.style.top = Math.max(edge, Math.min(top, viewportHeight - rect.height - edge)) + "px";
     };
 
     moveTooltip(e);
@@ -272,7 +290,7 @@ function maximizeText(text) {
         popupContent.className = 'popup-content';
         popupContent.innerHTML = '<p>' + text.value + '</p>';
 
-        closeButton.innerHTML  = '<img class="svg-inv" src="/static/svg/xmark.svg" alt="Fechar">';
+        closeButton.innerHTML  = '<span class="ui-icon ui-icon-md" style="--ui-icon-source: url(\'/static/svg/xmark.svg\');" aria-hidden="true"></span>';
         closeButton.className  = 'btn-fancy button-mini';
 
         closeButton.addEventListener('click', function() {
@@ -483,8 +501,6 @@ function toggleTheme() {
     const root = document.documentElement;
     document.documentElement.classList.toggle('dark');
 
-    var img = document.getElementById('toggle-theme');
-
     if (document.documentElement.classList.contains('dark')) {
         localStorage.setItem('theme', 'dark');
         //root.style.setProperty('--cde-color-rgb', '53, 80, 141');
@@ -545,16 +561,16 @@ function loadNotifications() {
                 unreadNotifications++;
 
                 // altera o icone da notificacao
-                svgNotification = document.getElementById('svg-notification');
-                svgNotification.src = '/static/svg/bell-dot.svg';
+                const svgNotification = document.getElementById('svg-notification');
+                svgNotification.style.setProperty('--ui-icon-source', "url('/static/svg/bell-dot.svg')");
 
                 // cria o elemento da notificacao
                 const notificationElement = document.createElement('div');
                 notificationElement.classList.add('dropdown-notification');
                 notificationElement.innerHTML = `
-                    <div class="flex-v" style="gap: 2px; cursor: pointer; border-bottom: 1px solid var(--light-white-h);" onclick="window.location.href='/cde/notifications/${notification.id}'">
-                        <h1 class="dropdown-notification-title" style="height: 16px;">${notification.title}</h1>
-                        <p class="dropdown-notification-message" style="height: 12px; margin-bottom: 4px;">${notification.message}</p>
+                    <div class="flex-v dropdown-notification-content" onclick="window.location.href='/cde/notifications/${notification.id}'">
+                        <strong class="dropdown-notification-title">${notification.title}</strong>
+                        <p class="dropdown-notification-message">${notification.message}</p>
                         <p class="dropdown-notification-date">${notification.date}</p>
                     </div>
                 `;
@@ -563,8 +579,8 @@ function loadNotifications() {
             
             const moreElement = document.createElement('div');
             moreElement.innerHTML = `
-                <div class="dropdown-notification">
-                    <a style="font-family: 'Calibri', sans-serif;" href="/cde/notifications">Ver todas... (${unreadNotifications} não lidas)</a>
+                <div class="dropdown-notification dropdown-notification-footer">
+                    <a href="/cde/notifications">Ver todas... (${unreadNotifications} não lidas)</a>
                 </div>
             `;
             notificationsContainer.appendChild(moreElement);

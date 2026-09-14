@@ -1,0 +1,13 @@
+{% macro switch_control(label, checked=False, onchange='', name='', value='') -%}
+    <label class="switch-control">
+        <input
+            type="checkbox"
+            {% if name %}name="{{ name }}"{% endif %}
+            {% if value %}value="{{ value }}"{% endif %}
+            {% if checked %}checked{% endif %}
+            {% if onchange %}oninput="{{ onchange }}"{% endif %}
+            aria-label="{{ label }}"
+        >
+        <span aria-hidden="true"></span>
+    </label>
+{%- endmacro %}

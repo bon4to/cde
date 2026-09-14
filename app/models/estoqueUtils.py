@@ -20,6 +20,73 @@ Example:
     t2: quantity = 20 AND operation = 'S' => -20
 """
 
+MOCK_ITEM_LOCATION_COLUMNS = [
+    "rua_letra",
+    "rua_numero",
+    "cod_item",
+    "desc_item",
+    "lote_item",
+    "saldo",
+    "date_fab",
+    "item_expire_months",
+]
+
+MOCK_ITEM_LOCATIONS = {
+    "004327": [
+        {
+            "address": "A.1 ",
+            "cod_item": "004327",
+            "desc_item": "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET",
+            "cod_lote": "CS5667",
+            "saldo": 625,
+            "date_fab": "2026-05-26",
+            "item_expire_months": 12,
+            "validade": 284,
+        }
+    ],
+    "004649": [
+        {
+            "address": "A.1 ",
+            "cod_item": "004649",
+            "desc_item": "ESPUMANTE NATURAL BRANCO BRUT 6X750ML - SR",
+            "cod_lote": "CS0000",
+            "saldo": 15,
+            "date_fab": "2026-07-20",
+            "item_expire_months": 12,
+            "validade": 339,
+        }
+    ],
+    "000366": [
+        {
+            "address": "A.2 ",
+            "cod_item": "000366",
+            "desc_item": "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L",
+            "cod_lote": "CS5900",
+            "saldo": 1045,
+            "date_fab": "2026-06-03",
+            "item_expire_months": 18,
+            "validade": 475,
+        },
+        {
+            "address": "A.3 ",
+            "cod_item": "000366",
+            "desc_item": "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L",
+            "cod_lote": "CS5924",
+            "saldo": 950,
+            "date_fab": "2026-06-13",
+            "item_expire_months": 18,
+            "validade": 485,
+        },
+    ],
+}
+
+
+def get_mock_item_inv_locations(cod_item):
+    result = MOCK_ITEM_LOCATIONS.get(str(cod_item), [])
+    if result:
+        return result, MOCK_ITEM_LOCATION_COLUMNS
+    return [], []
+
 
 @staticmethod
 def get_item_inv_locations(cod_item=None):
@@ -56,6 +123,9 @@ def get_item_inv_locations(cod_item=None):
         dsn = "LOCAL"
         result_local, columns_local = dbUtils.query(query, dsn)
 
+        if not columns_local and cdeapp.config.get_debug():
+            return get_mock_item_inv_locations(cod_item)
+
         result = []
         for row in result_local:
             validade, err = misc.days_to_expire(
@@ -80,6 +150,9 @@ def get_item_inv_locations(cod_item=None):
                     "validade": validade,
                 }
             )
+
+        if not result and cdeapp.config.get_debug():
+            return get_mock_item_inv_locations(cod_item)
 
         return result, columns_local
     else:
@@ -615,11 +688,33 @@ def get_inv_report(timestamp=False):
 
 @staticmethod
 # RETORNA ENDEREÇAMENTO DE FATURADOS POR LOTES
-def get_inv_address_with_batch_fat():
+def get_inv_address_with_batch_fat(page=None, per_page=None):
+    paginated = page is not None and per_page is not None
+    offset = (page - 1) * per_page if paginated else 0
+
     with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
-        cursor.execute(
+
+        where_clause = """
+            (h.operacao = 'S' AND (h.id_request != 0 OR h.id_request IS NULL))
+            OR
+            (h.operacao = 'F' AND (h.id_carga != 0 OR h.id_carga IS NULL))
+        """
+
+        row_count = 0
+        if paginated:
+            cursor.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM tbl_transactions h
+                JOIN itens i
+                ON h.cod_item = i.cod_item
+                WHERE {where_clause};
             """
+            )
+            row_count = cursor.fetchone()[0]
+
+        query = f"""
             SELECT  
                 h.rua_letra, h.rua_numero, i.cod_item,
                 i.desc_item, h.lote_item, h.id_carga, 
@@ -629,16 +724,17 @@ def get_inv_address_with_batch_fat():
             JOIN itens i 
             ON h.cod_item = i.cod_item
             
-            WHERE 
-                (h.operacao = 'S' AND (h.id_request != 0 OR h.id_request IS NULL)) 
-                OR
-                (h.operacao = 'F' AND (h.id_carga != 0 OR h.id_carga IS NULL))
+            WHERE {where_clause}
             
             ORDER BY 
                 h.time_mov DESC, h.id_carga DESC,
-                h.id_request DESC, h.cod_item ASC;
+                h.id_request DESC, h.cod_item ASC
         """
-        )
+        if paginated:
+            query += " LIMIT ? OFFSET ?"
+            cursor.execute(query, (per_page, offset))
+        else:
+            cursor.execute(query)
 
         result = [
             {
@@ -658,6 +754,8 @@ def get_inv_address_with_batch_fat():
             }
             for row in cursor.fetchall()
         ]
+    if paginated:
+        return result, row_count
     return result
 
 

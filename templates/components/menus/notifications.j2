@@ -1,4 +1,5 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
 
 {% block title %}Notificações{% endblock title %}
 
@@ -62,15 +63,15 @@
                         <div class="flex-h" style="width: 100%; justify-content: flex-end;">
                             {% if notification['flag_read'] %}
                             <div class="button-mini btn-fancy" onclick="unclearNotification({{ session['id_user'] }}, {{ notification['id'] }})" title="Marcar como não lida">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/mail.svg') }}" alt="">
+                                {{ ui_icon('svg/mail.svg', class_name='ui-icon-md') }}
                             </div>
                             {% else %}
                             <div class="button-mini btn-fancy" onclick="clearNotification({{ session['id_user'] }}, {{ notification['id'] }})" title="Marcar como lida">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/mail-open.svg') }}" alt="">
+                                {{ ui_icon('svg/mail-open.svg', class_name='ui-icon-md') }}
                             </div>
                             {% endif %}
                             <div class="button-mini btn-fancy" onclick="window.location.href='{{ url_for('cde_notifications') }}'" title="Fechar">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                                {{ ui_icon('svg/xmark.svg', class_name='ui-icon-md') }}
                             </div>
                         </div>
                     </div>
@@ -90,7 +91,7 @@
                             </div>
                             <textarea class="address-observ" id="message" maxlength="180" name="message" required placeholder="Mensagem..."></textarea>
                             <button type="submit" class="btn-fancy">
-                                <img class="svg-invert" src="{{ url_for('static', filename='svg/send.svg') }}" alt="Enviar">
+                                {{ ui_icon('svg/send.svg', 'Enviar', 'ui-icon-md') }}
                             </button>
                         </div>
                     </form>

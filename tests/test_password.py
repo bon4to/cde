@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 
 from app.models import misc
@@ -48,4 +50,20 @@ class TestCheckKey:
         password = ""
         hashed = misc.hash_key(password)
         result = misc.check_key(hashed, password)
+        assert result is True
+
+
+class TestPasswordCheck:
+    """Tests for password_check function."""
+
+    def test_extracts_hash_from_query_row(self):
+        password = "test_password"
+        hashed = misc.hash_key(password)
+
+        with patch(
+            "app.models.dbUtils.query",
+            return_value=([(hashed,)], ["password_user"]),
+        ):
+            result = misc.password_check(1, password)
+
         assert result is True

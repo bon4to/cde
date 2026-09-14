@@ -1,4 +1,5 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
 
 {% block title %}Etiquetas{% endblock title %}
 
@@ -24,136 +25,112 @@
 
     </div>
     
-    <div id="divContent">
-        <div class="forms-container">
-            <!-- leitor de códigos (qrcode, código de barras ou codigo de item) -->
-            <form id="formBuscarItens" style="width: 100%;" method="post" onsubmit="showLockLabel()">
-                <label for="input_code"></label>
-                <div class="inputs">
-                    <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
-                    <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+    <div id="divContent" class="label-generator-page">
+        <section class="label-generator-shell">
+            <header class="label-generator-header">
+                <div>
+                    <p class="label-generator-kicker">IDENTIFICAÇÃO OPERACIONAL</p>
+                    <h1>Gerador de etiquetas</h1>
                 </div>
-                <hr>
-            </form>
+                <p>Localize o item, confirme o lote e gere o QR Code para impressão.</p>
+            </header>
 
-            <form id="form-field" method="post" action="{{ url_for('etiqueta') }}">
-                <div class="flex-v">
-                    <div class="inputs">
-                        <div class="flex-v">
-                            {% from 'components/lock-label.j2' import lock_label %}
-                            {{ lock_label('Produto', 'desc_item') }}
-    
-                            <input 
-                                id="desc_item" 
-                                name="desc_item" 
-                                class="address-one"
-                                type="text" 
-                                value="{{ json_desc_item }}" 
-                                onclick="maximizeText(this)" 
-                                required 
-                                readonly 
-                                placeholder="Produto..."
-                            >
+            <div class="label-generator-layout">
+                <div class="label-generator-controls">
+                    <section class="label-generator-step">
+                        <div class="label-generator-step-heading">
+                            <span>01</span>
+                            <div>
+                                <h2>Localizar item</h2>
+                                <p>Leia o código ou informe-o manualmente.</p>
+                            </div>
                         </div>
-                    </div>
+                        <form id="formBuscarItens" class="label-generator-search" method="post" onsubmit="showLockLabel()">
+                            <label for="input_code">QR Code ou código de barras</label>
+                            <div class="inputs">
+                                <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="Escaneie ou digite o código">
+                                <button class="btn-fancy-sober icon-button scanner-submit" type="submit" aria-label="Buscar código" title="Buscar código">
+                                    {{ ui_icon('svg/scan-barcode.svg', class_name='ui-icon-md') }}
+                                </button>
+                            </div>
+                        </form>
+                    </section>
 
-                    <div class="inputs">
-                        <div class="flex-v">
-                            {% from 'components/lock-label.j2' import lock_label %}
-                            {{ lock_label('Código', 'cod_item', '<span style="color: red" id="json_cod_item_ocurr"></span>' | safe) }}
-                            
-                            <select 
-                                id="cod_item" 
-                                name="cod_item" 
-                                class="address-two" 
-                                required 
-                                onchange="showLockLabel()"
-                            >
-                            </select>
+                    <section class="label-generator-step label-generator-data-step">
+                        <div class="label-generator-step-heading">
+                            <span>02</span>
+                            <div>
+                                <h2>Confirmar dados</h2>
+                                <p>Revise produto, código e lote.</p>
+                            </div>
                         </div>
-                        <div class="flex-v">
+                        <form id="form-field" class="label-generator-form" method="post" action="{{ url_for('etiqueta') }}">
                             {% from 'components/lock-label.j2' import lock_label %}
-                            {{ lock_label('Lote', 'cod_lote') }}
+                            <div class="label-generator-field label-generator-field-wide">
+                                {{ lock_label('Produto', 'desc_item') }}
+                                <input id="desc_item" name="desc_item" class="address-one" type="text" value="{{ json_desc_item }}" onclick="maximizeText(this)" required readonly placeholder="Produto selecionado">
+                            </div>
 
-                            <input 
-                                id="lote_item" 
-                                name="cod_lote" 
-                                class="address-two" 
-                                pattern="[A-Z0-9]{6}" 
-                                maxlength="6" 
-                                type="text" 
-                                value="{{ json_cod_lote }}" 
-                                required 
-                                readonly 
-                                placeholder="Lote..."
-                            >
-                        </div>
-                    </div>
-                    <div class="inputs">
-                        <input 
-                            class="btn-fancy" 
-                            type="submit" 
-                            value="GERAR"
-                        >
-                        <button 
-                            class="btn-fancy" 
-                            style="
-                                max-height: 60px; 
-                                max-width: 60px; 
-                                padding: 12px; 
-                            " 
-                            onclick="toggleCheckbox('imgCheckbox','imgDownload')" 
-                        >
-                            <img class="svg-inv" id="imgCheckbox" src="{{ url_for('static', filename='svg/download.svg') }}" alt="">
-                        </button>
-                    </div>
+                            <div class="label-generator-form-grid">
+                                <div class="label-generator-field">
+                                    {{ lock_label('Código', 'cod_item', '<span style="color: var(--ux-danger)" id="json_cod_item_ocurr"></span>' | safe) }}
+                                    <select id="cod_item" name="cod_item" class="address-two" required onchange="showLockLabel()"></select>
+                                </div>
+                                <div class="label-generator-field">
+                                    {{ lock_label('Lote', 'cod_lote') }}
+                                    <input id="lote_item" name="cod_lote" class="address-two" pattern="[A-Z0-9]{6}" maxlength="6" type="text" value="{{ json_cod_lote }}" required readonly placeholder="Lote">
+                                </div>
+                            </div>
 
-                    <!-- checkbox real oculta -->
-                    <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">
+                            <div class="label-generator-actions">
+                                <input class="btn-fancy label-generator-submit" type="submit" value="GERAR ETIQUETA">
+                                <button class="btn-fancy label-generator-download" aria-label="Gerar e baixar etiqueta" title="Gerar e baixar etiqueta" onclick="toggleCheckbox('imgCheckbox','imgDownload')">
+                                    {{ ui_icon('svg/download.svg', class_name='ui-icon-md', element_id='imgCheckbox') }}
+                                </button>
+                            </div>
 
+                            <input class="check_box" style="display: none" type="checkbox" id="imgDownload" name="imgDownload">
+                        </form>
+                    </section>
                 </div>
-            </form>
-        </div>
 
-        <div class="tables-container" style="max-height: 600px">
-            <div class="centralizado">
-                <div class="qr-item featured">
-                    <img id="qrCodeImage" title="Última etiqueta gerada" src="" alt="">
+                <div class="label-generator-output">
+                    <section class="label-generator-current">
+                        <div class="label-generator-output-heading">
+                            <div>
+                                <p class="label-generator-kicker">ETIQUETA ATUAL</p>
+                                <h2>Pré-visualização</h2>
+                            </div>
+                            <span>QR CODE</span>
+                        </div>
+                        <div class="qr-item featured label-generator-featured">
+                            <img id="qrCodeImage" title="Última etiqueta gerada" src="" alt="Última etiqueta gerada">
+                        </div>
+                        <div id="label-success" class="label-generator-status">Aguardando dados...</div>
+                    </section>
+
+                    <section id="tables-container" class="label-generator-history">
+                        <div class="label-generator-history-heading">
+                            <div>
+                                <p class="label-generator-kicker">HISTÓRICO DA SESSÃO</p>
+                                <h2>Etiquetas recentes</h2>
+                            </div>
+                            <span>8 ITENS</span>
+                        </div>
+                        <div id="qr-grid" class="qr-grid">
+                            <div class="qr-item"><img id="qrCodeImage2" src="" alt="Etiqueta recente 1"></div>
+                            <div class="qr-item"><img id="qrCodeImage3" src="" alt="Etiqueta recente 2"></div>
+                            <div class="qr-item"><img id="qrCodeImage4" src="" alt="Etiqueta recente 3"></div>
+                            <div class="qr-item"><img id="qrCodeImage5" src="" alt="Etiqueta recente 4"></div>
+                            <div class="qr-item"><img id="qrCodeImage6" src="" alt="Etiqueta recente 5"></div>
+                            <div class="qr-item"><img id="qrCodeImage7" src="" alt="Etiqueta recente 6"></div>
+                            <div class="qr-item"><img id="qrCodeImage8" src="" alt="Etiqueta recente 7"></div>
+                            <div class="qr-item"><img id="qrCodeImage9" src="" alt="Etiqueta recente 8"></div>
+                        </div>
+                    </section>
                 </div>
             </div>
-            <p id="label-success" style="font-weight: 500; color: var(--main-color);">Aguardando dados...</p>
-        </div>
-
-        <div id="tables-container" class="tables-container glow-cde" style="max-height: 600px">
-            <div class="centralizado">
-                <div id="qr-grid" class="qr-grid">
-                    <div class="qr-item">
-                        <img id="qrCodeImage2" src="">
-                    </div>
-                    <div class="qr-item">
-                        <img id="qrCodeImage3" src="">
-                    </div>
-                    <div class="qr-item">
-                        <img id="qrCodeImage4" src="">
-                    </div>
-                    <div class="qr-item">
-                        <img id="qrCodeImage5" src="">
-                    </div>
-                    <div class="qr-item">
-                        <img id="qrCodeImage6" src="">
-                    </div>
-                    <div class="qr-item">
-                        <img id="qrCodeImage7" src="">
-                    </div>
-                    <div class="qr-item">
-                        <img id="qrCodeImage8" src="">
-                    </div>
-                    <div class="qr-item">
-                        <img id="qrCodeImage9" src="">
-                    </div>
-                </div>
-            </div>
-        </div>
+        </section>
     </div>
 
 {% endblock content %}

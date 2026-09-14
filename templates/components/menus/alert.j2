@@ -1,20 +1,31 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
 
 {% block title %}Alerta{% endblock title %}
+{% block body_class %}system-alert-shell{% endblock body_class %}
 
 {% block content %}
 
-    <div id="divContent">
-        <div class="form-login" style="max-width: 520px; max-height: 400px; padding: 32px">
-            <div class="split-v">
-                <div class="flex-v">
-                    <h1 class="text-main-color">{{ alert_type | safe }}</h1>
-                    <h1 class="alert-message">{{ alert_msge | safe }}</h1>
-                    <p class="alert-more">{{ alert_more | safe }}</p>
+    <div id="divContent" class="system-alert-page">
+        <section class="system-alert-card" role="alert" aria-labelledby="system-alert-title">
+            <div class="system-alert-heading">
+                <span class="system-alert-icon">
+                    {{ ui_icon('svg/lock.svg', class_name='ui-icon-md') }}
+                </span>
+                <div>
+                    <p class="system-alert-kicker">{{ alert_type | safe }}</p>
+                    <h1 id="system-alert-title" class="alert-message">{{ alert_msge | safe }}</h1>
                 </div>
-                <a class="btn-fancy" onclick="goBack()">VOLTAR</a>
             </div>
-        </div>
+            <div class="system-alert-details">
+                <p class="alert-more">{{ alert_more | safe }}</p>
+            </div>
+            <div class="system-alert-actions">
+                <a class="system-alert-action" href="{{ url_return }}">
+                    <span>Voltar</span>
+                </a>
+            </div>
+        </section>
     </div>
 
 {% endblock content %}

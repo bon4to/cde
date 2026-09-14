@@ -129,7 +129,7 @@ def password_check(id_user, password) -> bool:
     result, _ = dbUtils.query(query, dsn)
 
     if result:
-        db_password = result[0]
+        db_password = result[0][0]
         return check_key(db_password, password)
     return False
 

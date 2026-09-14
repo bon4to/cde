@@ -1,7 +1,127 @@
-{% extends "pages/index/index.j2" %}
-    
-{% block grid_buttons %}
-{% endblock grid_buttons %}
+{% extends 'base.j2' %}
 
-{% block side_banner %}
-{% endblock side_banner %}
+{% from 'components/icon.j2' import icon as ui_icon %}
+{% from 'components/title-route.j2' import title_container %}
+
+{% block title %}Sobre{% endblock title %}
+
+{% block custom_style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/about.css') }}">
+{% endblock custom_style %}
+
+{% block body_class %}about-shell{% endblock body_class %}
+
+{% block content %}
+    <div class="titles-ruler">
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'SOBRE'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+    </div>
+
+    <div id="divContent" class="about-page">
+        <section class="about-hero" aria-labelledby="about-title">
+            <div class="about-hero-copy">
+                <p class="about-kicker"><span aria-hidden="true"></span> CENTRALIZED DATA ENGINE</p>
+                <h1 id="about-title">Uma operação.<br><em>Um só lugar.</em></h1>
+                <p class="about-lead">
+                    O CDE conecta rotinas, dados e decisões para tornar a operação
+                    mais clara, rastreável e eficiente.
+                </p>
+                <div class="about-hero-tags" aria-label="Características da plataforma">
+                    <span>Centralizado</span>
+                    <span>Objetivo</span>
+                    <span>Em evolução</span>
+                </div>
+            </div>
+
+            <div class="about-engine" aria-label="Identidade visual do CDE">
+                <div class="about-engine-grid" aria-hidden="true"></div>
+                <div class="about-engine-orbit about-engine-orbit-lg" aria-hidden="true"></div>
+                <div class="about-engine-orbit about-engine-orbit-sm" aria-hidden="true"></div>
+                <div class="about-engine-core">
+                    <img src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="CDE">
+                </div>
+                <div class="about-engine-status">
+                    <span class="about-status-dot" aria-hidden="true"></span>
+                    <span>PLATAFORMA ATIVA</span>
+                </div>
+                <div class="about-engine-version">
+                    <span>VERSÃO ATUAL</span>
+                    <strong>v{{ app_version[0] }}</strong>
+                    <small>{{ app_version[1] }}</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-intro" aria-labelledby="about-purpose-title">
+            <div class="about-section-heading">
+                <p class="about-index">01 / PROPÓSITO</p>
+                <h2 id="about-purpose-title">Menos dispersão.<br>Mais controle.</h2>
+            </div>
+            <div class="about-intro-copy">
+                <p>
+                    Criado em janeiro de 2024, o CDE nasceu para reunir atividades
+                    essenciais da empresa em uma experiência única e consistente.
+                </p>
+                <p>
+                    Cada recurso busca reduzir tarefas repetitivas, organizar informações
+                    e oferecer uma visão confiável do trabalho em andamento.
+                </p>
+            </div>
+        </section>
+
+        <section class="about-domains" aria-labelledby="about-domains-title">
+            <div class="about-section-heading about-section-heading-row">
+                <div>
+                    <p class="about-index">02 / ÁREAS CONECTADAS</p>
+                    <h2 id="about-domains-title">Uma base para toda operação.</h2>
+                </div>
+                <p>Informação útil, no momento certo.</p>
+            </div>
+
+            <div class="about-domain-grid">
+                <article class="about-domain-card">
+                    <div class="about-domain-icon">{{ ui_icon('svg/boxes.svg', None, 'ui-icon-lg') }}</div>
+                    <span>01</span>
+                    <h3>Estoque</h3>
+                    <p>Posições, movimentações e rastreabilidade dos materiais.</p>
+                </article>
+                <article class="about-domain-card">
+                    <div class="about-domain-icon">{{ ui_icon('svg/truck.svg', None, 'ui-icon-lg') }}</div>
+                    <span>02</span>
+                    <h3>Logística</h3>
+                    <p>Cargas, separações e acompanhamento das entregas.</p>
+                </article>
+                <article class="about-domain-card">
+                    <div class="about-domain-icon">{{ ui_icon('svg/producao.svg', None, 'ui-icon-lg') }}</div>
+                    <span>03</span>
+                    <h3>Produção</h3>
+                    <p>Programações, envase e organização das rotinas produtivas.</p>
+                </article>
+                <article class="about-domain-card">
+                    <div class="about-domain-icon">{{ ui_icon('svg/database-zap.svg', None, 'ui-icon-lg') }}</div>
+                    <span>04</span>
+                    <h3>Dados</h3>
+                    <p>Consultas e relatórios reunidos para apoiar decisões.</p>
+                </article>
+            </div>
+        </section>
+
+        <div class="about-signature">
+            <div>
+                <span class="about-signature-mark" aria-hidden="true"></span>
+                <strong>CDE</strong>
+                <span>Centralized Data Engine</span>
+            </div>
+            <p>{{ current_year }} · USO INTERNO</p>
+        </div>
+    </div>
+{% endblock content %}

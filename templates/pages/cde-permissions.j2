@@ -1,14 +1,18 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
+{% from 'components/switch.j2' import switch_control %}
 
 {% block title %}Contratos{% endblock title %}
 
 {% block content %}
+    {% set can_manage_contracts = session['user_grant'] == 1 %}
+
     <div class="titles-ruler">
-        
         {% from 'components/title-route.j2' import title_container %}
         {{ title_container(
             id_page=session['id_page'],
             breadcrumbs=[
+                {'text': 'AJUSTES', 'url': 'cde_cfg'},
                 {'text': 'CONTRATOS'}
             ],
             aux_buttons=[
@@ -20,83 +24,205 @@
                 {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
             ]
         ) }}
-        
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
-        <div class="tables-container" style="min-width: 40vw;">   
-            {% if session['user_grant'] == 1 %}
-                {% if permissions %}
-                    {% if id_perm_data %}
-                        <h1>Código da Página <span class="text-main-color">[{{ id_perm_data[0]['id_perm'] }}]</span></h1>
-                        <h1 class="subtitle">Editando: <span class="text-main-color">''{{ id_perm_data[0]['desc_perm'] }}''</span></h1>
-                        <br>
-                        <form style="height: unset; align-items: flex-start;" action="{{ url_for('permissions_id', id_perm=id_perm_data[0]['id_perm']) }}" method="post">
-                            <div class="flex-h" style="gap: 20px">
-                                <div class="flex-v">
-                                    <label for="id_perm">ID (Página):</label>
-                                    <input class="address-three" style="margin: 0" type="text" name="id_perm" min="6" max="6" value="{{ id_perm_data[0]['id_perm'] }}" placeholder="{{ id_perm_data[0]['id_perm'] }}">
-                                </div>
-                                <div class="flex-v">
-                                    <label for="desc_perm">Descrição (Página):</label>
-                                    <div class="flex-h">
-                                        <input class="address-two" style="margin: 0" type="text" name="desc_perm" max="32" value="{{ id_perm_data[0]['desc_perm'] }}" placeholder="{{ id_perm_data[0]['desc_perm'] }}">
-                                        <button class="button-mini btn-fancy" type="submit" id="submitform">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/pen-line.svg') }}" title="EXECUTAR">
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <a class="hyperlink" style="font-size: 1.2em; margin-top: 14px" href="{{ url_for('permissions') }}">CANCELAR</a>
-                    {% else %}
-                        <h1><span style="color: var(--main-color);">Adicione o ID da Página</span></h1>
-                        <h1 class="subtitle">Ou selecione uma permissão</h1>
-                        <br>
-                        <form style="align-items: flex-start;" action="{{ url_for('permissions') }}" method="post">
-                            <div class="flex-h" style="gap: 20px">
-                                <div class="flex-v">
-                                    <label for="id_perm">ID (Página):</label>
-                                    <input class="address-three" style="margin: 0" type="text" name="id_perm_add" min="6" max="6" placeholder="ID...">
-                                </div>
-                                <div class="flex-v">
-                                    <label for="desc_perm">Descrição (Página):</label>
-                                    <div class="flex-h">
-                                        <input class="address-two" style="margin: 0" type="text" name="desc_perm_add" max="32" placeholder="Descrição...">
-                                        <button class="button-mini btn-fancy" type="submit" id="submitform">
-                                            <img class="svg-invert" src="{{ url_for('static', filename='svg/circle-plus.svg') }}" title="ADICIONAR">
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    {% endif %}
+    <div id="divContent" class="contracts-page">
+        <section class="contracts-overview">
+            <div>
+                <p class="contracts-kicker">MAPA DE ACESSO</p>
+                <h1>Contratos do sistema</h1>
+                <p>Organize páginas, códigos e descrições usados no controle de permissões.</p>
+            </div>
+            <div class="contracts-overview-stack">
+                <div class="contracts-overview-mark" aria-label="Total de contratos cadastrados">
+                    <span class="contracts-overview-icon">{{ ui_icon('svg/book-open-check.svg', class_name='ui-icon-md') }}</span>
+                    <span>
+                        <small>CONTRATOS</small>
+                        <strong>{{ permissions|length }} registros</strong>
+                    </span>
+                </div>
+                {% if can_manage_contracts %}
+                    <button class="contracts-open-create" type="button" onclick="openContractModal('createContractModal')">
+                        {{ ui_icon('svg/circle-plus.svg', class_name='ui-icon-sm') }}
+                        <span>Novo contrato</span>
+                    </button>
                 {% endif %}
-            {% else %}
-                <h1 class="subtitle">Você não tem permissão para editar estes registros.</h1>
-            {% endif %}
-        </div>
-        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-            <h1 class="subtitle" style="margin: 0;">Listagem de páginas</h1>
-            <p style="justify-content: flex-start; margin: 0 0 12px 0;">& permissões de acesso</p>
-            {% block all_separation_status %}
-            
-            {% endblock all_separation_status %}
-            <div class="table-overflow" style="max-height: 700px">
+            </div>
+        </section>
+
+        <section class="contracts-panel" aria-labelledby="contracts-list-title">
+            <header class="contracts-directory-header">
+                <div>
+                    <p class="contracts-kicker">LISTAGEM</p>
+                    <h2 id="contracts-list-title">Páginas e permissões</h2>
+                </div>
+                <label class="contracts-search" for="contracts-search-input">
+                    {{ ui_icon('svg/search.svg', class_name='ui-icon-sm') }}
+                    <input id="contracts-search-input" type="search" placeholder="Buscar contrato..." oninput="filterContracts()">
+                </label>
+            </header>
+
+            <div class="contracts-table-wrap">
                 {% if permissions %}
-                    <table style="border-top: 4px solid var(--main-color)">
+                    <table id="contracts-table" class="contracts-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Descrição</th>
+                                <th>Tipo</th>
+                                <th class="contracts-row-action" aria-label="Ações"></th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {% for row in permissions %}
-                                <tr class="selectable-row js_query_selector" onclick="window.location.href='/cde/permissions/{{ row['id_perm'] }}'">
-                                    <td>{{ row['id_perm'] }}</td>
+                                <tr data-contract-row {% if can_manage_contracts %}onclick="window.location.href='{{ url_for('permissions_id', id_perm=row['id_perm']) }}'"{% endif %}>
+                                    <td class="contracts-code">{{ row['id_perm'] }}</td>
                                     <td>{{ row['desc_perm'] }}</td>
+                                    <td>
+                                        {% if row['paid_feature'] %}
+                                            <span class="contracts-type-badge contracts-type-paid">Pago</span>
+                                        {% else %}
+                                            <span class="contracts-type-badge">Livre</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="contracts-row-action">
+                                        {% if can_manage_contracts %}
+                                            <button type="button" onclick="event.stopPropagation(); window.location.href='{{ url_for('permissions_id', id_perm=row['id_perm']) }}'" aria-label="Editar {{ row['id_perm'] }}" title="Editar contrato">
+                                                {{ ui_icon('svg/pen-to-square.svg', class_name='ui-icon-sm') }}
+                                            </button>
+                                        {% else %}
+                                            <span class="contracts-readonly">{{ ui_icon('svg/lock.svg', class_name='ui-icon-sm') }}</span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 {% endif %}
+                <div id="contracts-empty-search" class="contracts-empty-search" hidden>
+                    <strong>Nenhum contrato encontrado</strong>
+                    <span>Tente buscar por código ou descrição.</span>
+                </div>
             </div>
-        </div>
+        </section>
+
+        {% if not can_manage_contracts %}
+            <section class="contracts-restricted">
+                <span>{{ ui_icon('svg/lock.svg', class_name='ui-icon-md') }}</span>
+                <div>
+                    <strong>Edição restrita</strong>
+                    <small>Seu perfil pode consultar os contratos, mas não pode alterar registros.</small>
+                </div>
+            </section>
+        {% endif %}
+
+        {% if can_manage_contracts %}
+            <div id="createContractModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('createContractModal')">
+                <div class="modal contracts-modal" role="dialog" aria-modal="true" aria-labelledby="create-contract-title">
+                    <div class="modal-header">
+                        <div>
+                            <p class="contracts-kicker">NOVO CONTRATO</p>
+                            <h2 id="create-contract-title">Cadastrar contrato</h2>
+                        </div>
+                        <span class="contracts-panel-icon">{{ ui_icon('svg/circle-plus.svg', class_name='ui-icon-md') }}</span>
+                        <button class="modal-close" type="button" onclick="Modal.close('createContractModal')" aria-label="Fechar">&times;</button>
+                    </div>
+                    <form class="contracts-form" action="{{ url_for('permissions') }}" method="post">
+                        <div class="contracts-field">
+                            <label for="id_perm_add">ID da página <span>*</span></label>
+                            <input id="id_perm_add" type="text" name="id_perm_add" minlength="6" maxlength="6" placeholder="CDE001" required>
+                        </div>
+                        <div class="contracts-field">
+                            <label for="desc_perm_add">Descrição <span>*</span></label>
+                            <input id="desc_perm_add" type="text" name="desc_perm_add" maxlength="32" placeholder="Descrição da página" required>
+                        </div>
+                        <label class="contracts-paid-toggle">
+                            <span>
+                                <strong>Recurso pago</strong>
+                                <small>Exige liberação no arquivo de licença.</small>
+                            </span>
+                            {{ switch_control('Marcar como recurso pago', name='paid_feature_add') }}
+                        </label>
+                        <button class="contracts-primary-action" type="submit">
+                            {{ ui_icon('svg/circle-plus.svg', class_name='ui-icon-sm') }}
+                            <span>Cadastrar contrato</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if id_perm_data %}
+                <div id="editContractModal" class="modal-overlay" onclick="if(event.target === this) closeEditContractModal()">
+                    <div class="modal contracts-modal" role="dialog" aria-modal="true" aria-labelledby="edit-contract-title">
+                        <div class="modal-header">
+                            <div>
+                                <p class="contracts-kicker">EDITANDO {{ id_perm_data[0]['id_perm'] }}</p>
+                                <h2 id="edit-contract-title">Alterar contrato</h2>
+                            </div>
+                            <span class="contracts-panel-icon">{{ ui_icon('svg/pen-line.svg', class_name='ui-icon-md') }}</span>
+                            <button class="modal-close" type="button" onclick="closeEditContractModal()" aria-label="Fechar">&times;</button>
+                        </div>
+                        <form class="contracts-form" action="{{ url_for('permissions_id', id_perm=id_perm_data[0]['id_perm']) }}" method="post">
+                            <div class="contracts-field">
+                                <label for="id_perm">ID da página <span>*</span></label>
+                                <input id="id_perm" type="text" name="id_perm" minlength="6" maxlength="6" value="{{ id_perm_data[0]['id_perm'] }}" placeholder="{{ id_perm_data[0]['id_perm'] }}" required>
+                            </div>
+                            <div class="contracts-field">
+                                <label for="desc_perm">Descrição <span>*</span></label>
+                                <input id="desc_perm" type="text" name="desc_perm" maxlength="32" value="{{ id_perm_data[0]['desc_perm'] }}" placeholder="{{ id_perm_data[0]['desc_perm'] }}" required>
+                            </div>
+                            <label class="contracts-paid-toggle">
+                                <span>
+                                    <strong>Recurso pago</strong>
+                                    <small>Exige liberação no arquivo de licença.</small>
+                                </span>
+                                {{ switch_control('Marcar como recurso pago', checked=id_perm_data[0]['paid_feature'], name='paid_feature') }}
+                            </label>
+                            <div class="contracts-modal-actions">
+                                <a class="contracts-secondary-action" href="{{ url_for('permissions') }}">Cancelar</a>
+                                <button class="contracts-primary-action" type="submit">
+                                    {{ ui_icon('svg/pen-line.svg', class_name='ui-icon-sm') }}
+                                    <span>Salvar alterações</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
     </div>
 
 {% endblock content %}
+
+{% block route_script %}
+    <script>
+        function openContractModal(modalId) {
+            Modal.open(modalId);
+            requestAnimationFrame(() => {
+                document.querySelector('#' + modalId + ' input')?.focus();
+            });
+        }
+
+        function closeEditContractModal() {
+            window.location.href = "{{ url_for('permissions') }}";
+        }
+
+        function filterContracts() {
+            const term = document.getElementById('contracts-search-input').value.trim().toLocaleLowerCase('pt-BR');
+            const rows = document.querySelectorAll('[data-contract-row]');
+            let visibleRows = 0;
+
+            rows.forEach(row => {
+                const matches = !term || row.textContent.toLocaleLowerCase('pt-BR').includes(term);
+                row.hidden = !matches;
+                if (matches) visibleRows++;
+            });
+
+            document.getElementById('contracts-empty-search').hidden = visibleRows !== 0;
+        }
+
+        if (document.getElementById('editContractModal')) {
+            openContractModal('editContractModal');
+        }
+    </script>
+{% endblock route_script %}

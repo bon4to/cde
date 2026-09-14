@@ -1,4 +1,5 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
 
 {% block title %}Movimentar{% endblock title %}
 
@@ -52,7 +53,9 @@
                 <label for="input_code"></label>
                 <div class="inputs">
                     <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
-                    <input class="btn-fancy" style="width: 42px; height: 42px;" type="image" src="{{ url_for('static', filename='svg/scan-barcode.svg') }}" alt="">
+                    <button class="btn-fancy-sober icon-button scanner-submit" type="submit" aria-label="Buscar código" title="Buscar código">
+                        {{ ui_icon('svg/scan-barcode.svg', class_name='ui-icon-md') }}
+                    </button>
                 </div>
                 <hr>
             </form>
@@ -132,8 +135,12 @@
                     </div>
                     <div id="IconsField" class="inputs">
                         <div class="flex-h" style="justify-content: center; align-items: center">
-                            <img id="svg-operation" class="svg-orange" style="width: 22px; height: 22px; padding: 8px" src="{{ url_for('static', filename='svg/arrow-down-to-dot.svg') }}">
-                            <img id="svg-cfg" class="svg-orange" style="width: 12px; height: 12px; padding: 8px; display: none" src="{{ url_for('static', filename='svg/gear.svg') }}" onclick="Modal.open('opConfigModal')">
+                            <span class="operation-status" aria-hidden="true">
+                                {{ ui_icon('svg/arrow-down-to-dot.svg', class_name='ui-icon-md', element_id='svg-operation') }}
+                            </span>
+                            <button id="svg-cfg" class="operation-status operation-config" type="button" style="display: none" aria-label="Configurar operação" title="Configurar operação" onclick="Modal.open('opConfigModal')">
+                                {{ ui_icon('svg/gear.svg', class_name='ui-icon-sm') }}
+                            </button>
                         </div>
                     </div>
                     <div id="ParamsField" class="glow-logi" style="padding: 8px 22px; margin: 8px 16px; border-radius: 16px">
@@ -185,7 +192,9 @@
 
                         <div id="FaturaFields" class="inputs" style="display: none;">
                             <div style="text-align: center;">
-                                <img class="svg-orange" src="{{ url_for('static', filename='svg/package-check.svg') }}" alt="">
+                                <span class="operation-status" aria-hidden="true">
+                                    {{ ui_icon('svg/package-check.svg', class_name='ui-icon-md') }}
+                                </span>
                             </div>
                             <div style="display: flex;">
                                 <div>
@@ -236,7 +245,7 @@
                         <th>Validade (Dias)</th>
                         <th>QTDE (Efetiva)</th>
                         <th id="header-add-column" style="display: none; width: 100px; padding: 0;">
-                            <img class="svg-inv" src="{{ url_for('static', filename='svg/bag.svg') }}" alt="">
+                            {{ ui_icon('svg/bag.svg', class_name='ui-icon-md') }}
                         </th>
                     </tr>
                         {% for item in inv_data %}
@@ -276,7 +285,7 @@
                                 {% endif %}
                                 <td class="number">{{ item['saldo'] }}.0</td>
                                 <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
-                                    <img class="svg-inv" src="{{ url_for('static', filename='svg/list-plus.svg') }}" alt="">
+                                    {{ ui_icon('svg/list-plus.svg', class_name='ui-icon-md') }}
                                 </td>
                             </tr>
                         {% endfor %}

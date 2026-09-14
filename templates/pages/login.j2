@@ -1,57 +1,71 @@
 {% extends 'base.j2' %}
 
 {% block title %}Login{% endblock title %}
+{% block body_class %}login-shell{% endblock body_class %}
 
 {% block content %}
-    <div id="divContent">
-        <div class="form-login" style="padding: 20px">
-            <div class="two-split" style="grid-gap: 30px">
-                <div class="side-banner login">
-                    <img class="side-banner login" src="{{ url_for('static', filename='img/side-log-in.jpg') }}" alt="">
+    <div id="divContent" class="login-page">
+        <div class="login-layout">
+            <section class="login-brand-panel" aria-label="Centralized Data Engine">
+                <div class="login-brand-mark">
+                    <img src="{{ url_for('static', filename='img/cde-logo-w.png') }}" alt="CDE">
                 </div>
+
+                <div class="login-brand-copy">
+                    <h1>Operação centralizada.<br>Trabalho claro.</h1>
+                    <p>Sua operação conectada, do estoque à expedição.</p>
+                </div>
+
+                <p class="login-brand-footer">CDE · Centralized Data Engine · v{{ app_version[0] }} (beta)</p>
+            </section>
+
+            <section class="login-form-panel">
                 {% if 'logged_in' not in session %}
-                    <div class="log" style="width: 100%">
-                        <h1 style="font-size: 46px; margin-bottom: 10px" class="text-main-color title">Entrar</h1>
+                    <div class="login-form-content">
+
+
+                        <div class="login-intro">
+                            <p class="login-eyebrow">ACESSO OPERACIONAL</p>
+                            <h1>Bem-vindo de volta.</h1>
+                            <p>Entre com suas credenciais para continuar.</p>
+                        </div>
+
                         <form id="form-field" action="/login" method="post" onsubmit="showLoading()">
-                            <div class="flex-v">
-
-                                <div class="inputs">
-                                    <div class="flex-v">
-                                        <label for="login_user">Usuário <span style="color: red">*</span></label>
-                                        <input type="text" id="login_user" name="login_user" placeholder="usuário / seu@email.com" required>
-                                    </div>
+                            <div class="login-fields">
+                                <div class="login-field">
+                                    <label for="login_user">Usuário <span aria-hidden="true">*</span></label>
+                                    <input type="text" id="login_user" name="login_user" placeholder="usuário / seu@email.com" autocomplete="username" required>
                                 </div>
 
-                                <div class="inputs">
-                                    <div class="flex-v">
-                                        <label for="password_user">Senha <span style="color: red">*</span></label>
-                                        <input type="password" id="password_user" name="password_user" placeholder="*****" required>
-                                    </div>
+                                <div class="login-field">
+                                    <label for="password_user">Senha <span aria-hidden="true">*</span></label>
+                                    <input type="password" id="password_user" name="password_user" placeholder="Sua senha" autocomplete="current-password" required>
                                 </div>
 
-                                <div class="inputs">
+                                <div class="login-feedback">
                                     <p class="alert" id="custom-alert">{% if alert_msge %}{{ alert_msge }}{% else %}Sua sessão expirou, entre novamente!{% endif %}</p>
                                 </div>
 
-                                <div class="inputs">
-                                    <button class="btn-fancy" type="submit" id="submitform">
-                                        <img class="svg-inv" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                                    </button>
-                                </div>
+                                <button class="btn-fancy login-submit" type="submit" id="submitform">
+                                    <span>Entrar</span>
+                                    <img class="svg-inv" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                                </button>
                             </div>
-
                         </form>
                     </div>
                 {% endif %}
-            </div>
+            </section>
         </div>
     </div>
-{% endblock content%}
+{% endblock content %}
 
 {% block route_script %}
     <script>
-        document.getElementById("form-field").addEventListener("submit", function() {
-            document.getElementById("submitform").disabled = true;
-        });
+        const loginForm = document.getElementById("form-field");
+        if (loginForm) {
+            loginForm.addEventListener("submit", function() {
+                document.getElementById("submitform").disabled = true;
+            });
+        }
     </script>
 {% endblock route_script %}

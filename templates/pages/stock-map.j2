@@ -1,111 +1,287 @@
 {% extends 'base.j2' %}
+{% from 'components/icon.j2' import icon as ui_icon %}
 
 {% block title %}Mapa{% endblock title %}
 
 {% block content %}
 
-    <div style="all: unset; display: flex; min-width: 100%; flex-wrap: wrap; gap: 16px; margin: 0 0 16px 0;">
-        <div class="titles-container flex-h title-centerer">
-            <h1>
-                <a href="{{ url_for('mov') }}">MOV</a>
-                <span class="dash">/</span>
-                <span>MAPA (ENDEREÇOS)</span>
-                <span class="id-page">{{session['id_page']}}</span>
-            </h1>
-            <div class="aux-buttons">
-                <a class="aux-button active">
-                    <img class="svg-gray" src="{{ url_for('static', filename='svg/stock-map.svg') }}" title="MAPA (ENDEREÇOS)" alt="" onclick="window.location.href='{{ url_for('carga_sep_done', id_carga=0) }}';">
-                </a>
-                <hr class="vert">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/filter.svg') }}" alt="" title="FILTROS" onclick="toggleFilter()">
-                <img class="svg-gray" src="{{ url_for('static', filename='svg/circle-arrow-left.svg') }}" title="VOLTAR" alt="" onclick="goBack()">
+    <div class="titles-ruler">
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'MOV', 'url': 'mov', 'title': 'MOVIMENTAR'},
+                {'text': 'MAPA (ENDEREÇOS)'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'stock_map', 'icon': 'svg/stock-map.svg', 'title': 'MAPA (ENDEREÇOS)', 'active': True},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleMapFilters()'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+
+        <div id="map-filter-panel" class="stock-map-filter" hidden>
+            <label for="map-filter-input">Localizar endereço</label>
+            <div class="stock-map-filter-controls">
+                <input id="map-filter-input" type="search" placeholder="Ex.: A.12" oninput="applyMapFilter()">
+                <select id="map-filter-state" onchange="applyMapFilter()" aria-label="Ocupação do endereço">
+                    <option value="all">Todos os endereços</option>
+                    <option value="occupied">Somente ocupados</option>
+                    <option value="empty">Somente vazios</option>
+                </select>
+                <button class="btn-fancy-sober" type="button" onclick="clearMapFilter()">LIMPAR</button>
             </div>
         </div>
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
-        <div class="tables-container" style="max-width: 100%; min-width: 55%; padding: 22px;">
-            <div id="map-container">
-                <div id="map" style="width: fit-content;" class="map-grid">
+    <div id="divContent" class="stock-map-page">
+        <section class="stock-map-shell">
+            <header class="stock-map-header">
+                <div>
+                    <p class="stock-map-kicker">VISÃO OPERACIONAL</p>
+                    <h1>Mapa de endereços</h1>
                 </div>
-                <div class="map-buttons">
-                    <div class="map-button">
-                        <img class="svg-inv" src="{{ url_for('static', filename='svg/circle-plus.svg') }}" alt="" title="VOLTAR" onclick="">
+                <div class="stock-map-health">
+                    <span class="stock-map-live-dot" aria-hidden="true"></span>
+                    <span id="map-load-status">Carregando inventário...</span>
+                    <button class="stock-map-refresh" type="button" onclick="loadStockMap()" aria-label="Atualizar mapa" title="Atualizar com o estoque atual">
+                        {{ ui_icon('svg/reload.svg', class_name='ui-icon-sm') }}
+                        <span>ATUALIZAR</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="stock-map-layout">
+                <div id="map-container" class="stock-map-viewport" tabindex="0" aria-label="Mapa interativo dos endereços do estoque. Use as setas para mover, mais e menos para aproximar e Enter para abrir o endereço selecionado.">
+                    <div id="map-loading" class="stock-map-loading">
+                        <span></span>
+                        <strong>Montando mapa do estoque</strong>
                     </div>
-                    <div class="map-button">
-                        <img class="svg-inv" src="{{ url_for('static', filename='svg/circle-minus.svg') }}" alt="" title="VOLTAR" onclick="">
+                    <div id="map" class="map-grid"></div>
+                    <div class="map-buttons" aria-label="Controles do mapa">
+                        <button class="map-button" type="button" title="Aumentar zoom" aria-label="Aumentar zoom" onclick="zoomMap(0.15)">
+                            {{ ui_icon('svg/circle-plus.svg', class_name='ui-icon-md') }}
+                        </button>
+                        <button class="map-button" type="button" title="Diminuir zoom" aria-label="Diminuir zoom" onclick="zoomMap(-0.15)">
+                            {{ ui_icon('svg/circle-minus.svg', class_name='ui-icon-md') }}
+                        </button>
+                        <button class="map-button map-button-reset" type="button" title="Ajustar mapa à tela" aria-label="Ajustar mapa à tela" onclick="fitMap()">
+                            {{ ui_icon('svg/reload.svg', class_name='ui-icon-md') }}
+                        </button>
+                        <button id="map-fullscreen-button" class="map-button map-button-fullscreen" type="button" title="Ver em tela cheia" aria-label="Ver mapa em tela cheia" onclick="toggleMapFullscreen()">
+                            {{ ui_icon('svg/maximize.svg', class_name='ui-icon-md', element_id='map-fullscreen-icon') }}
+                        </button>
+                    </div>
+                    <div class="stock-map-scale" id="map-scale">100%</div>
+                </div>
+
+                <aside class="stock-map-sidebar">
+                    <div>
+                        <p class="stock-map-kicker">RESUMO DO ESTOQUE</p>
+                        <h2>Ocupação atual</h2>
+                    </div>
+                    <dl class="stock-map-metrics">
+                        <div>
+                            <dt>Endereços</dt>
+                            <dd id="map-total-addresses">—</dd>
+                        </div>
+                        <div>
+                            <dt>Ocupados</dt>
+                            <dd id="map-occupied-addresses">—</dd>
+                        </div>
+                        <div>
+                            <dt>Itens distintos</dt>
+                            <dd id="map-distinct-items">—</dd>
+                        </div>
+                        <div>
+                            <dt>Saldo total</dt>
+                            <dd id="map-total-balance">—</dd>
+                        </div>
+                    </dl>
+
+                    <div class="stock-map-guide">
+                        <h3>Como navegar</h3>
+                        <ul>
+                            <li><span>ARRASTE</span> para mover o mapa</li>
+                            <li><span>SCROLL</span> para aproximar</li>
+                            <li><span>CLIQUE</span> para abrir um endereço</li>
+                            <li><span>TECLAS</span> setas, +, − e 0</li>
+                        </ul>
+                    </div>
+
+                    <div class="stock-map-aisles">
+                        <h3>Corredores</h3>
+                        <div id="map-aisles-list"><span>—</span></div>
+                    </div>
+                </aside>
+            </div>
+
+            <div id="stockAddressModal" class="modal-overlay" onclick="if(event.target === this) Modal.close('stockAddressModal')">
+                <div class="modal modal-xl stock-address-modal" role="dialog" aria-modal="true" aria-labelledby="stock-address-title">
+                    <div class="modal-header stock-address-modal-header">
+                        <div>
+                            <p class="stock-map-kicker">CONTEÚDO DO ENDEREÇO</p>
+                            <h2 id="stock-address-title">Endereço</h2>
+                        </div>
+                        <button class="modal-close" type="button" onclick="Modal.close('stockAddressModal')" aria-label="Fechar detalhes do endereço">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <dl class="stock-address-summary">
+                            <div><dt>Registros</dt><dd id="stock-address-records">0</dd></div>
+                            <div><dt>Itens distintos</dt><dd id="stock-address-items-count">0</dd></div>
+                            <div><dt>Lotes</dt><dd id="stock-address-lots">0</dd></div>
+                            <div><dt>Saldo total</dt><dd id="stock-address-balance">0</dd></div>
+                        </dl>
+                        <div id="stock-address-empty" class="stock-address-empty" hidden>
+                            <strong>Endereço vazio</strong>
+                            <span>Não há saldo registrado neste endereço no estoque atual.</span>
+                        </div>
+                        <div id="stock-address-table-wrap" class="stock-address-table-wrap">
+                            <table class="stock-address-table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Descrição</th>
+                                        <th>Lote</th>
+                                        <th>Validade</th>
+                                        <th class="number">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stock-address-table-body"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 
 {% endblock content %}
 
 {% block route_script %}
     <script>
-        // definindo o layout das prateleiras e corredores
-        const mapLayout = {
-            'A': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
-            'B': [1, 2, 3, 4, 0, 0, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0, 0],
-            'C': [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0, 0, 0, 0, 0, 0, 0, 0],  
-            'D': [0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 0, 0],
-            'PP1': [1, 2],
-            'PP2': [1, 2],
-            'PP3': [1],
-            'PP4': [1]
-        };
-
         // cores para cada item
         const colors = [
             'rgb(var(--alt-color-1))', 'rgb(var(--alt-color-2))', 'rgb(var(--alt-color-3))',
             'rgb(var(--alt-color-4))', 'rgb(var(--alt-color-5))', 'rgb(var(--alt-color-6))',
             'rgb(var(--alt-color-7))'
         ];
+        const stockItemsByAddress = new Map();
+        const stockNumberFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
 
-        // carregar os dados e gerar o mapa
-        fetch('/get/stock_items')
-            .then(response => response.json())
-            .then(data => {
+        function parseStockAddress(value) {
+            const normalized = String(value || '').trim().toUpperCase();
+            const match = normalized.match(/^(.+?)\.(\d+)$/);
+            if (!match) return null;
+
+            return {
+                aisle: match[1],
+                position: Number.parseInt(match[2], 10),
+                address: `${match[1]}.${Number.parseInt(match[2], 10)}`
+            };
+        }
+
+        function loadStockMap() {
             const map = document.getElementById('map');
-            
-            // agrupar por letra e numero
+            const loadStatus = document.getElementById('map-load-status');
+            const loadingState = document.getElementById('map-loading');
+            const refreshButton = document.querySelector('.stock-map-refresh');
+
+            map.innerHTML = '';
+            loadingState.hidden = false;
+            loadingState.classList.remove('is-error');
+            loadingState.querySelector('strong').textContent = 'Montando mapa do estoque';
+            loadStatus.textContent = 'Consultando estoque atual...';
+            refreshButton.disabled = true;
+
+            fetch('/get/stock_items/', { cache: 'no-store' })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .then(data => renderStockMap(data))
+                .catch(error => {
+                    loadStatus.textContent = 'Falha ao carregar o mapa';
+                    loadingState.classList.add('is-error');
+                    loadingState.querySelector('strong').textContent = 'Não foi possível carregar o inventário';
+                    console.error('Erro ao carregar o mapa de estoque:', error);
+                })
+                .finally(() => {
+                    refreshButton.disabled = false;
+                });
+        }
+
+        function renderStockMap(data) {
+            const map = document.getElementById('map');
+            const loadStatus = document.getElementById('map-load-status');
+            const loadingState = document.getElementById('map-loading');
             const groupedData = {};
+            stockItemsByAddress.clear();
+
             data.forEach(item => {
-                const { letra, numero, cod_item, saldo } = item;
-                if (!groupedData[letra]) groupedData[letra] = {};
-                if (!groupedData[letra][numero]) groupedData[letra][numero] = {};
-                if (!groupedData[letra][numero][cod_item]) groupedData[letra][numero][cod_item] = 0;
-                groupedData[letra][numero][cod_item] += saldo;
+                const parsedAddress = parseStockAddress(item.address);
+                if (!parsedAddress) return;
+
+                const { aisle, position, address } = parsedAddress;
+                const itemCode = String(item.cod_item);
+                const balance = Number(item.saldo || 0);
+                if (!stockItemsByAddress.has(address)) stockItemsByAddress.set(address, []);
+                stockItemsByAddress.get(address).push(item);
+                if (!groupedData[aisle]) groupedData[aisle] = {};
+                if (!groupedData[aisle][position]) groupedData[aisle][position] = {};
+                if (!groupedData[aisle][position][itemCode]) groupedData[aisle][position][itemCode] = 0;
+                groupedData[aisle][position][itemCode] += balance;
             });
 
-            // method para gerar ruas
-            function generateRua(corredor) {
-                mapLayout[corredor].forEach(numero => {
+            const aisles = Object.keys(groupedData).sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+            const aisleMaximums = aisles.map(aisle => Math.max(...Object.keys(groupedData[aisle]).map(Number)));
+            const maximumPosition = Math.max(1, ...aisleMaximums);
+            map.style.setProperty('--map-columns', maximumPosition);
+
+            function generateAisle(aisle, aisleIndex) {
+                const aisleLabel = document.createElement('div');
+                aisleLabel.classList.add('map-aisle-label');
+                aisleLabel.textContent = `CORREDOR ${aisle}`;
+                map.appendChild(aisleLabel);
+
+                const aisleMaximum = aisleMaximums[aisleIndex];
+                for (let position = 1; position <= maximumPosition; position++) {
                     const cell = document.createElement('div');
-                    if (numero === 0) {
+                    if (position > aisleMaximum) {
                         cell.classList.add('invisible-cell');
                         map.appendChild(cell);
-                        return;
+                        continue;
                     }
+
                     cell.classList.add('map-cell');
-                    const items = groupedData[corredor] && groupedData[corredor][numero];
+                    const items = groupedData[aisle][position];
+                    cell.dataset.address = `${aisle}.${position}`;
+                    cell.dataset.occupied = items ? 'true' : 'false';
+                    cell.tabIndex = 0;
+                    cell.setAttribute('role', 'button');
+                    cell.setAttribute('aria-label', `${aisle}.${position}, ${items ? 'ocupado' : 'vazio'}. Abrir detalhes.`);
+
+                    const addressLabel = document.createElement('span');
+                    addressLabel.classList.add('map-cell-label');
+                    addressLabel.textContent = `${aisle}.${position}`;
+                    cell.appendChild(addressLabel);
                     
                     if (items) {
                         let stackedBar = document.createElement('div');
                         stackedBar.classList.add('stacked-bar');
                         stackedBar.draggable = false;
-                        let total = Object.values(items).reduce((a, b) => a + b, 0);
+                        let total = Object.values(items).reduce((sum, balance) => sum + Math.abs(balance), 0);
 
                         Object.keys(items).forEach((item, index) => {
                             let itemBar = document.createElement('div');
                             itemBar.classList.add('item-bar');
-                            itemBar.style.height = `${(items[item] / total) * 100}%`;
+                            itemBar.style.height = `${(Math.abs(items[item]) / total) * 100}%`;
                             itemBar.style.backgroundColor = colors[index % colors.length];
 
                             let legend = document.createElement('div');
                             legend.classList.add('legend');
-                            legend.innerHTML = `${corredor}.${numero}<br>${item}: ${items[item]}`;
+                            legend.innerHTML = `${aisle}.${position}<br>${item}: ${items[item]}`;
                             itemBar.appendChild(legend);
 
                             stackedBar.appendChild(itemBar);
@@ -114,72 +290,255 @@
                         cell.appendChild(stackedBar);
                     } else {
                         cell.classList.add('empty-cell');
-                        cell.innerHTML = '';
                     }
 
                     map.appendChild(cell);
-                });
+                }
             }
 
-            // gerar ruas
-            generateRua('A');
+            aisles.forEach(generateAisle);
 
-            // adicionar corredor entre A e B
-            let corredorAB = document.createElement('div');
-            corredorAB.classList.add('corredor-space');
-            map.appendChild(corredorAB);
+            const cells = map.querySelectorAll('.map-cell');
+            const occupiedCells = map.querySelectorAll('.map-cell[data-occupied="true"]');
+            const distinctItems = new Set(data.map(item => item.cod_item));
+            const totalBalance = data.reduce((total, item) => total + Number(item.saldo || 0), 0);
+            const numberFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
 
-            generateRua('B');
+            document.getElementById('map-total-addresses').textContent = numberFormat.format(cells.length);
+            document.getElementById('map-occupied-addresses').textContent = numberFormat.format(occupiedCells.length);
+            document.getElementById('map-distinct-items').textContent = numberFormat.format(distinctItems.size);
+            document.getElementById('map-total-balance').textContent = numberFormat.format(totalBalance);
+            loadStatus.dataset.defaultStatus = `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
+            loadStatus.textContent = loadStatus.dataset.defaultStatus;
+            loadingState.hidden = true;
 
-            // adicionar corredor entre C e D
-            generateRua('C');
-            
-            let corredorCD = document.createElement('div');
-            corredorCD.classList.add('corredor-space');
-            map.appendChild(corredorCD);
+            const aislesList = document.getElementById('map-aisles-list');
+            aislesList.innerHTML = '';
+            aisles.forEach(aisle => {
+                const aisleBadge = document.createElement('span');
+                aisleBadge.textContent = aisle;
+                aislesList.appendChild(aisleBadge);
+            });
 
-            generateRua('D');
-        });
+            requestAnimationFrame(() => {
+                fitMap();
+                applyMapFilter();
+            });
+        }
 
 
         const mapContainer = document.getElementById('map');
+        const mapViewport = document.getElementById('map-container');
+        const mapShell = document.querySelector('.stock-map-shell');
         let scale = 1;
         let posX = 0, posY = 0;
         let isDragging = false;
+        let hasDragged = false;
+        let pressedAddress = null;
+        let pointerStartX = 0, pointerStartY = 0;
         let startX, startY;
 
-        mapContainer.addEventListener('wheel', (e) => {
+        function applyMapTransform() {
+            mapContainer.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+            document.getElementById('map-scale').textContent = `${Math.round(scale * 100)}%`;
+        }
+
+        function zoomMap(change, clientX, clientY) {
+            const previousScale = scale;
+            const nextScale = Math.min(Math.max(0.35, scale + change), 2.5);
+            const rect = mapViewport.getBoundingClientRect();
+            const pointerX = Number.isFinite(clientX) ? clientX - rect.left : mapViewport.clientWidth / 2;
+            const pointerY = Number.isFinite(clientY) ? clientY - rect.top : mapViewport.clientHeight / 2;
+            const worldX = (pointerX - posX) / previousScale;
+            const worldY = (pointerY - posY) / previousScale;
+
+            scale = nextScale;
+            posX = pointerX - worldX * scale;
+            posY = pointerY - worldY * scale;
+            applyMapTransform();
+        }
+
+        function toggleMapFullscreen() {
+            if (document.fullscreenElement === mapShell) {
+                document.exitFullscreen();
+                return;
+            }
+
+            if (mapShell.requestFullscreen) {
+                mapShell.requestFullscreen().catch(error => console.error('Não foi possível abrir o mapa em tela cheia:', error));
+            }
+        }
+
+        function updateFullscreenControl() {
+            const isFullscreen = document.fullscreenElement === mapShell;
+            const button = document.getElementById('map-fullscreen-button');
+            const icon = document.getElementById('map-fullscreen-icon');
+            const label = isFullscreen ? 'Sair da tela cheia' : 'Ver mapa em tela cheia';
+
+            button.title = label;
+            button.setAttribute('aria-label', label);
+            icon.style.setProperty('--ui-icon-source', `url('/static/svg/${isFullscreen ? 'minimize' : 'maximize'}.svg')`);
+            requestAnimationFrame(fitMap);
+        }
+
+        function appendAddressCell(row, value, className = '') {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            if (className) cell.className = className;
+            row.appendChild(cell);
+        }
+
+        function openAddressModal(address) {
+            const items = stockItemsByAddress.get(address) || [];
+            const body = document.getElementById('stock-address-table-body');
+            const tableWrap = document.getElementById('stock-address-table-wrap');
+            const emptyState = document.getElementById('stock-address-empty');
+            const distinctItems = new Set(items.map(item => String(item.cod_item)));
+            const lots = new Set(items.map(item => String(item.cod_lote || '')).filter(Boolean));
+            const balance = items.reduce((total, item) => total + Number(item.saldo || 0), 0);
+
+            document.getElementById('stock-address-title').textContent = `Endereço ${address}`;
+            document.getElementById('stock-address-records').textContent = stockNumberFormat.format(items.length);
+            document.getElementById('stock-address-items-count').textContent = stockNumberFormat.format(distinctItems.size);
+            document.getElementById('stock-address-lots').textContent = stockNumberFormat.format(lots.size);
+            document.getElementById('stock-address-balance').textContent = stockNumberFormat.format(balance);
+            body.replaceChildren();
+
+            items
+                .slice()
+                .sort((a, b) => String(a.cod_item).localeCompare(String(b.cod_item), 'pt-BR', { numeric: true }))
+                .forEach(item => {
+                    const row = document.createElement('tr');
+                    appendAddressCell(row, item.cod_item || '—', 'stock-address-code');
+                    appendAddressCell(row, item.desc_item || '—');
+                    appendAddressCell(row, item.cod_lote || '—', 'stock-address-code');
+                    appendAddressCell(row, item.validade_str || item.validade || '—', 'stock-address-code');
+                    appendAddressCell(row, stockNumberFormat.format(Number(item.saldo || 0)), 'number stock-address-balance');
+                    body.appendChild(row);
+                });
+
+            const isEmpty = items.length === 0;
+            emptyState.hidden = !isEmpty;
+            tableWrap.hidden = isEmpty;
+            Modal.open('stockAddressModal');
+        }
+
+        function fitMap() {
+            if (!mapContainer.offsetWidth || !mapContainer.offsetHeight) return;
+
+            const availableWidth = Math.max(280, mapViewport.clientWidth - 72);
+            const availableHeight = Math.max(320, mapViewport.clientHeight - 72);
+            scale = Math.min(1, availableWidth / mapContainer.offsetWidth, availableHeight / mapContainer.offsetHeight);
+            posX = Math.max(24, (mapViewport.clientWidth - mapContainer.offsetWidth * scale) / 2);
+            posY = Math.max(24, (mapViewport.clientHeight - mapContainer.offsetHeight * scale) / 2);
+            applyMapTransform();
+        }
+
+        function toggleMapFilters() {
+            const panel = document.getElementById('map-filter-panel');
+            panel.hidden = !panel.hidden;
+            if (!panel.hidden) document.getElementById('map-filter-input').focus();
+        }
+
+        function clearMapFilter() {
+            document.getElementById('map-filter-input').value = '';
+            document.getElementById('map-filter-state').value = 'all';
+            applyMapFilter();
+        }
+
+        function applyMapFilter() {
+            const term = document.getElementById('map-filter-input').value.trim().toUpperCase();
+            const state = document.getElementById('map-filter-state').value;
+            const cells = document.querySelectorAll('.map-cell');
+            let matches = 0;
+
+            cells.forEach(cell => {
+                const matchesAddress = !term || cell.dataset.address.includes(term);
+                const matchesState = state === 'all' || (state === 'occupied' && cell.dataset.occupied === 'true') || (state === 'empty' && cell.dataset.occupied === 'false');
+                const isMatch = matchesAddress && matchesState;
+                cell.classList.toggle('is-filtered-out', !isMatch);
+                if (isMatch) matches++;
+            });
+
+            const loadStatus = document.getElementById('map-load-status');
+            loadStatus.textContent = term || state !== 'all'
+                ? `${matches} endereços encontrados`
+                : (loadStatus.dataset.defaultStatus || 'Mapa atualizado');
+        }
+
+        mapViewport.addEventListener('wheel', (e) => {
             e.preventDefault();
-
-            let zoomIntensity = 0.1;
-            let zoom = e.deltaY > 0 ? 1 - zoomIntensity : 1 + zoomIntensity;
-            // limite de zoom entre 0.5x e 3x
-            scale = Math.min(Math.max(0.5, scale * zoom), 3);
-
-            mapContainer.style.transform = `scale(${scale}) translate(${posX}px, ${posY}px)`;
+            zoomMap(e.deltaY > 0 ? -0.1 : 0.1, e.clientX, e.clientY);
         }, { passive: false });
+
+        mapViewport.addEventListener('dblclick', (e) => {
+            if (e.target.closest('.map-buttons, .map-cell')) return;
+            e.preventDefault();
+            zoomMap(0.25, e.clientX, e.clientY);
+        });
         
 
-        mapContainer.addEventListener('mousedown', (e) => {
+        mapViewport.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('.map-buttons')) return;
             isDragging = true;
-            startX = e.pageX - posX;
-            startY = e.pageY - posY;
+            hasDragged = false;
+            pressedAddress = e.target.closest('.map-cell')?.dataset.address || null;
+            pointerStartX = e.clientX;
+            pointerStartY = e.clientY;
+            startX = e.clientX - posX;
+            startY = e.clientY - posY;
+            mapViewport.setPointerCapture(e.pointerId);
+            mapContainer.classList.add('is-dragging');
         });
 
-        mapContainer.addEventListener('mousemove', (e) => {
+        mapViewport.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
-            posX = e.pageX - startX;
-            posY = e.pageY - startY;
-            mapContainer.style.transform = `scale(${scale}) translate(${posX}px, ${posY}px)`;
+            if (Math.hypot(e.clientX - pointerStartX, e.clientY - pointerStartY) > 4) hasDragged = true;
+            posX = e.clientX - startX;
+            posY = e.clientY - startY;
+            applyMapTransform();
         });
 
-        mapContainer.addEventListener('mouseup', () => {
+        mapViewport.addEventListener('pointerup', (e) => {
             isDragging = false;
+            if (mapViewport.hasPointerCapture(e.pointerId)) mapViewport.releasePointerCapture(e.pointerId);
+            mapContainer.classList.remove('is-dragging');
+            if (pressedAddress && !hasDragged) openAddressModal(pressedAddress);
+            pressedAddress = null;
         });
 
-        mapContainer.addEventListener('mouseleave', () => {
+        mapViewport.addEventListener('pointercancel', () => {
             isDragging = false;
+            pressedAddress = null;
+            mapContainer.classList.remove('is-dragging');
         });
+
+        mapViewport.addEventListener('keydown', (e) => {
+            const focusedCell = e.target.closest('.map-cell');
+            if (focusedCell && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                openAddressModal(focusedCell.dataset.address);
+                return;
+            }
+
+            const panAmount = 42;
+            if (e.key === 'ArrowLeft') posX += panAmount;
+            else if (e.key === 'ArrowRight') posX -= panAmount;
+            else if (e.key === 'ArrowUp') posY += panAmount;
+            else if (e.key === 'ArrowDown') posY -= panAmount;
+            else if (e.key === '+' || e.key === '=') zoomMap(0.15);
+            else if (e.key === '-' || e.key === '_') zoomMap(-0.15);
+            else if (e.key === '0' || e.key === 'Home') fitMap();
+            else if (e.key.toLowerCase() === 'f') toggleMapFullscreen();
+            else return;
+
+            e.preventDefault();
+            if (e.key.startsWith('Arrow')) applyMapTransform();
+        });
+
+        window.addEventListener('resize', fitMap);
+        document.addEventListener('fullscreenchange', updateFullscreenControl);
+        loadStockMap();
 
     </script>
 

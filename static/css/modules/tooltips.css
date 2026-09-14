@@ -1,13 +1,15 @@
 /* Tooltip styles */
 div.tooltip,
 body > div[style*="pointer-events: none"][style*="position: absolute"] {
-    position: absolute;
+    position: fixed;
     z-index: 9999 !important;
     background: black;
     color: white;
-    padding: 5px;
-    border-radius: 4px;
+    max-width: min(240px, calc(100vw - 16px));
+    padding: 7px 9px;
+    border-radius: 6px;
     display: block;
     font-size: 12px;
-    white-space: nowrap;
+    line-height: 1.25;
+    white-space: normal;
 }

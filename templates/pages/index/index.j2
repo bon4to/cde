@@ -24,34 +24,64 @@
         
     </div>
         
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="{% if about %}about-page{% else %}home-page{% endif %}">
         {% include "components/advert.j2" %}
         {% if 'user_grant' in session %}
             {% if not about %}
-                <div class="index-container flex-v">
-                    <div class="flex-h" style="gap: 30px">
-                        {% block side_banner %}  
-                            
-                        {% endblock side_banner %}
-                
-                        <div class="split-v">
-                            <div class="salute-text">
+                <div class="index-container flex-v home-workspace">
+                    <section class="home-overview">
+                        <div class="salute-text home-hero">
+                            <div>
+                                <p class="home-section-kicker">VISÃO GERAL</p>
                                 <h1 class="salute-text" id="salute-text"></h1>
-                                <p class="phrase disabled" id="frase-motivacional">``{{ frase }}``</p>
+                                <p class="phrase disabled" id="frase-motivacional">{{ frase }}</p>
                             </div>
-                            <div class="container-grid" style="margin-bottom: 32px; padding: 10px 0">
-                                {% block grid_buttons %}
-                                    
-                                {% endblock grid_buttons %}
+
+                            {% block side_banner %}
+
+                            {% endblock side_banner %}
+                        </div>
+                    </section>
+
+                    <div class="home-dashboard-layout">
+                        <section class="home-actions home-panel" aria-labelledby="home-actions-title">
+                            <div class="home-actions-body">
+                                <div class="home-actions-header">
+                                    <div>
+                                        <p class="home-section-kicker">ACESSOS RÁPIDOS</p>
+                                        <h2 id="home-actions-title">O que você quer fazer?</h2>
+                                    </div>
+                                    <p>Escolha uma área para continuar.</p>
+                                </div>
+                                <div class="container-grid home-action-grid">
+                                    {% block grid_buttons %}
+
+                                    {% endblock grid_buttons %}
+                                </div>
                             </div>
-                            <div class="split-h" style="padding: 0; width: auto;">
+                            <div class="split-h home-workspace-footer">
                                 <a class="btn-fancy button-mini disabled" href="{{ url_for('index') }}">
                                     <img class="svg" src="{{ url_for('static', filename='svg/cde-logo-only-w.svg') }}" alt="">
                                 </a>
-                                <p style="color: #7e7e7e">Centralized Data Engine (CDE)</p>
+                                <p class="home-engine-label">Centralized Data Engine (CDE)</p>
                                 <a class="btn-fancy button-mini" href="{{ url_for('cde_cfg') }}">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/cog.svg') }}" alt="">
                                 </a>
+                            </div>
+                        </section>
+
+                        <div id="recent-pages-container" class="tables-container split-v home-recent home-panel">
+                            <div id="recent-pages">
+                                <div class="home-recent-header">
+                                    <div>
+                                        <p class="home-section-kicker">HISTÓRICO</p>
+                                        <h1 class="home-recent-title">Continue de onde parou</h1>
+                                    </div>
+                                    <a class="hyperlink" onclick="clearRecentPages()">LIMPAR</a>
+                                </div>
+                                <div id="recent-pages-buttons-container">
+                                    <!-- Os botões serão inseridos aqui -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -76,7 +106,6 @@
                         </div>
                         <div class="split-h">
                             <p class="flex-v" style="gap: 0; align-items: flex-start; text-align: left; font-size: 14px; padding: 0; margin: 0; justify-content: flex-start;">
-                                <span>Released under the MIT License.</span>
                                 <span style="font-weight: 550">Copyright © {{ current_year }} Lucas G. Bonato</span>
                             </p>
                             <div style="align-items: end;">
@@ -93,18 +122,6 @@
                     </div>
                 </div>
             {% endif %}
-        {% endif %}
-        {% if not about %}
-            <div id="recent-pages-container" class="tables-container split-v" style="height: 628px; min-height: unset;  max-width: 30%; min-width: 16%; border: 1px solid var(--main-color); border-radius: 44px; padding: 24px;">
-                <div id="recent-pages">
-                    <h1 class="text-main-color" style="font-size: 14px; text-align: right;">Páginas Recentes:</h1>
-                    <hr style="margin-right: 4px; width: 20%;">
-                    <div id="recent-pages-buttons-container">
-                        <!-- Os botões serão inseridos aqui -->
-                    </div>
-                </div>
-                <a class="hyperlink" onclick="clearRecentPages()">LIMPAR HISTÓRICO</a>
-            </div>
         {% endif %}
     </div>
 

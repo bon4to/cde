@@ -20,13 +20,25 @@
                 {'type': 'link', 'url': 'faturado', 'icon': 'svg/package-check.svg', 'title': 'FATURADOS'},
                 {'type': 'link', 'url': 'cargas', 'icon': 'svg/truck.svg', 'title': 'CARGAS'},
                 {'type': 'divider'},
-                {'type': 'form', 'url': 'cargas', 'method': 'post', 'icon': 'svg/list-restart.svg', 'title': 'RECARREGAR LISTA DE CARGAS'},
-                {'type': 'divider'},
                 {'type': 'link', 'url': 'carga_sep_done', 'param_name': 'id_carga', 'param': '0', 'icon': 'svg/grid-2x2.svg', 'title': 'SEPARACAO (CONCLUIDOS)'},
                 {'type': 'divider'},
-                {'type': 'disabled', 'icon': 'svg/filter.svg', 'title': 'FILTROS'},
+                {'type': 'action', 'icon': 'svg/filter.svg', 'title': 'FILTROS', 'onclick': 'toggleFilter()'},
                 {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
             ]
+        ) }}
+
+        {% from 'components/filter-container.j2' import filter_container %}
+        {{ filter_container(
+            filter_options=[
+                {'value': 'id_carga', 'text': 'Carga'},
+                {'value': 'justificativa', 'text': 'Justificativa'},
+                {'value': 'usuario', 'text': 'Usuário'},
+                {'value': 'timestamp', 'text': 'Data/Hora'},
+                {'value': 'status', 'text': 'Status'}
+            ],
+            button_icon="search.svg",
+            form_endpoint="/logi/cargas/baixas/search",
+            type="form"
         ) }}
 
     </div>
@@ -35,10 +47,20 @@
 
         {% if 'user_grant' in session %}
             <div class="tables-container" style="min-width: 70%;">
+                <div style="justify-content: flex-end">
+                    {% if search_term %}
+                        <div class="split-h">
+                            <h1 style="font-size: 22px">Critério de pesquisa: <span class="text-main-color">"{{ search_term }}"</span> em <span class="text-main-color">{{ search_row_text }}</span>.</h1>
+                            <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('cargas_baixas') }}';" title="Limpar">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
                 <div class="flex-v">
                     <h1 class="subtitle">
                         {% if cargas | length > 0 %}
-                            <span class="text-main-color">{{ cargas | length }}</span> carga(s) com status
+                            <span class="text-main-color">{{ row_count if row_count else cargas | length }}</span> carga(s) com status
                         {% else %}
                             Nenhuma carga com baixa ou exclusão
                         {% endif %}
@@ -92,6 +114,32 @@
                 <div class="msg-success">
                     <p>Nenhuma carga com baixa ou exclusão encontrada.</p>
                 </div>
+                {% endif %}
+                <div class="pagination">
+                    {% if page > 1 %}
+                    <a href="{{ url_for('cargas_baixas', page=page-1) }}">&laquo; Anterior</a>
+                    {% endif %}
+
+                    {% if page > 3 %}
+                    <a href="{{ url_for('cargas_baixas', page=1) }}">1</a>
+                    <span>...</span>
+                    {% endif %}
+
+                    {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+                        <a href="{{ url_for('cargas_baixas', page=p) }}" class="{% if p == page %}active{% endif %}">{{ p }}</a>
+                    {% endfor %}
+
+                    {% if page < total_pages - 2 %}
+                    <span>...</span>
+                    <a href="{{ url_for('cargas_baixas', page=total_pages) }}">{{ total_pages }}</a>
+                    {% endif %}
+
+                    {% if page < total_pages %}
+                    <a href="{{ url_for('cargas_baixas', page=page+1) }}">Próximo &raquo;</a>
+                    {% endif %}
+                </div>
+                {% if row_count %}
+                    <p>{{ row_count }} registros</p>
                 {% endif %}
             </div>
         {% endif %}

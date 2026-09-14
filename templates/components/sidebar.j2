@@ -1,3 +1,5 @@
+{% from 'components/icon.j2' import icon as ui_icon %}
+
 {% macro sidebar(buttons) %}
 <div draggable="false" class="sidebar-container" style="position: relative; max-width: max-content; padding: 8px;">
     {% for button in buttons %}
@@ -12,8 +14,8 @@
              {% else %}
              onclick="window.location.href='{{ url_for(button.url) }}';"
              {% endif %}>
-            <img class="svg-inv" src="{{ url_for('static', filename=button.icon) }}" alt="">
+            {{ ui_icon(button.icon, class_name='ui-icon-lg') }}
         </div>
     {% endfor %}
 </div>
-{% endmacro %} 
+{% endmacro %}

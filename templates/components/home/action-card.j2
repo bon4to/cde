@@ -1,0 +1,17 @@
+{% from 'components/icon.j2' import icon as ui_icon %}
+
+{% macro home_action(endpoint, title, icon, page_id=None, description=None, featured=False) %}
+    <div class="item{% if featured %} featured{% endif %}" onclick="window.location.href='{{ url_for(endpoint) }}';">
+        <div class="split-h algn-cntr">
+            <div style="text-align: left">
+                <h2 class="text-default">{{ title }}</h2>
+                <p class="text-default bold">
+                    {% if page_id %}<span class="id-page">{{ page_id }}{% if description %}&nbsp;•&nbsp;{% endif %}</span>{% endif %}{{ description or '' }}
+                </p>
+            </div>
+            <a class="btn-fancy button-mini">
+                {{ ui_icon(icon, class_name='ui-icon-md') }}
+            </a>
+        </div>
+    </div>
+{% endmacro %}

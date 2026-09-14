@@ -1,3 +1,5 @@
+import sqlite3
+from app.utils import cdeapp
 from app.models import dbUtils as db
 
 
@@ -31,7 +33,10 @@ def setNotification(userid: int, title: str, message: str) -> tuple[None, str]:
 
     # pega todos os usuários e cria um registro para cada um caso o id_user seja 0
     users = []
-    userid = int(userid)
+    try:
+        userid = int(userid)
+    except (ValueError, TypeError):
+        return None, "Invalid userid"
 
     if userid != 0:
         users.append(userid)
@@ -50,43 +55,55 @@ def setNotification(userid: int, title: str, message: str) -> tuple[None, str]:
         except Exception as e:
             return None, str(e)
 
-    for user in users:
-        try:
-            query = f"""
-                INSERT INTO tbl_notifications (
-                    id_user, title, message, date
-                ) VALUES (
-                    {user}, "{title}", "{message}", datetime('now', '-3 hours')
-                );
-            """
-            dsn = "LOCAL"
-            db.query(query, dsn)
-        except Exception as e:
-            return None, str(e)
+    try:
+        db_path = cdeapp.config.get_db_path()
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            for user in users:
+                cursor.execute(
+                    """
+                    INSERT INTO tbl_notifications (
+                        id_user, title, message, date
+                    ) VALUES (
+                        ?, ?, ?, datetime('now', '-3 hours')
+                    );
+                    """,
+                    (int(user), title, message),
+                )
+            conn.commit()
+    except Exception as e:
+        return None, str(e)
     return None, ""
 
 
 # pega todas as notificações do usuário
 def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None, str]:
     try:
-        # se o id_notification for diferente de 0, pega a notificação específica
-        if id_notification != 0:
-            query = f"""
-                SELECT id, title, message, date, flag_read
-                FROM tbl_notifications
-                WHERE id_user = {userid} 
-                AND id = {id_notification};
-            """
-        else:
-            # pega todas as notificações do usuário
-            query = f"""
-                SELECT id, title, message, date, flag_read
-                FROM tbl_notifications
-                WHERE id_user = {userid} 
-                ORDER BY date DESC;
-        """
-        dsn = "LOCAL"
-        result, _ = db.query(query, dsn)
+        db_path = cdeapp.config.get_db_path()
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            if id_notification != 0:
+                cursor.execute(
+                    """
+                    SELECT id, title, message, date, flag_read
+                    FROM tbl_notifications
+                    WHERE id_user = ?
+                    AND id = ?;
+                    """,
+                    (int(userid), int(id_notification)),
+                )
+            else:
+                cursor.execute(
+                    """
+                    SELECT id, title, message, date, flag_read
+                    FROM tbl_notifications
+                    WHERE id_user = ?
+                    ORDER BY date DESC;
+                    """,
+                    (int(userid),),
+                )
+            result = cursor.fetchall()
+
         notifications = []
         for row in result:
             notifications.append(
@@ -95,7 +112,7 @@ def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None
                     "title": row[1],
                     "message": row[2],
                     "date": row[3],
-                    "flag_read": row[4],
+                    "flag_read": bool(row[4]),
                 }
             )
         return notifications, None
@@ -106,15 +123,20 @@ def getNotifications(userid: int, id_notification: int = 0) -> tuple[list | None
 # limpa/ marca como lida uma notificação do usuário
 def clearNotification(userid: int, id: int):
     try:
-        query = f"""
-            UPDATE tbl_notifications
-            SET flag_read = 1
-            WHERE id_user = {userid}
-            AND id = {id};
-        """
-        dsn = "LOCAL"
-        result, _ = db.query(query, dsn)
-        return result, None
+        db_path = cdeapp.config.get_db_path()
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                UPDATE tbl_notifications
+                SET flag_read = 1
+                WHERE id_user = ?
+                AND id = ?;
+                """,
+                (int(userid), int(id)),
+            )
+            conn.commit()
+        return None, None
     except Exception as e:
         return None, str(e)
 
@@ -122,15 +144,20 @@ def clearNotification(userid: int, id: int):
 # marca como não lida uma notificação do usuário
 def unclearNotification(userid: int, id: int):
     try:
-        query = f"""
-            UPDATE tbl_notifications
-            SET flag_read = 0
-            WHERE id_user = {userid}
-            AND id = {id};
-        """
-        dsn = "LOCAL"
-        result, _ = db.query(query, dsn)
-        return result, None
+        db_path = cdeapp.config.get_db_path()
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                UPDATE tbl_notifications
+                SET flag_read = 0
+                WHERE id_user = ?
+                AND id = ?;
+                """,
+                (int(userid), int(id)),
+            )
+            conn.commit()
+        return None, None
     except Exception as e:
         return None, str(e)
 

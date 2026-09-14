@@ -1,13 +1,7 @@
-
-        <!-- temporary div closer to non-set base.j2 -->
-        {% if session['module'] == 'unset' %}
-            </div>
-        </div>
-        {% endif %}
-
+        {% from 'components/icon.j2' import icon as ui_icon %}
         <div id="scroll-to-top-button" class="hidden-opacity">
             <button onclick="scrollToTop()">
-                <img style="height: 24px; width: 24px; padding: 0" class="svg-inv" src="{{ url_for('static', filename='svg/arrow-big-up-dash.svg') }}" alt="">
+                {{ ui_icon('svg/arrow-big-up-dash.svg', 'Voltar ao topo', 'ui-icon-md') }}
             </button>
         </div>
 
@@ -35,13 +29,12 @@
             <div class="split-h" style="width: 80%; align-items: start;">
                 <div class="flex-v" style="width: 460px;">
                     <ul class="flex-h" style="justify-content: flex-start; gap: 12px">
-                        <li><a href="https://linkedin.com/in/lucas-bonato/" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/linkedin.svg') }}" alt="LinkedIn"></a></li>
-                        <li><a href="https://github.com/bon4to" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/github.svg') }}" alt="GitHub"></a></li>
-                        <li><a href="mailto:bon4to@icloud.com" target="_blank"><img class="svg-invert-hover opaque" src="{{ url_for('static', filename='svg/inbox.svg') }}" alt="E-Mail"></a></li>
+                        <li><a href="https://linkedin.com/in/lucas-bonato/" target="_blank">{{ ui_icon('svg/linkedin.svg', 'LinkedIn', 'footer-social-icon ui-icon-md') }}</a></li>
+                        <li><a href="https://github.com/bon4to" target="_blank">{{ ui_icon('svg/github.svg', 'GitHub', 'footer-social-icon ui-icon-md') }}</a></li>
+                        <li><a href="mailto:bon4to@icloud.com" target="_blank">{{ ui_icon('svg/inbox.svg', 'E-mail', 'footer-social-icon ui-icon-md') }}</a></li>
                     </ul>
                     <div>
                         <p class="flex-v" style="gap: 0; align-items: flex-start; text-align: left; font-size: 14px; padding: 0; margin: 0; justify-content: flex-start;">
-                            <span>Released under the MIT License.</span>
                             <span style="font-weight: 550">Copyright © {{ current_year }} Lucas G. Bonato</span>
                         </p>
                     </div>
@@ -49,7 +42,6 @@
                 <div class="flex-v">
                     <ul class="flex-h" style="gap: 32px; margin: 26px 0">
                         <li><a href="/about" target="_blank">About</a></li>
-                        <li><a href="https://github.com/bon4to/cde/blob/main/LICENSE" target="_blank">License</a></li>
                         <li><a href="https://github.com/bon4to/cde" target="_blank">GitHub</a></li>
                         <li><a href="https://github.com/bon4to/cde/issues" target="_blank">Issues</a></li>
                     </ul>
@@ -73,5 +65,3 @@
         
         <script src="{{ url_for('static', filename='js/lb-filter.js') }}"></script>
         <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    </body>
-</html>
