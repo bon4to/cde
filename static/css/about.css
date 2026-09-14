@@ -1,0 +1,487 @@
+/* About page — operational editorial */
+
+#divContent.about-page {
+    gap: 18px;
+    display: flex !important;
+    min-height: 0;
+    flex-direction: column;
+}
+
+.about-hero {
+    min-height: 520px;
+    display: grid;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--ux-border);
+    border-radius: var(--ux-radius-lg);
+    background: var(--ux-surface);
+    box-shadow: var(--ux-shadow-sm);
+    grid-template-columns: minmax(0, 1.15fr) minmax(380px, 0.85fr);
+}
+
+.about-hero::before {
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    content: "";
+    z-index: 2;
+    position: absolute;
+    background: var(--main-color);
+}
+
+.about-hero-copy {
+    z-index: 1;
+    display: flex;
+    padding: clamp(38px, 6vw, 92px);
+    position: relative;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.about-kicker,
+.about-index {
+    margin: 0;
+    color: var(--main-color);
+    font-family: var(--ux-font-data);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+}
+
+.about-kicker {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+}
+
+.about-kicker > span {
+    width: 7px;
+    height: 7px;
+    display: inline-block;
+    border-radius: 50%;
+    background: var(--main-color);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--main-color) 12%, transparent);
+}
+
+body.app-shell .about-hero h1 {
+    max-width: 800px;
+    margin: 22px 0 0;
+    color: var(--ux-text);
+    font-size: clamp(48px, 6.3vw, 94px);
+    font-weight: 750;
+    line-height: 0.91;
+    letter-spacing: -0.072em;
+}
+
+body.app-shell .about-hero h1 em {
+    color: var(--main-color);
+    font-style: normal;
+}
+
+body.app-shell .about-lead {
+    max-width: 610px;
+    margin: 30px 0 0;
+    color: var(--ux-text-muted);
+    font-size: clamp(15px, 1.25vw, 19px);
+    line-height: 1.65;
+}
+
+.about-hero-tags {
+    display: flex;
+    gap: 8px;
+    margin-top: 38px;
+    flex-wrap: wrap;
+}
+
+.about-hero-tags span {
+    padding: 7px 10px;
+    color: var(--ux-text-muted);
+    border: 1px solid var(--ux-border);
+    border-radius: 999px;
+    background: var(--ux-surface-muted);
+    font-family: var(--ux-font-data);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.about-engine {
+    min-height: 520px;
+    overflow: hidden;
+    position: relative;
+    background:
+        radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--main-color) 45%, transparent), transparent 33%),
+        linear-gradient(145deg, color-mix(in srgb, var(--main-color) 56%, #14232b), #101a20 72%);
+    isolation: isolate;
+}
+
+.about-engine-grid {
+    inset: 0;
+    opacity: 0.22;
+    position: absolute;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+}
+
+.about-engine-orbit {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.about-engine-orbit::after {
+    top: 50%;
+    left: -4px;
+    width: 8px;
+    height: 8px;
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.75);
+}
+
+.about-engine-orbit-lg {
+    width: min(72%, 400px);
+    aspect-ratio: 1;
+    animation: about-orbit 18s linear infinite;
+}
+
+.about-engine-orbit-sm {
+    width: min(49%, 270px);
+    aspect-ratio: 1;
+    border-style: dashed;
+    animation: about-orbit-reverse 12s linear infinite;
+}
+
+.about-engine-core {
+    top: 50%;
+    left: 50%;
+    width: clamp(90px, 11vw, 150px);
+    display: grid;
+    position: absolute;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 28%;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 35px rgba(255, 255, 255, 0.08), 0 28px 60px rgba(4, 9, 12, 0.3);
+    transform: translate(-50%, -50%) rotate(45deg);
+    backdrop-filter: blur(8px);
+}
+
+.about-engine-core img {
+    width: 51%;
+    height: 51%;
+    object-fit: contain;
+    transform: rotate(-45deg);
+}
+
+.about-engine-status,
+.about-engine-version {
+    z-index: 2;
+    position: absolute;
+    font-family: var(--ux-font-data);
+}
+
+.about-engine-status {
+    top: 26px;
+    right: 28px;
+    display: flex;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.75);
+    align-items: center;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.about-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #71e6a5;
+    box-shadow: 0 0 0 5px rgba(113, 230, 165, 0.13);
+}
+
+.about-engine-version {
+    right: 28px;
+    bottom: 24px;
+    display: grid;
+    color: #fff;
+    text-align: right;
+}
+
+.about-engine-version span {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 8px;
+    letter-spacing: 0.14em;
+}
+
+.about-engine-version strong {
+    margin-top: 4px;
+    font-size: 21px;
+    letter-spacing: -0.04em;
+}
+
+.about-engine-version small {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 9px;
+}
+
+.about-intro {
+    display: grid;
+    gap: clamp(36px, 7vw, 120px);
+    padding: clamp(32px, 5vw, 70px);
+    border: 1px solid var(--ux-border);
+    border-radius: var(--ux-radius-lg);
+    background: var(--ux-surface);
+    box-shadow: var(--ux-shadow-sm);
+    grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.about-section-heading h2 {
+    max-width: 660px;
+    margin: 14px 0 0;
+    color: var(--ux-text);
+    font-size: clamp(30px, 3.6vw, 54px);
+    line-height: 1.03;
+    letter-spacing: -0.05em;
+}
+
+.about-intro-copy {
+    display: grid;
+    gap: 22px;
+    align-content: center;
+}
+
+body.app-shell .about-intro-copy p {
+    margin: 0;
+    color: var(--ux-text-muted);
+    font-size: clamp(15px, 1.2vw, 18px);
+    line-height: 1.72;
+}
+
+body.app-shell .about-intro-copy p:first-child {
+    color: var(--ux-text);
+    font-weight: 600;
+}
+
+.about-domains {
+    padding: clamp(28px, 4vw, 54px);
+    border: 1px solid var(--ux-border);
+    border-radius: var(--ux-radius-lg);
+    background: var(--ux-surface-strong);
+    box-shadow: var(--ux-shadow-sm);
+}
+
+.about-section-heading-row {
+    display: flex;
+    gap: 24px;
+    align-items: end;
+    justify-content: space-between;
+}
+
+.about-domains .about-index {
+    color: color-mix(in srgb, var(--main-color) 62%, #fff 38%);
+}
+
+body.app-shell .about-domains h2 {
+    color: #fff;
+}
+
+body.app-shell .about-section-heading-row > p {
+    max-width: 240px;
+    margin: 0 0 6px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 13px;
+    text-align: right;
+}
+
+.about-domain-grid {
+    display: grid;
+    gap: 1px;
+    margin-top: 44px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: var(--ux-radius-md);
+    background: rgba(255, 255, 255, 0.24);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.about-domain-card {
+    min-height: 250px;
+    padding: 28px;
+    display: flex;
+    position: relative;
+    background: #19262d;
+    flex-direction: column;
+    transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.about-domain-card:hover {
+    z-index: 1;
+    background: color-mix(in srgb, var(--main-color) 20%, var(--ux-surface-strong));
+    transform: translateY(-3px);
+}
+
+.about-domain-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    color: #fff;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: var(--ux-radius-sm);
+    background: rgba(255, 255, 255, 0.11);
+}
+
+.about-domain-card > span {
+    top: 28px;
+    right: 28px;
+    position: absolute;
+    color: rgba(255, 255, 255, 0.62);
+    font-family: var(--ux-font-data);
+    font-size: 10px;
+}
+
+body.app-shell .about-domain-card h3 {
+    margin: auto 0 0;
+    color: #fff;
+    font-size: 22px;
+    letter-spacing: -0.03em;
+}
+
+body.app-shell .about-domain-card p {
+    margin: 8px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.about-signature {
+    display: flex;
+    padding: 16px 20px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--ux-border);
+}
+
+.about-signature > div {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.about-signature-mark {
+    width: 8px;
+    height: 22px;
+    display: inline-block;
+    border-radius: 2px;
+    background: var(--main-color);
+}
+
+.about-signature strong {
+    color: var(--ux-text);
+    font-family: var(--ux-font-data);
+    font-size: 15px;
+}
+
+.about-signature span,
+body.app-shell .about-signature p {
+    margin: 0;
+    color: var(--ux-text-muted);
+    font-family: var(--ux-font-data);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+}
+
+@keyframes about-orbit {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes about-orbit-reverse {
+    to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+@media (max-width: 1050px) {
+    .about-hero {
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+    }
+
+    .about-domain-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 760px) {
+    .about-hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .about-engine {
+        min-height: 390px;
+    }
+
+    .about-intro {
+        gap: 32px;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .about-section-heading-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    body.app-shell .about-section-heading-row > p {
+        text-align: left;
+    }
+}
+
+@media (max-width: 520px) {
+    .about-hero,
+    .about-intro,
+    .about-domains {
+        border-radius: var(--ux-radius-md);
+    }
+
+    .about-hero-copy {
+        padding: 36px 24px 42px;
+    }
+
+    body.app-shell .about-hero h1 {
+        font-size: clamp(45px, 15vw, 64px);
+    }
+
+    .about-engine {
+        min-height: 330px;
+    }
+
+    .about-domain-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .about-domain-card {
+        min-height: 210px;
+    }
+
+    .about-signature > div > span:last-child {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .about-engine-orbit-lg,
+    .about-engine-orbit-sm {
+        animation: none;
+    }
+}

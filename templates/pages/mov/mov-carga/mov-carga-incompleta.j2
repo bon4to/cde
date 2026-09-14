@@ -29,228 +29,297 @@
 
     </div>
 
-    <div id="divContent" style="flex-wrap: wrap;">
-    
-        <form class="hidden" id="cod_item_form" method="GET" action="">
-            <input type="hidden" id="cod_item_input" name="cod_item">
-            <input type="hidden" id="carga_id_input" name="carga_id">
-            <input type="hidden" id="qtde_item_input" name="qtde_solic">
-        </form>
-    
+    <div id="divContent" class="carga-ops-page">
         {% if 'user_grant' in session %}
-            <div id="incompTable" class="tables-container" style="min-width: 55%;">
-                {% if carga_incomp | count > 0 %}
-                <div class="flex-v">
-                    {% if id_carga %}
-                        <div class="split-h">
-                            <h1 style="margin-bottom: 8px">Número de Carga <input id="idCargaContainer" class="text-main-color" value="{{ id_carga }}"></h1>
-                            <div style="display: flex; flex-direction: column; gap: 6px">
-                                <div class="cart-container" style="display: none">
-                                    <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
-                                    <div class="cart-dropdown hidden" id="cart-dropdown">
-                                        <ul class="cart-items">
-                                            <!-- Itens serão renderizados aqui -->
-                                        </ul>
-                                        <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar Separação</button>
+            <section class="carga-ops-shell">
+                <header class="carga-ops-header">
+                    <div>
+                        <p class="carga-ops-kicker">
+                            {% if id_carga %}RETOMADA DE SEPARAÇÃO{% else %}PENDÊNCIAS DE EXPEDIÇÃO{% endif %}
+                        </p>
+                        {% if id_carga %}
+                            <h1>Carga: <span class="carga-title-code">{{ id_carga }}</span></h1>
+                        {% else %}
+                            <h1>Cargas incompletas</h1>
+                        {% endif %}
+                    </div>
+                    <div class="carga-header-aside">
+                        <p>
+                            {% if id_carga %}
+                                Confira os itens pendentes, consulte o estoque e retome a separação.
+                            {% else %}
+                                Selecione uma carga para consultar os itens que ainda precisam ser separados.
+                            {% endif %}
+                        </p>
+                        {% if id_carga %}
+                            <a class="button-mini btn-fancy carga-close-action" href="{{ url_for('carga_incomp') }}" title="FECHAR">
+                                <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
+                            </a>
+                        {% endif %}
+                    </div>
+                </header>
+
+                <div class="carga-ops-layout {% if id_carga %}is-detail{% else %}is-list rail-collapsed{% endif %}" id="cargaOpsLayout">
+                    {% if not id_carga %}
+                        <div id="incompTable" class="carga-ops-panel carga-queue-panel">
+                            {% if carga_incomp | count > 0 %}
+                                <div class="carga-section-heading">
+                                    <span>01</span>
+                                    <div>
+                                        <h2>Itens pendentes</h2>
+                                        <p><strong>{{ carga_list | length }}</strong> carga(s) aguardando conclusão.</p>
                                     </div>
                                 </div>
-                                <a class="button-mini btn-fancy" style="margin: 0" onclick="window.location.href='{{ url_for('carga_incomp') }}';" title="FECHAR">
-                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/xmark.svg') }}" alt="">
-                                </a>
-                            </div>
-                        </div>
-                        <h1 class="subtitle">Cliente: <span class="text-main-color">{{ fant_cliente }}</span></h1>
-                    {% else %}
-                        <h1 style="margin-bottom: 8px">Todas as Cargas</h1>
-                        <h1 class="subtitle">Há <span class="text-main-color">{{ carga_incomp | count }} produto(s)</span> pendente(s)</h1>
-                    {% endif %}
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                    <p>Itens de cargas pendentes</p>
-                </div>
-                <div style="max-height: 540px; overflow-y: auto; width: 100%;">
-                    <table>
-                        <thead>
-                            <tr>
-                                {% if not id_carga %}
-                                <th>Carga (Código)</th>
-                                {% endif %}
-                                <th>Item (Código)</th>
-                                <th>Item (Descrição)</th>
-                                <th style="width: 100px;">QTDE (Solicitada)</th>
-                                {% if id_carga %}
-                                <th style="width: 100px;">QTDE (Separada)</th>
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tbody>
-                                {% set items = {} %}
-                                
-                                {% for row in carga_incomp %}
-                                    {% set row_cod_item = row[1] %}
-                                    {% set priv_id_carga = row[0] %}
-                                    {% set priv_desc_item = row[2] %}
-                                    {% set priv_qtde_solic = row[4] %}
-                                    
-                                    {% if row_cod_item in items %}
-                                        {% set items = 
-                                            items.update({ 
-                                                row_cod_item: {
-                                                    'priv_id_carga': priv_id_carga,
-                                                    'desc': priv_desc_item,
-                                                    'qtde': items[row_cod_item]['qtde'] + priv_qtde_solic
-                                                }
-                                            }) 
-                                            or items 
-                                        %}
-                                    {% else %}
-                                        {% set items = 
-                                            items.update({ row_cod_item: {
-                                                'priv_id_carga': priv_id_carga,
-                                                'desc': priv_desc_item,
-                                                'qtde': priv_qtde_solic
-                                            }}) 
-                                            or items 
-                                        %}
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                {% for row_cod_item, item in items.items() %}
-                                    <tr 
-                                        class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}" 
-                                        data-cod-item="{{ row_cod_item }}"
-                                        onclick="sendCodItem('cargas/incompletas', '{{ row_cod_item }}', '{{ item.priv_id_carga }}', '{{ item.qtde }}')"
-                                    >
-                                        {% if not id_carga %}
-                                            <td>{{ item.priv_id_carga }}</td>
-                                        {% endif %}
-                                        <td>{{ row_cod_item }}</td>
-                                        <td style="text-wrap: balance;">{{ item.desc }}</td>
-                                        <td>{{ item.qtde }}</td>
-                                        {% if id_carga %}
-                                            <td class="subtotal-cell"></td>
-                                        {% endif %}
-                                    </tr> 
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                        <div style="margin: 50% 0; padding: 0 160px;">
-                            <p class="disabled">Não há cargas incompletas para finalizar.</p>
+                                <div class="table-overflow carga-table-frame">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Carga</th>
+                                                <th>Item</th>
+                                                <th>Descrição</th>
+                                                <th>QTDE solicitada</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row in carga_incomp %}
+                                                <tr class="selectable-row" onclick="window.location.href='{{ url_for('carga_incomp_id', id_carga=row[0]) }}'">
+                                                    <td class="number">{{ row[0] }}</td>
+                                                    <td>{{ row[1] }}</td>
+                                                    <td style="text-wrap: auto;">{{ row[2] }}</td>
+                                                    <td>{{ row[4] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="carga-empty-panel">
+                                    <span>01</span>
+                                    <h2>Nenhuma carga incompleta</h2>
+                                    <p class="disabled">Não existem itens pendentes para concluir.</p>
+                                </div>
+                            {% endif %}
                         </div>
                     {% endif %}
-                    <br>
+
                     {% if id_carga %}
-                    <div class="split-h">
-                        <div class="flex-h">
-                            <div class="button-mini btn-fancy" onclick="excludeCargaIncompleta()" title="APAGAR CARGA INCOMPLETA">
-                                <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                        <div id="incompTable" class="carga-ops-panel carga-detail-panel">
+                            <div class="carga-active-summary">
+                                <div>
+                                    <p class="carga-ops-kicker">CLIENTE</p>
+                                    <h2>{{ fant_cliente }}</h2>
+                                </div>
+                                {% if cod_transportadora or transportadora %}
+                                    <div>
+                                        <p class="carga-ops-kicker">TRANSPORTADORA</p>
+                                        <h2>
+                                            {% if cod_transportadora %}({{ cod_transportadora }}){% endif %}
+                                            {{ transportadora or 'Não informada' }}
+                                        </h2>
+                                    </div>
+                                {% endif %}
+                                <div class="carga-active-actions">
+                                    <div class="cart-container" style="display: none">
+                                        <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
+                                        <div class="cart-dropdown hidden" id="cart-dropdown">
+                                            <ul class="cart-items"></ul>
+                                            <button class="checkout-button" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">Visualizar separação</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
+                            {% if obs_cliente %}
+                                {% set obs_cliente = obs_cliente | trim %}
+                                {% if obs_cliente %}
+                                    <div class="msg-info"><span>Observação do cliente: {{ obs_cliente }}</span></div>
+                                {% endif %}
+                            {% endif %}
+                            {% if obs_carga %}
+                                {% set obs_carga = obs_carga | trim %}
+                                {% if obs_carga %}
+                                    <div class="msg-info"><span>Observação da carga: {{ obs_carga }}</span></div>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if carga_incomp | count > 0 %}
+                                <div class="carga-section-heading compact">
+                                    <span>01</span>
+                                    <div>
+                                        <h2>Itens pendentes</h2>
+                                        <p>Quantidades restantes desta carga.</p>
+                                    </div>
+                                </div>
+                                <div class="table-overflow carga-table-frame detail">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Descrição</th>
+                                                <th>QTDE solicitada</th>
+                                                <th>QTDE separada</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% set items = {} %}
+                                            {% for row in carga_incomp %}
+                                                {% set row_cod_item = row[1] %}
+                                                {% set priv_id_carga = row[0] %}
+                                                {% set priv_desc_item = row[2] %}
+                                                {% set priv_qtde_solic = row[4] %}
+                                                {% if row_cod_item in items %}
+                                                    {% set items = items.update({row_cod_item: {
+                                                        'priv_id_carga': priv_id_carga,
+                                                        'desc': priv_desc_item,
+                                                        'qtde': items[row_cod_item]['qtde'] + priv_qtde_solic
+                                                    }}) or items %}
+                                                {% else %}
+                                                    {% set items = items.update({row_cod_item: {
+                                                        'priv_id_carga': priv_id_carga,
+                                                        'desc': priv_desc_item,
+                                                        'qtde': priv_qtde_solic
+                                                    }}) or items %}
+                                                {% endif %}
+                                            {% endfor %}
+
+                                            {% for row_cod_item, item in items.items() %}
+                                                <tr
+                                                    class="selectable-row sub-total {% if row_cod_item == cod_item %}active{% endif %}"
+                                                    data-cod-item="{{ row_cod_item }}"
+                                                    onclick="sendCodItem('cargas/incompletas', '{{ row_cod_item }}', '{{ item.priv_id_carga }}', '{{ item.qtde }}')"
+                                                >
+                                                    <td>{{ row_cod_item }}</td>
+                                                    <td style="text-wrap: auto;">{{ item.desc }}</td>
+                                                    <td>{{ item.qtde }}</td>
+                                                    <td class="subtotal-cell"></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="carga-action-strip">
+                                    <div class="button-mini btn-fancy" onclick="excludeCargaIncompleta()" title="APAGAR CARGA INCOMPLETA">
+                                        <img class="svg-inv" style="height: 20px; width: 20px;" src="{{ url_for('static', filename='svg/trash.svg') }}" alt="">
+                                    </div>
+                                    <div class="btn-fancy featured" onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
+                                        <span>RETOMAR SEPARAÇÃO</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="carga-empty-panel">
+                                    <h2>Carga concluída</h2>
+                                    <p class="disabled">Não existem itens pendentes nesta carga.</p>
+                                </div>
+                            {% endif %}
                         </div>
-                        <div 
-                            class="btn-fancy featured" 
-                            style="height: 45px; margin: 0; max-width: 200px;" 
-                            onclick="window.location.href='{{ url_for('carga_sep_pend', id_carga=id_carga) }}';">
-                            <span>VISUALIZAR</span>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-        {% endif %}
-        {% if cod_item and cod_item in cod_item_list %}
-            <div id="stockTable" class="tables-container glow-logi">
-                <span>
-                    <h1>Item <span class="text-main-color">{{ cod_item }}</span> em Estoque:</h1>
-                </span>
-                    <table>
-                        {% if not result_local %}
-                            <div class="msg-error">
-                                <details>
-                                    <summary>Não há saldo disponível para este item!</summary>
-                                    Atualmente, não existe saldo suficiente para suprir esta carga.
-                                </details>
+
+                        {% if cod_item and cod_item in cod_item_list %}
+                            <div id="stockTable" class="carga-ops-panel carga-stock-panel">
+                                <div class="carga-section-heading compact">
+                                    <span>02</span>
+                                    <div>
+                                        <h2>Estoque do item</h2>
+                                        <p class="carga-code-label"><span>Código</span><strong class="text-main-color">{{ cod_item }}</strong></p>
+                                    </div>
+                                </div>
+                                {% if not result_local %}
+                                    <div class="msg-error">Não há saldo disponível para este item.</div>
+                                {% else %}
+                                    <div class="table-overflow carga-table-frame stock">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Endereço</th>
+                                                    <th>Lote</th>
+                                                    <th>Validade</th>
+                                                    <th>QTDE</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for row in result_local %}
+                                                    {% set qtde_solic = request.args.get('qtde_solic') %}
+                                                    <tr class="selectable-row" onclick="pushItemIntoSeparacao(
+                                                        '{{ row['saldo'] }}', '{{ qtde_solic }}',
+                                                        '{{ row['address'] }}', '{{ row['cod_lote'] }}'
+                                                    )">
+                                                        <td>{{ row['address'] }}</td>
+                                                        <td>{{ row['cod_lote'] }}</td>
+                                                        <td title="Data Fab.: {{ row['date_fab'] }}">{{ row['validade'] }}</td>
+                                                        <td {% if qtde_solic | int <= row['saldo'] %}style="color: green"{% else %}style="color: red"{% endif %}>{{ row['saldo'] }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div id="inputContainer" class="hidden"></div>
+                                {% endif %}
                             </div>
                         {% else %}
-                            <thead>
-                                <tr>
-                                    <th>Endereço</th>
-                                    <th>Item (Código)</th>
-                                    <th>Lote (Código)</th>
-                                    <th>Validade (Dias)</th>
-                                    <th>QTDE (Efetiva)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in result_local %}
-                                {% set qtde_solic = request.args.get('qtde_solic') %}
-                                    <tr class="selectable-row" onclick="pushItemIntoSeparacao(
-                                        '{{ row['saldo'] }}', '{{ qtde_solic }}',
-                                        '{{ row['address'] }}', '{{ row['cod_lote'] }}'
-                                    )">
-                                        <td>{{ row['address'] }}</td>
-                                        <td>{{ row['cod_item'] }}</td>
-                                        <td>{{ row['cod_lote'] }}</td>
-                                        <td title="Data Fab.: {{ row['date_fab'] }}">{{ row['validade'] }}</td>
-                                        <td {% if qtde_solic|int <= row['saldo'] %} style="color: green"{% else %} style="color: red"{% endif %}>
-                                            {{ row['saldo'] }}
-                                        </td>    
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                            <div id="inputContainer" class="hidden"></div>
+                            <div class="carga-ops-panel carga-stock-panel carga-item-placeholder">
+                                <div class="carga-section-heading compact">
+                                    <span>02</span>
+                                    <div>
+                                        <h2>Estoque do item</h2>
+                                        <p>Aguardando seleção na lista de pendências.</p>
+                                    </div>
+                                </div>
+                                <div class="carga-empty-panel">
+                                    <h2>Selecione um item</h2>
+                                    <p class="disabled">Clique em uma linha para consultar o estoque e continuar a separação.</p>
+                                </div>
+                            </div>
                         {% endif %}
-                    </table>
-                <br>
-            </div>
-        {% else %}
-        <div class="tables-container" id="sepListContainer" style="max-width: 20vw">
-            <h1 class="subtitle" style="margin: 0;">Buscar cargas...</h1>
-            <select class="address-three inline-input" style="color: var(--cde-color); font-size: 12px" onchange="window.location.href='/logi/cargas/separacao/f/{{ id_carga | default(0) }}'">
-                <option style="color: var(--cde-color);">Incompletas</option>
-            </select>
-            {% block all_separation_status %}
-            
-            {% endblock all_separation_status %}
-                <div class="table-overflow" style="max-height: 700px">
-                    {% if id_carga %}
-                        
                     {% endif %}
-                    <form onsubmit="preQuickRouting('cargas/incompletas'); return false;">
-                        <div class="flex-h" style="margin: 8px 0; width: 100%;">
-                            <input class="address-one" style="margin: 0; height: 32px" type="number" id="navigatorInput" min="1" placeholder="Carga...">
-                            <button type="submit" class="button-mini btn-fancy" style="height: 32px; width: 32px;" title="IR PARA CARGA..." >
-                                <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
-                            </button>
-                        </div>
-                    </form>
-                    <table id="allSeparationsTable" style="border-top: 4px solid var(--main-color)">
-                        <tbody>
-                            {% if not carga_list %}
-                                <tr>
-                                    <td>Nenhuma carga incompleta pendente</td>
-                                </tr>
-                            {% else %}
-                                {% for row in carga_list %}
-                                    <tr class="selectable-row" onclick="window.location.href='/logi/cargas/incompletas/{{ row }}'">
-                                        <td>{{ row }}</td>
-                                    </tr>
-                                {% endfor %}
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {% endif %}
 
-        <form class="hidden" id="cod_item_form" method="GET" action="">
-            <input type="hidden" id="cod_item_input" name="cod_item">
-            <input type="hidden" id="carga_id_input" name="carga_id">
-            <input type="hidden" id="qtde_item_input" name="qtde_solic">
-        </form>
-        <!-- PopUp -->
-        {% include "components/menus/quantity-popup.j2" %}
+                    {% if not id_carga %}
+                        <div class="carga-ops-panel carga-rail-panel" id="sepListContainer">
+                            <button type="button" class="carga-rail-tab" onclick="toggleCargasRail()" aria-controls="sepListContainer" aria-expanded="false" title="Mostrar cargas incompletas">
+                                <strong>Incompletas</strong>
+                            </button>
+                            <div class="carga-rail-content">
+                                <div class="carga-section-heading compact">
+                                    <div>
+                                        <h2>Cargas incompletas</h2>
+                                        <p>{{ carga_list | length }} carga(s) pendente(s).</p>
+                                    </div>
+                                    <button type="button" class="carga-rail-collapse" onclick="toggleCargasRail()" title="Recolher cargas" aria-label="Recolher cargas">›</button>
+                                </div>
+                                <div class="table-overflow carga-rail-list">
+                                    <form onsubmit="preQuickRouting('cargas/incompletas'); return false;">
+                                        <div class="carga-rail-search">
+                                            <input class="address-one" type="number" id="navigatorInput" min="1" placeholder="Carga...">
+                                            <button type="submit" class="button-mini btn-fancy" title="IR PARA CARGA">
+                                                <img class="svg-invert" style="height: 18px; width: 18px;" src="{{ url_for('static', filename='svg/arrow-right.svg') }}" alt="">
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <table id="allSeparationsTable">
+                                        <tbody>
+                                            {% if not carga_list %}
+                                                <tr><td>Nenhuma carga incompleta</td></tr>
+                                            {% else %}
+                                                {% for row in carga_list %}
+                                                    <tr class="selectable-row" onclick="window.location.href='{{ url_for('carga_incomp_id', id_carga=row) }}'">
+                                                        <td>{{ row }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <form class="hidden" id="cod_item_form" method="GET" action="">
+                    <input type="hidden" id="cod_item_input" name="cod_item">
+                    <input type="hidden" id="carga_id_input" name="carga_id">
+                    <input type="hidden" id="qtde_item_input" name="qtde_solic">
+                </form>
+                {% include "components/menus/quantity-popup.j2" %}
+            </section>
+        {% endif %}
     </div>
 
 {% endblock content %}
@@ -264,11 +333,6 @@
         var userID  = '{{ session['id_user'] }}';
         var itemCount = 0;
 
-        if (nroCarga != '') {
-            renderCartSubtotals();
-        }
-    
-        
         function getSeparacao() {
             return new Promise((resolve, reject) => {
                 const localStorageData = localStorage.getItem(getStorageKey());
@@ -301,6 +365,23 @@
             standardTable.classList.toggle('hidden');
         }
 
+        function toggleCargasRail() {
+            const layout = document.getElementById('cargaOpsLayout');
+            const tab = document.querySelector('.carga-rail-tab');
+
+            if (!layout) {
+                return;
+            }
+
+            layout.classList.toggle('rail-collapsed');
+
+            if (tab) {
+                const isExpanded = !layout.classList.contains('rail-collapsed');
+                tab.setAttribute('aria-expanded', String(isExpanded));
+                tab.setAttribute('title', isExpanded ? 'Ocultar cargas incompletas' : 'Mostrar cargas incompletas');
+            }
+        }
+
 
         async function getAndCompareItems() {
             try {
@@ -325,15 +406,8 @@
 
 
         document.addEventListener('DOMContentLoaded', function() {
-            var rows = document.querySelectorAll('.js_query_selector');
-            rows.forEach(function(row) {
-                row.addEventListener('click', function() {
-                    var idCarga = this.getAttribute('data-id');
-                    window.location.href = '/logi/cargas/' + idCarga;
-                });
-            });
-            if (!codItem) {
-                listSeparations('cargas/incompleta', source='browser');
+            if (nroCarga != '') {
+                renderCartSubtotals();
             }
         });
 

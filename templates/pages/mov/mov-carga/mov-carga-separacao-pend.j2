@@ -38,7 +38,10 @@
 
         const nroCarga    = {{ id_carga | tojson }};
         const fantCliente = {{ fant_cliente | tojson }};
-        const obs_carga   = {{ obs_carga | tojson }}; 
+        const codTransportadora = {{ cod_transportadora | tojson }};
+        const transportadora = {{ transportadora | tojson }};
+        const obsCliente  = {{ obs_cliente | tojson }};
+        const obs_carga   = {{ obs_carga | tojson }};
 
         function getSeparacao() {
             return new Promise((resolve, reject) => {
@@ -207,10 +210,8 @@
 
                             errorMessage = `
                                 <div class="msg-alert">
-                                    <details>
-                                        <summary>A separação foi finalizada, mas está incompleta.</summary>
-                                        Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
-                                    </details>
+                                    Ainda existem itens pendentes nesta carga.
+                                    <a class="hyperlink" href="{{ url_for('carga_incomp_id', id_carga=id_carga) }}">Ver carga incompleta</a>
                                 </div>
                             `;
                         } else {

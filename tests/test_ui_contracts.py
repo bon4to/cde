@@ -245,16 +245,22 @@ def test_navigation_indexes_paid_modules_as_disabled_when_unlicensed():
 
     assert "paid_feature_locked(page_id)" in navigation
     assert "dropdown-disabled" in navigation
-    assert "MOV008 | MAPA (ENDEREÇOS)" in navigation
+    assert "MOV008 | MAPA ESTOQUE" in navigation
     assert "PRC010 | PROCESSAMENTO" in navigation
     assert "ENV006 | ENVASE" in navigation
     assert "NÃO CONTRATADO" not in navigation
-    assert "nav_link('stock_map', 'MOV008 | MAPA (ENDEREÇOS)', 'MOV008')" in navigation
-    assert "nav_link('stock_map', 'MOV008 | MAPA (ENDEREÇOS)', 'MOV008')" in estoque_section
+    assert "MOV008 | MAPA ESTOQUE" not in estoque_section
+    assert navigation.index("MOV007 | REQUISIÇÕES") < navigation.index(
+        "MOV008 | MAPA ESTOQUE"
+    ) < navigation.index("PRODUÇÃO")
+    assert "dropdown-coming-soon" in navigation
+    assert "dropdown-status-badge" in navigation
+    assert "EM BREVE" in navigation
     assert "is_paid_feature_locked" in backend
     assert "deny_license_access" in backend
     assert 'DEFAULT_PAID_MODULES = {"MOV008", "PRC010", "ENV006"}' in license_manager
     assert ".dropdown-disabled" in styles
+    assert ".dropdown-status-badge" in styles
 
 
 def test_shared_icons_do_not_depend_on_inversion_filters():
@@ -402,6 +408,9 @@ def test_dev_cargas_mock_matches_cargas_table_contract():
         "NRO_PEDIDO",
         "COD_CLIENTE",
         "FANT_CLIENTE",
+        "OBS_CLIENTE",
+        "COD_TRANSP",
+        "FANT_TRANSP",
         "DT_EMISSAO",
         "DT_ENTREGA",
         "OBS_CARGA",
@@ -412,6 +421,8 @@ def test_dev_cargas_mock_matches_cargas_table_contract():
     assert "MOCK_CARGAS_COLUMNS" in backend
     assert "MOCK_CARGA_DETAIL_COLUMNS" in backend
     assert "MOCK_CARGA_DETAILS" in backend
+    assert "LEFT JOIN DB2ADMIN.TRANSP tr" in backend
+    assert "tr.FANTASIA" in backend
     assert "def mock_cargas_payload(all_cargas=False)" in backend
     assert "def mock_carga_detail_payload(id_carga)" in backend
     assert "def get_mock_carga_qtde_solic(id_carga, cod_item)" in backend
@@ -420,6 +431,35 @@ def test_dev_cargas_mock_matches_cargas_table_contract():
     assert "if not columns and cdeapp.config.get_debug():" in backend
     assert "Usando cargas mock" in backend
     assert "Usando carga mock" in backend
+
+    separation = read("templates/pages/mov/mov-carga/mov-carga-separacao.j2")
+    separation_pending = read(
+        "templates/pages/mov/mov-carga/mov-carga-separacao-pend.j2"
+    )
+    separation_done = read(
+        "templates/pages/mov/mov-carga/mov-carga-separacao-done.j2"
+    )
+    incomplete = read(
+        "templates/pages/mov/mov-carga/mov-carga-incompleta.j2"
+    )
+    cargas_js = read("static/js/lb-cargas.js")
+
+    assert "def get_carga_info_with_carga(id_carga)" in backend
+    assert "cl.OBSERVACOES" in backend
+    assert "Observação do cliente:" in separation
+    assert ">TRANSPORTADORA<" in separation
+    assert "RECARREGAR CARGAS" in cargas
+    assert 'class="carga-empty-action"' in cargas
+    assert 'class="carga-ops-shell"' in incomplete
+    assert 'id="cargaOpsLayout"' in incomplete
+    assert ">TRANSPORTADORA<" in incomplete
+    assert "Observação do cliente:" in incomplete
+    assert "RETOMAR SEPARAÇÃO" in incomplete
+    assert "toggleCargasRail()" in incomplete
+    assert "const obsCliente" in separation_pending
+    assert "const obsCliente" in separation_done
+    assert 'drawObservation("OBSERVAÇÃO DO CLIENTE", obsCliente)' in cargas_js
+    assert "TRANSPORTADORA:" in cargas_js
 
     estoque_utils = read("app/models/estoqueUtils.py")
     assert "MOCK_ITEM_LOCATIONS" in estoque_utils

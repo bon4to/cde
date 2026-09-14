@@ -58,7 +58,6 @@
                                             <a href="{{ url_for('estoque_enderecado') }}">ENDEREÇADO</a>
                                             <a href="{{ url_for('inv_report') }}">RELATÓRIO</a>
                                             <a href="{{ url_for('estoque_preset') }}">PRESET</a>
-                                            {{ nav_link('stock_map', 'MOV008 | MAPA (ENDEREÇOS)', 'MOV008') }}
                                         </div>
                                     </div>
                                     <div class="submenu">
@@ -78,6 +77,10 @@
                                             <a href="{{ url_for('req_sep_done', id_req=0) }}">SEPARAÇÃO</a>
                                         </div>
                                     </div>
+                                    <span class="dropdown-disabled dropdown-coming-soon" aria-disabled="true">
+                                        <span>MOV008 | MAPA ESTOQUE</span>
+                                        <span class="dropdown-status-badge">EM BREVE</span>
+                                    </span>
                                 </div>
                             </div>
                             <div class="dropdown">

@@ -99,9 +99,11 @@
                                                 <th>Carga (Cód.)</th>
                                                 <th>Pedido (Cód.)</th>
                                                 <th>Cliente (Descrição)</th>
+                                                <th>Transportadora</th>
                                                 <th>Emissão (Data)</th>
                                                 <th>Entrega (Data)</th>
-                                                <th>OBS.</th>
+                                                <th>OBS. Cliente</th>
+                                                <th>OBS. Carga</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -115,8 +117,19 @@
                                                         <td class="number">{{ row[columns.index('NRO_CARGA')] }}</td>
                                                         <td class="number r second-plan">{{ row[columns.index('NRO_PEDIDO')] }}</td>
                                                         <td style="text-wrap: none;">({{ row[columns.index('COD_CLIENTE')] }}) {{ row[columns.index('FANT_CLIENTE')] }}</td>
+                                                        <td style="text-wrap: none;">
+                                                            {% if row[columns.index('COD_TRANSP')] %}({{ row[columns.index('COD_TRANSP')] }}){% endif %}
+                                                            {{ row[columns.index('FANT_TRANSP')] or 'Não informada' }}
+                                                        </td>
                                                         <td class="second-plan c">{{ row[columns.index('DT_EMISSAO')] | parse_date }}</td>
                                                         <td class="second-plan c">{{ row[columns.index('DT_ENTREGA')] | parse_date }}</td>
+                                                        <td class="c">
+                                                            {% if row[columns.index('OBS_CLIENTE')] | trim | length > 1 %}
+                                                                <span title="{{ row[columns.index('OBS_CLIENTE')] }}">🟢</span>
+                                                            {% else %}
+                                                                <span>🔴</span>
+                                                            {% endif %}
+                                                        </td>
                                                         <td class="c">
                                                             {% if row[columns.index('OBS_CARGA')] | trim | length > 1 %}
                                                                 <span title="{{ row[columns.index('OBS_CARGA')] }}">🟢</span>
@@ -143,8 +156,14 @@
                             <span>01</span>
                             <h2>Aguardando lista de cargas</h2>
                             <p class="disabled">
-                                Use o botão de recarregar na barra superior para carregar a fila operacional.
+                                Recarregue para buscar a fila operacional.
                             </p>
+                            <form class="carga-empty-action" action="{{ url_for('cargas') }}" method="post">
+                                <button type="submit" class="btn-fancy featured" onclick="showLoading()">
+                                    <img class="svg-invert" src="{{ url_for('static', filename='svg/list-restart.svg') }}" alt="">
+                                    <span>RECARREGAR CARGAS</span>
+                                </button>
+                            </form>
                         </div>
                     {% endif %}
                 </div>
@@ -157,6 +176,15 @@
                             <p class="carga-ops-kicker">CLIENTE</p>
                             <h2>{{ fant_cliente }}</h2>
                         </div>
+                        {% if cod_transportadora or transportadora %}
+                            <div>
+                                <p class="carga-ops-kicker">TRANSPORTADORA</p>
+                                <h2>
+                                    {% if cod_transportadora %}({{ cod_transportadora }}){% endif %}
+                                    {{ transportadora or 'Não informada' }}
+                                </h2>
+                            </div>
+                        {% endif %}
                         <div class="carga-active-actions">
                             <div class="cart-container" style="display: none">
                                 <button class="cart-button" onclick="toggleCart()">Subtotais<span class="item-count" id="item-count">0</span></button>
@@ -178,6 +206,15 @@
                         {% if obs_carga and obs_carga | length > 0 %}
                             <div class="msg-info">
                                 <span id="obs_carga">Observação: {{ obs_carga }}</span>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if obs_cliente %}
+                        {% set obs_cliente = obs_cliente|trim %}
+                        {% if obs_cliente and obs_cliente | length > 0 %}
+                            <div class="msg-info">
+                                <span>Observação do cliente: {{ obs_cliente }}</span>
                             </div>
                         {% endif %}
                     {% endif %}
@@ -476,10 +513,8 @@
                                 errorMessage = 
                                 `
                                     <div class="msg-alert">
-                                        <details>
-                                            <summary>A separação foi finalizada, mas está incompleta.</summary>
-                                            Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
-                                        </details>
+                                        Ainda existem itens pendentes nesta carga.
+                                        <a class="hyperlink" href="{{ url_for('carga_incomp_id', id_carga=id_carga) }}">Ver carga incompleta</a>
                                     </div>
                                 `;
                                 const alert = document.getElementById('alert-message');
@@ -514,10 +549,8 @@
                                 errorMessage = 
                                 `
                                     <div class="msg-alert">
-                                        <details>
-                                            <summary>A separação foi finalizada, mas está incompleta.</summary>
-                                            Para finalizá-la, clique no ícone <img class="svg msg-svg" src="{{ url_for('static', filename='svg/package-badge.svg') }}"> acima..
-                                        </details>
+                                        Ainda existem itens pendentes nesta carga.
+                                        <a class="hyperlink" href="{{ url_for('carga_incomp_id', id_carga=id_carga) }}">Ver carga incompleta</a>
                                     </div>
                                 `;
                                 const alert = document.getElementById('alert-message');

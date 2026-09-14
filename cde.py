@@ -1,4 +1,4 @@
-﻿# cde.py #TODO: após o decoupling, nomear para main.py
+# cde.py #TODO: após o decoupling, nomear para main.py
 import sqlite3, json, sys, re, os, time
 
 # local imports
@@ -338,6 +338,9 @@ class CargaUtils:
         "NRO_PEDIDO",
         "COD_CLIENTE",
         "FANT_CLIENTE",
+        "OBS_CLIENTE",
+        "COD_TRANSP",
+        "FANT_TRANSP",
         "DT_EMISSAO",
         "DT_ENTREGA",
         "OBS_CARGA",
@@ -347,6 +350,8 @@ class CargaUtils:
         "NRO_CARGA",
         "NRO_PEDIDO",
         "NROPED_SEQ",
+        "COD_TRANSP",
+        "FANT_TRANSP",
         "COD_ITEM",
         "DESC_ITEM",
         "QTDE_SOLIC",
@@ -355,25 +360,25 @@ class CargaUtils:
 
     MOCK_CARGA_DETAILS = {
         "900101": [
-            ["900101", "750001", "750001.1", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 12, "Prioridade rota sul"],
-            ["900101", "750001", "750001.2", "004649", "ESPUMANTE NATURAL BRANCO BRUT 6X750ML - SR", 8, "Prioridade rota sul"],
-            ["900101", "750001", "750001.3", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 20, "Prioridade rota sul"],
+            ["900101", "750001", "750001.1", "2001", "TRANSPORTADORA MOCK ALFA", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 12, "Prioridade rota sul"],
+            ["900101", "750001", "750001.2", "2001", "TRANSPORTADORA MOCK ALFA", "004649", "ESPUMANTE NATURAL BRANCO BRUT 6X750ML - SR", 8, "Prioridade rota sul"],
+            ["900101", "750001", "750001.3", "2001", "TRANSPORTADORA MOCK ALFA", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 20, "Prioridade rota sul"],
         ],
         "900102": [
-            ["900102", "750002", "750002.1", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 6, ""],
-            ["900102", "750002", "750002.2", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 14, ""],
+            ["900102", "750002", "750002.1", "2002", "TRANSPORTADORA MOCK BETA", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 6, ""],
+            ["900102", "750002", "750002.2", "2002", "TRANSPORTADORA MOCK BETA", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 14, ""],
         ],
         "900103": [
-            ["900103", "750003", "750003.1", "004649", "ESPUMANTE NATURAL BRANCO BRUT 6X750ML - SR", 10, "Conferir janela de entrega"],
-            ["900103", "750003", "750003.2", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 18, "Conferir janela de entrega"],
+            ["900103", "750003", "750003.1", "2003", "TRANSPORTADORA MOCK GAMA", "004649", "ESPUMANTE NATURAL BRANCO BRUT 6X750ML - SR", 10, "Conferir janela de entrega"],
+            ["900103", "750003", "750003.2", "2003", "TRANSPORTADORA MOCK GAMA", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 18, "Conferir janela de entrega"],
         ],
         "900104": [
-            ["900104", "750004", "750004.1", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 9, ""],
-            ["900104", "750004", "750004.2", "004649", "ESPUMANTE NATURAL BRANCO BRUT 6X750ML - SR", 7, ""],
+            ["900104", "750004", "750004.1", "2004", "TRANSPORTADORA MOCK DELTA", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 9, ""],
+            ["900104", "750004", "750004.2", "2004", "TRANSPORTADORA MOCK DELTA", "004649", "ESPUMANTE NATURAL BRANCO BRUT 6X750ML - SR", 7, ""],
         ],
         "900105": [
-            ["900105", "750005", "750005.1", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 16, "Carga mock desenvolvimento"],
-            ["900105", "750005", "750005.2", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 11, "Carga mock desenvolvimento"],
+            ["900105", "750005", "750005.1", "2005", "TRANSPORTADORA MOCK EPSILON", "000366", "O TRADICIONAL SUCO DE UVA TINTO INTEGRAL 6X1L", 16, "Carga mock desenvolvimento"],
+            ["900105", "750005", "750005.2", "2005", "TRANSPORTADORA MOCK EPSILON", "004327", "1936 SUCO DE UVA TINTO INTEGRAL 6X1,35L PET", 11, "Carga mock desenvolvimento"],
         ],
     }
 
@@ -381,11 +386,11 @@ class CargaUtils:
     def mock_cargas_payload(all_cargas=False):
         """Retorna cargas estáveis para desenvolvimento sem DB remoto."""
         rows = [
-            ["900101", "750001", "1001", "CLIENTE MOCK ALFA", "2026-08-12", "2026-08-16", "Prioridade rota sul"],
-            ["900102", "750002", "1002", "CLIENTE MOCK BETA", "2026-08-12", "2026-08-17", ""],
-            ["900103", "750003", "1003", "CLIENTE MOCK GAMA", "2026-08-13", "2026-08-18", "Conferir janela de entrega"],
-            ["900104", "750004", "1004", "CLIENTE MOCK DELTA", "2026-08-14", "2026-08-19", ""],
-            ["900105", "750005", "1005", "CLIENTE MOCK EPSILON", "2026-08-14", "2026-08-20", "Carga mock desenvolvimento"],
+            ["900101", "750001", "1001", "CLIENTE MOCK ALFA", "Cliente recebe somente pela manhã.", "2001", "TRANSPORTADORA MOCK ALFA", "2026-08-12", "2026-08-16", "Prioridade rota sul"],
+            ["900102", "750002", "1002", "CLIENTE MOCK BETA", "", "2002", "TRANSPORTADORA MOCK BETA", "2026-08-12", "2026-08-17", ""],
+            ["900103", "750003", "1003", "CLIENTE MOCK GAMA", "Agendar entrega antecipadamente.", "2003", "TRANSPORTADORA MOCK GAMA", "2026-08-13", "2026-08-18", "Conferir janela de entrega"],
+            ["900104", "750004", "1004", "CLIENTE MOCK DELTA", "", "2004", "TRANSPORTADORA MOCK DELTA", "2026-08-14", "2026-08-19", ""],
+            ["900105", "750005", "1005", "CLIENTE MOCK EPSILON", "Conferir endereço antes da saída.", "2005", "TRANSPORTADORA MOCK EPSILON", "2026-08-14", "2026-08-20", "Carga mock desenvolvimento"],
         ]
 
         if all_cargas:
@@ -415,6 +420,27 @@ class CargaUtils:
             if str(row[carga_col]) == str(id_carga):
                 return row[cliente_col]
         return "CLIENTE MOCK"
+
+    @staticmethod
+    def get_mock_carga_info(id_carga):
+        result, columns = CargaUtils.mock_cargas_payload()
+        carga_col = columns.index("NRO_CARGA")
+
+        for row in result:
+            if str(row[carga_col]) == str(id_carga):
+                return {
+                    "fant_cliente": row[columns.index("FANT_CLIENTE")],
+                    "obs_cliente": row[columns.index("OBS_CLIENTE")],
+                    "cod_transportadora": row[columns.index("COD_TRANSP")],
+                    "transportadora": row[columns.index("FANT_TRANSP")],
+                }
+
+        return {
+            "fant_cliente": "CLIENTE MOCK",
+            "obs_cliente": "",
+            "cod_transportadora": "",
+            "transportadora": "",
+        }
 
     @staticmethod
     def get_mock_carga_obs(id_carga):
@@ -458,6 +484,9 @@ class CargaUtils:
                         icrg.NRO_PEDIDO      AS NRO_PEDIDO,
                         ped.CODIGO_CLIENTE   AS COD_CLIENTE,
                         cl.FANTASIA          AS FANT_CLIENTE,
+                        cl.OBSERVACOES       AS OBS_CLIENTE,
+                        crg.CODIGO_TRANSP    AS COD_TRANSP,
+                        tr.FANTASIA          AS FANT_TRANSP,
                         crg.DATA_EMISSAO     AS DT_EMISSAO,
                         iped.DT_ENTREGA      AS DT_ENTREGA,
                         crg.OBSERVACAO       AS OBS_CARGA
@@ -476,6 +505,9 @@ class CargaUtils:
 
                     JOIN DB2ADMIN.CLIENTE cl
                     ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+                    LEFT JOIN DB2ADMIN.TRANSP tr
+                    ON tr.CODIGO_TRANSP = crg.CODIGO_TRANSP
 
                     JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
                     ON i.ITEM = iped.ITEM
@@ -492,6 +524,9 @@ class CargaUtils:
                         icrg.NRO_PEDIDO      AS NRO_PEDIDO,
                         ped.CODIGO_CLIENTE   AS COD_CLIENTE,
                         cl.FANTASIA          AS FANT_CLIENTE,
+                        cl.OBSERVACOES       AS OBS_CLIENTE,
+                        crg.CODIGO_TRANSP    AS COD_TRANSP,
+                        tr.FANTASIA          AS FANT_TRANSP,
                         crg.DATA_EMISSAO     AS DT_EMISSAO,
                         iped.DT_ENTREGA      AS DT_ENTREGA,
                         crg.OBSERVACAO       AS OBS_CARGA
@@ -510,6 +545,9 @@ class CargaUtils:
 
                     JOIN DB2ADMIN.CLIENTE cl
                     ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+                    LEFT JOIN DB2ADMIN.TRANSP tr
+                    ON tr.CODIGO_TRANSP = crg.CODIGO_TRANSP
 
                     JOIN DB2ADMIN.HUGO_PIETRO_VIEW_ITEM i
                     ON i.ITEM = iped.ITEM
@@ -972,6 +1010,57 @@ class CargaUtils:
         if result:
             return result[0][0]
         return None
+
+    @staticmethod
+    def get_carga_info_with_carga(id_carga):
+        if cdeapp.config.get_debug() and CargaUtils.is_mock_carga(id_carga):
+            return CargaUtils.get_mock_carga_info(id_carga)
+
+        query = """
+            SELECT DISTINCT
+                cl.FANTASIA       AS FANT_CLIENTE,
+                cl.OBSERVACOES    AS OBS_CLIENTE,
+                crg.CODIGO_TRANSP AS COD_TRANSP,
+                tr.FANTASIA       AS FANT_TRANSP
+
+            FROM DB2ADMIN.IGRUPOPE icrg
+
+            JOIN DB2ADMIN.PEDIDO ped
+            ON icrg.NRO_PEDIDO = ped.NRO_PEDIDO
+
+            JOIN DB2ADMIN.GRUPOPED crg
+            ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+            JOIN DB2ADMIN.CLIENTE cl
+            ON cl.CODIGO_CLIENTE = ped.CODIGO_CLIENTE
+
+            LEFT JOIN DB2ADMIN.TRANSP tr
+            ON tr.CODIGO_TRANSP = crg.CODIGO_TRANSP
+
+            WHERE icrg.CODIGO_GRUPOPED = {a}
+            FETCH FIRST 1 ROW ONLY;
+        """.format(
+            a=id_carga
+        )
+
+        dsn = cde.get_unit()
+        result, columns = dbUtils.query(query, dsn)
+
+        if result and columns:
+            return {
+                "fant_cliente": result[0][columns.index("FANT_CLIENTE")],
+                "obs_cliente": result[0][columns.index("OBS_CLIENTE")],
+                "cod_transportadora": result[0][columns.index("COD_TRANSP")],
+                "transportadora": result[0][columns.index("FANT_TRANSP")],
+            }
+        if cdeapp.config.get_debug():
+            return CargaUtils.get_mock_carga_info(id_carga)
+        return {
+            "fant_cliente": "",
+            "obs_cliente": "",
+            "cod_transportadora": "",
+            "transportadora": "",
+        }
 
     @staticmethod
     # retorna todos os IDs de cargas faturadas,
@@ -2064,20 +2153,25 @@ class UserUtils:
     @staticmethod
     # RETORNA NOME DO USUÁRIO
     def get_username(id_user):
-        query = """
-            SELECT DISTINCT
-                u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
-            FROM users u
-            WHERE u.id_user = {a};
-        """.format(
-            a=id_user
-        )
+        try:
+            id_user = int(id_user)
+        except (ValueError, TypeError):
+            return None
 
-        dsn = "LOCAL"
-        result, columns = dbUtils.query(query, dsn)
-
-        if result:
-            return result[0][0]
+        with sqlite3.connect(db_path) as connection:
+            cursor = connection.cursor()
+            cursor.execute(
+                """
+                SELECT DISTINCT
+                    u.nome_user || ' ' || u.sobrenome_user AS NOME_USER
+                FROM users u
+                WHERE u.id_user = ?;
+                """,
+                (id_user,),
+            )
+            row = cursor.fetchone()
+            if row:
+                return row[0]
         return None
 
     @staticmethod
@@ -2238,6 +2332,15 @@ def check_ip() -> None:
             abort(403)
 
     return None
+
+
+@app.after_request
+def set_security_headers(response: Response) -> Response:
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 
 @app.context_processor
@@ -3535,11 +3638,13 @@ def carga_incomp_id(id_carga) -> str:
     id_carga = cde.split_code_seq(id_carga)[0]
 
     result, columns = CargaUtils.get_carga_incomp(id_carga)
-    fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
+    carga_info = CargaUtils.get_carga_info_with_carga(id_carga)
+    obs_carga = CargaUtils.get_obs_with_carga(id_carga)
     carga_list = CargaUtils.listed_carga_incomp()
 
     cod_item = request.args.get("cod_item", "")
     qtde_solic = request.args.get("qtde_solic", "")
+    cod_item_list = []
 
     if columns:
         # cria lista dos itens da carga (p/ validação de necessidade no jinja)
@@ -3568,7 +3673,11 @@ def carga_incomp_id(id_carga) -> str:
         columns=columns,
         carga_list=carga_list,
         id_carga=id_carga,
-        fant_cliente=fant_cliente,
+        fant_cliente=carga_info["fant_cliente"],
+        obs_cliente=carga_info["obs_cliente"],
+        cod_transportadora=carga_info["cod_transportadora"],
+        transportadora=carga_info["transportadora"],
+        obs_carga=obs_carga,
         cod_item=cod_item,
         qtde_solic=qtde_solic,
         result_local=result_local,
@@ -4318,7 +4427,8 @@ def carga_id(id_carga) -> str:
         # extrai o primeiro elemento de `id_carga`
         id_carga = cde.split_code_seq(id_carga)[0]
 
-        fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
+        carga_info = CargaUtils.get_carga_info_with_carga(id_carga)
+        fant_cliente = carga_info["fant_cliente"]
         all_cargas = CargaUtils.get_cargas_finalizadas()
 
         query = f"""
@@ -4326,6 +4436,8 @@ def carga_id(id_carga) -> str:
                 icrg.CODIGO_GRUPOPED                  AS NRO_CARGA,
                 icrg.NRO_PEDIDO                       AS NRO_PEDIDO,
                 (iped.NRO_PEDIDO || '.' || iped.SEQ)  AS NROPED_SEQ,
+                crg.CODIGO_TRANSP                     AS COD_TRANSP,
+                tr.FANTASIA                           AS FANT_TRANSP,
                 CAST(iped.ITEM AS VARCHAR(255))        AS COD_ITEM,
                 i.ITEM_DESCRICAO                      AS DESC_ITEM,
                 CAST(iped.QTDE_SOLICITADA AS INTEGER)  AS QTDE_SOLIC,
@@ -4342,6 +4454,9 @@ def carga_id(id_carga) -> str:
 
             JOIN DB2ADMIN.GRUPOPED crg
             ON icrg.CODIGO_GRUPOPED = crg.CODIGO_GRUPOPED
+
+            LEFT JOIN DB2ADMIN.TRANSP tr
+            ON tr.CODIGO_TRANSP = crg.CODIGO_TRANSP
 
             WHERE icrg.CODIGO_GRUPOPED = {id_carga}
 
@@ -4388,6 +4503,9 @@ def carga_id(id_carga) -> str:
             result_local=result_local,
             columns_local=columns_local,
             fant_cliente=fant_cliente,
+            obs_cliente=carga_info["obs_cliente"],
+            cod_transportadora=carga_info["cod_transportadora"],
+            transportadora=carga_info["transportadora"],
             cod_item_list=cod_item_list,
         )
 
@@ -4753,12 +4871,15 @@ def carga_sep_pend(id_carga) -> str:
     id_user = session.get("id_user")
     user_info = UserUtils.get_userdata(id_user)
     obs_carga = CargaUtils.get_obs_with_carga(id_carga)
-    fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
+    carga_info = CargaUtils.get_carga_info_with_carga(id_carga)
     return render_template(
         "pages/mov/mov-carga/mov-carga-separacao-pend.j2",
         id_carga=id_carga,
         user_info=user_info,
-        fant_cliente=fant_cliente,
+        fant_cliente=carga_info["fant_cliente"],
+        obs_cliente=carga_info["obs_cliente"],
+        cod_transportadora=carga_info["cod_transportadora"],
+        transportadora=carga_info["transportadora"],
         obs_carga=obs_carga,
         status="p",  # pendente
     )
@@ -4774,13 +4895,16 @@ def carga_sep_done(id_carga) -> str:
     id_user = session.get("id_user")
     user_info = UserUtils.get_userdata(id_user)
     obs_carga = CargaUtils.get_obs_with_carga(id_carga)
-    fant_cliente = CargaUtils.get_cliente_with_carga(id_carga)
+    carga_info = CargaUtils.get_carga_info_with_carga(id_carga)
     return render_template(
         "pages/mov/mov-carga/mov-carga-separacao-done.j2",
         id_carga=id_carga,
         seq=seq,
         user_info=user_info,
-        fant_cliente=fant_cliente,
+        fant_cliente=carga_info["fant_cliente"],
+        obs_cliente=carga_info["obs_cliente"],
+        cod_transportadora=carga_info["cod_transportadora"],
+        transportadora=carga_info["transportadora"],
         obs_carga=obs_carga,
         status="f",  # finalizado
     )
@@ -4807,8 +4931,10 @@ def get_description(cod_item) -> Response:
     return jsonify({"description": desc_item})
 
 
-@app.route("/get/username/<id_user>/", methods=["GET"])
-def get_username_route(id_user) -> Response:
+@app.route("/get/username/<int:id_user>/", methods=["GET"])
+@app.route("/get/username/<int:id_user>", methods=["GET"])
+@cde.verify_auth("CDE001")
+def get_username_route(id_user: int) -> Response:
     username = UserUtils.get_username(id_user)
     return jsonify({"username": username})
 

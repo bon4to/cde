@@ -271,6 +271,8 @@ async function genCargaReport() {
         
         // Draws the report header on the current PDF page.
         function drawHeader() {
+            let headerY = 38;
+
             pdf.addImage(headerMainLogo, 'PNG', 164, 20, 35, 8);
             pdf.setFont("helvetica", "bold").setFontSize(16)
                 .text("RELATÓRIO", 10, 24);
@@ -283,12 +285,28 @@ async function genCargaReport() {
                 .text("MOV006", 200, 38, { align: 'right' });
             pdf.setFontSize(10);
             if (typeof fantCliente !== 'undefined') {
-                pdf.setFont("helvetica", "bold").text(`CLIENTE: ${fantCliente}`, 10, 38);
+                const clientLines = pdf.splitTextToSize(`CLIENTE: ${fantCliente}`, 145);
+                pdf.setFont("helvetica", "bold").text(clientLines, 10, headerY);
+                headerY += Math.max(clientLines.length, 1) * 4;
             }
             if (typeof nroCarga !== 'undefined') {
-                pdf.setFont("helvetica", "normal").text(`CARGA: ${nroCarga}`, 10, 42);
+                pdf.setFont("helvetica", "normal").text(`CARGA: ${nroCarga}`, 10, headerY);
+                headerY += 4;
             }
-            pdf.setDrawColor(192, 192, 192);
+            if (typeof transportadora !== 'undefined') {
+                const carrierCode = typeof codTransportadora !== 'undefined' && codTransportadora
+                    ? `(${codTransportadora})`
+                    : '';
+                const carrierName = transportadora || 'Não informada';
+                const carrierLines = pdf.splitTextToSize(
+                    `TRANSPORTADORA: ${carrierCode} ${carrierName}`.trim(),
+                    190
+                );
+                pdf.setFont("helvetica", "normal").text(carrierLines, 10, headerY);
+                headerY += Math.max(carrierLines.length, 1) * 4;
+            }
+            pdf.setDrawColor(192, 192, 192).line(10, headerY, 200, headerY);
+            tableStartY = headerY + 3;
         }
         
         // Draws the footer (operator, page, date) on all PDF pages.
@@ -317,6 +335,39 @@ async function genCargaReport() {
                     pdf.text(formattedDateTime, pdf.internal.pageSize.width - 10, pageHeight - 10, { align: 'right' });
                 }
             }
+        }
+
+        // Draws a paginated observation block after report items.
+        function drawObservation(title, text) {
+            const observation = typeof text === 'string' ? text.trim() : '';
+            if (!observation) {
+                return;
+            }
+
+            const lineHeight = 4;
+            const contentBottom = pageHeight - footerMargin - 2;
+            const lines = pdf.splitTextToSize(observation, 190);
+
+            if (tableStartY + 11 > contentBottom) {
+                pdf.addPage();
+                drawHeader();
+            } else {
+                tableStartY += 7;
+            }
+
+            pdf.setFontSize(10).setFont("courier", "bold").text(`${title}:`, 10, tableStartY);
+            tableStartY += 5;
+            pdf.setFont("courier", "normal");
+
+            lines.forEach(line => {
+                if (tableStartY + lineHeight > contentBottom) {
+                    pdf.addPage();
+                    drawHeader();
+                    pdf.setFontSize(10).setFont("courier", "normal");
+                }
+                pdf.text(line, 10, tableStartY);
+                tableStartY += lineHeight;
+            });
         }
         
         // Draws the table with all items, handling page breaks and cell formatting.
@@ -385,7 +436,6 @@ async function genCargaReport() {
                 if (tableStartY + defaultCellHeight + footerMargin > pageHeight) {
                     pdf.addPage();
                     drawHeader();
-                    tableStartY = 50;
                     
                     // resets the table format for the next page
                     pdf.setFontSize(8).setLineWidth(0.1).setFont("courier", "bold");
@@ -398,14 +448,9 @@ async function genCargaReport() {
             headerMainLogo = base64Logo;
             drawHeader();
             drawTable(items);
+            drawObservation("OBSERVAÇÃO DO CLIENTE", obsCliente);
+            drawObservation("OBSERVAÇÃO DA CARGA", obs_carga);
             drawFooter();
-
-            // Print observations if available
-            if (typeof obs_carga !== 'undefined' && obs_carga.trim().length > 0) {
-                const obsY = tableStartY + 10;
-                pdf.setFontSize(10).setFont("courier", "bold").text("OBSERVAÇÕES: ", 10, obsY);
-                pdf.setFont("courier", "normal").text(obs_carga, 10 + pdf.getTextWidth("OBSERVAÇÕES:") + 5, obsY);
-            }
 
             // Save the PDF file
             const pdfFileName = `MOV006-${nroCarga}.pdf`;
@@ -1163,4 +1208,3 @@ function sendCodItem(routePage, cod_item, carga_id, qtde_solic) {
     form.action = `/logi/${routePage}/${carga_id}`;
     form.submit();
 }
-
