@@ -2,6 +2,7 @@
 {% from 'components/icon.j2' import icon as ui_icon %}
 
 {% block title %}Movimentar{% endblock title %}
+{% block body_class %}mov-scanner-page{% endblock body_class %}
 
 {% block content %}
 
@@ -37,7 +38,7 @@
 
     </div>
     
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="mov-workstation" data-mobile-panel="form" style="flex-wrap: wrap;">
 
         {% from 'components/sidebar.j2' import sidebar %}
         {{ sidebar([
@@ -52,7 +53,7 @@
             <form id="formBuscarItens" style="width: 100%;" method="post" onsubmit="showLockLabel()">
                 <label for="input_code"></label>
                 <div class="inputs">
-                    <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required placeholder="QR-Code ou Código de Barras...">
+                    <input class="address-one" type="text" id="input_code" maxlength="14" name="input_code" required autofocus autocomplete="off" placeholder="QR-Code ou Código de Barras...">
                     <button class="btn-fancy-sober icon-button scanner-submit" type="submit" aria-label="Buscar código" title="Buscar código">
                         {{ ui_icon('svg/scan-barcode.svg', class_name='ui-icon-md') }}
                     </button>
@@ -60,7 +61,7 @@
                 <hr>
             </form>
 
-            <form id="form-field" class="split-v" method="post" action="/logi/mov/moving">
+            <form id="form-field" class="split-v" method="post" action="/logi/mov/moving" autocomplete="off">
                 <div class="flex-v">
                     <div id="produtoField">
                         <div class="flex-v">
@@ -68,16 +69,29 @@
                                 <div class="flex-v">
                                     {% from 'components/lock-label.j2' import lock_label %}
                                     {{ lock_label('Produto', 'desc_item') }}
-                                    <input 
-                                        id="desc_item" 
-                                        name="desc_item" 
-                                        class="address-one" 
-                                        type="text" 
-                                        required readonly 
-                                        placeholder="Descrição do item..." 
-                                        onclick="maximizeText(this)"
-                                        value="{{ json_desc_item }}"
-                                    >
+                                    <div class="mov-description-control">
+                                        <input
+                                            id="desc_item"
+                                            name="desc_item"
+                                            class="address-one"
+                                            type="text"
+                                            required readonly
+                                            autocomplete="off"
+                                            placeholder="Descrição do item..."
+                                            onclick="maximizeText(this)"
+                                            value="{{ json_desc_item }}"
+                                        >
+                                        <button
+                                            id="clear-scanned-item"
+                                            class="btn-fancy-sober icon-button mov-clear-scan"
+                                            type="button"
+                                            aria-label="Limpar item escaneado"
+                                            title="Limpar item escaneado"
+                                            onclick="clearScannedItem()"
+                                        >
+                                            {{ ui_icon('svg/eraser.svg', class_name='ui-icon-md') }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="inputs">
@@ -233,7 +247,22 @@
             
         </div>
 
-        <div id="tables-container" class="tables-container" style="max-height: 600px">
+        <button
+            id="mov-mobile-panel-toggle"
+            class="mov-mobile-panel-toggle"
+            type="button"
+            aria-controls="floating-container tables-container"
+            aria-pressed="false"
+            aria-label="Ver estoque"
+            onclick="toggleMovMobilePanel()"
+        >
+            <span class="mov-mobile-panel-action">
+                <span id="mov-mobile-panel-action">VER ESTOQUE</span>
+                <span class="mov-mobile-panel-arrow" aria-hidden="true">↓</span>
+            </span>
+        </button>
+
+        <div id="tables-container" class="tables-container" tabindex="-1" style="max-height: 600px">
 
             <div class="table-overflow">
                 <table id="filterTable" style="max-height: revert-layer;">
@@ -250,10 +279,11 @@
                     </tr>
                         {% for item in inv_data %}
                             <tr id="row-{{ loop.index }}">
-                                <td>{{ item['address'] }} </td>
-                                <td class="number">{{ item['cod_item'] }}</td>
-                                <td>{{ item['desc_item'] }}</td>
+                                <td data-label="END.">{{ item['address'] }} </td>
+                                <td class="number" data-label="ITEM">{{ item['cod_item'] }}</td>
+                                <td data-label="DESCRIÇÃO">{{ item['desc_item'] }}</td>
                                 <td 
+                                    data-label="LOTE"
                                     title="Data Fab.: {{ item['date_fab'] }}"
                                     {% if 'CS' not in item['cod_lote']|string %}
                                         style="color:rgb(113, 113, 113);"
@@ -262,20 +292,23 @@
                                     {{ item['cod_lote'] }}
                                 </td>
                                 {% if '/' in item['validade']|string  and 'CS' in item['cod_lote']%}
-                                    <td 
+                                    <td
+                                        data-label="VALIDADE"
                                         style="color:rgb(113, 113, 113);"
                                         title="Validade não informada!"
                                     >
                                         -
                                     </td>
                                 {% elif '/' in item['validade']|string %}
-                                        <td 
+                                        <td
+                                            data-label="VALIDADE"
                                             style="color:rgb(113, 113, 113);"
                                         >
                                         {{ item['validade'] }}
                                         </td>
                                 {% else %}
-                                    <td 
+                                    <td
+                                        data-label="VALIDADE"
                                         {% set validade_meses = item['validade'] | int / 30  %}
                                         title="{{ item['validade_str'] }} ({{ item['validade_perc_str'] }}%)"
                                         style="color: var(--cde-color); font-weight: bold"
@@ -283,7 +316,7 @@
                                         {{ item['validade'] }}
                                     </td>
                                 {% endif %}
-                                <td class="number">{{ item['saldo'] }}.0</td>
+                                <td class="number" data-label="QTDE">{{ item['saldo'] }}.0</td>
                                 <td class="action-cell green" onclick="addToBundle({{ loop.index }})" title="ADICIONAR ({{ item['cod_item'] }} | {{ item['cod_lote'] }})">
                                     {{ ui_icon('svg/list-plus.svg', class_name='ui-icon-md') }}
                                 </td>
@@ -294,7 +327,7 @@
             </div>
 
         </div>
-        
+
         <div id="bundle-container" class="tables-container glow-logi" style="display: none; min-width: 800px;">
             <div style="display: flex; justify-content: space-between; flex-direction: column; height: 100%;">
                 <div>
@@ -402,6 +435,101 @@
         let ultimoCodigo = '';
         let userID = '{{ session['id_user'] }}';
         var tableData = [];
+
+        function clearScannedItem(focusScanner = true) {
+            const scannerInput = document.getElementById('input_code');
+            const descriptionInput = document.getElementById('desc_item');
+            const itemSelect = document.getElementById('cod_item');
+            const batchInput = document.getElementById('lote_item');
+            const itemCount = document.getElementById('json_item_no');
+            const dateInput = document.getElementById('date_fab');
+            const dateLockedInput = document.getElementById('data_locked');
+            const filterInput = document.getElementById('filterInput');
+
+            if (scannerInput) scannerInput.value = '';
+            if (descriptionInput) descriptionInput.value = '';
+            if (itemSelect) itemSelect.innerHTML = '<option value="">Selecione...</option>';
+            if (batchInput) {
+                batchInput.value = '';
+                batchInput.readOnly = true;
+            }
+            if (itemCount) itemCount.textContent = '';
+            if (dateInput) {
+                dateInput.value = '';
+                dateInput.readOnly = false;
+                dateInput.onclick = null;
+            }
+            if (dateLockedInput) dateLockedInput.value = 'false';
+            if (filterInput) {
+                filterInput.value = '';
+                if (typeof filterTable === 'function') filterTable();
+            }
+
+            ultimoCodigo = '';
+            showLockLabel();
+
+            if (focusScanner && scannerInput) scannerInput.focus();
+        }
+
+        window.addEventListener('pageshow', function(event) {
+            const navigation = performance.getEntriesByType('navigation')[0];
+            if (event.persisted || navigation?.type === 'reload') {
+                clearScannedItem(false);
+            }
+        });
+
+        function setMovMobilePanel(panel) {
+            const workspace = document.querySelector('.mov-workstation');
+            const toggle = document.getElementById('mov-mobile-panel-toggle');
+            const actionLabel = document.getElementById('mov-mobile-panel-action');
+            const inventoryOpen = panel === 'inventory';
+
+            if (!workspace || !toggle || !actionLabel) return;
+
+            workspace.dataset.mobilePanel = inventoryOpen ? 'inventory' : 'form';
+            toggle.setAttribute('aria-pressed', inventoryOpen ? 'true' : 'false');
+            toggle.setAttribute(
+                'aria-label',
+                inventoryOpen ? 'Movimentar' : 'Ver estoque'
+            );
+            actionLabel.textContent = inventoryOpen ? 'MOVIMENTAR' : 'VER ESTOQUE';
+            toggle.querySelector('.mov-mobile-panel-arrow').textContent = inventoryOpen ? '↑' : '↓';
+        }
+
+        function toggleMovMobilePanel() {
+            const workspace = document.querySelector('.mov-workstation');
+            const nextPanel = workspace?.dataset.mobilePanel === 'inventory' ? 'form' : 'inventory';
+            setMovMobilePanel(nextPanel);
+
+            if (!window.matchMedia('(max-width: 500px)').matches) return;
+
+            const target = nextPanel === 'inventory'
+                ? document.getElementById('tables-container')
+                : document.getElementById('floating-container');
+
+            const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                ? 'auto'
+                : 'smooth';
+
+            target?.scrollIntoView({ behavior, block: 'start' });
+        }
+
+        if (window.matchMedia('(max-width: 500px)').matches) {
+            setMovMobilePanel('form');
+        }
+
+        if ('IntersectionObserver' in window) {
+            const inventoryPanel = document.getElementById('tables-container');
+            const mobilePanelObserver = new IntersectionObserver((entries) => {
+                if (!window.matchMedia('(max-width: 500px)').matches) return;
+                setMovMobilePanel(entries[0].isIntersecting ? 'inventory' : 'form');
+            }, {
+                rootMargin: '-15% 0px -55% 0px',
+                threshold: 0
+            });
+
+            if (inventoryPanel) mobilePanelObserver.observe(inventoryPanel);
+        }
 
         $(function() {
             $("#formBuscarItens").submit(function(event) {

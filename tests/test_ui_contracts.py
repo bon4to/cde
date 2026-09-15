@@ -466,6 +466,40 @@ def test_dev_cargas_mock_matches_cargas_table_contract():
     assert "def get_mock_item_inv_locations(cod_item)" in estoque_utils
 
 
+def test_mov_scanner_layout_is_scoped_and_scrolls_between_panels():
+    movement = read("templates/pages/mov/mov.j2")
+    styles = read("static/css/ux.css")
+
+    assert "{% block body_class %}mov-scanner-page{% endblock body_class %}" in movement
+    assert 'id="mov-mobile-panel-toggle"' in movement
+    assert 'data-mobile-panel="form"' in movement
+    assert "toggleMovMobilePanel()" in movement
+    assert "scrollIntoView({ behavior, block: 'start' })" in movement
+    assert "IntersectionObserver" in movement
+    assert "@media (max-width: 500px)" in styles
+    assert "body.mov-scanner-page > .navigation-bar" in styles
+    assert "body.mov-scanner-page .titles-ruler" in styles
+    assert "body.mov-scanner-page #scroll-to-top-button" in styles
+    assert "body.mov-scanner-page #pre-footer" in styles
+    assert "body.mov-scanner-page #form-field" in styles
+    assert "height: auto !important" in styles
+    assert "flex: 0 0 auto" in styles
+    assert "max-width: none !important" in styles
+    assert "justify-content: flex-start" in styles
+    assert "position: sticky" in styles
+    assert 'aria-label="Ver estoque"' in movement
+    assert "mov-mobile-panel-count" not in movement
+    assert ".mov-mobile-panel-toggle:active" in styles
+    assert "max-width: none" in styles.split("body.mov-scanner-page #filterTable td", 1)[1]
+    assert 'data-mobile-panel="inventory"] #floating-container' not in styles
+    assert 'id="clear-scanned-item"' in movement
+    assert "svg/eraser.svg" in movement
+    assert "function clearScannedItem" in movement
+    assert "navigation?.type === 'reload'" in movement
+    assert "filterInput.value = ''" in movement
+    assert ".mov-description-control" in styles
+
+
 def test_visual_overrides_preserve_ui_state_colors():
     styles = read("static/css/ux.css")
 
