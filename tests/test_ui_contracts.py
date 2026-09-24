@@ -63,6 +63,21 @@ def test_navigation_script_only_changes_navigation_state():
     assert ".submit(" not in script
 
 
+def test_full_address_checkbox_submits_with_movement_form():
+    movement = read("templates/pages/mov/mov.j2")
+
+    assert 'id="is_end_completo"' in movement
+    assert 'name="is_end_completo" value="true" form="form-field"' in movement
+
+
+def test_transfer_order_does_not_future_date_inventory():
+    backend = read("cde.py")
+
+    assert backend.count("timestamp_out = (timestamp_br - timedelta(seconds=1))") == 2
+    assert backend.count('if operacao == "T":') >= 4
+    assert "timestamp_br + timedelta(seconds=1)" not in backend
+
+
 def test_home_keeps_every_existing_action():
     action_component = read("templates/components/home/action-card.j2")
     expected_actions = {

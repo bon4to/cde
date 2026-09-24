@@ -3284,15 +3284,19 @@ def moving() -> str | Response:
 
         lt.debug_log(f"  | TIMESTAMP OUT: {timestamp_br}")
 
-    is_end_completo = bool(request.form.get("is_end_completo"))
+    is_end_completo = request.form.get("is_end_completo") == "true"
     id_carga = str(request.form.get("id_carga", 0))
     id_request = str(request.form.get("id_req", 0))
 
     if operacao != "E" or data_locked:
         timestamp_br = datetime.now(timezone(timedelta(hours=-3)))
 
-    timestamp_out = timestamp_br.strftime("%Y/%m/%d %H:%M:%S")
-    timestamp_in = (timestamp_br + timedelta(seconds=1)).strftime("%Y/%m/%d %H:%M:%S")
+    timestamp_in = timestamp_br.strftime("%Y/%m/%d %H:%M:%S")
+    timestamp_out = timestamp_in
+    if operacao == "T":
+        timestamp_out = (timestamp_br - timedelta(seconds=1)).strftime(
+            "%Y/%m/%d %H:%M:%S"
+        )
 
     print(f"  | OPERAÇÃO: {operacao}")
 
@@ -3504,13 +3508,17 @@ def moving_req_bulk():
 def moving_carga_bulk():
     sep_carga = request.json
     timestamp_br = datetime.now(timezone(timedelta(hours=-3)))
-    timestamp_out = timestamp_br.strftime("%Y/%m/%d %H:%M:%S")
-    timestamp_in = (timestamp_br + timedelta(seconds=1)).strftime("%Y/%m/%d %H:%M:%S")
+    timestamp_in = timestamp_br.strftime("%Y/%m/%d %H:%M:%S")
 
     try:
         for item in sep_carga:
             # define o valor padrão 'F' para 'operacao' caso não esteja presente
             operacao = item.get("operacao", "F")
+            timestamp_out = timestamp_in
+            if operacao == "T":
+                timestamp_out = (timestamp_br - timedelta(seconds=1)).strftime(
+                    "%Y/%m/%d %H:%M:%S"
+                )
 
             # verifica a quantidade em estoque
             haveItem = estoqueUtils.get_saldo_item(
