@@ -63,7 +63,7 @@
                     <div id="detailedTable" class="hidden">
                         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                             <p>Lista Detalhada</p>
-                            <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()" title="EXIBIR LISTA SUBTOTAL" aria-label="Exibir lista subtotal">
                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
                             </div>
                         </div>
@@ -113,7 +113,7 @@
                     <div id="standardTable">
                         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                             <p>Lista Subtotal</p>
-                            <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()">
+                            <div class="btn-fancy" style="width: 45px; height: 45px; margin: 0" onclick="toggleTableSubtotal()" title="EXIBIR LISTA DETALHADA" aria-label="Exibir lista detalhada">
                                 <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
                             </div>
                         </div>

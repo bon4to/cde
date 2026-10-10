@@ -1,4 +1,5 @@
 {% extends 'base.j2' %}
+{% from 'components/cde-observation-info.j2' import cde_observation_info %}
 
 {% block title %}Cargas Incompletas{% endblock title %}
 
@@ -132,7 +133,10 @@
                             {% if obs_cliente %}
                                 {% set obs_cliente = obs_cliente | trim %}
                                 {% if obs_cliente %}
-                                    <div class="msg-info"><span>Observação do cliente: {{ obs_cliente }}</span></div>
+                                    <div class="msg-info cde-customer-observation">
+                                        <span>Observação do cliente: {{ obs_cliente }}</span>
+                                        {{ cde_observation_info() }}
+                                    </div>
                                 {% endif %}
                             {% endif %}
                             {% if obs_carga %}

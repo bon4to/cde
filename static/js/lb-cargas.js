@@ -459,6 +459,8 @@ async function genCargaReport() {
             showToast('Relatório gerado com sucesso. O download iniciou automaticamente.', 'success', 10);
 
             btnReport.innerHTML = `✓`;
+            btnReport.title = 'RELATÓRIO BAIXADO';
+            btnReport.setAttribute('aria-label', 'Relatório baixado');
             btnReport.classList.add('disabled');
         });
     

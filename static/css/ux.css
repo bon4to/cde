@@ -439,87 +439,150 @@ html.dark .dropdown-menu-action .theme-switch::after {
     transform: translateX(14px);
 }
 
-/* Notification dropdown */
+/* Notifications workspace */
 
-#notifications-container {
-    width: min(380px, calc(100vw - 24px));
-    min-width: 0;
-    max-height: min(480px, calc(100vh - 84px));
-    padding: 6px;
+.navigation-bar .navigation-notifications-link {
+    height: 60px;
+    color: #fff;
+    align-items: center;
+    box-sizing: border-box;
+    text-decoration: none;
+}
+
+.navigation-bar .navigation-notifications-link:hover,
+.navigation-bar .navigation-notifications-link:focus-visible {
+    color: #fff;
+}
+
+#divContent.notifications-page {
+    gap: 18px;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.notifications-list-shell {
+    width: min(100%, 560px);
+    min-width: min(100%, 340px);
+    flex: 0 1 560px;
+}
+
+.notifications-list {
+    width: 100%;
+    max-height: min(640px, calc(100vh - 220px));
+    padding-right: 4px;
     overflow-x: hidden;
     overflow-y: auto;
-    color: var(--ux-text);
-    background: var(--ux-surface-raised);
 }
 
-#notifications-container .dropdown-notification {
-    min-width: 0;
-    border-radius: var(--ux-radius-sm);
-    background: transparent;
-}
-
-#notifications-container .dropdown-notification-content {
-    gap: 3px;
-    padding: 11px 12px;
+.notification-container {
+    gap: 12px;
+    width: 100%;
+    min-height: 104px;
+    max-height: none;
+    margin: 0 0 10px;
+    padding: 16px 18px 13px;
+    display: grid;
     cursor: pointer;
-    align-items: stretch;
-    border-bottom: 1px solid var(--ux-border) !important;
+    box-sizing: border-box;
+    grid-template-rows: minmax(0, 1fr) auto;
+    border-color: color-mix(in srgb, var(--main-color) 44%, var(--ux-border));
+    border-radius: var(--ux-radius-md);
+    background: color-mix(in srgb, var(--main-color) 8%, var(--ux-surface));
+    transition: border-color var(--ux-transition), background-color var(--ux-transition), box-shadow var(--ux-transition);
 }
 
-#notifications-container .dropdown-notification-title {
-    height: auto;
+.notification-container:hover,
+.notification-container:focus-visible {
+    border-color: var(--main-color);
+    background: color-mix(in srgb, var(--main-color) 12%, var(--ux-surface));
+    box-shadow: var(--ux-shadow-sm);
+    outline: none;
+}
+
+.notification-container.read {
+    opacity: 0.78;
+    border-color: var(--ux-border);
+    background: var(--ux-surface-muted);
+}
+
+.notification-main {
+    gap: 14px;
+    display: grid;
+    min-width: 0;
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.notification-copy {
+    min-width: 0;
+}
+
+body.app-shell .notification-container .notification-title {
     max-width: 100%;
     margin: 0;
-    padding: 0;
     overflow: hidden;
     color: var(--ux-text);
-    font-family: var(--ux-font-body);
-    font-size: 13px;
-    font-weight: 750;
-    line-height: 1.35;
-    letter-spacing: -0.01em;
-    text-align: left;
+    font-size: 16px;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-body.app-shell #notifications-container .dropdown-notification-message,
-body.app-shell #notifications-container .dropdown-notification-date {
-    height: auto;
+body.app-shell .notification-container .notification-message {
     max-width: 100%;
-    margin: 0;
-    padding: 0;
+    margin: 6px 0 0;
     overflow: hidden;
     color: var(--ux-text-muted);
-    font-family: var(--ux-font-body);
+    font-size: 13px;
     font-weight: 500;
+    line-height: 1.4;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-body.app-shell #notifications-container .dropdown-notification-message {
-    font-size: 12px;
-    line-height: 1.4;
-}
-
-body.app-shell #notifications-container .dropdown-notification-date {
+body.app-shell .notification-container .notification-date {
+    margin: 0;
+    color: var(--ux-text-soft);
     font-family: var(--ux-font-data);
-    font-size: 9px;
-    line-height: 1.35;
+    font-size: 10px;
+    line-height: 1.2;
     text-align: right;
 }
 
-#notifications-container .dropdown-notification-content:hover {
-    background: color-mix(in srgb, var(--main-color) 8%, var(--ux-surface-raised));
+.notification-actions {
+    min-width: 32px;
+    display: flex;
+    justify-content: flex-end;
 }
 
-#notifications-container .dropdown-notification-footer a {
-    color: var(--main-color);
-    padding: 10px 12px;
-    font-family: var(--ux-font-body);
-    font-size: 12px;
-    text-align: center;
+.notification-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: grid;
+    cursor: pointer;
+    color: var(--ux-text-muted);
+    place-items: center;
+    border: 0;
+    border-radius: var(--ux-radius-xs);
     background: transparent;
+}
+
+.notification-icon-button:hover,
+.notification-icon-button:focus-visible {
+    color: var(--main-color);
+    background: color-mix(in srgb, var(--main-color) 10%, transparent);
+    outline: none;
+}
+
+.notifications-empty {
+    padding: 30px 20px;
+    color: var(--ux-text-muted);
+    text-align: center;
+    border: 1px dashed var(--ux-border-strong);
+    border-radius: var(--ux-radius-md);
 }
 
 .submenu-content {
@@ -1062,6 +1125,10 @@ hr {
 .btn-fancy.active,
 .modal-btn-primary {
     background: var(--main-color);
+}
+
+.btn-fancy.logistics-report-button {
+    background: var(--ux-info);
 }
 
 .modal-btn-danger {
@@ -2415,8 +2482,7 @@ html.dark body.app-shell .view-width {
 }
 
 html.dark .dropdown-content,
-html.dark .submenu-content,
-html.dark #notifications-container {
+html.dark .submenu-content {
     border-color: var(--ux-border);
     background: var(--ux-surface-raised);
 }
@@ -2644,23 +2710,10 @@ html.dark .btn-fancy.active {
         background: rgba(8, 13, 16, 0.12);
     }
 
-    .navigation-menu #notifications-container {
-        top: calc(100% + 8px);
-        right: 0;
-        left: auto;
-        width: min(380px, calc(100vw - 24px));
-        display: none;
-        padding: 6px;
-        position: absolute;
-        border: 1px solid var(--ux-border);
-        border-radius: var(--ux-radius-md);
-        background: var(--ux-surface-raised);
-        box-shadow: var(--ux-shadow-md);
-    }
-
-    .navigation-menu .dropdown:hover > #notifications-container,
-    .navigation-menu .dropdown:focus-within > #notifications-container {
-        display: block;
+    .navigation-bar .navigation-notifications-link {
+        width: 100%;
+        height: auto;
+        justify-content: flex-end;
     }
 
     .user-params-button {
@@ -5461,6 +5514,104 @@ body.app-shell .settings-group-header h2 {
     transition: transform var(--ux-transition), border-color var(--ux-transition), background-color var(--ux-transition), box-shadow var(--ux-transition);
 }
 
+.logistics-settings-page {
+    max-width: 980px;
+    margin-inline: auto;
+}
+
+.logistics-settings-shell .container {
+    align-content: flex-start;
+}
+
+.logistics-settings-shell .titles-ruler {
+    height: 72px;
+    min-height: 72px;
+    flex: 0 0 100%;
+}
+
+.logistics-settings-form {
+    padding: clamp(24px, 3vw, 34px);
+    border: 1px solid var(--ux-border);
+    border-radius: var(--ux-radius-lg);
+    background: var(--ux-surface);
+    box-shadow: var(--ux-shadow-sm);
+}
+
+.logistics-policy-setting {
+    gap: 24px;
+    display: flex;
+    padding: 20px;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--ux-border);
+    border-radius: var(--ux-radius-md);
+    background: var(--ux-surface-muted);
+}
+
+.logistics-policy-copy {
+    gap: 7px;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.logistics-policy-copy strong {
+    color: var(--ux-text);
+    font-size: 16px;
+}
+
+.logistics-policy-copy span {
+    max-width: 650px;
+    color: var(--ux-text-muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.logistics-policy-copy code {
+    padding: 2px 5px;
+    color: var(--main-color);
+    font-family: var(--ux-font-data);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--main-color) 9%, var(--ux-surface));
+}
+
+.logistics-policy-toggle {
+    gap: 12px;
+    display: flex;
+    min-width: 144px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logistics-policy-toggle > span:first-child {
+    color: var(--main-color);
+    font-family: var(--ux-font-data);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+}
+
+.logistics-settings-actions {
+    display: flex;
+    margin-top: 18px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.logistics-settings-actions .btn-fancy {
+    min-width: 140px;
+}
+
+.logistics-settings-actions .btn-fancy:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+    filter: none;
+    box-shadow: none;
+    transform: none;
+}
+
 .settings-card:hover,
 .settings-card:focus-visible {
     color: var(--ux-text);
@@ -5580,6 +5731,21 @@ body.app-shell .settings-group-header h2 {
     .settings-grid {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    .logistics-policy-setting,
+    .logistics-settings-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .logistics-policy-toggle {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .logistics-settings-actions .btn-fancy {
+        width: 100%;
+    }
 }
 
 @media (max-width: 420px) {
@@ -5605,6 +5771,10 @@ body.app-shell .settings-group-header h2 {
 
     .settings-card-arrow {
         display: none;
+    }
+
+    .logistics-settings-form {
+        padding: 22px 18px;
     }
 }
 

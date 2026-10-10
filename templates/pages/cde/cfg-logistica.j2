@@ -1,0 +1,71 @@
+{% extends 'base.j2' %}
+{% from 'components/switch.j2' import switch_control %}
+
+{% block title %}Ajustes de logística{% endblock title %}
+{% block body_class %}logistics-settings-shell{% endblock body_class %}
+
+{% block content %}
+    <div class="titles-ruler">
+        {% from 'components/title-route.j2' import title_container %}
+        {{ title_container(
+            id_page=session['id_page'],
+            breadcrumbs=[
+                {'text': 'AJUSTES', 'url': 'cde_cfg'},
+                {'text': 'LOGÍSTICA'}
+            ],
+            aux_buttons=[
+                {'type': 'link', 'url': 'cde_cfg', 'icon': 'svg/cog.svg', 'title': 'AJUSTES'},
+                {'type': 'divider'},
+                {'type': 'action', 'icon': 'svg/circle-arrow-left.svg', 'title': 'VOLTAR', 'onclick': 'goBack()'}
+            ]
+        ) }}
+    </div>
+
+    <div id="divContent" class="settings-page logistics-settings-page">
+        {% include "components/advert.j2" %}
+
+        <form class="logistics-settings-form" id="logistics-settings-form" method="post">
+            <div class="logistics-policy-setting">
+                <div class="logistics-policy-copy">
+                    <strong>Observações do cliente sem marcação</strong>
+                    <span>
+                        Esta regra vale somente para observações cadastradas no cliente.
+                        Observações da carga e outros campos não são alterados.
+                        Sem marcadores <code>&gt;CDE</code>,
+                        {{ 'texto completo será exibido.' if show_untagged_observations else 'nenhum texto será exibido.' }}
+                    </span>
+                </div>
+                <div class="logistics-policy-toggle">
+                    <span>{{ 'MOSTRAR TUDO' if show_untagged_observations else 'NÃO MOSTRAR' }}</span>
+                    {{ switch_control(
+                        'Exibir observações do cliente sem marcação',
+                        checked=show_untagged_observations,
+                        name='show_untagged_observations'
+                    ) }}
+                </div>
+            </div>
+
+            <div class="logistics-settings-actions">
+                <button class="btn-fancy featured" id="save-logistics-settings" type="submit" disabled>SALVAR ALTERAÇÕES</button>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+
+{% block route_script %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const policyInput = document.querySelector('[name="show_untagged_observations"]');
+            const saveButton = document.getElementById('save-logistics-settings');
+            const initialValue = policyInput.checked;
+
+            policyInput.addEventListener('change', () => {
+                saveButton.disabled = policyInput.checked === initialValue;
+            });
+
+            {% if observation_policy_saved %}
+                showToast('Configuração salva.', 'success');
+            {% endif %}
+        });
+    </script>
+{% endblock route_script %}

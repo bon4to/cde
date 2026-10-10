@@ -119,14 +119,9 @@
                             </div>
                         </div>
                         <div class="flex-h navigation-actions">
-                            <div class="dropdown">
-                                <button class="dropbtn" style="cursor: pointer;" onclick="window.location.href='{{ url_for('cde_notifications') }}';">
-                                    {{ ui_icon('svg/bell.svg', 'Notificações', 'navigation-notification-icon ui-icon-sm', 'svg-notification') }}
-                                </button>
-                                <div class="dropdown-content" id="notifications-container" style="right: 0; left: unset;">
-                                    <!-- notifications will be automatically added here -->
-                                </div>
-                            </div>
+                            <a class="dropbtn navigation-notifications-link" href="{{ url_for('cde_notifications') }}" aria-label="Notificações">
+                                {{ ui_icon('svg/bell.svg', class_name='navigation-notification-icon ui-icon-sm') }}
+                            </a>
                             <div class="dropdown" id="system-menu">
                                 <button class="dropbtn">
                                     <span>SISTEMA</span>

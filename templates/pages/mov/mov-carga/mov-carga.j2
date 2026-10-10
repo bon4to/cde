@@ -1,4 +1,5 @@
 {% extends 'base.j2' %}
+{% from 'components/cde-observation-info.j2' import cde_observation_info %}
 
 {% block title %}Cargas{% endblock title %}
 
@@ -102,7 +103,7 @@
                                                 <th>Transportadora</th>
                                                 <th>Emissão (Data)</th>
                                                 <th>Entrega (Data)</th>
-                                                <th>OBS. Cliente</th>
+                                                <th>OBS. Cliente {{ cde_observation_info() }}</th>
                                                 <th>OBS. Carga</th>
                                             </tr>
                                         </thead>
@@ -213,8 +214,9 @@
                     {% if obs_cliente %}
                         {% set obs_cliente = obs_cliente|trim %}
                         {% if obs_cliente and obs_cliente | length > 0 %}
-                            <div class="msg-info">
+                            <div class="msg-info cde-customer-observation">
                                 <span>Observação do cliente: {{ obs_cliente }}</span>
+                                {{ cde_observation_info() }}
                             </div>
                         {% endif %}
                     {% endif %}
@@ -227,7 +229,7 @@
                                     <h2>Lista detalhada</h2>
                                     <p>Itens abertos por pedido e sequência.</p>
                                 </div>
-                                <div class="btn-fancy carga-mode-button" onclick="toggleTableSubtotal()">
+                                <div class="btn-fancy carga-mode-button" onclick="toggleTableSubtotal()" title="EXIBIR LISTA SUBTOTAL" aria-label="Exibir lista subtotal">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/panel-top-close.svg') }}" alt="">
                                 </div>
                             </div>
@@ -283,7 +285,7 @@
                                     <h2>Lista subtotal</h2>
                                     <p>Itens agrupados para iniciar a separação.</p>
                                 </div>
-                                <div class="btn-fancy carga-mode-button" onclick="toggleTableSubtotal()">
+                                <div class="btn-fancy carga-mode-button" onclick="toggleTableSubtotal()" title="EXIBIR LISTA DETALHADA" aria-label="Exibir lista detalhada">
                                     <img class="svg-invert" src="{{ url_for('static', filename='svg/list-tree.svg') }}" alt="">
                                 </div>
                             </div>

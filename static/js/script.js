@@ -535,62 +535,6 @@ function visualDelay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function loadNotifications() {
-// carrega notificacoes do backend
-    fetch('/api/notification/get')
-        .then(response => response.json())
-        .then(data => {
-            // exibe as notificacoes
-            const notificationsContainer = document.getElementById('notifications-container');
-            notificationsContainer.innerHTML = ''; // limpa antes de inserir
-            
-            let unreadNotifications = 0;
-            for (let i = 0; i < data.length; i++) {
-                const notification = data[i];
-
-                // limita a exibicao de 5 notificacoes
-                if (unreadNotifications >= 5) {
-                    break;
-                }
-
-                // ignora as notificacoes lidas
-                if (notification.flag_read) {
-                    continue;
-                }
-
-                unreadNotifications++;
-
-                // altera o icone da notificacao
-                const svgNotification = document.getElementById('svg-notification');
-                svgNotification.style.setProperty('--ui-icon-source', "url('/static/svg/bell-dot.svg')");
-
-                // cria o elemento da notificacao
-                const notificationElement = document.createElement('div');
-                notificationElement.classList.add('dropdown-notification');
-                notificationElement.innerHTML = `
-                    <div class="flex-v dropdown-notification-content" onclick="window.location.href='/cde/notifications/${notification.id}'">
-                        <strong class="dropdown-notification-title">${notification.title}</strong>
-                        <p class="dropdown-notification-message">${notification.message}</p>
-                        <p class="dropdown-notification-date">${notification.date}</p>
-                    </div>
-                `;
-                notificationsContainer.appendChild(notificationElement);
-            }
-            
-            const moreElement = document.createElement('div');
-            moreElement.innerHTML = `
-                <div class="dropdown-notification dropdown-notification-footer">
-                    <a href="/cde/notifications">Ver todas... (${unreadNotifications} não lidas)</a>
-                </div>
-            `;
-            notificationsContainer.appendChild(moreElement);
-        })
-        .catch(error => {
-            console.error('Erro ao carregar notificacoes:', error);
-        });
-}
-
-
 function loadRecentPages() {
     // recupera o histórico do localStorage
     let recentPages = JSON.parse(localStorage.getItem('recentPages')) || [];
@@ -747,11 +691,6 @@ window.onload = function () {
         toggleContainer();
     } catch (error) {
         console.log('[INFO] lb-float: A rota não contém float-container.');
-    }
-    try {
-        loadNotifications();
-    } catch (error) {
-        console.log('[INFO] A rota não contém dropdown de notificação.');
     }
     hideLoading();
 };

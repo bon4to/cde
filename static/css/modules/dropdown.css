@@ -62,69 +62,6 @@
     display: block;
 }
 
-.dropdown-notification {
-    background-color: var(--strong-dark-l);
-    min-width: 360px;
-}
-
-.dropdown-notification:hover h1, 
-.dropdown-notification:hover p,
-.dropdown-notification:hover {
-    background-color: var(--dark-or-white);
-    color: var(--main-color);
-}
-
-.dropdown-notification .dropdown-notification-title, 
-.dropdown-notification .dropdown-notification-message {
-    font-family: 'Inter', sans-serif;    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    max-width: 300px;
-    text-overflow: ellipsis;
-}
-
-.dropdown-notification .dropdown-notification-date {
-    font-family: 'Inter', sans-serif;
-    justify-content: flex-end; 
-    margin: 0; 
-    font-size: 9px;
-}
-
-.dropdown-notification .dropdown-notification-message,
-.dropdown-notification .dropdown-notification-date {
-    font-weight: 500;
-}
-
-.dropdown-notification h1 {
-    margin: 0;
-    color: var(--dark-or-white);
-    display: block;
-    text-align: left;
-    transition: none;
-    font-weight: bold;
-    padding: 14px 16px 0px 16px;
-    text-decoration: none;
-    font-family: 'Chivo Mono', monospace;
-    font-size: 14px;
-}
-
-.dropdown-notification p {
-    color: var(--dark-or-white);
-    font-size: 11px;
-    text-align: left;
-    transition: none;
-    font-weight: bold;
-    padding: 2px 18px 8px 18px;
-    text-decoration: none;
-    justify-content: flex-start;
-}
-
-.dropdown-notification a {
-    text-align: center;
-}
-
 .dropbtn {
     gap: 4px;
     border: none;

@@ -70,6 +70,23 @@ A modular web-based application designed for inventory management, logistics coo
    python cde_wsgi.py
    ```
 
+### Project runner
+
+With Corepack enabled, project commands can be run through Yarn without
+activating the virtual environment. Each command uses `venv/bin/python`
+directly:
+
+```bash
+corepack enable
+yarn start
+yarn test
+yarn lint
+```
+
+- `yarn start` starts the Flask debug server on port `5100`.
+- `yarn test` runs the complete pytest suite.
+- `yarn lint` checks Python sources with Ruff.
+
 > ⚠️ **Important:** To perform ODBC-based queries to the ERP, the companion service [`cde-api`](https://github.com/lucas-bonato/cde-api) must be installed on the machine where the appropriate driver is available.
 
 ---

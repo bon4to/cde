@@ -103,3 +103,13 @@ class TestSecurityHeadersAndAuth:
 
         res_invalid = app_client.get("/get/username/invalid_id")
         assert res_invalid.status_code == 404
+
+    def test_user_initials_support_single_name(self):
+        from flask import session
+        from cde import UserUtils, app
+
+        with app.test_request_context():
+            UserUtils.get_user_initials("ADMIN", "")
+
+            assert session["user_name"] == "ADMIN"
+            assert session["user_initials"] == "AD"

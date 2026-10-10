@@ -1,4 +1,5 @@
 {% extends 'base.j2' %}
+{% from 'components/cde-observation-info.j2' import cde_observation_info %}
 
 {% block title %}Cargas Sep.{% endblock title %}
 
@@ -68,8 +69,9 @@
                 {% if obs_cliente %}
                     {% set obs_cliente = obs_cliente|trim %}
                     {% if obs_cliente and obs_cliente | length > 0 %}
-                        <div class="msg-info">
+                        <div class="msg-info cde-customer-observation">
                             <span>Observação do cliente: {{ obs_cliente }}</span>
+                            {{ cde_observation_info() }}
                         </div>
                     {% endif %}
                 {% endif %}

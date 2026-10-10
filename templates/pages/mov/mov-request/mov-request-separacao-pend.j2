@@ -14,13 +14,14 @@
             <img class="svg-invert" src="{{ url_for('static', filename='svg/eraser.svg') }}" alt="">
         </div>
         {% if session['user_grant'] == 1 %}
-        <div class="button-mini btn-fancy" onclick="genRequestReport()" title="GERAR RELATÓRIO" >
+        <button id="btnGenReqReport" class="button-mini btn-fancy logistics-report-button" type="button" onclick="genRequestReport()" title="GERAR RELATÓRIO" aria-label="Gerar relatório">
             <img class="svg-invert" src="{{ url_for('static', filename='svg/file-text.svg') }}" alt="">
-        </div>
+        </button>
         {% endif %}
     </div>
-    <div id="finalizarBtn" class="btn-fancy safe" style="height: 45px; margin: 0; max-width: 200px;" onclick="concludeSeparacao()">
-        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check.svg') }}" alt="Finalizar...">
+    <div id="finalizarBtn" class="btn-fancy safe" style="height: 45px; margin: 0; max-width: 200px;" onclick="concludeSeparacao()" aria-label="Finalizar separação">
+        <img class="svg-invert" style="height: 22px; width: 22px;" src="{{ url_for('static', filename='svg/circle-check.svg') }}" alt="">
+        <span>FINALIZAR SEPARAÇÃO</span>
     </div>
 {% endblock separation_buttons %}
 

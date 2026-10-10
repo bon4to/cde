@@ -30,6 +30,21 @@ div.msg-info {
     background-color: rgba(128, 180, 240, 0.5);
 }
 
+.cde-observation-info {
+    flex: 0 0 auto;
+    cursor: help;
+    font-size: 0.9em;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.cde-customer-observation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 div.msg-alert {
     margin: 8px;
     padding: 12px;

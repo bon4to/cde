@@ -137,6 +137,7 @@ def test_settings_hub_keeps_every_destination_in_shared_cards():
     component = read("templates/components/settings/setting-card.j2")
     endpoints = {
         "api",
+        "logi_cfg",
         "cde_notifications",
         "cde_query_list",
         "users",
@@ -150,6 +151,16 @@ def test_settings_hub_keeps_every_destination_in_shared_cards():
     assert settings.count("setting_card(") == len(endpoints)
     for endpoint in endpoints:
         assert f"setting_card('{endpoint}'" in settings
+
+    logistics_settings = read("templates/pages/cde/cfg-logistica.j2")
+    assert 'name=\'show_untagged_observations\'' in logistics_settings
+    assert 'id="save-logistics-settings"' in logistics_settings
+    assert "saveButton.disabled = policyInput.checked === initialValue" in logistics_settings
+    assert "showToast('Configuração salva.', 'success')" in logistics_settings
+    assert 'class="msg-success logistics-settings-feedback"' not in logistics_settings
+    assert "session.get('user_grant', 99) <= 2" in settings
+    assert '@app.route("/logi/settings/", methods=["GET", "POST"])' in read("cde.py")
+    assert "if not cde.is_admin():" in read("cde.py")
 
 
 def test_profile_keeps_account_actions_in_responsive_workspace():
@@ -461,24 +472,75 @@ def test_dev_cargas_mock_matches_cargas_table_contract():
 
     assert "def get_carga_info_with_carga(id_carga)" in backend
     assert "cl.OBSERVACOES" in backend
-    assert "Observação do cliente:" in separation
+    assert "cde_observation_info()" in separation
     assert ">TRANSPORTADORA<" in separation
     assert "RECARREGAR CARGAS" in cargas
     assert 'class="carga-empty-action"' in cargas
     assert 'class="carga-ops-shell"' in incomplete
     assert 'id="cargaOpsLayout"' in incomplete
     assert ">TRANSPORTADORA<" in incomplete
-    assert "Observação do cliente:" in incomplete
+    assert "cde_observation_info()" in incomplete
     assert "RETOMAR SEPARAÇÃO" in incomplete
     assert "toggleCargasRail()" in incomplete
     assert "const obsCliente" in separation_pending
     assert "const obsCliente" in separation_done
     assert 'drawObservation("OBSERVAÇÃO DO CLIENTE", obsCliente)' in cargas_js
+    observation_info = read("templates/components/cde-observation-info.j2")
+    assert "edite a observação do cliente na fonte dos dados" in observation_info
+    assert "Use &gt;CDE antes e depois" in observation_info
+    assert "ou &gt; CDE" not in observation_info
+    assert "cde-customer-observation" in cargas
+    assert "cde-customer-observation" in separation
+    assert "cde-customer-observation" in incomplete
     assert "TRANSPORTADORA:" in cargas_js
 
     estoque_utils = read("app/models/estoqueUtils.py")
     assert "MOCK_ITEM_LOCATIONS" in estoque_utils
     assert "def get_mock_item_inv_locations(cod_item)" in estoque_utils
+
+
+def test_logistics_report_actions_match_their_context():
+    pending_templates = (
+        "templates/pages/mov/mov-carga/mov-carga-separacao-pend.j2",
+        "templates/pages/mov/mov-request/mov-request-separacao-pend.j2",
+    )
+    done_templates = (
+        "templates/pages/mov/mov-carga/mov-carga-separacao-done.j2",
+        "templates/pages/mov/mov-request/mov-request-separacao-done.j2",
+    )
+
+    for template in pending_templates:
+        content = read(template)
+        assert "logistics-report-button" in content
+        assert "GERAR RELATÓRIO</span>" not in content
+        assert 'title="GERAR RELATÓRIO"' in content
+        assert "FINALIZAR SEPARAÇÃO</span>" in content
+        assert 'title="FINALIZAR SEPARAÇÃO"' not in content
+        assert 'aria-label="Finalizar separação"' in content
+
+    for template in done_templates:
+        content = read(template)
+        assert "logistics-report-button" in content
+        assert "GERAR RELATÓRIO</span>" in content
+        assert 'title="GERAR RELATÓRIO"' in content
+
+    for script in (read("static/js/lb-cargas.js"), read("static/js/lb-requests.js")):
+        assert ".title = 'RELATÓRIO BAIXADO'" in script
+        assert "setAttribute('aria-label', 'Relatório baixado')" in script
+
+
+def test_logistics_table_mode_actions_have_tooltips():
+    templates = (
+        "templates/pages/mov/mov-carga/mov-carga.j2",
+        "templates/pages/mov/mov-request/mov-request.j2",
+    )
+
+    for template in templates:
+        content = read(template)
+        assert 'title="EXIBIR LISTA SUBTOTAL"' in content
+        assert 'title="EXIBIR LISTA DETALHADA"' in content
+        assert 'aria-label="Exibir lista subtotal"' in content
+        assert 'aria-label="Exibir lista detalhada"' in content
 
 
 def test_mov_scanner_layout_is_scoped_and_scrolls_between_panels():
@@ -543,14 +605,21 @@ def test_compact_header_dividers_override_global_rule():
     assert "flex-wrap: wrap" in styles
 
 
-def test_notification_dropdown_owns_its_visual_contract():
+def test_notification_listing_is_compact_and_header_has_direct_link():
     styles = read("static/css/ux.css")
     script = read("static/js/script.js")
+    header = read("templates/components/dropdown/dropdown-cde.j2")
+    notifications = read("templates/components/menus/notifications.j2")
 
-    assert "#notifications-container" in styles
-    assert ".dropdown-notification-content" in styles
-    assert '<strong class="dropdown-notification-title">' in script
-    assert 'style="height: 16px;"' not in script
+    assert ".notifications-list-shell" in styles
+    assert "min-height: 104px" in styles
+    assert 'class="dropbtn navigation-notifications-link"' in header
+    assert 'id="notifications-container"' not in header
+    assert "loadNotifications" not in script
+    assert ".navigation-bar .navigation-notifications-link" in styles
+    assert "color: #fff;" in styles
+    assert 'role="link"' in notifications
+    assert "svg/open.svg" not in notifications
 
 
 def test_system_alert_uses_visible_return_action():

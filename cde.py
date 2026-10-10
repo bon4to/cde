@@ -3,7 +3,15 @@ import sqlite3, json, sys, re, os, time
 
 # local imports
 from app.utils import cdeapp
-from app.models import dbUtils, stickerUtils, misc, estoqueUtils, logTexts as lt
+from app.utils.observationUtils import extract_cde_observation
+from app.models import (
+    dbUtils,
+    stickerUtils,
+    misc,
+    estoqueUtils,
+    systemSettings,
+    logTexts as lt,
+)
 from app.models.migrationManager import MigrationManager
 from app.services import NotificationManager as nm, licenseManager
 
@@ -411,6 +419,26 @@ class CargaUtils:
         return str(id_carga) in CargaUtils.MOCK_CARGA_DETAILS
 
     @staticmethod
+    def filter_customer_observations(result, columns):
+        if not result or not columns or "OBS_CLIENTE" not in columns:
+            return result
+
+        obs_index = columns.index("OBS_CLIENTE")
+        show_untagged = (
+            systemSettings.SystemSettings.show_untagged_customer_observations()
+        )
+        filtered_result = []
+
+        for row in result:
+            filtered_row = list(row)
+            filtered_row[obs_index] = extract_cde_observation(
+                row[obs_index], show_untagged=show_untagged
+            )
+            filtered_result.append(filtered_row)
+
+        return filtered_result
+
+    @staticmethod
     def get_mock_carga_cliente(id_carga):
         result, columns = CargaUtils.mock_cargas_payload()
         carga_col = columns.index("NRO_CARGA")
@@ -430,7 +458,12 @@ class CargaUtils:
             if str(row[carga_col]) == str(id_carga):
                 return {
                     "fant_cliente": row[columns.index("FANT_CLIENTE")],
-                    "obs_cliente": row[columns.index("OBS_CLIENTE")],
+                    "obs_cliente": extract_cde_observation(
+                        row[columns.index("OBS_CLIENTE")],
+                        show_untagged=(
+                            systemSettings.SystemSettings.show_untagged_customer_observations()
+                        ),
+                    ),
                     "cod_transportadora": row[columns.index("COD_TRANSP")],
                     "transportadora": row[columns.index("FANT_TRANSP")],
                 }
@@ -469,7 +502,8 @@ class CargaUtils:
     def get_cargas(all_cargas=False, dsn="ODBC-DRIVER"):
         if cdeapp.config.get_debug():
             lt.debug_log("Usando cargas mock: modo dev sem consulta remota.")
-            return CargaUtils.mock_cargas_payload(all_cargas)
+            result, columns = CargaUtils.mock_cargas_payload(all_cargas)
+            return CargaUtils.filter_customer_observations(result, columns), columns
 
         if all_cargas:
 
@@ -564,12 +598,14 @@ class CargaUtils:
 
         if not columns and cdeapp.config.get_debug():
             lt.debug_log("Usando cargas mock: DB remoto indisponível em modo dev.")
-            return CargaUtils.mock_cargas_payload(all_cargas)
+            result, columns = CargaUtils.mock_cargas_payload(all_cargas)
+            return CargaUtils.filter_customer_observations(result, columns), columns
 
         if all_cargas and result and columns:
             excluded = set(str(c) for c in all_cargas)
             result = [row for row in result if str(row[0]) not in excluded]
 
+        result = CargaUtils.filter_customer_observations(result, columns)
         return result, columns
 
     @staticmethod
@@ -1049,7 +1085,12 @@ class CargaUtils:
         if result and columns:
             return {
                 "fant_cliente": result[0][columns.index("FANT_CLIENTE")],
-                "obs_cliente": result[0][columns.index("OBS_CLIENTE")],
+                "obs_cliente": extract_cde_observation(
+                    result[0][columns.index("OBS_CLIENTE")],
+                    show_untagged=(
+                        systemSettings.SystemSettings.show_untagged_customer_observations()
+                    ),
+                ),
                 "cod_transportadora": result[0][columns.index("COD_TRANSP")],
                 "transportadora": result[0][columns.index("FANT_TRANSP")],
             }
@@ -1842,9 +1883,9 @@ class UserUtils:
 
     @staticmethod
     def get_user_initials(nome, snome):  # nome e sobrenome
-        if snome == " ":  # verifica se o sobrenome é vazio
-            session["user_name"] = f"{nome}"
-            session["user_initials"] = f"{nome[0]}{snome[1]}"
+        if not snome.strip():
+            session["user_name"] = nome
+            session["user_initials"] = nome[:2].upper()
         else:
             session["user_name"] = f"{nome} {snome}"
             session["user_initials"] = f"{nome[0]}{snome[0]}"
@@ -2744,6 +2785,28 @@ def api() -> str:
 @cde.verify_auth("CDE001")
 def cde_cfg() -> str:
     return render_template("pages/cde/cfg-index.j2")
+
+
+@app.route("/logi/settings/", methods=["GET", "POST"])
+@cde.verify_auth("CDE001", "logi")
+def logi_cfg() -> str:
+    if not cde.is_admin():
+        abort(403)
+
+    if request.method == "POST":
+        show_untagged = request.form.get("show_untagged_observations") == "on"
+        systemSettings.SystemSettings.set_show_untagged_customer_observations(
+            show_untagged
+        )
+        return redirect(url_for("logi_cfg", saved="observation-policy"))
+
+    return render_template(
+        "pages/cde/cfg-logistica.j2",
+        show_untagged_observations=(
+            systemSettings.SystemSettings.show_untagged_customer_observations()
+        ),
+        observation_policy_saved=request.args.get("saved") == "observation-policy",
+    )
 
 
 @app.route("/cde/query-list/", methods=["GET"])

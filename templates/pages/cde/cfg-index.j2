@@ -52,6 +52,9 @@
                     <p>Ferramentas de operação e administração.</p>
                 </header>
                 <div class="settings-grid">
+                    {% if session.get('user_grant', 99) <= 2 %}
+                        {{ setting_card('logi_cfg', 'Logística', 'Configure cargas e regras operacionais.', 'svg/truck.svg', 'OPERAÇÃO') }}
+                    {% endif %}
                     {{ setting_card('api', 'Database', 'Faça consultas no banco de dados.', 'svg/database-zap.svg', 'DADOS') }}
                     {{ setting_card('cde_notifications', 'Notificações', 'Consulte mensagens e avisos do sistema.', 'svg/bell.svg', 'PESSOAL') }}
                     {{ setting_card('cde_query_list', 'Queries', 'Visualize a biblioteca de consultas.', 'svg/file-text.svg', 'DADOS') }}

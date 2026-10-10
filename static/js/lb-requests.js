@@ -326,6 +326,8 @@ async function genRequestReport() {
             const pdfName = `MOV007-RQ${nroReq}.pdf`;
             report.save(pdfName);
             btnGenReqReport.innerHTML = `✓`;
+            btnGenReqReport.title = 'RELATÓRIO BAIXADO';
+            btnGenReqReport.setAttribute('aria-label', 'Relatório baixado');
             btnGenReqReport.classList.add('disabled');
         });
     } catch (error) {

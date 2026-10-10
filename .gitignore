@@ -23,6 +23,7 @@ __pycache__
 .idea
 .env
 venv
+node_modules/
 
 # macOS folder cfg file
 .DS_Store

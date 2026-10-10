@@ -23,26 +23,43 @@
         ) }}
 
     </div>
-    <div id="divContent" style="flex-wrap: wrap;">
+    <div id="divContent" class="notifications-page">
         
-        <div class="tables-container" style="flex: 0; display: flex; justify-content: flex-start; min-width: 30vw;">
-            <div style="width: 100%; height: 640px; overflow-x: hidden;">
+        <div class="tables-container notifications-list-shell">
+            <div class="notifications-list">
                 {% for notification in notifications %}
-                <div class="notification-container {% if notification['flag_read'] %}read{% endif %}" id="notification-{{ notification['id'] }}">
-                    <div class="split-h" style="padding: 16px; width: unset;">
-                        <div style="margin-right: 14px;">
-                            <h2 class="notification-title" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 20px;">{{ notification['title'] }}</h2>
-                            <p class="notification-message" style="display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 20px;">{{ notification['message'] }}</p>
+                <article
+                    class="notification-container {% if notification['flag_read'] %}read{% endif %}"
+                    id="notification-{{ notification['id'] }}"
+                    role="link"
+                    tabindex="0"
+                    data-href="{{ url_for('cde_notifications_id', id_notification=notification['id']) }}"
+                    onclick="window.location.href=this.dataset.href"
+                    onkeydown="if (event.target === this && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); window.location.href=this.dataset.href; }"
+                >
+                    <div class="notification-main">
+                        <div class="notification-copy">
+                            <h2 class="notification-title">{{ notification['title'] }}</h2>
+                            <p class="notification-message">{{ notification['message'] }}</p>
                         </div>
-                        <div class="notification-icons">
+                        <div class="notification-actions">
                             {% if not notification['flag_read'] %}
-                            <img class="notification-icon" src="{{ url_for('static', filename='svg/mail-open.svg') }}" title="Marcar como lida" onclick="clearNotification({{ session['id_user'] }}, {{ notification['id'] }})">
+                            <button
+                                class="notification-icon-button"
+                                type="button"
+                                title="Marcar como lida"
+                                aria-label="Marcar como lida"
+                                onclick="event.stopPropagation(); clearNotification({{ session['id_user'] }}, {{ notification['id'] }})"
+                            >
+                                {{ ui_icon('svg/mail-open.svg', class_name='ui-icon-md') }}
+                            </button>
                             {% endif %}
-                            <img class="notification-icon" src="{{ url_for('static', filename='svg/open.svg') }}" title="Abrir" onclick="window.location.href='{{ url_for('cde_notifications_id', id_notification=notification['id']) }}'">
                         </div>
                     </div>
                     <p class="notification-date">{{ notification['date'] }}</p>
-                </div>
+                </article>
+                {% else %}
+                    <div class="notifications-empty">Nenhuma notificação encontrada.</div>
                 {% endfor %}
             </div>
         </div>

@@ -1,0 +1,10 @@
+{
+  "name": "cde",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "start": "venv/bin/python cde.py",
+    "test": "venv/bin/python -m pytest",
+    "lint": "venv/bin/python -m ruff check ."
+  }
+}

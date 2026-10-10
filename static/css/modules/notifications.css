@@ -44,16 +44,3 @@
     color: #aaa;
     text-wrap: nowrap;
 }
-
-.notification-icons {
-    align-items: flex-end;
-    display: flex;
-    height: 20px;
-    gap: 8px;
-}
-
-.notification-icon {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-}
